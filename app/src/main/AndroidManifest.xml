@@ -1,21 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.boris.expert.csvmagic">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
+
     <application
-        android:allowBackup="true"
+        android:name="com.boris.expert.csvmagic.App"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Csvmagic">
-        <activity android:name=".MainActivity">
+        android:theme="@style/Theme.QRGenerator"
+        tools:replace="android:allowBackup">
+
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <activity android:name="com.boris.expert.csvmagic.view.activities.PostSheetDataActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.SocialNetworksQrActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.FieldListValuesActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.SheetsActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.FieldListsActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.TableViewActivity" />
+        <activity
+            android:name="com.boris.expert.csvmagic.view.activities.SettingsActivity"
+            android:label="@string/title_activity_settings" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.TablesDataActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.CreateTableActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.TablesActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.ProfileActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.CodeDetailActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.FeedbackQrActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.ShareActivity" />
+        <activity android:name="com.boris.expert.csvmagic.view.activities.DesignActivity" />
+        <activity
+            android:name="com.boris.expert.csvmagic.view.activities.CouponQrActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.boris.expert.csvmagic.view.activities.DynamicQrActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.boris.expert.csvmagic.view.activities.BarcodeHistoryActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.boris.expert.csvmagic.view.activities.MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- File Provider -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
     </application>
 
 </manifest>
