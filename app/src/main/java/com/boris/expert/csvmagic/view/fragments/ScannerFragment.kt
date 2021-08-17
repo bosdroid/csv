@@ -13,6 +13,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
 import android.util.Log
@@ -36,6 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
@@ -44,6 +46,7 @@ import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.LoginCallback
+import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.CodeHistory
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.model.TableObject
@@ -68,6 +71,9 @@ import com.google.api.services.drive.model.FileList
 import com.google.api.services.drive.model.Permission
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -113,6 +119,7 @@ class ScannerFragment : Fragment() {
     private var cameraProviderFuture: ListenableFuture<*>? = null
     private var cameraExecutor: ExecutorService? = null
     private var mContext: AppCompatActivity? = null
+    private var storageReference: StorageReference = FirebaseStorage.getInstance().reference
 
     //private var previewView: PreviewView? = null
     private var imageAnalyzer: MyImageAnalyzer? = null
@@ -383,7 +390,7 @@ class ScannerFragment : Fragment() {
                             val quantity = tableGenerator.getScanQuantity(tableName, it.text)
                             var qty = 0
                             qty = if (quantity != null) {
-                                quantity.toInt()+1
+                                quantity.toInt() + 1
                             } else {
                                 1
                             }
@@ -451,42 +458,42 @@ class ScannerFragment : Fragment() {
             if (isFound) {
                 val quantity = tableGenerator.getScanQuantity(tableName, text)
                 var qty = 0
-                if (quantity!= null){
-                    qty = quantity.toInt()+1
+                if (quantity != null) {
+                    qty = quantity.toInt() + 1
 
-                if (qty != -1) {
-                    if (qty > 0) {
-                        qty -= 1
-                        val isUpdate = tableGenerator.updateScanQuantity(tableName, text, qty)
-                        if (isUpdate) {
-                            Toast.makeText(
-                                requireActivity(),
-                                "${getString(R.string.scan_quantity_update_success_text)} ${
-                                    getString(
-                                        R.string.scan_quantity_remaining_text
-                                    )
-                                } $qty",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            Handler(Looper.myLooper()!!).postDelayed({
-                                codeScanner!!.startPreview()
-                            }, 2000)
-                        }
-                    } else {
-                        val isSuccess = tableGenerator.deleteItem(tableName, text)
-                        if (isSuccess) {
-                            Toast.makeText(
-                                requireActivity(),
-                                requireActivity().getString(R.string.scan_item_delete_success_text),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            Handler(Looper.myLooper()!!).postDelayed({
-                                codeScanner!!.startPreview()
-                            }, 2000)
+                    if (qty != -1) {
+                        if (qty > 0) {
+                            qty -= 1
+                            val isUpdate = tableGenerator.updateScanQuantity(tableName, text, qty)
+                            if (isUpdate) {
+                                Toast.makeText(
+                                    requireActivity(),
+                                    "${getString(R.string.scan_quantity_update_success_text)} ${
+                                        getString(
+                                            R.string.scan_quantity_remaining_text
+                                        )
+                                    } $qty",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                Handler(Looper.myLooper()!!).postDelayed({
+                                    codeScanner!!.startPreview()
+                                }, 2000)
+                            }
+                        } else {
+                            val isSuccess = tableGenerator.deleteItem(tableName, text)
+                            if (isSuccess) {
+                                Toast.makeText(
+                                    requireActivity(),
+                                    requireActivity().getString(R.string.scan_item_delete_success_text),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                Handler(Looper.myLooper()!!).postDelayed({
+                                    codeScanner!!.startPreview()
+                                }, 2000)
 
+                            }
                         }
                     }
-                }
                 }
             } else {
                 showAlert(
@@ -1024,76 +1031,78 @@ class ScannerFragment : Fragment() {
                     if (addImageCheckBox.isChecked && filePathView!!.text.toString()
                             .isNotEmpty()
                     ) {
-                        val isUpload = uploadImageOnDrive()
-                        // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
-                        // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
-                        if (isUpload && url.isNotEmpty()) {
-                            if (multiImagesList.isNotEmpty()) {
-                                multiImagesList.clear()
-                            }
-                            if (params.size > 0) {
-                                params.clear()
-                            }
-                            // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED EDIT TEXT
-                            for (i in 0 until textInputIdsList.size) {
-                                val pair = textInputIdsList[i]
-                                // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
-                                // WITH COLUMN IMAGE ELSE MAP THE OTHER TEXTINPUTIDS LIST OBJECTS
-                                if (pair.first == "image") {
-                                    params.add(
-                                        Pair(
-                                            pair.first,
-                                            url
+                        uploadImageOnFirebaseStorage(object: UploadImageCallback{
+                            override fun onSuccess() {
+                                // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
+                                // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
+                                if (url.isNotEmpty()) {
+                                    if (multiImagesList.isNotEmpty()) {
+                                        multiImagesList.clear()
+                                    }
+                                    if (params.size > 0) {
+                                        params.clear()
+                                    }
+                                    // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED EDIT TEXT
+                                    for (i in 0 until textInputIdsList.size) {
+                                        val pair = textInputIdsList[i]
+                                        // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
+                                        // WITH COLUMN IMAGE ELSE MAP THE OTHER TEXTINPUTIDS LIST OBJECTS
+                                        if (pair.first == "image") {
+                                            params.add(
+                                                Pair(
+                                                    pair.first,
+                                                    url
+                                                )
+                                            )
+                                        } else {
+                                            params.add(
+                                                Pair(
+                                                    pair.first,
+                                                    pair.second.text.toString()
+                                                        .trim()
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED DROPDOWNS
+                                    for (j in 0 until spinnerIdsList.size) {
+                                        val pair = spinnerIdsList[j]
+                                        params.add(
+                                            Pair(
+                                                pair.first,
+                                                pair.second.selectedItem.toString()
+                                            )
                                         )
-                                    )
-                                } else {
-                                    params.add(
-                                        Pair(
-                                            pair.first,
-                                            pair.second.text.toString()
-                                                .trim()
+                                    }
+                                    tableGenerator.insertData(tableName, params)
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        Handler(Looper.myLooper()!!).postDelayed(
+                                            {
+                                                isFileSelected = false
+                                                BaseActivity.dismiss()
+                                                saveSuccessScans()
+                                                Toast.makeText(
+                                                    requireActivity(),
+                                                    requireActivity().resources.getString(R.string.scan_data_save_success_text),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                textInputIdsList.clear()
+                                                spinnerIdsList.clear()
+                                                params.clear()
+                                                tableDetailLayoutWrapper.removeAllViews()
+                                                filePathView!!.setText("")
+                                                val bundle = Bundle()
+                                                bundle.putString("success", "success")
+                                                mFirebaseAnalytics?.logEvent("scanner", bundle)
+                                            },
+                                            1000
                                         )
-                                    )
+                                    }
                                 }
                             }
 
-                            // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED DROPDOWNS
-                            for (j in 0 until spinnerIdsList.size) {
-                                val pair = spinnerIdsList[j]
-                                params.add(
-                                    Pair(
-                                        pair.first,
-                                        pair.second.selectedItem.toString()
-                                    )
-                                )
-                            }
-                            tableGenerator.insertData(tableName, params)
-                            CoroutineScope(Dispatchers.Main).launch {
-                                Handler(Looper.myLooper()!!).postDelayed(
-                                    {
-                                        isFileSelected = false
-                                        BaseActivity.dismiss()
-                                        saveSuccessScans()
-                                        Toast.makeText(
-                                            requireActivity(),
-                                            requireActivity().resources.getString(R.string.scan_data_save_success_text),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        textInputIdsList.clear()
-                                        spinnerIdsList.clear()
-                                        params.clear()
-                                        tableDetailLayoutWrapper.removeAllViews()
-                                        filePathView!!.setText("")
-                                        val bundle = Bundle()
-                                        bundle.putString("success", "success")
-                                        mFirebaseAnalytics?.logEvent("scanner", bundle)
-                                    },
-                                    1000
-                                )
-                            }
-                        }
-
-
+                        })
                     }
                     // THIS ELSE PART WILL RUN WHEN ADD IMAGE CHECK BOX IS UN-CHECKED
                     else {
@@ -1329,160 +1338,77 @@ class ScannerFragment : Fragment() {
     }
 
     var uploadedUrlList = mutableListOf<String>()
-    private fun uploadImageOnDrive(): Boolean {
-        var isUploadingSuccess = false
+    var array: List<String> = mutableListOf()
+    val handler = Handler(Looper.myLooper()!!)
+    private fun uploadImageOnFirebaseStorage(listener:UploadImageCallback) {
         val imageList = filePathView!!.text.toString()
         if (imageList.contains(",")) {
-            val array = imageList.split(",")
+            array = imageList.split(",")
+
             for (i in array.indices) {
+
+                handler.postDelayed({
+
                 val imagePath = array[i]
 
-                val bundle = Bundle()
-                bundle.putString("starts", "starts")
-                mFirebaseAnalytics?.logEvent("upload image", bundle)
-                try {
+                if (FirebaseAuth.getInstance().currentUser != null) {
+                    val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                    val fileMetadata =
-                        com.google.api.services.drive.model.File()
-                    fileMetadata.copyRequiresWriterPermission = true
-                    fileMetadata.name =
-                        "Image_${System.currentTimeMillis()}.jpg"
-                    val filePath: File =
-                        File(imagePath)
-                    val mediaContent = FileContent("image/jpeg", filePath)
-
-                    val file: com.google.api.services.drive.model.File =
-                        DriveService.instance!!.files()
-                            .create(fileMetadata, mediaContent)
-                            .setFields("id")
-                            .execute()
-                    // WHEN EXECUTE FUNCTION RUN SUCCESSFULLY THEN IT RETURN FILE OBJECT HAVING ID
-                    // SO, WE MAKE THE DYNAMIC PATH OF IMAGE USING FILE ID LIKE BELOW
-                    insertPermission(file.id)
-                    url = "https://drive.google.com/file/d/" + file.id + "/view?usp=sharing"
-
-                    uploadedUrlList.add(url)
-                    val bundle = Bundle()
-                    bundle.putString("success", "success")
-                    mFirebaseAnalytics?.logEvent("upload image", bundle)
-                    isUploadingSuccess = true
-                } catch (e: UserRecoverableAuthIOException) {
-//            Log.d("TEST199",e.localizedMessage!!)
-                    userRecoverableAuthType = 0
-                    userAuthLauncher.launch(e.intent)
-                    val bundle = Bundle()
-                    bundle.putString("UserRecoverableAuthIOException", "Error: " + e.message)
-                    mFirebaseAnalytics?.logEvent("upload image", bundle)
-                    isUploadingSuccess = false
-                } catch (e: GoogleJsonResponseException) {
-                    val bundle = Bundle()
-                    bundle.putString("GoogleJsonResponseException", "Error: " + e.message)
-                    mFirebaseAnalytics?.logEvent("upload image", bundle)
-                    showAlert(
-                        requireActivity(),
-                        e.details.message
-                    )
-                    isUploadingSuccess = false
+                    val file = Uri.fromFile(File(imagePath))
+                    val fileRef =
+                        storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
+                    val uploadTask = fileRef.putFile(file)
+                    uploadTask.continueWithTask { task ->
+                        if (!task.isSuccessful) {
+                            task.exception?.let {
+                                throw it
+                            }
+                        }
+                        fileRef.downloadUrl
+                    }.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val downloadUri = task.result
+                            uploadedUrlList.add(downloadUri.toString())
+                            if (i == array.size-1){
+                                url = uploadedUrlList.joinToString(" ")
+                                uploadedUrlList.clear()
+                                listener.onSuccess()
+                            }
+                        }
+                    }
                 }
+                }, (1000*i+1).toLong())
             }
-            return if (isUploadingSuccess) {
-                url = uploadedUrlList.joinToString(",")
-                uploadedUrlList.clear()
-                true
-            } else {
-                false
-            }
+
         } else {
             val bundle = Bundle()
             bundle.putString("starts", "starts")
             mFirebaseAnalytics?.logEvent("upload image", bundle)
-            try {
 
-                val fileMetadata =
-                    com.google.api.services.drive.model.File()
-                fileMetadata.copyRequiresWriterPermission = true
-                fileMetadata.name =
-                    "Image_${System.currentTimeMillis()}.jpg"
-                val filePath: File =
-                    File(filePathView!!.text.toString())
-                val mediaContent = FileContent("image/jpeg", filePath)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                val file: com.google.api.services.drive.model.File =
-                    DriveService.instance!!.files()
-                        .create(fileMetadata, mediaContent)
-                        .setFields("id")
-                        .execute()
-                // WHEN EXECUTE FUNCTION RUN SUCCESSFULLY THEN IT RETURN FILE OBJECT HAVING ID
-                // SO, WE MAKE THE DYNAMIC PATH OF IMAGE USING FILE ID LIKE BELOW
-                insertPermission(file.id)
-                url = "https://drive.google.com/file/d/" + file.id + "/view?usp=sharing"
-                val bundle = Bundle()
-                bundle.putString("success", "success")
-                mFirebaseAnalytics?.logEvent("upload image", bundle)
-                return true
-            } catch (e: UserRecoverableAuthIOException) {
-//            Log.d("TEST199",e.localizedMessage!!)
-                userRecoverableAuthType = 0
-                userAuthLauncher.launch(e.intent)
-
-                val bundle = Bundle()
-                bundle.putString("UserRecoverableAuthIOException", "Error: " + e.message)
-                mFirebaseAnalytics?.logEvent("upload image", bundle)
-                return false
-            } catch (e: GoogleJsonResponseException) {
-                val bundle = Bundle()
-                bundle.putString("GoogleJsonResponseException", "Error: " + e.message)
-                mFirebaseAnalytics?.logEvent("upload image", bundle)
-                showAlert(
-                    requireActivity(),
-                    e.details.message
-                )
-                return false
+                val file = Uri.fromFile(File(filePathView!!.text.toString()))
+                val fileRef =
+                    storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
+                val uploadTask = fileRef.putFile(file)
+                uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
+                        }
+                    }
+                    fileRef.downloadUrl
+                }.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadUri = task.result
+                        url = downloadUri.toString()
+                        listener.onSuccess()
+                    }
+                }
             }
         }
 
-//        val bundle = Bundle()
-//        bundle.putString("starts", "starts")
-//        mFirebaseAnalytics?.logEvent("upload image", bundle)
-//        try {
-//
-//            val fileMetadata =
-//                com.google.api.services.drive.model.File()
-//            fileMetadata.name =
-//                "Image_${System.currentTimeMillis()}.jpg"
-//            val filePath: File =
-//                File(filePathView!!.text.toString())
-//            val mediaContent = FileContent("image/jpeg", filePath)
-//
-//            val file: com.google.api.services.drive.model.File =
-//                DriveService.instance!!.files()
-//                    .create(fileMetadata, mediaContent)
-//                    .setFields("id")
-//                    .execute()
-//            // WHEN EXECUTE FUNCTION RUN SUCCESSFULLY THEN IT RETURN FILE OBJECT HAVING ID
-//            // SO, WE MAKE THE DYNAMIC PATH OF IMAGE USING FILE ID LIKE BELOW
-//            url = "https://drive.google.com/file/d/" + file.id + "/view?usp=sharing"
-//            val bundle = Bundle()
-//            bundle.putString("success", "success")
-//            mFirebaseAnalytics?.logEvent("upload image", bundle)
-//            return true
-//        } catch (e: UserRecoverableAuthIOException) {
-////            Log.d("TEST199",e.localizedMessage!!)
-////            userAuthLauncher.launch(e.intent)
-//            val bundle = Bundle()
-//            bundle.putString("UserRecoverableAuthIOException", "Error: " + e.message)
-//            mFirebaseAnalytics?.logEvent("upload image", bundle)
-//            return false
-//        } catch (e: GoogleJsonResponseException) {
-//            val bundle = Bundle()
-//            bundle.putString("GoogleJsonResponseException", "Error: " + e.message)
-//            mFirebaseAnalytics?.logEvent("upload image", bundle)
-//            showAlert(
-//                requireActivity(),
-//                e.details.message
-//            )
-//            return false
-//        }
     }
 
     @Throws(java.lang.Exception::class)
@@ -2021,4 +1947,28 @@ class ScannerFragment : Fragment() {
         onResume()
     }
 
+    private fun uploadImage(imagePath: String) {
+
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+            val file = Uri.fromFile(File(imagePath))
+            val fileRef = storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
+            val uploadTask = fileRef.putFile(file)
+            uploadTask.continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let {
+                        throw it
+                    }
+                }
+                fileRef.downloadUrl
+            }.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val downloadUri = task.result
+                    uploadedUrlList.add(downloadUri.toString())
+
+                }
+            }
+        }
+    }
 }
