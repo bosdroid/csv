@@ -1089,9 +1089,17 @@ class ScannerFragment : Fragment() {
                                                 ).show()
                                                 textInputIdsList.clear()
                                                 spinnerIdsList.clear()
-                                                params.clear()
+
                                                 tableDetailLayoutWrapper.removeAllViews()
                                                 filePathView!!.setText("")
+                                                for (i in 0 until params.size){
+                                                    val pair = params[i]
+                                                    values_JSON.put(pair.second)
+                                                }
+                                                if (values_JSON.length() > 0){
+                                                    sendRequest()
+                                                }
+                                                params.clear()
                                                 val bundle = Bundle()
                                                 bundle.putString("success", "success")
                                                 mFirebaseAnalytics?.logEvent("scanner", bundle)
@@ -1152,22 +1160,22 @@ class ScannerFragment : Fragment() {
                                 ).show()
                                 textInputIdsList.clear()
                                 spinnerIdsList.clear()
-                                params.clear()
+
                                 tableDetailLayoutWrapper.removeAllViews()
                                 codeScanner!!.startPreview()
                                 filePathView!!.setText("")
-                                openHistoryBtnTip()
+//                                openHistoryBtnTip()
+                                for (i in 0 until params.size){
+                                    val pair = params[i]
+                                    values_JSON.put(pair.second)
+                                }
+                                if (values_JSON.length() > 0){
+                                    sendRequest()
+                                }
+                                params.clear()
                             }, 1000)
                         }
                     }
-
-//                    for (i in 0 until params.size){
-//                        val pair = params[i]
-//                        values_JSON.put(pair.second)
-//                    }
-//                    if (values_JSON.length() > 0){
-//                        sendRequest()
-//                    }
 
                 } catch (e: Exception) {
                     val bundle = Bundle()
@@ -1237,7 +1245,7 @@ class ScannerFragment : Fragment() {
                             params.clear()
                             tableDetailLayoutWrapper.removeAllViews()
                             codeScanner!!.startPreview()
-                            openHistoryBtnTip()
+//                            openHistoryBtnTip()
                             val bundle = Bundle()
                             bundle.putString("success", "success")
                             mFirebaseAnalytics?.logEvent("scanner", bundle)
@@ -1411,13 +1419,13 @@ class ScannerFragment : Fragment() {
 
     }
 
-    @Throws(java.lang.Exception::class)
-    private fun insertPermission(fileId: String) {
-        val newPermission = Permission()
-        newPermission.type = "anyone"
-        newPermission.role = "reader"
-        DriveService.instance!!.permissions().create(fileId, newPermission).execute()
-    }
+//    @Throws(java.lang.Exception::class)
+//    private fun insertPermission(fileId: String) {
+//        val newPermission = Permission()
+//        newPermission.type = "anyone"
+//        newPermission.role = "reader"
+//        DriveService.instance!!.permissions().create(fileId, newPermission).execute()
+//    }
 
     // THIS GOOGLE LAUNCHER WILL HANDLE RESULT
     private var userAuthLauncher =
@@ -1442,7 +1450,7 @@ class ScannerFragment : Fragment() {
                     if (userRecoverableAuthType == 0) {
                         saveToDriveAppFolder()
                     } else {
-//                      getAllSheets()
+                      getAllSheets()
                     }
 
                 }
@@ -1526,7 +1534,7 @@ class ScannerFragment : Fragment() {
         startScanner()
         getTableList()
         getModeList()
-//        getAllSheets()
+        getAllSheets()
         val flag = appSettings.getBoolean(requireActivity().getString(R.string.key_tips))
         if (flag) {
             tipsSwitchBtn.setText(requireActivity().getString(R.string.tip_switch_on_text))
@@ -1792,8 +1800,8 @@ class ScannerFragment : Fragment() {
 
     private fun getAllSheets() {
         if (Constants.userData != null) {
-//             connectGoogleSheetsTextView.visibility =View.GONE
-//             sheetsTopLayout.visibility = View.VISIBLE
+             connectGoogleSheetsTextView.visibility =View.GONE
+             sheetsTopLayout.visibility = View.VISIBLE
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
@@ -1824,8 +1832,8 @@ class ScannerFragment : Fragment() {
                 }
             }
         } else {
-//            sheetsTopLayout.visibility = View.GONE
-//            connectGoogleSheetsTextView.visibility = View.VISIBLE
+            sheetsTopLayout.visibility = View.GONE
+            connectGoogleSheetsTextView.visibility = View.VISIBLE
         }
     }
 
@@ -1945,30 +1953,5 @@ class ScannerFragment : Fragment() {
 
     fun restart() {
         onResume()
-    }
-
-    private fun uploadImage(imagePath: String) {
-
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            val userId = FirebaseAuth.getInstance().currentUser!!.uid
-
-            val file = Uri.fromFile(File(imagePath))
-            val fileRef = storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
-            val uploadTask = fileRef.putFile(file)
-            uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let {
-                        throw it
-                    }
-                }
-                fileRef.downloadUrl
-            }.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val downloadUri = task.result
-                    uploadedUrlList.add(downloadUri.toString())
-
-                }
-            }
-        }
     }
 }

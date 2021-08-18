@@ -113,7 +113,7 @@
     <string name="support_email">qrmagicsup@gmail.com</string>
     <string name="recommend_to_friends">Recommend to friends</string>
     <string name="contact_support">Contact Support</string>
-    <string name="share_app_message">I am using QRMagic for scanning and generating barcodes. You should try by uploading from here \n</string>
+    <string name="share_app_message">I am using CSVMagic for scanning and generating CSV Files. You should try by uploading from here \n</string>
     <string name="email_subject">Write your subject</string>
     <string name="later">Later</string>
     <string name="do_you_like_our_app">Do you like our app?</string>

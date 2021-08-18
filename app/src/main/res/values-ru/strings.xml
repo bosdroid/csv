@@ -113,7 +113,7 @@
 	<string name="support_email">qrmagicsup@gmail.com.</string>
 	<string name="recommend_to_friends">Порекомендовать друзьям</string>
 	<string name="contact_support">Тех. поддержка</string>
-	<string name="share_app_message">Я использую QRMAGIC для сканирования и создания штрих-кодов</string>
+	<string name="share_app_message">Я использую CSVMagic для сканирования и создания файлов CSV. Вы должны попробовать, загрузив отсюда</string>
 	<string name="email_subject">Тема сообщения</string>
 	<string name="later">Позже</string>
 	<string name="do_you_like_our_app">Вам нравится наше приложение?</string>
