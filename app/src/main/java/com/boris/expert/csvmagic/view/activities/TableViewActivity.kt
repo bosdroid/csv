@@ -619,7 +619,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
                 val file = File(filesDir, "$tableName.csv")
                 val path =
-                    FileProvider.getUriForFile(context, "com.expert.qrgenerator.fileprovider", file)
+                    FileProvider.getUriForFile(context, context.applicationContext.packageName + ".fileprovider", file)
                 dismiss()
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "text/csv"

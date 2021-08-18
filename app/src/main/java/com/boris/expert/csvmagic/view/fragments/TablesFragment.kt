@@ -43,7 +43,7 @@ class TablesFragment : Fragment() {
         pager2!!.adapter = viewPagerAdapter
 
         tabLayout!!.addTab(tabLayout!!.newTab().setText(getString(R.string.tables)))
-        tabLayout!!.addTab(tabLayout!!.newTab().setText(getString(R.string.create)))
+//        tabLayout!!.addTab(tabLayout!!.newTab().setText(getString(R.string.create)))
 
         tabLayout!!.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabSelected(tab: TabLayout.Tab?) {

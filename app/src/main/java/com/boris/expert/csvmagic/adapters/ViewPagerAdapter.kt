@@ -18,7 +18,7 @@ class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
     }
 
     override fun getItemCount(): Int {
-        return 2
+        return 1
     }
 
 }

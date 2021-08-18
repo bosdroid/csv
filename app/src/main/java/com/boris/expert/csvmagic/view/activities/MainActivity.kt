@@ -28,13 +28,10 @@ import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
 import com.boris.expert.csvmagic.model.CodeHistory
 import com.boris.expert.csvmagic.model.User
-import com.boris.expert.csvmagic.singleton.DriveService
-import com.boris.expert.csvmagic.singleton.SheetService
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
-import com.boris.expert.csvmagic.view.fragments.GeneratorFragment
+import com.boris.expert.csvmagic.view.fragments.ScanFragment
 import com.boris.expert.csvmagic.view.fragments.ScannerFragment
-import com.boris.expert.csvmagic.view.fragments.TablesFragment
 import com.boris.expert.csvmagic.viewmodel.MainActivityViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -42,9 +39,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Scope
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -57,11 +51,8 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.drive.Drive
-import com.google.api.services.drive.DriveScopes
 import com.google.api.services.sheets.v4.Sheets
-import com.google.api.services.sheets.v4.SheetsScopes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
@@ -180,7 +171,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 }
                 R.id.bottom_tables -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, TablesFragment(), "tables")
+                        .replace(R.id.fragment_container, ScanFragment(), "tables")
                         .addToBackStack("tables")
                         .commit()
 //                    historyBtn.visibility = View.GONE
@@ -197,8 +188,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         if (intent != null && intent.hasExtra("KEY") && intent.getStringExtra("KEY") == "tables") {
             bottomNavigation.selectedItemId = R.id.bottom_tables
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, TablesFragment(), "tables")
-                .addToBackStack("generator")
+                .replace(R.id.fragment_container, ScanFragment(), "tables")
+                .addToBackStack("tables")
                 .commit()
             //historyBtn.visibility = View.GONE
 //            nextStepTextView.visibility = View.VISIBLE
