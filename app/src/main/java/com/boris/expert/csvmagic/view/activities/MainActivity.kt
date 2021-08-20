@@ -403,6 +403,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 }
 
             }
+            R.id.credit -> {
+                startActivity(Intent(context, CreditActivity::class.java))
+            }
             R.id.nav_setting -> {
                 startActivity(Intent(context, SettingsActivity::class.java))
             }
@@ -710,6 +713,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.logout).isVisible = true
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = true
+            mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
 
@@ -719,6 +723,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.logout).isVisible = false
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = false
+            mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
         }

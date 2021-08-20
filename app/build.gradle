@@ -197,6 +197,7 @@ dependencies {
     // CSV FILE READER LIBRARY
     implementation 'com.opencsv:opencsv:4.6'
 
-
+    def billing_version = "4.0.0"
+    implementation "com.android.billingclient:billing-ktx:${billing_version}"
 
 }

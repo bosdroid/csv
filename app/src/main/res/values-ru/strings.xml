@@ -354,9 +354,14 @@
 	<string name="table_created_failed_message">Table not created, may be file structure not correct.</string>
     <string name="table_already_exist_message">Table already exist in database.</string>
     <string name="table_csv_import_error_message">Something wrong with CSV data structure.</string>
+    <string name="credits">Credits</string>
+    <string name="minimum_package_btn">MINIMUM</string>
+    <string name="package_heading_text">Choose the Credit Package</string>
+	<string name="regular_package_btn">Regular</string>
+	<string name="premium_package_btn">Premium</string>
 
 
-    <string-array name="mode_list">
+	<string-array name="mode_list">
 		<item>Инвентарь</item>
 		<item>Продавец</item>
 		<item>Поиск</item>

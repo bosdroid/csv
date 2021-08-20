@@ -15,9 +15,10 @@
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="com.android.vending.BILLING"/>
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -29,9 +30,8 @@
         </intent>
     </queries>
 
-
     <application
-        android:name="com.boris.expert.csvmagic.App"
+        android:name=".App"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
@@ -43,51 +43,52 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
+        <activity android:name=".view.activities.CreditActivity"></activity>
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:name="com.boris.expert.csvmagic.view.activities.PostSheetDataActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.SocialNetworksQrActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.FieldListValuesActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.SheetsActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.FieldListsActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.TableViewActivity" />
+        <activity android:name=".view.activities.PostSheetDataActivity" />
+        <activity android:name=".view.activities.SocialNetworksQrActivity" />
+        <activity android:name=".view.activities.FieldListValuesActivity" />
+        <activity android:name=".view.activities.SheetsActivity" />
+        <activity android:name=".view.activities.FieldListsActivity" />
+        <activity android:name=".view.activities.TableViewActivity" />
         <activity
-            android:name="com.boris.expert.csvmagic.view.activities.SettingsActivity"
+            android:name=".view.activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.TablesDataActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.CreateTableActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.TablesActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.ProfileActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.CodeDetailActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.FeedbackQrActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.ShareActivity" />
-        <activity android:name="com.boris.expert.csvmagic.view.activities.DesignActivity" />
+        <activity android:name=".view.activities.TablesDataActivity" />
+        <activity android:name=".view.activities.CreateTableActivity" />
+        <activity android:name=".view.activities.TablesActivity" />
+        <activity android:name=".view.activities.ProfileActivity" />
+        <activity android:name=".view.activities.CodeDetailActivity" />
+        <activity android:name=".view.activities.FeedbackQrActivity" />
+        <activity android:name=".view.activities.ShareActivity" />
+        <activity android:name=".view.activities.DesignActivity" />
         <activity
-            android:name="com.boris.expert.csvmagic.view.activities.CouponQrActivity"
+            android:name=".view.activities.CouponQrActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
         <activity
-            android:name="com.boris.expert.csvmagic.view.activities.DynamicQrActivity"
+            android:name=".view.activities.DynamicQrActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
         <activity
-            android:name="com.boris.expert.csvmagic.view.activities.BarcodeHistoryActivity"
+            android:name=".view.activities.BarcodeHistoryActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
         <activity
-            android:name="com.boris.expert.csvmagic.view.activities.MainActivity"
+            android:name=".view.activities.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysVisible|adjustPan">
@@ -96,8 +97,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!-- File Provider -->
+        </activity> <!-- File Provider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -107,7 +107,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
 
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
