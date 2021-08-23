@@ -23,6 +23,7 @@ import com.google.android.material.textview.MaterialTextView
 import com.google.api.services.drive.Drive
 import com.google.api.services.sheets.v4.Sheets
 import java.io.File
+import java.io.IOException
 import java.util.regex.Pattern
 
 
@@ -41,6 +42,7 @@ class Constants {
         private const val LOGO_IMAGE_PATH = "LogoImages"
         const val BASE_URL = "https://pages.qrmagicapp.com/"
         const val googleAppScriptUrl = "https://script.google.com/macros/s/AKfycbw4-8R85cCh9C5JXD6BTl0q89NNOTFkYfZO1Sp2LRrVA-mCv06LRYu2PqCPUaKab26-/exec"
+        const val licenseKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlbIjQZds4JytxrzDIzVQ9EY0FzpTsuLPX7OO/c6SF9kS6TN4REhsgcaXO6BbyBKoVUL5SznysLATryvjpliLtI///8I9ohz1A5AaxAoqzXZgpj0ECHuHk68R+nGs1dzBS9/pjNjh1Gj3rMf5eSNjBTIGqjPPZjtgMW7c+sr/BfHe+L1Mci3Ep0pv17roZPwczsHzPaK8yP308fd5n6KU3VJDmrj4xwcyqdPVQvcbC4bM7/JK523xNNsEtoF10grxj1Izeo6AYplSV5KjvrN/ByqTqGLP4x4KyfDoE0BA/6hyoARTPKoM9clDN1EhwUb/yItH6tAlOO2AcAp7GVWCHQIDAQAB"
         var generatedImage: Bitmap? = null
         var tipsValue :Boolean = true
         var finalQrImageUri: Uri? = null
@@ -70,6 +72,16 @@ class Constants {
             return File(context.externalCacheDir, LOGO_IMAGE_PATH)
         }
 
+        private fun verifyValidSignature(signedData: String, signature: String): Boolean {
+            return try {
+                // To get key go to Developer Console > Select your app > Development Tools > Services & APIs.
+
+                val base64Key = "Add Your Key Here"
+                Security.verifyPurchase(base64Key, signedData, signature)
+            } catch (e: IOException) {
+                false
+            }
+        }
 
         // THIS FUNCTION WILL RETURN THE ALL THE EXTERNAL BACKGROUND IMAGES
         fun getAllBackgroundImages(context: Context): List<String> {

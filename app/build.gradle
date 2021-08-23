@@ -15,7 +15,7 @@ android {
         applicationId "com.boris.expert.csvmagic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 109
+        versionCode 112
         versionName "multi images been added"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -197,7 +197,8 @@ dependencies {
     // CSV FILE READER LIBRARY
     implementation 'com.opencsv:opencsv:4.6'
 
-    def billing_version = "4.0.0"
-    implementation "com.android.billingclient:billing-ktx:${billing_version}"
+//    def billing_version = "4.0.0"
+//    implementation "com.android.billingclient:billing-ktx:${billing_version}"
+    implementation 'com.anjlab.android.iab.v3:library:1.0.44'
 
 }

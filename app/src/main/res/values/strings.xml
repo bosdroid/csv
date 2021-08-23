@@ -371,6 +371,7 @@
     <string name="package_heading_text">Choose the Credit Package</string>
     <string name="regular_package_btn">Regular</string>
     <string name="premium_package_btn">Premium</string>
+    <string name="minimum_product_id" translatable="false">credit</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>
