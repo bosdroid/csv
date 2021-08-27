@@ -630,7 +630,6 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
         }
 
     private fun pickImageFromCamera() {
-//        startActivity(Intent(context,OcrActivity::class.java))
         val takePictureIntent = Intent(context, OcrActivity::class.java)
         cameraResultLauncher.launch(takePictureIntent)
     }
