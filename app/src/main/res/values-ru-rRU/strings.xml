@@ -71,4 +71,12 @@
     <string name="package_heading_text">Choose the Credit Package</string>
     <string name="regular_package_btn">Regular</string>
     <string name="premium_package_btn">Premium</string>
+    <string name="image_recognition_text">Image Recognition</string>
+    <string name="photo_recognition_text">Photo Recognition</string>
+    <string name="choose_image_gallery">Choose Image from Gallery</string>
+    <string name="textinput_not_focused_error_text">You have not selected any box for input!</string>
+    <string name="text_capture_button_text">Text Capture</string>
+    <string name="keyboard_name">CSV Keyboard</string>
+    <string name="erase_text">Erase Text</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

@@ -18,10 +18,8 @@ import android.os.*
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -37,14 +35,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
-import com.budiyev.android.codescanner.*
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
 import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.CodeHistory
@@ -53,22 +50,16 @@ import com.boris.expert.csvmagic.model.TableObject
 import com.boris.expert.csvmagic.room.AppViewModel
 import com.boris.expert.csvmagic.singleton.DriveService
 import com.boris.expert.csvmagic.utils.*
-import com.boris.expert.csvmagic.view.activities.BaseActivity
+import com.boris.expert.csvmagic.view.activities.*
 import com.boris.expert.csvmagic.view.activities.BaseActivity.Companion.rateUs
-import com.boris.expert.csvmagic.view.activities.CodeDetailActivity
-import com.boris.expert.csvmagic.view.activities.MainActivity
-import com.boris.expert.csvmagic.view.activities.TablesActivity
+import com.budiyev.android.codescanner.*
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.http.FileContent
 import com.google.api.services.drive.model.FileList
-import com.google.api.services.drive.model.Permission
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
@@ -79,12 +70,15 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.google.zxing.Result
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutionException
@@ -93,8 +87,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
-class ScannerFragment : Fragment() {
+class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
 
+    private var customAlertDialog: CustomAlertDialog?=null
+    private var updateInputBox: CustomTextInputEditText? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     private var arrayList = mutableListOf<String>()
@@ -109,7 +105,7 @@ class ScannerFragment : Fragment() {
     private lateinit var tablesSpinner: AppCompatSpinner
     private lateinit var sheetsSpinner: AppCompatSpinner
     private lateinit var modesSpinner: AppCompatSpinner
-    private var textInputIdsList = mutableListOf<Pair<String, TextInputEditText>>()
+    private var textInputIdsList = mutableListOf<Pair<String, CustomTextInputEditText>>()
     private var spinnerIdsList = mutableListOf<Pair<String, AppCompatSpinner>>()
     private lateinit var addNewTableBtn: MaterialButton
     private lateinit var appSettings: AppSettings
@@ -522,7 +518,7 @@ class ScannerFragment : Fragment() {
                     val scanResultLayout = LayoutInflater.from(requireActivity())
                         .inflate(R.layout.scan_result_dialog, null)
                     val codeDataTInputView =
-                        scanResultLayout.findViewById<TextInputEditText>(R.id.scan_result_dialog_code_data)
+                        scanResultLayout.findViewById<CustomTextInputEditText>(R.id.scan_result_dialog_code_data)
                     tableDetailLayoutWrapper =
                         scanResultLayout.findViewById<LinearLayout>(R.id.table_detail_layout_wrapper)
                     val submitBtn =
@@ -535,6 +531,33 @@ class ScannerFragment : Fragment() {
                         scanResultLayout.findViewById<LinearLayout>(R.id.image_sources_layout)
                     filePathView =
                         scanResultLayout.findViewById<MaterialTextView>(R.id.filePath)
+                    val imageRecognitionBtn =
+                        scanResultLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
+                    val photoRecognitionBtn =
+                        scanResultLayout.findViewById<LinearLayout>(R.id.photo_recognition_btn)
+
+                    imageRecognitionBtn.setOnClickListener {
+                        if (RuntimePermissionHelper.checkCameraPermission(
+                                requireActivity(),
+                                Constants.READ_STORAGE_PERMISSION
+                            )
+                        ) {
+                            BaseActivity.hideSoftKeyboard(requireActivity(), imageRecognitionBtn)
+                            pickImageFromGallery()
+                        }
+                    }
+
+                    photoRecognitionBtn.setOnClickListener {
+                        if (RuntimePermissionHelper.checkCameraPermission(
+                                requireActivity(), Constants.CAMERA_PERMISSION
+                            )
+                        ) {
+                            BaseActivity.hideSoftKeyboard(requireActivity(), photoRecognitionBtn)
+                            pickImageFromCamera()
+                        }
+
+
+                    }
 
                     addImageCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
                         if (isChecked) {
@@ -620,7 +643,7 @@ class ScannerFragment : Fragment() {
                             val columnName =
                                 tableRowLayout.findViewById<MaterialTextView>(R.id.table_column_name)
                             val columnValue =
-                                tableRowLayout.findViewById<TextInputEditText>(R.id.table_column_value)
+                                tableRowLayout.findViewById<CustomTextInputEditText>(R.id.table_column_value)
                             val columnDropdown =
                                 tableRowLayout.findViewById<AppCompatSpinner>(R.id.table_column_dropdown)
                             val columnDropDwonLayout =
@@ -689,13 +712,17 @@ class ScannerFragment : Fragment() {
                                 } else {
                                     columnValue.isEnabled = true
                                     columnValue.isFocusable = true
-                                    columnValue.isFocusableInTouchMode = true
+//                                    columnValue.isFocusableInTouchMode = true
                                     columnValue.setText("")
                                 }
                                 textInputIdsList.add(Pair(value, columnValue))
                             }
                             tableDetailLayoutWrapper.addView(tableRowLayout)
                         }
+                    }
+
+                    for (i in 0 until textInputIdsList.size){
+                        textInputIdsList[i].second.onFocusChangeListener = this
                     }
 
                     val builder = MaterialAlertDialogBuilder(requireActivity())
@@ -809,6 +836,53 @@ class ScannerFragment : Fragment() {
                 }
             }
         }
+    }
+
+    fun pickImageFromGallery() {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        resultLauncher1.launch(
+            Intent.createChooser(
+                pickPhoto, getString(R.string.choose_image_gallery)
+            )
+        )
+    }
+
+    private var resultLauncher1 =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val cropPicUri = CropImage.getPickImageResultUri(requireActivity(), data)
+                cropImage(cropPicUri)
+            }
+        }
+
+    private var cameraResultLauncher1 =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+//                val data: Intent? = result.data
+//                val bitmap = data!!.extras!!.get("data") as Bitmap
+//                val file = ImageManager.readWriteImage(requireActivity(), bitmap)
+//                cropImage(Uri.fromFile(file))
+                val text = result.data!!.getStringExtra("SCAN_TEXT")
+                updateInputBox!!.setText(text)
+                updateInputBox!!.setSelection(updateInputBox!!.text.toString().length)
+            }
+        }
+
+    fun pickImageFromCamera() {
+        //        startActivity(Intent(context,OcrActivity::class.java))
+        val takePictureIntent = Intent(context, OcrActivity::class.java)
+        cameraResultLauncher1.launch(takePictureIntent)
+    }
+
+    private fun cropImage(imageUri: Uri) {
+
+        CropImage.activity(imageUri)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setMultiTouchEnabled(true)
+            .start(requireActivity())
     }
 
     private fun renderQuickLinksDialog(searchTableObject: TableObject) {
@@ -1031,7 +1105,7 @@ class ScannerFragment : Fragment() {
                     if (addImageCheckBox.isChecked && filePathView!!.text.toString()
                             .isNotEmpty()
                     ) {
-                        uploadImageOnFirebaseStorage(object: UploadImageCallback{
+                        uploadImageOnFirebaseStorage(object : UploadImageCallback {
                             override fun onSuccess() {
                                 // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
                                 // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
@@ -1092,11 +1166,11 @@ class ScannerFragment : Fragment() {
 
                                                 tableDetailLayoutWrapper.removeAllViews()
                                                 filePathView!!.setText("")
-                                                for (i in 0 until params.size){
+                                                for (i in 0 until params.size) {
                                                     val pair = params[i]
                                                     values_JSON.put(pair.second)
                                                 }
-                                                if (values_JSON.length() > 0){
+                                                if (values_JSON.length() > 0) {
                                                     sendRequest()
                                                 }
                                                 params.clear()
@@ -1165,12 +1239,14 @@ class ScannerFragment : Fragment() {
                                 codeScanner!!.startPreview()
                                 filePathView!!.setText("")
 //                                openHistoryBtnTip()
-                                for (i in 0 until params.size){
-                                    val pair = params[i]
-                                    values_JSON.put(pair.second)
-                                }
-                                if (values_JSON.length() > 0){
-                                    sendRequest()
+                                if (Constants.userData != null) {
+                                    for (i in 0 until params.size) {
+                                        val pair = params[i]
+                                        values_JSON.put(pair.second)
+                                    }
+                                    if (values_JSON.length() > 0) {
+                                        sendRequest()
+                                    }
                                 }
                                 params.clear()
                             }, 1000)
@@ -1348,7 +1424,7 @@ class ScannerFragment : Fragment() {
     var uploadedUrlList = mutableListOf<String>()
     var array: List<String> = mutableListOf()
     val handler = Handler(Looper.myLooper()!!)
-    private fun uploadImageOnFirebaseStorage(listener:UploadImageCallback) {
+    private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
         val imageList = filePathView!!.text.toString()
         if (imageList.contains(",")) {
             array = imageList.split(",")
@@ -1357,35 +1433,35 @@ class ScannerFragment : Fragment() {
 
                 handler.postDelayed({
 
-                val imagePath = array[i]
+                    val imagePath = array[i]
 
-                if (FirebaseAuth.getInstance().currentUser != null) {
-                    val userId = FirebaseAuth.getInstance().currentUser!!.uid
+                    if (FirebaseAuth.getInstance().currentUser != null) {
+                        val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                    val file = Uri.fromFile(File(imagePath))
-                    val fileRef =
-                        storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
-                    val uploadTask = fileRef.putFile(file)
-                    uploadTask.continueWithTask { task ->
-                        if (!task.isSuccessful) {
-                            task.exception?.let {
-                                throw it
+                        val file = Uri.fromFile(File(imagePath))
+                        val fileRef =
+                            storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
+                        val uploadTask = fileRef.putFile(file)
+                        uploadTask.continueWithTask { task ->
+                            if (!task.isSuccessful) {
+                                task.exception?.let {
+                                    throw it
+                                }
                             }
-                        }
-                        fileRef.downloadUrl
-                    }.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val downloadUri = task.result
-                            uploadedUrlList.add(downloadUri.toString())
-                            if (i == array.size-1){
-                                url = uploadedUrlList.joinToString(" ")
-                                uploadedUrlList.clear()
-                                listener.onSuccess()
+                            fileRef.downloadUrl
+                        }.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val downloadUri = task.result
+                                uploadedUrlList.add(downloadUri.toString())
+                                if (i == array.size - 1) {
+                                    url = uploadedUrlList.joinToString(" ")
+                                    uploadedUrlList.clear()
+                                    listener.onSuccess()
+                                }
                             }
                         }
                     }
-                }
-                }, (1000*i+1).toLong())
+                }, (1000 * i + 1).toLong())
             }
 
         } else {
@@ -1450,7 +1526,7 @@ class ScannerFragment : Fragment() {
                     if (userRecoverableAuthType == 0) {
                         saveToDriveAppFolder()
                     } else {
-                      getAllSheets()
+                        getAllSheets()
                     }
 
                 }
@@ -1664,6 +1740,30 @@ class ScannerFragment : Fragment() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
+            val result = CropImage.getActivityResult(data)
+            val imgUri = result.uri
+            try {
+                if (updateInputBox != null){
+                    TextRecogniser.runTextRecognition(requireActivity(), updateInputBox!!, imgUri)
+                }
+                else{
+                    showAlert(
+                        requireActivity(),
+                        getString(R.string.textinput_not_focused_error_text)
+                    )
+                }
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
 
     private fun bindPreview(processCameraProvider: ProcessCameraProvider) {
         val preview = Preview.Builder().build()
@@ -1800,8 +1900,8 @@ class ScannerFragment : Fragment() {
 
     private fun getAllSheets() {
         if (Constants.userData != null) {
-             connectGoogleSheetsTextView.visibility =View.GONE
-             sheetsTopLayout.visibility = View.VISIBLE
+            connectGoogleSheetsTextView.visibility = View.GONE
+            sheetsTopLayout.visibility = View.VISIBLE
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
@@ -1934,12 +2034,10 @@ class ScannerFragment : Fragment() {
                     }
 
                 }
-                sr.setRetryPolicy(
-                    DefaultRetryPolicy(
-                        10000,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                    )
+                sr.retryPolicy = DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
                 )
                 VolleySingleton(requireActivity()).addToRequestQueue(sr)
 
@@ -1951,7 +2049,54 @@ class ScannerFragment : Fragment() {
         }
     }
 
+
+    override fun onFocusChange(v: View?, hasFocus: Boolean) {
+        updateInputBox  = v as CustomTextInputEditText?
+        if (hasFocus){
+           openDialog()
+       }
+    }
+
     fun restart() {
         onResume()
+    }
+
+    private fun openDialog() {
+        updateInputBox!!.clearFocus()
+        customAlertDialog = CustomAlertDialog()
+        customAlertDialog!!.setFocusListener(this)
+        customAlertDialog!!.show(childFragmentManager, "dialog")
+    }
+
+    override fun onEraseBtnClick(alertDialog: CustomAlertDialog) {
+        updateInputBox!!.setText("")
+    }
+
+    override fun onImageRecognitionBtnClick(alertDialog: CustomAlertDialog) {
+        if (customAlertDialog != null){
+            customAlertDialog!!.dismiss()
+
+                BaseActivity.hideSoftKeyboard(requireActivity(), updateInputBox!!)
+                pickImageFromGallery()
+
+        }
+    }
+
+    override fun onPhotoRecognitionBtnClick(alertDialog: CustomAlertDialog) {
+        if (customAlertDialog != null){
+            customAlertDialog!!.dismiss()
+
+                BaseActivity.hideSoftKeyboard(requireActivity(), updateInputBox!!)
+                pickImageFromCamera()
+
+        }
+    }
+
+    override fun onDismissBtnClick(alertDialog: CustomAlertDialog) {
+         if (customAlertDialog != null){
+             customAlertDialog!!.dismiss()
+             updateInputBox!!.requestFocus()
+             Constants.openKeyboar(requireActivity())
+         }
     }
 }

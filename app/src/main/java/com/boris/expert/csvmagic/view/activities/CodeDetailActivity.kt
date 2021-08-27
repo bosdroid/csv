@@ -1,5 +1,6 @@
 package com.boris.expert.csvmagic.view.activities
 
+import android.app.Activity
 import android.app.SearchManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -14,6 +15,7 @@ import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -21,11 +23,13 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
@@ -34,19 +38,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.FeedbackAdapter
+import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
 import com.boris.expert.csvmagic.model.CodeHistory
 import com.boris.expert.csvmagic.model.Feedback
 import com.boris.expert.csvmagic.model.TableObject
 import com.boris.expert.csvmagic.room.AppViewModel
-import com.boris.expert.csvmagic.utils.Constants
-import com.boris.expert.csvmagic.utils.RuntimePermissionHelper
-import com.boris.expert.csvmagic.utils.TableGenerator
+import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.viewmodel.CodeDetailViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -55,8 +60,9 @@ import java.util.*
 import java.util.regex.Pattern
 
 
-class CodeDetailActivity : BaseActivity(), View.OnClickListener {
+class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialog.CustomDialogListener,View.OnFocusChangeListener {
 
+    private var customAlertDialog: CustomAlertDialog?=null
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
     private var codeHistory: CodeHistory? = null
@@ -88,7 +94,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
     private lateinit var feedbackCsvExportImageView: AppCompatImageView
     private lateinit var qrCodeHistoryNotesInputField: TextInputEditText
     private lateinit var updateNotesBtn: AppCompatButton
-
+    private lateinit var contentView:ConstraintLayout
     //    private lateinit var viewModel: DynamicQrViewModel
     private lateinit var barcodeDetailParentLayout: LinearLayout
     private lateinit var dialogSubHeading: MaterialTextView
@@ -102,6 +108,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
     var selectedProtocol = ""
     var barcodeEditList = mutableListOf<Triple<AppCompatImageView, String, String>>()
     private var counter: Int = 0
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,6 +174,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
         protocolGroup = findViewById(R.id.http_protocol_group)
         barcodeDetailParentLayout = findViewById(R.id.barcode_detail_wrapper_layout)
         dialogSubHeading = findViewById(R.id.dialog_sub_heading)
+        contentView = findViewById(R.id.code_detail_parent_layout)
         protocolGroup.setOnCheckedChangeListener { group, checkedId ->
             when (checkedId) {
                 R.id.http_protocol_rb -> {
@@ -184,6 +192,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
         qrCodeHistoryNotesInputField = findViewById(R.id.qr_code_history_notes_input_field)
         updateNotesBtn = findViewById(R.id.update_notes_btn)
         updateNotesBtn.setOnClickListener(this)
+
     }
 
     // THIS FUNCTION WILL RENDER THE ACTION BAR/TOOLBAR
@@ -500,18 +509,24 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    private lateinit var updateInputBox:CustomTextInputEditText
     private fun updateBarcodeDetail(id: Int, triple: Triple<AppCompatImageView, String, String>) {
         val updateBarcodeLayout =
             LayoutInflater.from(context).inflate(R.layout.update_barcode_detail_dialog, null)
-        val updateInputBox =
-            updateBarcodeLayout.findViewById<TextInputEditText>(R.id.update_barcode_detail_text_input_field)
-
+        updateInputBox =
+            updateBarcodeLayout.findViewById(R.id.update_barcode_detail_text_input_field)
+        updateInputBox.onFocusChangeListener = this
         val cleanBrushView =
             updateBarcodeLayout.findViewById<AppCompatImageView>(R.id.update_barcode_detail_cleaning_text_view)
         val cancelBtn =
             updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_cancel_btn)
         val updateBtn =
             updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_update_btn)
+
+        val imageRecognitionBtn = updateBarcodeLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
+        val photoRecognitionBtn =
+            updateBarcodeLayout.findViewById<LinearLayout>(R.id.photo_recognition_btn)
+
 
         val builder = MaterialAlertDialogBuilder(context)
         builder.setView(updateBarcodeLayout)
@@ -520,8 +535,35 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
         alert.show()
         cancelBtn.setOnClickListener {
             hideSoftKeyboard(context, cancelBtn)
+            updateInputBox.clearFocus()
             alert.dismiss()
         }
+
+        updateInputBox.setOnClickListener {
+            updateInputBox.requestFocus()
+        }
+
+        imageRecognitionBtn.setOnClickListener {
+            if (RuntimePermissionHelper.checkCameraPermission(
+                    context,
+                    Constants.READ_STORAGE_PERMISSION
+                )
+            ) {
+                hideSoftKeyboard(context, updateInputBox)
+                pickImageFromGallery()
+            }
+        }
+
+        photoRecognitionBtn.setOnClickListener {
+            if (RuntimePermissionHelper.checkCameraPermission(
+                    context, Constants.CAMERA_PERMISSION
+                )
+            ) {
+                hideSoftKeyboard(context, updateInputBox)
+                pickImageFromCamera()
+            }
+        }
+
 
         cleanBrushView.setOnClickListener { updateInputBox.setText("") }
 
@@ -550,8 +592,55 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
         updateInputBox.setText(triple.second)
         updateInputBox.setSelection(updateInputBox.text!!.length)
         updateInputBox.requestFocus()
-        Constants.openKeyboar(context)
+//        Constants.openKeyboar(context)
 
+    }
+
+    private fun pickImageFromGallery() {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        resultLauncher.launch(
+            Intent.createChooser(
+                pickPhoto, getString(R.string.choose_image_gallery)
+            )
+        )
+    }
+
+    private var resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val cropPicUri = CropImage.getPickImageResultUri(this, data)
+                cropImage(cropPicUri)
+            }
+        }
+
+    private var cameraResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                val text = result.data!!.getStringExtra("SCAN_TEXT")
+                 updateInputBox.setText(text)
+                 updateInputBox.setSelection(updateInputBox.text.toString().length)
+//                val data: Intent? = result.data
+//                val bitmap = data!!.extras!!.get("data") as Bitmap
+//                val file = ImageManager.readWriteImage(context,bitmap)
+//                cropImage(Uri.fromFile(file))
+            }
+        }
+
+    private fun pickImageFromCamera() {
+//        startActivity(Intent(context,OcrActivity::class.java))
+        val takePictureIntent = Intent(context, OcrActivity::class.java)
+        cameraResultLauncher.launch(takePictureIntent)
+    }
+
+    private fun cropImage(imageUri: Uri) {
+
+        CropImage.activity(imageUri)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setMultiTouchEnabled(true)
+            .start(this)
     }
 
     private fun displayBarcodeDetail() {
@@ -762,6 +851,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
                         .create().show()
                 }
             }
+            Constants.CAMERA_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    hideSoftKeyboard(context, contentView)
+                    pickImageFromCamera()
+                }
+            }
             else -> {
 
             }
@@ -797,4 +892,70 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener {
             }
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
+            val result = CropImage.getActivityResult(data)
+            val imgUri = result.uri
+            try {
+                TextRecogniser.runTextRecognition(applicationContext, updateInputBox, imgUri)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    override fun onFocusChange(v: View?, hasFocus: Boolean) {
+       if (hasFocus){
+           openDialog()
+       }
+    }
+
+    private fun openDialog() {
+        customAlertDialog = CustomAlertDialog()
+        customAlertDialog!!.setFocusListener(this)
+        customAlertDialog!!.show(supportFragmentManager, "dialog")
+    }
+
+    override fun onEraseBtnClick(alertDialog: CustomAlertDialog) {
+        updateInputBox.setText("")
+    }
+
+    override fun onImageRecognitionBtnClick(alertDialog: CustomAlertDialog) {
+        if (customAlertDialog != null){
+            customAlertDialog!!.dismiss()
+            if (RuntimePermissionHelper.checkCameraPermission(
+                    context,
+                    Constants.READ_STORAGE_PERMISSION
+                )
+            ) {
+                hideSoftKeyboard(context, updateInputBox)
+                pickImageFromGallery()
+            }
+        }
+    }
+
+    override fun onPhotoRecognitionBtnClick(alertDialog: CustomAlertDialog) {
+        if (customAlertDialog != null){
+            customAlertDialog!!.dismiss()
+            if (RuntimePermissionHelper.checkCameraPermission(
+                    context, Constants.CAMERA_PERMISSION
+                )
+            ) {
+                hideSoftKeyboard(context, updateInputBox)
+                pickImageFromCamera()
+            }
+        }
+    }
+
+    override fun onDismissBtnClick(alertDialog: CustomAlertDialog) {
+         if (customAlertDialog != null){
+             customAlertDialog!!.dismiss()
+             Constants.openKeyboar(context)
+         }
+    }
+
+
 }

@@ -63,7 +63,8 @@ class Constants {
                     "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
                     ")+"
         )
-
+        val RECEIVER_INTENT = "RECEIVER_INTENT"
+        val RECEIVER_MESSAGE = "RECEIVER_MESSAGE"
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
         }
@@ -595,9 +596,19 @@ class Constants {
 
         fun openKeyboar(context: Context){
             val imm: InputMethodManager? = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+
             imm!!.toggleSoftInput(
                 InputMethodManager.SHOW_FORCED,
                 InputMethodManager.HIDE_IMPLICIT_ONLY
+            )
+        }
+
+        fun hideKeyboar(context: Context){
+            val imm: InputMethodManager? = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+
+            imm!!.toggleSoftInput(
+                InputMethodManager.HIDE_IMPLICIT_ONLY,
+                0
             )
         }
 

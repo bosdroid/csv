@@ -33,6 +33,65 @@
                 />
 
             <LinearLayout
+                android:id="@+id/text_recognition_buttons_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_margin="@dimen/eightDpMargin"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:id="@+id/image_recognition_btn"
+                    >
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginHorizontal="@dimen/_10dp"
+                        android:src="@drawable/gallery" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/image_recognition_text"
+                        android:textSize="@dimen/mediumText"
+                        android:textColor="@color/black"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/photo_recognition_btn"
+                    >
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginHorizontal="@dimen/_10dp"
+                        android:src="@drawable/camera" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/photo_recognition_text"
+                        android:textSize="@dimen/mediumText"
+                        android:textColor="@color/black"
+                        />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -48,12 +107,14 @@
                     android:textColor="@color/black"
                     android:gravity="end"
                     />
-                <com.google.android.material.textfield.TextInputEditText
+                <com.boris.expert.csvmagic.customviews.CustomTextInputEditText
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/input_text_field_design"
                     android:padding="5dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:textSize="@dimen/mediumText"
                     android:layout_marginStart="@dimen/eightDpMargin"
                     android:id="@+id/scan_result_dialog_code_data"

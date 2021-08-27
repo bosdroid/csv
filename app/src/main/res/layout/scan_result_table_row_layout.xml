@@ -14,7 +14,7 @@
         android:id="@+id/table_column_name"
         android:gravity="end"
         />
-    <com.google.android.material.textfield.TextInputEditText
+    <com.boris.expert.csvmagic.customviews.CustomTextInputEditText
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

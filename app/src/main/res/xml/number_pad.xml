@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:keyWidth="20%p"
+    android:horizontalGap="5dp"
+    android:verticalGap="5dp"
+    android:keyHeight="60dp">
+
+    <Row>
+<!--        <Key android:codes="-5"-->
+<!--            android:keyLabel="@string/image_recognition_text"-->
+<!--            android:keyWidth="50%p"-->
+<!--            android:keyEdgeFlags="left"-->
+<!--            />-->
+        <Key android:codes="49" android:keyWidth="50%p" android:keyLabel="@string/image_recognition_text" android:keyEdgeFlags="left"/>
+<!--        <Key android:codes="10"-->
+<!--            android:keyLabel="@string/photo_recognition_text"-->
+<!--            android:keyWidth="50%p"-->
+<!--            android:keyEdgeFlags="right"-->
+<!--            />-->
+        <Key android:codes="50" android:keyWidth="50%p" android:keyLabel="@string/photo_recognition_text" android:keyEdgeFlags="right"/>
+    </Row>
+
+</Keyboard>

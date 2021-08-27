@@ -2,8 +2,10 @@ package com.boris.expert.csvmagic.view.activities
 
 import android.Manifest
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.net.Uri
@@ -23,6 +25,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
@@ -96,6 +99,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private var scannerFragment: ScannerFragment? = null
     private var callback: LoginCallback?=null
 
+
     companion object {
         lateinit var context: Context
         lateinit var historyBtn: MaterialButton
@@ -136,6 +140,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
     }
+
 
     // THIS FUNCTION WILL INITIALIZE ALL THE VIEWS AND REFERENCE OF OBJECTS
     private fun initViews() {
@@ -723,7 +728,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.logout).isVisible = false
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = false
-            mNavigation.menu.findItem(R.id.credit).isVisible = true
+            mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
         }
@@ -760,6 +765,13 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         hideKeyboard(context,this)
         super.onDestroy()
 
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val fragment = supportFragmentManager.findFragmentByTag("scanner")
+        fragment?.onActivityResult(requestCode, resultCode, data)
     }
 
 }

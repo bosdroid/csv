@@ -7,18 +7,19 @@
 
 
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/top_layout"
         android:gravity="center_vertical"
         android:layout_margin="@dimen/eightDpMargin"
         >
-        <com.google.android.material.textfield.TextInputEditText
+        <com.boris.expert.csvmagic.customviews.CustomTextInputEditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -39,7 +40,64 @@
             />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/text_recognition_buttons_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_layout"
+        android:layout_margin="@dimen/eightDpMargin"
+        >
 
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:id="@+id/image_recognition_btn"
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginHorizontal="@dimen/_10dp"
+                android:src="@drawable/gallery" />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/image_recognition_text"
+                android:textSize="@dimen/mediumText"
+                android:textColor="@color/black"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:id="@+id/photo_recognition_btn"
+            >
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginHorizontal="@dimen/_10dp"
+                android:src="@drawable/camera" />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/photo_recognition_text"
+                android:textSize="@dimen/mediumText"
+                android:textColor="@color/black"
+                />
+        </LinearLayout>
+
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:layout_width="wrap_content"
@@ -47,7 +105,7 @@
         android:text="@string/cancel_text"
         android:id="@+id/update_barcode_detail_dialog_cancel_btn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_layout"
+        app:layout_constraintTop_toBottomOf="@id/text_recognition_buttons_layout"
         app:layout_constraintEnd_toStartOf="@id/update_barcode_detail_dialog_update_btn"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
@@ -59,10 +117,12 @@
         android:text="@string/update_text"
         android:id="@+id/update_barcode_detail_dialog_update_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_layout"
+        app:layout_constraintTop_toBottomOf="@id/text_recognition_buttons_layout"
         app:layout_constraintStart_toEndOf="@id/update_barcode_detail_dialog_cancel_btn"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
