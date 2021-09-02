@@ -65,6 +65,7 @@ class MainActivityViewModel : ViewModel() {
         return fontList
     }
 
+
     fun createDynamicQrCode(context:Context,body:HashMap<String,String>){
         dynamicQrCodeResponse = ApiRepository.getInstance(context).createDynamicQrCode(body)
     }

@@ -367,10 +367,10 @@
     <string name="table_already_exist_message">Table already exist in database.</string>
     <string name="table_csv_import_error_message">Something wrong with CSV data structure.</string>
     <string name="credits">Credits</string>
-    <string name="minimum_package_btn">MINIMUM</string>
+    <string name="minimum_package_btn">Minimum 1 CREDIT</string>
     <string name="package_heading_text">Choose the Credit Package</string>
-    <string name="regular_package_btn">Regular</string>
-    <string name="premium_package_btn">Premium</string>
+    <string name="regular_package_btn">Regular 6 CREDITS</string>
+    <string name="premium_package_btn">Premium 12 CREDITS</string>
     <string name="minimum_product_id" translatable="false">credit</string>
     <string name="image_recognition_text">Image Recognition</string>
     <string name="photo_recognition_text">Photo Recognition</string>
@@ -380,6 +380,13 @@
     <string name="keyboard_name">CSV Keyboard</string>
     <string name="erase_text">Erase Text</string>
     <string name="dismiss">Dismiss</string>
+    <string name="memory_usage_size_heading">Memory Usage Size</string>
+    <string name="duration_time_heading">Time Duration</string>
+    <string name="credit_price_heading">Credit Price</string>
+    <string name="purchase_package_btn">Purchase</string>
+    <string name="user_session_expired">User session has been expired or user not logged. Please try later!</string>
+    <string name="user_credits_update_success_text">User Credits has been updated successfully!</string>
+    <string name="total_credits_text">Total Credits:</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

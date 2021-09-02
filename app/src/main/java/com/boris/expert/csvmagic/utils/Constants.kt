@@ -34,6 +34,9 @@ class Constants {
         const val firebaseBackgroundImages = "backgroundImages"
         const val firebaseLogoImages = "logoImages"
         const val firebaseFonts = "fonts"
+        const val firebaseFeatures = "features"
+        const val firebasePurchaseHistory = "PurchaseHistory"
+        const val firebaseUserCredits = "UserCredits"
         const val READ_STORAGE_REQUEST_CODE = 100
         const val CAMERA_REQUEST_CODE = 101
         const val READ_STORAGE_PERMISSION = "android.permission.READ_EXTERNAL_STORAGE"

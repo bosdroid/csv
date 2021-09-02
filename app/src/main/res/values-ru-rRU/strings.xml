@@ -79,4 +79,11 @@
     <string name="keyboard_name">CSV Keyboard</string>
     <string name="erase_text">Erase Text</string>
     <string name="dismiss">Dismiss</string>
+    <string name="memory_usage_size_heading">Memory Usage Size</string>
+    <string name="duration_time_heading">Time Duration</string>
+    <string name="credit_price_heading">Credit Price</string>
+    <string name="purchase_package_btn">Purchase</string>
+    <string name="user_session_expired">User session has been expired or user not logged. Please try later!</string>
+    <string name="user_credits_update_success_text">User Credits has been updated successfully!</string>
+    <string name="total_credits_text">Total Credits:</string>
 </resources>

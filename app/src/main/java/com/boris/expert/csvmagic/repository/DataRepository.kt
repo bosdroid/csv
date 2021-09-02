@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.boris.expert.csvmagic.model.Feature
 import com.boris.expert.csvmagic.model.Fonts
 import com.boris.expert.csvmagic.utils.Constants
 import com.google.firebase.database.*
@@ -115,5 +116,30 @@ class DataRepository {
         return fontList
     }
 
+    // THIS FUNCTION WILL FETCH THE FIREBASE FEATURE LIST
+    fun getFeatureList():MutableLiveData<List<Feature>>{
+        val featureList = MutableLiveData<List<Feature>>()
+        val list = mutableListOf<Feature>()
+        databaseReference.child(Constants.firebaseFeatures)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+
+                        for (postSnapshot in dataSnapshot.children) {
+
+                            val item = postSnapshot.getValue(Feature::class.java) as Feature
+                            list.add(item)
+
+                        }
+                        featureList.postValue(list)
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    featureList.postValue(null)
+                }
+            })
+        return featureList
+    }
 
 }
