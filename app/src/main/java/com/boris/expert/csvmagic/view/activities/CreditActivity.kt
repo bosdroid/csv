@@ -203,7 +203,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, BillingProcessor.IB
 
 
     override fun onProductPurchased(productId: String, details: TransactionDetails?) {
-        Log.d("TEST199", "onProductPurchased: ")
+//        Log.d("TEST199", "onProductPurchased: ")
         if (auth.currentUser != null) {
             val userId = auth.currentUser!!.uid
             val purchaseDetail =
@@ -240,11 +240,11 @@ class CreditActivity : BaseActivity(), View.OnClickListener, BillingProcessor.IB
     }
 
     override fun onPurchaseHistoryRestored() {
-        Log.d("TEST199", "onPurchaseHistoryRestored: ")
+//        Log.d("TEST199", "onPurchaseHistoryRestored: ")
     }
 
     override fun onBillingError(errorCode: Int, error: Throwable?) {
-        Log.d("TEST199", "onBillingError: ")
+//        Log.d("TEST199", "onBillingError: ")
     }
 
     override fun onBillingInitialized() {
