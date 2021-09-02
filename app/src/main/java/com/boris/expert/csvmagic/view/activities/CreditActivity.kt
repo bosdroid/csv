@@ -191,6 +191,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
                     creditsValue = 1
                     userId = auth.currentUser!!.uid
                     purchase()
+
 //                    if (bp.isOneTimePurchaseSupported) {
 //                        bp.purchase(this, minimumProductId)
 //                    } else {
