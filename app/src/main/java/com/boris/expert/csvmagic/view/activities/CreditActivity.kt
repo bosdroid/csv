@@ -129,7 +129,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
                 PurchaseDetail(
                     userId,
                     purchase.orderId,
-                    "credit",
+                    "single_credit",
                     purchase.purchaseTime,
                     purchase.purchaseToken
                 )
@@ -327,7 +327,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
 
     private fun initiatePurchase() {
         val skuList: MutableList<String> = ArrayList()
-        skuList.add("credit")
+        skuList.add("single_credit")
         val params = SkuDetailsParams.newBuilder()
         params.setSkusList(skuList).setType(INAPP)
 
@@ -362,7 +362,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
         for (purchase in purchases) {
             //if item is purchased
 
-            if (purchase.skus.equals("credit") && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                 if (!verifyValidSignature(purchase.originalJson, purchase.signature)) {
                     // Invalid purchase
                     // show error to user
@@ -397,14 +397,14 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
                 }
             }
             //if purchase is pending
-            else if (purchase.skus.equals("credit") && purchase.purchaseState == Purchase.PurchaseState.PENDING) {
+            else if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.PENDING) {
                 Toast.makeText(
                     applicationContext,
                     "Purchase is Pending. Please complete Transaction", Toast.LENGTH_SHORT
                 ).show()
             }
             //if purchase is refunded or unknown
-            else if (purchase.skus.equals("credit") && purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
+            else if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
 //                savePurchaseValueToPref(false)
 //                purchaseStatus!!.text = "Purchase Status : Not Purchased"
 //                purchaseButton!!.visibility = View.VISIBLE
