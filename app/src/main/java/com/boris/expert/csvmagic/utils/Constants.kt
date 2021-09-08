@@ -37,6 +37,7 @@ class Constants {
         const val firebaseFeatures = "features"
         const val firebasePurchaseHistory = "PurchaseHistory"
         const val firebaseUserCredits = "UserCredits"
+        const val firebaseUserFeatureDetails = "UserFeatureDetails"
         const val READ_STORAGE_REQUEST_CODE = 100
         const val CAMERA_REQUEST_CODE = 101
         const val READ_STORAGE_PERMISSION = "android.permission.READ_EXTERNAL_STORAGE"
@@ -52,6 +53,8 @@ class Constants {
         var isLogin: String = "is_login"
         var user: String = "user"
         var email: String = "email"
+        var userCreditsValue = "user_credits_value"
+        var firebaseUserId = ""
         var userData: User? = null
         var mService: Drive? = null
         var sheetService: Sheets? = null

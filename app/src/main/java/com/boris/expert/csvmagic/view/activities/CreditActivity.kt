@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,31 +23,32 @@ import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.Security
 import com.boris.expert.csvmagic.viewmodel.CreditActivityViewModel
+import com.boris.expert.csvmagic.viewmodel.PurchaseFeatureActivityViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.io.IOException
 
 
-class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedListener,
+class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedListener,
     FeaturesAdapter.OnItemClickListener {
 
-//    private var minimumProductDetail: TransactionDetails? = null
+    private var purchaseDetail: PurchaseDetail? = null
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
     private lateinit var viewModel: CreditActivityViewModel
 
-        private var billingClient: BillingClient? = null
+    private var billingClient: BillingClient? = null
     private lateinit var minimumPackageBtn: AppCompatButton
     private lateinit var regularPackageBtn: AppCompatButton
     private lateinit var premiumPackageBtn: AppCompatButton
     private lateinit var appSettings: AppSettings
-//    private lateinit var bp: BillingProcessor
     private var minimumProductId = ""
     private var featureList = mutableListOf<Feature>()
     private lateinit var featuresRecyclerView: RecyclerView
-    private lateinit var totalCreditsView:MaterialTextView
+    private lateinit var totalCreditsView: MaterialTextView
     private lateinit var adapter: FeaturesAdapter
     private var creditsValue: Int = 0
     private var userCurrentCreditsValue: Int = 0
@@ -75,8 +77,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
         )[CreditActivityViewModel::class.java]
         billingClient = BillingClient.newBuilder(this)
             .enablePendingPurchases().setListener(this).build()
-//        bp = BillingProcessor.newBillingProcessor(this, Constants.licenseKey, this)
-//        bp.initialize()
+
         toolbar = findViewById(R.id.toolbar)
         featuresRecyclerView = findViewById(R.id.features_recyclerview)
         minimumPackageBtn = findViewById(R.id.minimum_package_btn)
@@ -109,11 +110,6 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
 
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        if (!bp.handleActivityResult(requestCode, resultCode, data)) {
-//            super.onActivityResult(requestCode, resultCode, data)
-//        }
-//    }
 
     override fun onPurchasesUpdated(
         billingResult: BillingResult,
@@ -122,40 +118,22 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
 //if item newly purchased
 
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-             val purchase:Purchase = purchases[0]
-              if (auth.currentUser != null) {
-            val userId = auth.currentUser!!.uid
-            val purchaseDetail =
-                PurchaseDetail(
-                    userId,
-                    purchase.orderId,
-                    "single_credit",
-                    purchase.purchaseTime,
-                    purchase.purchaseToken
-                )
-            firebaseDatabase.child(Constants.firebasePurchaseHistory).push()
-                .setValue(purchaseDetail)
-            val hashMap = HashMap<String, String>()
-            creditsValue += userCurrentCreditsValue
-            hashMap["credits"] = creditsValue.toString()
-            firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(userId)
-                .setValue(hashMap)
-                .addOnSuccessListener {
-                    Toast.makeText(
-                        context,
-                        getString(R.string.user_credits_update_success_text),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    getUserCredits()
-                    Log.d("TEST199","$userCurrentCreditsValue")
-                }
-                .addOnFailureListener {
-
-                }
-        } else {
-            showAlert(context, getString(R.string.user_session_expired))
-        }
+            val purchase: Purchase = purchases[0]
+            if (auth.currentUser != null) {
+                val userId = auth.currentUser!!.uid
+                purchaseDetail =
+                    PurchaseDetail(
+                        userId,
+                        purchase.orderId,
+                        purchase.packageName,
+                        "single_credit",
+                        purchase.purchaseTime,
+                        purchase.purchaseToken
+                    )
+                verifyPurchase()
+            } else {
+                showAlert(context, getString(R.string.user_session_expired))
+            }
             //handlePurchases(purchases)
         }
         //if item already purchased then check and reflect changes
@@ -175,14 +153,75 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
         }
         // Handle any other error msgs
         else {
-            Toast.makeText(
-                applicationContext,
-                "Error " + billingResult.debugMessage,
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                applicationContext,
+//                "Error " + billingResult.debugMessage,
+//                Toast.LENGTH_SHORT
+//            ).show()
         }
     }
 
+    private fun verifyPurchase() {
+        startLoading(context)
+        viewModel.callPurchase(
+            context,
+            purchaseDetail!!.packageName,
+            "single_credit",
+            purchaseDetail!!.purchaseToken
+        )
+        viewModel.getPurchaseResponse().observe(this, { response ->
+            dismiss()
+            if (response != null) {
+                when (response.get("validPurchase").asString) {
+                    "true" -> {
+                        firebaseDatabase.child(Constants.firebasePurchaseHistory).push()
+                            .setValue(purchaseDetail)
+                        val hashMap = HashMap<String, String>()
+                        creditsValue += userCurrentCreditsValue
+                        hashMap["credits"] = creditsValue.toString()
+                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                            .child(userId)
+                            .setValue(hashMap)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    context,
+                                    getString(R.string.user_credits_update_success_text),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                getUserCredits()
+                                Log.d("TEST199", "$userCurrentCreditsValue")
+                            }
+                            .addOnFailureListener {
+
+                            }
+                    }
+                    "false" -> {
+                        showRetryDialogBox()
+                    }
+                    "error" -> {
+                        showRetryDialogBox()
+                    }
+                }
+            } else {
+                showRetryDialogBox()
+            }
+        })
+
+    }
+
+
+    private fun showRetryDialogBox() {
+        MaterialAlertDialogBuilder(context).setCancelable(false)
+            .setMessage(getString(R.string.purchase_retry_error_message))
+            .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(getString(R.string.retry_text)) { dialog, which ->
+                dialog.dismiss()
+                verifyPurchase()
+            }
+            .create().show()
+    }
 
     override fun onClick(v: View?) {
         when (v!!.id) {
@@ -192,34 +231,6 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
                     userId = auth.currentUser!!.uid
                     purchase()
 
-//                    if (bp.isOneTimePurchaseSupported) {
-//                        bp.purchase(this, minimumProductId)
-//                    } else {
-//                        Toast.makeText(
-//                            context,
-//                            "Billing Purchased not Supported!",
-//                            Toast.LENGTH_SHORT
-//                        )
-//                            .show()
-//                    }
-//                    val hashMap = HashMap<String, String>()
-//                    creditsValue += userCurrentCreditsValue
-//                    hashMap["credits"] = creditsValue.toString()
-//                    firebaseDatabase.child(Constants.firebaseUserCredits)
-//                        .child(userId)
-//                        .setValue(hashMap)
-//                        .addOnSuccessListener {
-//                            Toast.makeText(
-//                                context,
-//                                getString(R.string.user_credits_update_success_text),
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                            getUserCredits()
-//                            Log.d("TEST199","$userCurrentCreditsValue")
-//                        }
-//                        .addOnFailureListener {
-//
-//                        }
                 } else {
                     showAlert(context, getString(R.string.user_session_expired))
                 }
@@ -237,66 +248,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
     }
 
 
-//    override fun onProductPurchased(productId: String, details: TransactionDetails?) {
-////        Log.d("TEST199", "onProductPurchased: ")
-//        if (auth.currentUser != null) {
-//            val userId = auth.currentUser!!.uid
-//            val purchaseDetail =
-//                PurchaseDetail(
-//                    userId,
-//                    details!!.purchaseInfo.purchaseData.orderId,
-//                    details.purchaseInfo.purchaseData.productId,
-//                    details.purchaseInfo.purchaseData.purchaseTime.time,
-//                    details.purchaseInfo.purchaseData.purchaseToken
-//                )
-//            firebaseDatabase.child(Constants.firebasePurchaseHistory).push()
-//                .setValue(purchaseDetail)
-//            val hashMap = HashMap<String, String>()
-//            creditsValue += userCurrentCreditsValue
-//            hashMap["credits"] = creditsValue.toString()
-//            firebaseDatabase.child(Constants.firebaseUserCredits)
-//                .child(userId)
-//                .setValue(hashMap)
-//                .addOnSuccessListener {
-//                    Toast.makeText(
-//                        context,
-//                        getString(R.string.user_credits_update_success_text),
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                    getUserCredits()
-//                    Log.d("TEST199","$userCurrentCreditsValue")
-//                }
-//                .addOnFailureListener {
-//
-//                }
-//        } else {
-//            showAlert(context, getString(R.string.user_session_expired))
-//        }
-//    }
-//
-//    override fun onPurchaseHistoryRestored() {
-////        Log.d("TEST199", "onPurchaseHistoryRestored: ")
-//    }
-//
-//    override fun onBillingError(errorCode: Int, error: Throwable?) {
-////        Log.d("TEST199", "onBillingError: ")
-//    }
-//
-//    override fun onBillingInitialized() {
-//        Log.d("TEST199", "onBillingInitialized: ")
-//        minimumProductDetail = bp.getPurchaseTransactionDetails(minimumProductId)
-//
-////        if (bp.isPurchased(minimumProductId)) {
-////            Toast.makeText(context, "Product already purchased!", Toast.LENGTH_SHORT)
-////                .show()
-////        } else {
-//////            Toast.makeText(context, "You can purchase a Product!", Toast.LENGTH_SHORT)
-//////                .show()
-////        }
-//    }
-
     override fun onDestroy() {
-//        bp.release()
         super.onDestroy()
     }
 
@@ -306,7 +258,8 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
         }
         //else reconnect service
         else {
-            billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
+            billingClient =
+                BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
             billingClient!!.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
@@ -408,10 +361,12 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
 //                savePurchaseValueToPref(false)
 //                purchaseStatus!!.text = "Purchase Status : Not Purchased"
 //                purchaseButton!!.visibility = View.VISIBLE
-                Toast.makeText(applicationContext, "Purchase Status Unknown", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Purchase Status Unknown", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
+
     var ackPurchase = AcknowledgePurchaseResponseListener { billingResult ->
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
 
@@ -453,11 +408,12 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
             userId = auth.currentUser!!.uid
 
             firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(userId).addListenerForSingleValueEvent(object : ValueEventListener{
+                .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         dismiss()
                         if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
-                            val previousCredits = snapshot.child("credits").getValue(String::class.java)
+                            val previousCredits =
+                                snapshot.child("credits").getValue(String::class.java)
                             userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
                                 previousCredits.toInt()
                             } else {
@@ -465,7 +421,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
                             }
                         }
                         totalCreditsView.text = "$userCurrentCreditsValue"
-                        Log.d("TEST199","$userCurrentCreditsValue")
+                        Log.d("TEST199", "$userCurrentCreditsValue")
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -474,22 +430,27 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
 
                 })
             firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(userId).addChildEventListener(object : ChildEventListener{
+                .child(userId).addChildEventListener(object : ChildEventListener {
                     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
 
                     }
 
-                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                    override fun onChildChanged(
+                        snapshot: DataSnapshot,
+                        previousChildName: String?
+                    ) {
                     }
 
                     override fun onChildRemoved(snapshot: DataSnapshot) {
-                        userCurrentCreditsValue = if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
-                            val previousCredits = snapshot.child("credits").getValue(String::class.java)
-                            previousCredits!!.toInt()
-                        } else{
-                            0
-                        }
-                        Log.d("TEST199","$userCurrentCreditsValue")
+                        userCurrentCreditsValue =
+                            if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                val previousCredits =
+                                    snapshot.child("credits").getValue(String::class.java)
+                                previousCredits!!.toInt()
+                            } else {
+                                0
+                            }
+                        Log.d("TEST199", "$userCurrentCreditsValue")
                     }
 
                     override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
@@ -505,37 +466,33 @@ class CreditActivity : BaseActivity(), View.OnClickListener,PurchasesUpdatedList
         }
     }
 
-    private fun getFeaturesList() {
-        featuresRecyclerView.layoutManager = LinearLayoutManager(context)
-        featuresRecyclerView.hasFixedSize()
-        adapter = FeaturesAdapter(context, featureList as ArrayList<Feature>)
-        featuresRecyclerView.adapter = adapter
-        adapter.setOnItemClickListener(this)
 
-        startLoading(context)
-        viewModel.callFeaturesList(context)
-        viewModel.getFeaturesList().observe(this, { list ->
-            if (list != null) {
-                dismiss()
-                if (list.isNotEmpty()) {
-                    featureList.clear()
-                }
-                featureList.addAll(list)
-                adapter.notifyItemRangeChanged(0, featureList.size)
-            } else {
-                dismiss()
-            }
-        })
-    }
+//    private fun getFeaturesList() {
+//        featuresRecyclerView.layoutManager = LinearLayoutManager(context)
+//        featuresRecyclerView.hasFixedSize()
+//        adapter = FeaturesAdapter(context, featureList as ArrayList<Feature>)
+//        featuresRecyclerView.adapter = adapter
+//        adapter.setOnItemClickListener(this)
+//
+//        startLoading(context)
+//        viewModel.callFeaturesList(context)
+//        viewModel.getFeaturesList().observe(this, { list ->
+//            if (list != null) {
+//                dismiss()
+//                if (list.isNotEmpty()) {
+//                    featureList.clear()
+//                }
+//                featureList.addAll(list)
+//                adapter.notifyItemRangeChanged(0, featureList.size)
+//            } else {
+//                dismiss()
+//            }
+//        })
+//    }
 
     override fun onItemPurchaseBtnClick(position: Int) {
         val feature = featureList[position]
-//        if (bp.isOneTimePurchaseSupported) {
-//            bp.purchase(this, feature.name)
-//        } else {
-//            Toast.makeText(context, "Billing Purchased not Supported!", Toast.LENGTH_SHORT)
-//                .show()
-//        }
+
     }
 
 }

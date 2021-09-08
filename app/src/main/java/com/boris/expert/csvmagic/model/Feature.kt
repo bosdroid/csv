@@ -4,8 +4,10 @@ data class Feature(
     val id: Int,
     val name: String,
     val credit_price: Int,
-    val duration: Int,
-    val memory: Int
+    var duration: Int,
+    val memory: Int,
+    var createdAt:Long,
+    var expiredAt:Long
 ){
-    constructor():this(0,"",0,0,0)
+    constructor():this(0,"",0,0,0,0,0)
 }

@@ -86,4 +86,7 @@
     <string name="user_session_expired">User session has been expired or user not logged. Please try later!</string>
     <string name="user_credits_update_success_text">User Credits has been updated successfully!</string>
     <string name="total_credits_text">Total Credits:</string>
+    <string name="purchase_feature">Purchase Feature</string>
+    <string name="purchase_retry_error_message">Purchase not verified, please try one more time</string>
+    <string name="retry_text">Retry</string>
 </resources>

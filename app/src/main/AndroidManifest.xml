@@ -43,7 +43,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-
+        <activity android:name=".view.activities.PurchaseFeatureActivity"></activity>
         <activity android:name=".view.activities.OcrActivity" />
         <activity android:name=".view.activities.CreditActivity" />
 
@@ -119,19 +119,6 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-
-<!--        <service-->
-<!--            android:name=".services.CustomInputMethodService"-->
-<!--            android:label="@string/keyboard_name"-->
-<!--            android:permission="android.permission.BIND_INPUT_METHOD">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.view.InputMethod"/>-->
-<!--            </intent-filter>-->
-<!--            <meta-data-->
-<!--                android:name="android.view.im"-->
-<!--                android:resource="@xml/method"/>-->
-<!--        </service>-->
-
     </application>
 
 </manifest>

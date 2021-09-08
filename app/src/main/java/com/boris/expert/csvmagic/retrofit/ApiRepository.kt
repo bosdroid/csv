@@ -146,4 +146,19 @@ class ApiRepository {
 
         return res
     }
+
+    fun purchase(packageName:String,productId:String,token:String): MutableLiveData<JsonObject> {
+        val res = MutableLiveData<JsonObject>()
+        apiInterface.purchase(packageName,productId,token).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
 }

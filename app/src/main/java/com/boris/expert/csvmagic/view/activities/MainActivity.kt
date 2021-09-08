@@ -97,7 +97,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private var user: User? = null
     private var requestLogin: String? = null
     private var scannerFragment: ScannerFragment? = null
-    private var callback: LoginCallback?=null
+    private var callback: LoginCallback? = null
 
 
     companion object {
@@ -120,7 +120,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt1")
-            if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(1) ) {
+            if (duration.compareTo(0) == 0 || System.currentTimeMillis() - duration > TimeUnit.DAYS.toMillis(
+                    1
+                )
+            ) {
 
                 SimpleTooltip.Builder(this)
                     .anchorView(bottomNavigation)
@@ -130,7 +133,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     .transparentOverlay(false)
                     .onDismissListener { tooltip ->
                         tooltip.dismiss()
-                        appSettings.putLong("tt1",System.currentTimeMillis())
+                        appSettings.putLong("tt1", System.currentTimeMillis())
                         val fragment =
                             supportFragmentManager.findFragmentByTag("scanner") as ScannerFragment
                         fragment.showTableSelectTip()
@@ -352,11 +355,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 )
                 appSettings.putUser(Constants.user, user)
                 Constants.userData = user
-                if (callback != null){
+                if (callback != null) {
                     callback!!.onSuccess()
-                }
-                else{
-                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                } else {
+                    val scannerFragment =
+                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                     scannerFragment.restart()
                 }
                 if (isLastSignUser == "new") {
@@ -410,6 +413,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
             R.id.credit -> {
                 startActivity(Intent(context, CreditActivity::class.java))
+            }
+            R.id.purchase_feature -> {
+                startActivity(Intent(context, PurchaseFeatureActivity::class.java))
             }
             R.id.nav_setting -> {
                 startActivity(Intent(context, SettingsActivity::class.java))
@@ -499,7 +505,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 Constants.userData = null
                 Constants.sheetService = null
                 Constants.mService = null
-                val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                val scannerFragment =
+                    supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                 scannerFragment.restart()
                 checkUserLoginStatus()
             }
@@ -563,7 +570,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             DriveService.saveDriveInstance(mService!!)
                             SheetService.saveGoogleSheetInstance(sheetService!!)
                             firebaseAuthWithGoogle(googleSignInAccount.idToken!!)
-                            saveUserUpdatedDetail(googleSignInAccount,"new")
+                            saveUserUpdatedDetail(googleSignInAccount, "new")
                         }
                     }).addOnFailureListener(object : OnFailureListener {
                         override fun onFailure(p0: java.lang.Exception) {
@@ -603,7 +610,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //                    if (response.has("errorMessage")) {
 //
 //                    } else {
-                        saveUserUpdatedDetail(acct, "new")
+            saveUserUpdatedDetail(acct, "new")
 //                    }
 //                } else {
 //                    showAlert(context, getString(R.string.something_wrong_error))
@@ -719,9 +726,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = true
             mNavigation.menu.findItem(R.id.credit).isVisible = true
+            mNavigation.menu.findItem(R.id.purchase_feature).isVisible = true
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
-
+            getUserCredits(context)
 
         } else {
             mNavigation.menu.findItem(R.id.login).isVisible = true
@@ -729,6 +737,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = false
             mNavigation.menu.findItem(R.id.credit).isVisible = false
+            mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
         }
@@ -757,12 +766,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     override fun onPause() {
-        hideKeyboard(context,this)
+        hideKeyboard(context, this)
         super.onPause()
     }
 
     override fun onDestroy() {
-        hideKeyboard(context,this)
+        hideKeyboard(context, this)
         super.onDestroy()
 
     }

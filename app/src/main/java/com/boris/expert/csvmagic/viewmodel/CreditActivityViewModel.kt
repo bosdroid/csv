@@ -4,19 +4,20 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.boris.expert.csvmagic.model.Feature
-import com.boris.expert.csvmagic.repository.DataRepository
+import com.boris.expert.csvmagic.retrofit.ApiRepository
+import com.google.gson.JsonObject
 
 class CreditActivityViewModel : ViewModel() {
 
-    private var featuresList = MutableLiveData<List<Feature>>()
+    private var purchaseResponse = MutableLiveData<JsonObject>()
 
-    fun callFeaturesList(context: Context){
-        featuresList = DataRepository.getInstance(context).getFeatureList()
+    fun callPurchase(context: Context, packageName: String, productId: String, token: String) {
+        purchaseResponse =
+            ApiRepository.getInstance(context).purchase(packageName, productId, token)
     }
 
-    fun getFeaturesList(): LiveData<List<Feature>> {
-        return featuresList
+    fun getPurchaseResponse(): LiveData<JsonObject> {
+        return purchaseResponse
     }
 
 }

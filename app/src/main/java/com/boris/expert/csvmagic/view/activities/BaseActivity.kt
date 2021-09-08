@@ -18,15 +18,19 @@ import androidx.appcompat.widget.AppCompatRatingBar
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.utils.AppSettings
+import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.utils.Constants.Companion.EMAIL_ADDRESS_PATTERN
+import com.boris.expert.csvmagic.utils.DialogPrefs
 import com.downloader.Error
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
 import com.downloader.request.DownloadRequest
-import com.boris.expert.csvmagic.R
-import com.boris.expert.csvmagic.utils.Constants.Companion.EMAIL_ADDRESS_PATTERN
-import com.boris.expert.csvmagic.utils.DialogPrefs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -114,7 +118,7 @@ open class BaseActivity : AppCompatActivity() {
 
         }
 
-        fun hideKeyboard(context: Context,activity: MainActivity){
+        fun hideKeyboard(context: Context, activity: MainActivity){
             val view: View? = activity.currentFocus
             if (view != null) {
                 val imm = context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
@@ -146,6 +150,14 @@ open class BaseActivity : AppCompatActivity() {
             if (alert != null) {
                 alert!!.dismiss()
             }
+        }
+
+        fun addDaysCalenderDate(days:Int):Calendar{
+            val sdf = SimpleDateFormat("yyyy-MM-dd kk:mm a",Locale.ENGLISH)
+            val c = Calendar.getInstance()
+            c.time = sdf.parse(getDateTimeFromTimeStamp(System.currentTimeMillis()))!!
+            c.add(Calendar.DATE,days)
+            return c
         }
 
         fun getDateFromTimeStamp(timeStamp: Long): String {
@@ -205,6 +217,90 @@ open class BaseActivity : AppCompatActivity() {
                     Uri.parse("market://details?id=" + context.packageName)
                 )
             context.startActivity(rateIntent)
+        }
+
+        fun getUserCredits(context: Context) {
+            val appSettings = AppSettings(context)
+            var userCurrentCreditsValue: Int = 0
+            val auth = FirebaseAuth.getInstance()
+            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+            if (auth.currentUser != null) {
+
+                val userId = auth.currentUser!!.uid
+                Constants.firebaseUserId = userId
+                firebaseDatabase.child(Constants.firebaseUserCredits)
+                    .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+
+                            if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                val previousCredits =
+                                    snapshot.child("credits").getValue(String::class.java)
+                                userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
+                                    previousCredits.toInt()
+                                } else {
+                                    0
+                                }
+                            }
+                            appSettings.putString(
+                                Constants.userCreditsValue,
+                                "$userCurrentCreditsValue"
+                            )
+                            Log.d("TEST199", "$userCurrentCreditsValue")
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                        }
+
+                    })
+                firebaseDatabase.child(Constants.firebaseUserCredits)
+                    .child(userId).addChildEventListener(object : ChildEventListener {
+                        override fun onChildAdded(
+                            snapshot: DataSnapshot,
+                            previousChildName: String?
+                        ) {
+
+                        }
+
+                        override fun onChildChanged(
+                            snapshot: DataSnapshot,
+                            previousChildName: String?
+                        ) {
+                        }
+
+                        override fun onChildRemoved(snapshot: DataSnapshot) {
+                            userCurrentCreditsValue =
+                                if (snapshot.hasChildren() && snapshot.hasChild(
+                                        "credits"
+                                    )
+                                ) {
+                                    val previousCredits =
+                                        snapshot.child("credits").getValue(String::class.java)
+                                    previousCredits!!.toInt()
+                                } else {
+                                    0
+                                }
+                            appSettings.putString(
+                                Constants.userCreditsValue,
+                                "$userCurrentCreditsValue"
+                            )
+                            Log.d("TEST199", "$userCurrentCreditsValue")
+                        }
+
+                        override fun onChildMoved(
+                            snapshot: DataSnapshot,
+                            previousChildName: String?
+                        ) {
+
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                        }
+
+                    })
+
+            }
         }
 
         fun contactSupport(context: AppCompatActivity) {

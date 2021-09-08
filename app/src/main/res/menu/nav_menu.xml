@@ -35,6 +35,13 @@
                     />
 
                 <item
+                    android:title="@string/purchase_feature"
+                    android:id="@+id/purchase_feature"
+                    android:icon="@drawable/ic_cart"
+                    android:visible="false"
+                    />
+
+                <item
                     android:title="@string/tables"
                     android:id="@+id/tables"
                     android:icon="@drawable/ic_gridview"

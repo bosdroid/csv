@@ -371,12 +371,15 @@
 	<string name="duration_time_heading">Время Продолжительность</string>
 	<string name="credit_price_heading">Стоимость кредита</string>
     <string name="purchase_package_btn">Покупка</string>
-    <string name="user_session_expired">User session has been expired or user not logged. Please try later!</string>
-	<string name="user_credits_update_success_text">User Credits has been updated successfully!</string>
-    <string name="total_credits_text">Total Credits:</string>
+    <string name="user_session_expired">Сессия пользователя истекла или пользователь не вошел в систему. Пожалуйста, попробуйте позднее!</string>
+	<string name="user_credits_update_success_text">Кредиты пользователей успешно обновлены!</string>
+    <string name="total_credits_text">Всего кредитов:</string>
+    <string name="purchase_feature">Покупка Feature</string>
+    <string name="purchase_retry_error_message">Покупка не подтверждена, попробуйте еще раз</string>
+	<string name="retry_text">Повторить</string>
 
 
-    <string-array name="mode_list">
+	<string-array name="mode_list">
 		<item>Инвентарь</item>
 		<item>Продавец</item>
 		<item>Поиск</item>
