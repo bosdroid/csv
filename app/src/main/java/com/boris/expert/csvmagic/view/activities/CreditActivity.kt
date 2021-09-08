@@ -158,6 +158,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
 //                "Error " + billingResult.debugMessage,
 //                Toast.LENGTH_SHORT
 //            ).show()
+
         }
     }
 
