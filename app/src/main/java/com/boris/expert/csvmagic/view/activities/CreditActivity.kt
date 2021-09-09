@@ -29,6 +29,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 
@@ -130,6 +132,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
                         purchase.purchaseTime,
                         purchase.purchaseToken
                     )
+                handlePurchases(purchases)
                 verifyPurchase()
             } else {
                 showAlert(context, getString(R.string.user_session_expired))
@@ -315,17 +318,16 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
     private fun handlePurchases(purchases: List<Purchase>) {
         for (purchase in purchases) {
             //if item is purchased
-
             if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                 if (!verifyValidSignature(purchase.originalJson, purchase.signature)) {
                     // Invalid purchase
                     // show error to user
 
-                    Toast.makeText(
-                        applicationContext,
-                        "Error : Invalid Purchase",
-                        Toast.LENGTH_SHORT
-                    ).show()
+//                    Toast.makeText(
+//                        applicationContext,
+//                        "Error : Invalid Purchase",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
                     return
                 }
                 // else purchase is valid
@@ -352,18 +354,18 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
             }
             //if purchase is pending
             else if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.PENDING) {
-                Toast.makeText(
-                    applicationContext,
-                    "Purchase is Pending. Please complete Transaction", Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    applicationContext,
+//                    "Purchase is Pending. Please complete Transaction", Toast.LENGTH_SHORT
+//                ).show()
             }
             //if purchase is refunded or unknown
             else if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
 //                savePurchaseValueToPref(false)
 //                purchaseStatus!!.text = "Purchase Status : Not Purchased"
 //                purchaseButton!!.visibility = View.VISIBLE
-                Toast.makeText(applicationContext, "Purchase Status Unknown", Toast.LENGTH_SHORT)
-                    .show()
+//                Toast.makeText(applicationContext, "Purchase Status Unknown", Toast.LENGTH_SHORT)
+//                    .show()
             }
         }
     }
@@ -374,7 +376,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
             //if purchase is acknowledged
             // Grant entitlement to the user. and restart activity
 //            savePurchaseValueToPref(true)
-            Toast.makeText(applicationContext, "Item Purchased", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(applicationContext, "Item Purchased", Toast.LENGTH_SHORT).show()
 //            recreate()
         }
     }
