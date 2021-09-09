@@ -166,7 +166,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
         startLoading(context)
         viewModel.callPurchase(
             context,
-            purchaseDetail!!.packageName,
+            context.packageName,
             "single_credit",
             purchaseDetail!!.purchaseToken
         )
