@@ -390,6 +390,7 @@
     <string name="purchase_feature">Purchase Feature</string>
     <string name="purchase_retry_error_message">Purchase not verified, please try one more time</string>
     <string name="retry_text">Retry</string>
+    <string name="consumer_product_success_text">Purchase Product Consumed Successfully!</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

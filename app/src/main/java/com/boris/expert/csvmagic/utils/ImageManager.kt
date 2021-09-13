@@ -407,6 +407,11 @@ class ImageManager {
             return file
         }
 
+        fun getFileSize(path:String):Long{
+            val f = File(path)
+            return f.length()
+        }
+
     }
 
 

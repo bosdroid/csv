@@ -27,6 +27,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
 import com.boris.expert.csvmagic.model.CodeHistory
@@ -730,6 +731,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
             getUserCredits(context)
+            Constants.getFirebaseStorageSize(object :FirebaseStorageCallback{
+                override fun onSize(bytes: Long) {
+                    Log.d("TEST199SIZE","$bytes")
+                }
+            })
 
         } else {
             mNavigation.menu.findItem(R.id.login).isVisible = true

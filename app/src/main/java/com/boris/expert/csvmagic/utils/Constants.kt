@@ -11,19 +11,26 @@ import android.widget.FrameLayout
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
 import com.boris.expert.csvmagic.model.QRTypes
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.model.User
 import com.boris.expert.csvmagic.view.activities.BaseActivity
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.api.services.drive.Drive
 import com.google.api.services.sheets.v4.Sheets
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
+import retrofit2.http.Url
 import java.io.File
 import java.io.IOException
+import java.net.URL
 import java.util.regex.Pattern
 
 
@@ -38,6 +45,8 @@ class Constants {
         const val firebasePurchaseHistory = "PurchaseHistory"
         const val firebaseUserCredits = "UserCredits"
         const val firebaseUserFeatureDetails = "UserFeatureDetails"
+        const val firebaseStorageSizes = "StorageSizes"
+        const val firebaseBarcodeImages = "BarcodeImages"
         const val READ_STORAGE_REQUEST_CODE = 100
         const val CAMERA_REQUEST_CODE = 101
         const val READ_STORAGE_PERMISSION = "android.permission.READ_EXTERNAL_STORAGE"
@@ -45,10 +54,12 @@ class Constants {
         private const val BACKGROUND_IMAGE_PATH = "BackgroundImages"
         private const val LOGO_IMAGE_PATH = "LogoImages"
         const val BASE_URL = "https://pages.qrmagicapp.com/"
-        const val googleAppScriptUrl = "https://script.google.com/macros/s/AKfycbw4-8R85cCh9C5JXD6BTl0q89NNOTFkYfZO1Sp2LRrVA-mCv06LRYu2PqCPUaKab26-/exec"
-        const val licenseKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlbIjQZds4JytxrzDIzVQ9EY0FzpTsuLPX7OO/c6SF9kS6TN4REhsgcaXO6BbyBKoVUL5SznysLATryvjpliLtI///8I9ohz1A5AaxAoqzXZgpj0ECHuHk68R+nGs1dzBS9/pjNjh1Gj3rMf5eSNjBTIGqjPPZjtgMW7c+sr/BfHe+L1Mci3Ep0pv17roZPwczsHzPaK8yP308fd5n6KU3VJDmrj4xwcyqdPVQvcbC4bM7/JK523xNNsEtoF10grxj1Izeo6AYplSV5KjvrN/ByqTqGLP4x4KyfDoE0BA/6hyoARTPKoM9clDN1EhwUb/yItH6tAlOO2AcAp7GVWCHQIDAQAB"
+        const val googleAppScriptUrl =
+            "https://script.google.com/macros/s/AKfycbw4-8R85cCh9C5JXD6BTl0q89NNOTFkYfZO1Sp2LRrVA-mCv06LRYu2PqCPUaKab26-/exec"
+        const val licenseKey =
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlbIjQZds4JytxrzDIzVQ9EY0FzpTsuLPX7OO/c6SF9kS6TN4REhsgcaXO6BbyBKoVUL5SznysLATryvjpliLtI///8I9ohz1A5AaxAoqzXZgpj0ECHuHk68R+nGs1dzBS9/pjNjh1Gj3rMf5eSNjBTIGqjPPZjtgMW7c+sr/BfHe+L1Mci3Ep0pv17roZPwczsHzPaK8yP308fd5n6KU3VJDmrj4xwcyqdPVQvcbC4bM7/JK523xNNsEtoF10grxj1Izeo6AYplSV5KjvrN/ByqTqGLP4x4KyfDoE0BA/6hyoARTPKoM9clDN1EhwUb/yItH6tAlOO2AcAp7GVWCHQIDAQAB"
         var generatedImage: Bitmap? = null
-        var tipsValue :Boolean = true
+        var tipsValue: Boolean = true
         var finalQrImageUri: Uri? = null
         var isLogin: String = "is_login"
         var user: String = "user"
@@ -181,7 +192,8 @@ class Constants {
                     )
                     val heading = websiteView!!.findViewById<MaterialTextView>(R.id.dialog_heading)
 //                    val generateBtn = websiteView.findViewById<MaterialTextView>(R.id.next_step_btn)
-                    heading.text = context.getString(R.string.generator_type_description_static_link)
+                    heading.text =
+                        context.getString(R.string.generator_type_description_static_link)
                     val websiteInputBox =
                         websiteView.findViewById<TextInputEditText>(R.id.website_input_field)
                     val protocolGroup =
@@ -229,14 +241,14 @@ class Constants {
                                 context,
                                 context.resources.getString(R.string.without_protocol_error)
                             )
-                        }
-                        else if (!Pattern.compile("^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?\$").matcher(value).find()) {
+                        } else if (!Pattern.compile("^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?\$")
+                                .matcher(value).find()
+                        ) {
                             BaseActivity.showAlert(
                                 context,
                                 context.resources.getString(R.string.valid_website_error)
                             )
-                        }
-                        else {
+                        } else {
                             encodedData = "$selectedProtocol$value"
                             completeListener!!.onTypeSelected(encodedData, 1, "link")
 
@@ -250,7 +262,8 @@ class Constants {
                     val websiteView =
                         LayoutInflater.from(context).inflate(R.layout.website_dialog_layout, null)
                     val heading = websiteView!!.findViewById<MaterialTextView>(R.id.dialog_heading)
-                    heading.text = context.getString(R.string.generator_type_description_dynamic_link)
+                    heading.text =
+                        context.getString(R.string.generator_type_description_dynamic_link)
                     val websiteInputBox =
                         websiteView.findViewById<TextInputEditText>(R.id.website_input_field)
 //                    val generateBtn = websiteView.findViewById<MaterialTextView>(R.id.next_step_btn)
@@ -297,14 +310,14 @@ class Constants {
                                 context,
                                 context.resources.getString(R.string.without_protocol_error)
                             )
-                        }
-                        else if (!Pattern.compile("^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?\$").matcher(value).find()) {
+                        } else if (!Pattern.compile("^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?\$")
+                                .matcher(value).find()
+                        ) {
                             BaseActivity.showAlert(
                                 context,
                                 context.resources.getString(R.string.valid_website_error)
                             )
-                        }
-                        else {
+                        } else {
                             BaseActivity.hideSoftKeyboard(context, websiteView)
                             encodedData = "$selectedProtocol$value"
                             completeListener!!.onTypeSelected(encodedData, 2, "link")
@@ -600,8 +613,9 @@ class Constants {
 
         }
 
-        fun openKeyboar(context: Context){
-            val imm: InputMethodManager? = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        fun openKeyboar(context: Context) {
+            val imm: InputMethodManager? =
+                context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
 
             imm!!.toggleSoftInput(
                 InputMethodManager.SHOW_FORCED,
@@ -609,8 +623,9 @@ class Constants {
             )
         }
 
-        fun hideKeyboar(context: Context){
-            val imm: InputMethodManager? = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        fun hideKeyboar(context: Context) {
+            val imm: InputMethodManager? =
+                context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
 
             imm!!.toggleSoftInput(
                 InputMethodManager.HIDE_IMPLICIT_ONLY,
@@ -626,6 +641,29 @@ class Constants {
                 end = if (end > message.length) message.length else end
                 Log.d(TAG, message.substring(start, end))
             }
+        }
+
+        fun getFirebaseStorageSize(listener: FirebaseStorageCallback) {
+            val storage = FirebaseStorage.getInstance().reference
+            val listRef = storage.child("${firebaseBarcodeImages}/$firebaseUserId")
+            listRef.listAll().addOnSuccessListener { listResult ->
+                var totalBytes:Long = 0
+
+                for (item in listResult.items) {
+                    // All the items under listRef.
+
+//                    item.metadata.addOnSuccessListener { storageMetadata ->
+//                            totalBytes +=storageMetadata.sizeBytes
+//                        }.addOnFailureListener(
+//                        { })
+
+                }
+
+                listener.onSize(totalBytes)
+            }
+                .addOnFailureListener {
+                    // Uh-oh, an error occurred!
+                }
         }
     }
 }

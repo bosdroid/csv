@@ -63,6 +63,7 @@ import com.google.api.services.drive.model.FileList
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.mlkit.vision.barcode.Barcode
@@ -85,6 +86,7 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 
 class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
@@ -115,6 +117,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
     private var cameraProviderFuture: ListenableFuture<*>? = null
     private var cameraExecutor: ExecutorService? = null
     private var mContext: AppCompatActivity? = null
+    private var databaseReference:DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storageReference: StorageReference = FirebaseStorage.getInstance().reference
 
     //private var previewView: PreviewView? = null
@@ -1424,6 +1427,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
     var uploadedUrlList = mutableListOf<String>()
     var array: List<String> = mutableListOf()
     val handler = Handler(Looper.myLooper()!!)
+    var totalImageSize:Long = 0
     private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
         val imageList = filePathView!!.text.toString()
         if (imageList.contains(",")) {
@@ -1440,7 +1444,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
 
                         val file = Uri.fromFile(File(imagePath))
                         val fileRef =
-                            storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
+                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${file.lastPathSegment}")
                         val uploadTask = fileRef.putFile(file)
                         uploadTask.continueWithTask { task ->
                             if (!task.isSuccessful) {
@@ -1453,6 +1457,8 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                             if (task.isSuccessful) {
                                 val downloadUri = task.result
                                 uploadedUrlList.add(downloadUri.toString())
+//                                totalImageSize = getTotalImagesSize(uploadedUrlList)
+//                                Log.d("TEST199","$totalImageSize")
                                 if (i == array.size - 1) {
                                     url = uploadedUrlList.joinToString(" ")
                                     uploadedUrlList.clear()
@@ -1487,12 +1493,52 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                     if (task.isSuccessful) {
                         val downloadUri = task.result
                         url = downloadUri.toString()
+//                        uploadedUrlList.add(url)
+//                        totalImageSize = getTotalImagesSize(uploadedUrlList)
+                        Log.d("TEST199","$totalImageSize")
                         listener.onSuccess()
                     }
                 }
             }
         }
 
+    }
+
+    private fun getTotalImagesSize(uploadedUrlList: MutableList<String>): Long {
+       var total:Long = 0
+        for (i in 0 until uploadedUrlList.size){
+            total +=ImageManager.getFileSize(uploadedUrlList[i])
+        }
+        return total
+    }
+
+
+    private fun updateStorageSize(size:Int,type:String){
+        databaseReference.child(Constants.firebaseStorageSizes)
+            .child(Constants.firebaseUserId).addListenerForSingleValueEvent(object: ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                   var currentStorageSize:Long? = snapshot.child("size").getValue(Long::class.java)
+                    if (currentStorageSize != null){
+                        if (type == "add"){
+                            currentStorageSize +=size
+                        }
+                        else{
+                            currentStorageSize -=size
+                        }
+
+                        val params = HashMap<String,Long>()
+                        params["size"] = currentStorageSize
+                        databaseReference.child(Constants.firebaseStorageSizes)
+                            .child(Constants.firebaseUserId).setValue(params)
+                    }
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
     }
 
 //    @Throws(java.lang.Exception::class)

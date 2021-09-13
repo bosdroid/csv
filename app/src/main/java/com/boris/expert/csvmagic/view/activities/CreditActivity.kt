@@ -9,9 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.SkuType.INAPP
@@ -23,14 +21,11 @@ import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.Security
 import com.boris.expert.csvmagic.viewmodel.CreditActivityViewModel
-import com.boris.expert.csvmagic.viewmodel.PurchaseFeatureActivityViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.IOException
 
 
@@ -132,7 +127,10 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
                         purchase.purchaseTime,
                         purchase.purchaseToken
                     )
-                handlePurchases(purchases)
+                val token = purchase.purchaseToken
+                val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(token).build()
+                billingClient!!.consumeAsync(consumeParams, consumeListener)
+
                 verifyPurchase()
             } else {
                 showAlert(context, getString(R.string.user_session_expired))
@@ -165,6 +163,11 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
         }
     }
 
+    var consumeListener =
+        ConsumeResponseListener { billingResult, purchaseToken ->
+          Toast.makeText(context,getString(R.string.consumer_product_success_text),Toast.LENGTH_SHORT).show()
+        }
+
     private fun verifyPurchase() {
         startLoading(context)
         viewModel.callPurchase(
@@ -176,8 +179,8 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
         viewModel.getPurchaseResponse().observe(this, { response ->
             dismiss()
             if (response != null) {
-                when (response.get("validPurchase").asString) {
-                    "true" -> {
+                when (response.get("purchaseState").asInt) {
+                    0 -> {
                         firebaseDatabase.child(Constants.firebasePurchaseHistory).push()
                             .setValue(purchaseDetail)
                         val hashMap = HashMap<String, String>()
@@ -199,24 +202,21 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
 
                             }
                     }
-                    "false" -> {
-                        showRetryDialogBox()
-                    }
-                    "error" -> {
-                        showRetryDialogBox()
+                    else->{
+                        showRetryDialogBox(response.get("error").asString)
                     }
                 }
             } else {
-                showRetryDialogBox()
+                showRetryDialogBox(getString(R.string.something_wrong_error))
             }
         })
 
     }
 
 
-    private fun showRetryDialogBox() {
+    private fun showRetryDialogBox(message:String) {
         MaterialAlertDialogBuilder(context).setCancelable(false)
-            .setMessage(getString(R.string.purchase_retry_error_message))
+            .setMessage(message)
             .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
                 dialog.dismiss()
             }
