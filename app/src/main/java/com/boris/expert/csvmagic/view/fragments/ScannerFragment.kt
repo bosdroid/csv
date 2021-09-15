@@ -577,6 +577,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                         listener!!.login(object : LoginCallback {
                                             override fun onSuccess() {
                                                 Log.d("TEST199", "success")
+
                                                 onResume()
                                             }
 
