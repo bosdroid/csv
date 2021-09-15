@@ -303,6 +303,46 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
+        fun getCurrentSubscriptionDetail(context: Context){
+            val appSettings = AppSettings(context)
+            val auth = FirebaseAuth.getInstance()
+            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+
+            if (auth.currentUser != null) {
+                val userId = auth.currentUser!!.uid
+                Constants.firebaseUserId = userId
+                var duration:Int = 0
+                var memory :Int = 0
+                var expiredAt:Long = 0
+                firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
+                    .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+
+                            if (snapshot.hasChildren() && snapshot.hasChild("duration")) {
+                                duration = snapshot.child("duration").getValue(Int::class.java)!!
+                            }
+
+                            if (snapshot.hasChildren() && snapshot.hasChild("memory")) {
+                                memory = snapshot.child("memory").getValue(Int::class.java)!!
+                            }
+
+                            if (snapshot.hasChildren() && snapshot.hasChild("expiredAt")) {
+                                expiredAt = snapshot.child("expiredAt").getValue(Long::class.java)!!
+                            }
+                            appSettings.putInt(Constants.duration,duration)
+                            appSettings.putInt(Constants.memory,memory)
+                            appSettings.putLong(Constants.expiredAt,expiredAt)
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                        }
+
+                    })
+            }
+
+        }
+
         fun contactSupport(context: AppCompatActivity) {
             val intent = Intent(Intent.ACTION_SENDTO)
             // only email apps should handle this

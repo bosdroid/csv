@@ -64,6 +64,9 @@ class Constants {
         var isLogin: String = "is_login"
         var user: String = "user"
         var email: String = "email"
+        var duration: String = "duration"
+        var memory: String = "memory"
+        var expiredAt: String = "expiredAt"
         var userCreditsValue = "user_credits_value"
         var firebaseUserId = ""
         var userData: User? = null
@@ -82,12 +85,22 @@ class Constants {
         )
         val RECEIVER_INTENT = "RECEIVER_INTENT"
         val RECEIVER_MESSAGE = "RECEIVER_MESSAGE"
+        const val megaByte: Long = 1024L * 1024L
+
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
         }
 
         private fun getLogoImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, LOGO_IMAGE_PATH)
+        }
+
+        fun convertBytesToMegaBytes(bytes: Long): Int {
+            return (bytes / megaByte).toInt()
+        }
+
+        fun convertMegaBytesToBytes(megaBytes: Int): Int {
+            return (megaBytes * 1048576).toInt()
         }
 
         private fun verifyValidSignature(signedData: String, signature: String): Boolean {
@@ -647,7 +660,7 @@ class Constants {
             val storage = FirebaseStorage.getInstance().reference
             val listRef = storage.child("${firebaseBarcodeImages}/$firebaseUserId")
             listRef.listAll().addOnSuccessListener { listResult ->
-                var totalBytes:Long = 0
+                var totalBytes: Long = 0
 
                 for (item in listResult.items) {
                     // All the items under listRef.

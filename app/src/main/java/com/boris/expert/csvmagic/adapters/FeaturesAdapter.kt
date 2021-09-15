@@ -29,6 +29,8 @@ class FeaturesAdapter(val context: Context, val featuresList: ArrayList<Feature>
             var featureNameView:MaterialTextView
             var memoryUsageView:MaterialTextView
             var timeDuration:MaterialTextView
+        var memoryUsageHeadingView:MaterialTextView
+        var timeDurationHeading:MaterialTextView
             var creditPriceView:MaterialTextView
             var purchaseBtn:AppCompatButton
 
@@ -36,6 +38,8 @@ class FeaturesAdapter(val context: Context, val featuresList: ArrayList<Feature>
                 featureNameView = itemView.findViewById(R.id.feature_name_item_view)
                 memoryUsageView = itemView.findViewById(R.id.memory_usage_size_view)
                 timeDuration = itemView.findViewById(R.id.time_duration_view)
+                memoryUsageHeadingView = itemView.findViewById(R.id.memory_usage_size_heading_view)
+                timeDurationHeading = itemView.findViewById(R.id.time_duration_heading_view)
                 creditPriceView = itemView.findViewById(R.id.credit_price_view)
                 purchaseBtn = itemView.findViewById(R.id.purchase_package_btn)
 
@@ -61,8 +65,19 @@ class FeaturesAdapter(val context: Context, val featuresList: ArrayList<Feature>
 
         val feature = featuresList[position]
         holder.featureNameView.text = feature.name
-        holder.memoryUsageView.text = "${feature.memory} MB"
-        holder.timeDuration.text = "${feature.duration} Days"
+        if (feature.name.contains("storage")){
+            holder.memoryUsageView.text = "${feature.memory} MB"
+            holder.timeDuration.visibility = View.GONE
+            holder.timeDurationHeading.visibility = View.GONE
+        }
+
+        if (feature.name.contains("time")){
+            holder.timeDuration.text = "${feature.duration} Days"
+            holder.memoryUsageView.visibility = View.GONE
+            holder.memoryUsageHeadingView.visibility = View.GONE
+        }
+
+
         holder.creditPriceView.text = "${feature.credit_price}$"
     }
 

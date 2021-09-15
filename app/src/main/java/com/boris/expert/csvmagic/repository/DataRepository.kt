@@ -124,7 +124,7 @@ class DataRepository {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
-
+                        list.clear()
                         for (postSnapshot in dataSnapshot.children) {
 
                             val item = postSnapshot.getValue(Feature::class.java) as Feature

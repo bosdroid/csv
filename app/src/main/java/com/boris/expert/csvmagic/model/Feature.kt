@@ -5,7 +5,7 @@ data class Feature(
     val name: String,
     val credit_price: Int,
     var duration: Int,
-    val memory: Int,
+    var memory: Int,
     var createdAt:Long,
     var expiredAt:Long
 ){

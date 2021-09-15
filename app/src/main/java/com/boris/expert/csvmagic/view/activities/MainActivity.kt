@@ -731,6 +731,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
             getUserCredits(context)
+            getCurrentSubscriptionDetail(context)
             Constants.getFirebaseStorageSize(object :FirebaseStorageCallback{
                 override fun onSize(bytes: Long) {
                     Log.d("TEST199SIZE","$bytes")

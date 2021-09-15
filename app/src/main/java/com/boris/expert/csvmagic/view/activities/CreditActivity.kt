@@ -26,6 +26,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.IOException
 
 
@@ -127,9 +130,11 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
                         purchase.purchaseTime,
                         purchase.purchaseToken
                     )
-                val token = purchase.purchaseToken
-                val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(token).build()
-                billingClient!!.consumeAsync(consumeParams, consumeListener)
+               CoroutineScope(Dispatchers.IO).launch {
+                   val token = purchase.purchaseToken
+                   val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(token).build()
+                   billingClient!!.consumeAsync(consumeParams, consumeListener)
+               }
 
                 verifyPurchase()
             } else {
@@ -165,7 +170,10 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
 
     var consumeListener =
         ConsumeResponseListener { billingResult, purchaseToken ->
-          Toast.makeText(context,getString(R.string.consumer_product_success_text),Toast.LENGTH_SHORT).show()
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(context,getString(R.string.consumer_product_success_text),Toast.LENGTH_SHORT).show()
+            }
+
         }
 
     private fun verifyPurchase() {

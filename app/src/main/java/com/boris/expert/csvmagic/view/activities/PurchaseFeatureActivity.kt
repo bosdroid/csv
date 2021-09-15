@@ -127,128 +127,162 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
         userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
         startLoading(context)
         if (userCurrentCredits.isNotEmpty()) {
-            if (userCurrentCredits.toInt() > 0 && userCurrentCredits.toInt() >= 1 && userCurrentCredits.toInt() >= feature.credit_price) {
+            if (userCurrentCredits.toInt() >= feature.credit_price) {
 
                 if (auth.currentUser != null) {
                     val userId = auth.currentUser!!.uid
                     val reference = firebaseDatabase.child(Constants.firebaseUserFeatureDetails).child(userId)
 
-                    listener = reference.addValueEventListener(object : ValueEventListener {
+                   reference.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                reference.removeEventListener(listener!!)
-                                var previouskey = ""
-                                var foundFeature: Feature? = null
+                                //reference.removeEventListener(listener!!)
+                                //var previouskey = ""
+                                var foundMemory = 0
+                                var foundStorage = 0
+                                var isFoundValue = false
+                                val params = HashMap<String,Any>()
                                 if (dataSnapshot.exists()) {
-                                    for (postSnapshot in dataSnapshot.children) {
-                                        previouskey = postSnapshot.key as String
-                                        val item =
-                                            postSnapshot.getValue(Feature::class.java) as Feature
-                                        if (item.name == feature.name) {
-                                            foundFeature = item
-                                            break
+                                    if (feature.name.contains("storage")){
+                                        if (dataSnapshot.hasChild("memory")){
+                                            isFoundValue = true
+                                            foundMemory = dataSnapshot.child("memory").getValue(Int::class.java)!!
+                                        }
+                                        else{
+                                            isFoundValue = false
+                                        }
+
+                                    }
+                                    else{
+                                        if (dataSnapshot.hasChild("duration")){
+                                            isFoundValue = true
+                                            foundStorage = dataSnapshot.child("duration").getValue(Int::class.java)!!
+                                        }
+                                        else{
+                                            isFoundValue = false
                                         }
                                     }
+//                                    for (postSnapshot in dataSnapshot.children) {
+//                                        previouskey = postSnapshot.key as String
+//                                        val item =
+//                                            postSnapshot.getValue(Feature::class.java) as Feature
+//                                        if (item.name == feature.name) {
+//                                            foundFeature = item
+//                                            break
+//                                        }
+//                                    }
 
-                                    if (foundFeature != null) {
-                                        reference.removeEventListener(listener!!)
-                                        Log.d("TEST199DURATION","step")
-                                        feature.createdAt = System.currentTimeMillis()
-                                        feature.duration += 30
-                                        feature.expiredAt = addDaysCalenderDate(feature.duration).timeInMillis
+                                    if (isFoundValue) {
+//                                        reference.removeEventListener(listener!!)
+                                        if (feature.name.contains("storage")){
+                                            val totalMemory = foundMemory + feature.memory
+                                            feature.memory = totalMemory
+                                            params["memory"] = totalMemory
+                                        }
+                                        else{
+                                            feature.createdAt = System.currentTimeMillis()
+                                            feature.duration += foundStorage
+                                            feature.expiredAt = addDaysCalenderDate(feature.duration).timeInMillis
+                                            params["createdAt"] = feature.createdAt
+                                            params["duration"] = feature.duration
+                                            params["expiredAt"] = feature.expiredAt
+                                        }
+
 
                                         firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                                             .child(userId)
-                                            .child(previouskey)
-                                            .setValue(feature)
+                                            .updateChildren(params)
+                                        dismiss()
+                                        val hashMap = HashMap<String, String>()
+                                        val remaining = userCurrentCredits.toInt() - feature.credit_price
+                                        hashMap["credits"] = remaining.toString()
+                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                                            .child(userId)
+                                            .setValue(hashMap)
                                             .addOnSuccessListener {
-                                                dismiss()
-                                                val hashMap = HashMap<String, String>()
-                                                val remaining =
-                                                    userCurrentCredits.toInt() - feature.credit_price
-                                                hashMap["credits"] = remaining.toString()
-                                                firebaseDatabase.child(Constants.firebaseUserCredits)
-                                                    .child(userId)
-                                                    .setValue(hashMap)
-                                                    .addOnSuccessListener {
-
-                                                    }
-                                                    .addOnFailureListener {
-
-                                                    }
 
                                             }
                                             .addOnFailureListener {
-                                                dismiss()
+
                                             }
 
                                     } else {
-                                        reference.removeEventListener(listener!!)
-                                        feature.createdAt = System.currentTimeMillis()
-                                        feature.expiredAt = addDaysCalenderDate(30).timeInMillis
+//                                        reference.removeEventListener(listener!!)
+                                        if (feature.name.contains("storage")){
+                                            val totalMemory = feature.memory
+                                            feature.memory = totalMemory
+                                            params["memory"] = totalMemory
+                                        }
+                                        else{
+                                            feature.createdAt = System.currentTimeMillis()
+                                            feature.expiredAt = addDaysCalenderDate(feature.duration).timeInMillis
+                                            params["createdAt"] = feature.createdAt
+                                            params["duration"] = feature.duration
+                                            params["expiredAt"] = feature.expiredAt
+
+                                        }
+
 
                                         firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                                             .child(userId)
-                                            .push()
-                                            .setValue(feature)
+                                            .updateChildren(params)
+                                        dismiss()
+                                        val hashMap = HashMap<String, String>()
+                                        val remaining =
+                                            userCurrentCredits.toInt() - feature.credit_price
+                                        hashMap["credits"] = remaining.toString()
+                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                                            .child(userId)
+                                            .setValue(hashMap)
                                             .addOnSuccessListener {
-                                                dismiss()
-                                                val hashMap = HashMap<String, String>()
-                                                val remaining =
-                                                    userCurrentCredits.toInt() - feature.credit_price
-                                                hashMap["credits"] = remaining.toString()
-                                                firebaseDatabase.child(Constants.firebaseUserCredits)
-                                                    .child(userId)
-                                                    .setValue(hashMap)
-                                                    .addOnSuccessListener {
-
-                                                    }
-                                                    .addOnFailureListener {
-
-                                                    }
 
                                             }
                                             .addOnFailureListener {
-                                                dismiss()
+
                                             }
                                     }
 
                                 }
                                 else{
-                                    reference.removeEventListener(listener!!)
-                                    feature.createdAt = System.currentTimeMillis()
-                                    feature.expiredAt = addDaysCalenderDate(30).timeInMillis
+//                                    reference.removeEventListener(listener!!)
+                                    if (feature.name.contains("storage")){
+                                        val totalMemory = feature.memory
+                                        feature.memory = totalMemory
+                                        params["memory"] = totalMemory
+                                    }
+                                    else {
+                                        feature.createdAt = System.currentTimeMillis()
+                                        feature.expiredAt = addDaysCalenderDate(feature.duration).timeInMillis
+                                        params["createdAt"] = feature.createdAt
+                                        params["duration"] = feature.duration
+                                        params["expiredAt"] = feature.expiredAt
+                                    }
 
                                     firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                                         .child(userId)
-                                        .push()
-                                        .setValue(feature)
+                                        .updateChildren(params)
+                                    dismiss()
+                                    val hashMap = HashMap<String, String>()
+                                    val remaining =
+                                        userCurrentCredits.toInt() - feature.credit_price
+                                    hashMap["credits"] = remaining.toString()
+                                    firebaseDatabase.child(Constants.firebaseUserCredits)
+                                        .child(userId)
+                                        .setValue(hashMap)
                                         .addOnSuccessListener {
-                                            dismiss()
-                                            val hashMap = HashMap<String, String>()
-                                            val remaining =
-                                                userCurrentCredits.toInt() - feature.credit_price
-                                            hashMap["credits"] = remaining.toString()
-                                            firebaseDatabase.child(Constants.firebaseUserCredits)
-                                                .child(userId)
-                                                .setValue(hashMap)
-                                                .addOnSuccessListener {
-
-                                                }
-                                                .addOnFailureListener {
-
-                                                }
 
                                         }
                                         .addOnFailureListener {
-                                            dismiss()
+
                                         }
                                 }
+
+                                getUserCredits(context)
                             }
 
                             override fun onCancelled(databaseError: DatabaseError) {
                             }
                         })
-                    reference.addValueEventListener(listener!!)
+//                    reference.addValueEventListener(listener!!)
                 }
             } else {
                 dismiss()

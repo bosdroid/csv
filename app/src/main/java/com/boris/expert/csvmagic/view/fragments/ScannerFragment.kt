@@ -19,7 +19,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import android.view.*
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -89,9 +88,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 
 
-class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
+class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
+    View.OnFocusChangeListener {
 
-    private var customAlertDialog: CustomAlertDialog?=null
+    private var customAlertDialog: CustomAlertDialog? = null
     private var updateInputBox: CustomTextInputEditText? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
@@ -117,7 +117,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
     private var cameraProviderFuture: ListenableFuture<*>? = null
     private var cameraExecutor: ExecutorService? = null
     private var mContext: AppCompatActivity? = null
-    private var databaseReference:DatabaseReference = FirebaseDatabase.getInstance().reference
+    private var databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storageReference: StorageReference = FirebaseStorage.getInstance().reference
 
     //private var previewView: PreviewView? = null
@@ -724,7 +724,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                         }
                     }
 
-                    for (i in 0 until textInputIdsList.size){
+                    for (i in 0 until textInputIdsList.size) {
                         textInputIdsList[i].second.onFocusChangeListener = this
                     }
 
@@ -755,9 +755,37 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                         }
                     }
                     submitBtn.setOnClickListener {
-                        alert.dismiss()
-                        saveToDriveAppFolder()
+                        val availableStorageMemory = Constants.convertMegaBytesToBytes(appSettings.getInt(Constants.memory))
+                        if (addImageCheckBox.isChecked && totalImageSize <= availableStorageMemory)
+                        {
+                            alert.dismiss()
+                            saveDataIntoTable()
+                        }
+                        else
+                        {
+                            val b1 = MaterialAlertDialogBuilder(requireActivity())
+                                .setCancelable(true)
+                                .setTitle(requireActivity().resources.getString(R.string.alert_text))
+                                .setMessage(requireActivity().resources.getString(R.string.storage_available_error_text))
+                                .setNegativeButton(requireActivity().resources.getString(R.string.close_text)) { dialog, which ->
+                                    dialog.dismiss()
+                                }
+                                .setPositiveButton(requireActivity().resources.getString(R.string.save_without_image_text)) { dialog, which ->
+                                    dialog.dismiss()
+                                    alert.dismiss()
+                                    addImageCheckBox.isChecked = false
+                                    saveDataIntoTable()
+                                }
+                            val iAlert = b1.create()
+                            iAlert.show()
+                            iAlert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                                ContextCompat.getColor(
+                                    requireActivity(),
+                                    R.color.purple_700
+                                )
+                            )
 
+                        }
                     }
                 }
             } else {
@@ -1096,102 +1124,189 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
         counter = 0
     }
 
-    private fun saveToDriveAppFolder() {
-        if (BaseActivity.isNetworkAvailable(requireActivity())) {
-            BaseActivity.dismiss()
-            BaseActivity.startLoading(requireActivity())
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val params = mutableListOf<Pair<String, String>>()
+    private fun saveDataIntoTable() {
 
-                    // THIS IF PART WILL RUN WHEN ADD IMAGE CHECK BOX IS CHECKED
-                    if (addImageCheckBox.isChecked && filePathView!!.text.toString()
-                            .isNotEmpty()
-                    ) {
-                        uploadImageOnFirebaseStorage(object : UploadImageCallback {
-                            override fun onSuccess() {
-                                // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
-                                // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
-                                if (url.isNotEmpty()) {
-                                    if (multiImagesList.isNotEmpty()) {
-                                        multiImagesList.clear()
-                                    }
-                                    if (params.size > 0) {
-                                        params.clear()
-                                    }
-                                    // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED EDIT TEXT
-                                    for (i in 0 until textInputIdsList.size) {
-                                        val pair = textInputIdsList[i]
-                                        // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
-                                        // WITH COLUMN IMAGE ELSE MAP THE OTHER TEXTINPUTIDS LIST OBJECTS
-                                        if (pair.first == "image") {
-                                            params.add(
-                                                Pair(
-                                                    pair.first,
-                                                    url
+            if (BaseActivity.isNetworkAvailable(requireActivity())) {
+                BaseActivity.dismiss()
+                BaseActivity.startLoading(requireActivity())
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val params = mutableListOf<Pair<String, String>>()
+
+                        // THIS IF PART WILL RUN WHEN ADD IMAGE CHECK BOX IS CHECKED
+                        if (addImageCheckBox.isChecked && filePathView!!.text.toString()
+                                .isNotEmpty()
+                        ) {
+                            uploadImageOnFirebaseStorage(object : UploadImageCallback {
+                                override fun onSuccess() {
+                                    updateStorageSize(totalImageSize,"minus")
+                                    // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
+                                    // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
+                                    if (url.isNotEmpty()) {
+                                        if (multiImagesList.isNotEmpty()) {
+                                            multiImagesList.clear()
+                                        }
+                                        if (params.size > 0) {
+                                            params.clear()
+                                        }
+                                        // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED EDIT TEXT
+                                        for (i in 0 until textInputIdsList.size) {
+                                            val pair = textInputIdsList[i]
+                                            // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
+                                            // WITH COLUMN IMAGE ELSE MAP THE OTHER TEXTINPUTIDS LIST OBJECTS
+                                            if (pair.first == "image") {
+                                                params.add(
+                                                    Pair(
+                                                        pair.first,
+                                                        url
+                                                    )
                                                 )
-                                            )
-                                        } else {
+                                            } else {
+                                                params.add(
+                                                    Pair(
+                                                        pair.first,
+                                                        pair.second.text.toString()
+                                                            .trim()
+                                                    )
+                                                )
+                                            }
+                                        }
+
+                                        // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED DROPDOWNS
+                                        for (j in 0 until spinnerIdsList.size) {
+                                            val pair = spinnerIdsList[j]
                                             params.add(
                                                 Pair(
                                                     pair.first,
-                                                    pair.second.text.toString()
-                                                        .trim()
+                                                    pair.second.selectedItem.toString()
                                                 )
                                             )
                                         }
-                                    }
+                                        tableGenerator.insertData(tableName, params)
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            Handler(Looper.myLooper()!!).postDelayed(
+                                                {
+                                                    isFileSelected = false
+                                                    BaseActivity.dismiss()
+                                                    saveSuccessScans()
+                                                    Toast.makeText(
+                                                        requireActivity(),
+                                                        requireActivity().resources.getString(R.string.scan_data_save_success_text),
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    textInputIdsList.clear()
+                                                    spinnerIdsList.clear()
 
-                                    // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED DROPDOWNS
-                                    for (j in 0 until spinnerIdsList.size) {
-                                        val pair = spinnerIdsList[j]
-                                        params.add(
-                                            Pair(
-                                                pair.first,
-                                                pair.second.selectedItem.toString()
+                                                    tableDetailLayoutWrapper.removeAllViews()
+                                                    filePathView!!.setText("")
+                                                    for (i in 0 until params.size) {
+                                                        val pair = params[i]
+                                                        values_JSON.put(pair.second)
+                                                    }
+                                                    if (values_JSON.length() > 0) {
+                                                        sendRequest()
+                                                    }
+                                                    params.clear()
+                                                    val bundle = Bundle()
+                                                    bundle.putString("success", "success")
+                                                    mFirebaseAnalytics?.logEvent("scanner", bundle)
+                                                },
+                                                1000
                                             )
-                                        )
-                                    }
-                                    tableGenerator.insertData(tableName, params)
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        Handler(Looper.myLooper()!!).postDelayed(
-                                            {
-                                                isFileSelected = false
-                                                BaseActivity.dismiss()
-                                                saveSuccessScans()
-                                                Toast.makeText(
-                                                    requireActivity(),
-                                                    requireActivity().resources.getString(R.string.scan_data_save_success_text),
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                                textInputIdsList.clear()
-                                                spinnerIdsList.clear()
-
-                                                tableDetailLayoutWrapper.removeAllViews()
-                                                filePathView!!.setText("")
-                                                for (i in 0 until params.size) {
-                                                    val pair = params[i]
-                                                    values_JSON.put(pair.second)
-                                                }
-                                                if (values_JSON.length() > 0) {
-                                                    sendRequest()
-                                                }
-                                                params.clear()
-                                                val bundle = Bundle()
-                                                bundle.putString("success", "success")
-                                                mFirebaseAnalytics?.logEvent("scanner", bundle)
-                                            },
-                                            1000
-                                        )
+                                        }
                                     }
                                 }
-                            }
 
-                        })
+                            })
+                        }
+                        // THIS ELSE PART WILL RUN WHEN ADD IMAGE CHECK BOX IS UN-CHECKED
+                        else {
+                            // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED EDIT TEXT
+                            for (i in 0 until textInputIdsList.size) {
+                                val pair = textInputIdsList[i]
+                                // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
+                                // WITH COLUMN IMAGE ELSE MAP THE OTHER TEXTINPUTIDS LIST OBJECTS
+                                if (pair.first == "image") {
+                                    params.add(
+                                        Pair(
+                                            pair.first,
+                                            pair.second.text.toString()
+                                                .trim()
+                                        )
+                                    )
+                                } else {
+                                    params.add(
+                                        Pair(
+                                            pair.first,
+                                            pair.second.text.toString()
+                                                .trim()
+                                        )
+                                    )
+                                }
+                            }
+                            // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED DROPDOWNS
+                            for (j in 0 until spinnerIdsList.size) {
+                                val pair = spinnerIdsList[j]
+                                params.add(
+                                    Pair(
+                                        pair.first,
+                                        pair.second.selectedItem.toString()
+                                    )
+                                )
+                            }
+                            tableGenerator.insertData(tableName, params)
+                            CoroutineScope(Dispatchers.Main).launch {
+                                Handler(Looper.myLooper()!!).postDelayed({
+                                    isFileSelected = false
+                                    BaseActivity.dismiss()
+                                    saveSuccessScans()
+                                    Toast.makeText(
+                                        requireActivity(),
+                                        requireActivity().resources.getString(R.string.scan_data_save_success_text),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    textInputIdsList.clear()
+                                    spinnerIdsList.clear()
+
+                                    tableDetailLayoutWrapper.removeAllViews()
+                                    codeScanner!!.startPreview()
+                                    filePathView!!.setText("")
+//                                openHistoryBtnTip()
+                                    if (Constants.userData != null) {
+                                        for (i in 0 until params.size) {
+                                            val pair = params[i]
+                                            values_JSON.put(pair.second)
+                                        }
+                                        if (values_JSON.length() > 0) {
+                                            sendRequest()
+                                        }
+                                    }
+                                    params.clear()
+                                }, 1000)
+                            }
+                        }
+
+                    } catch (e: Exception) {
+                        val bundle = Bundle()
+                        bundle.putString("failure", "Error" + e.message)
+                        mFirebaseAnalytics?.logEvent("scanner", bundle)
+                        e.printStackTrace()
                     }
-                    // THIS ELSE PART WILL RUN WHEN ADD IMAGE CHECK BOX IS UN-CHECKED
-                    else {
-                        // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED EDIT TEXT
+                }
+            }
+            else {
+
+                val b = MaterialAlertDialogBuilder(requireActivity())
+                    .setCancelable(true)
+                    .setTitle(requireActivity().resources.getString(R.string.alert_text))
+                    .setMessage(requireActivity().resources.getString(R.string.image_upload_internet_error_text))
+                    .setNegativeButton(requireActivity().resources.getString(R.string.close_text)) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(requireActivity().resources.getString(R.string.save_without_image_text)) { dialog, which ->
+                        dialog.dismiss()
+                        alert.dismiss()
+                        val params = mutableListOf<Pair<String, String>>()
                         for (i in 0 until textInputIdsList.size) {
                             val pair = textInputIdsList[i]
                             // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
@@ -1237,109 +1352,26 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                                 ).show()
                                 textInputIdsList.clear()
                                 spinnerIdsList.clear()
-
+                                params.clear()
                                 tableDetailLayoutWrapper.removeAllViews()
                                 codeScanner!!.startPreview()
-                                filePathView!!.setText("")
-//                                openHistoryBtnTip()
-                                if (Constants.userData != null) {
-                                    for (i in 0 until params.size) {
-                                        val pair = params[i]
-                                        values_JSON.put(pair.second)
-                                    }
-                                    if (values_JSON.length() > 0) {
-                                        sendRequest()
-                                    }
-                                }
-                                params.clear()
+//                            openHistoryBtnTip()
+                                val bundle = Bundle()
+                                bundle.putString("success", "success")
+                                mFirebaseAnalytics?.logEvent("scanner", bundle)
                             }, 1000)
                         }
                     }
-
-                } catch (e: Exception) {
-                    val bundle = Bundle()
-                    bundle.putString("failure", "Error" + e.message)
-                    mFirebaseAnalytics?.logEvent("scanner", bundle)
-                    e.printStackTrace()
-                }
-            }
-        } else {
-
-            val b = MaterialAlertDialogBuilder(requireActivity())
-                .setCancelable(true)
-                .setTitle(requireActivity().resources.getString(R.string.alert_text))
-                .setMessage(requireActivity().resources.getString(R.string.image_upload_internet_error_text))
-                .setNegativeButton(requireActivity().resources.getString(R.string.close_text)) { dialog, which ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton(requireActivity().resources.getString(R.string.save_without_image_text)) { dialog, which ->
-                    dialog.dismiss()
-                    alert.dismiss()
-                    val params = mutableListOf<Pair<String, String>>()
-                    for (i in 0 until textInputIdsList.size) {
-                        val pair = textInputIdsList[i]
-                        // THIS WILL CHECK IF TEXTINPUTIDSLIST HAVE IMAGE PARAMETER THEN SET THE URL
-                        // WITH COLUMN IMAGE ELSE MAP THE OTHER TEXTINPUTIDS LIST OBJECTS
-                        if (pair.first == "image") {
-                            params.add(
-                                Pair(
-                                    pair.first,
-                                    pair.second.text.toString()
-                                        .trim()
-                                )
-                            )
-                        } else {
-                            params.add(
-                                Pair(
-                                    pair.first,
-                                    pair.second.text.toString()
-                                        .trim()
-                                )
-                            )
-                        }
-                    }
-                    // THIS LOOP WILL GET ALL THE DATA FROM DYNAMICALLY GENERATED DROPDOWNS
-                    for (j in 0 until spinnerIdsList.size) {
-                        val pair = spinnerIdsList[j]
-                        params.add(
-                            Pair(
-                                pair.first,
-                                pair.second.selectedItem.toString()
-                            )
-                        )
-                    }
-                    tableGenerator.insertData(tableName, params)
-                    CoroutineScope(Dispatchers.Main).launch {
-                        Handler(Looper.myLooper()!!).postDelayed({
-                            isFileSelected = false
-                            BaseActivity.dismiss()
-                            saveSuccessScans()
-                            Toast.makeText(
-                                requireActivity(),
-                                requireActivity().resources.getString(R.string.scan_data_save_success_text),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            textInputIdsList.clear()
-                            spinnerIdsList.clear()
-                            params.clear()
-                            tableDetailLayoutWrapper.removeAllViews()
-                            codeScanner!!.startPreview()
-//                            openHistoryBtnTip()
-                            val bundle = Bundle()
-                            bundle.putString("success", "success")
-                            mFirebaseAnalytics?.logEvent("scanner", bundle)
-                        }, 1000)
-                    }
-                }
-            val iAlert = b.create()
-            iAlert.show()
-            iAlert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
-                ContextCompat.getColor(
-                    requireActivity(),
-                    R.color.purple_700
+                val iAlert = b.create()
+                iAlert.show()
+                iAlert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.purple_700
+                    )
                 )
-            )
-        }
+            }
+
     }
 
     // THIS FUNCTION WILL ALERT THE DIFFERENT MESSAGES
@@ -1427,7 +1459,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
     var uploadedUrlList = mutableListOf<String>()
     var array: List<String> = mutableListOf()
     val handler = Handler(Looper.myLooper()!!)
-    var totalImageSize:Long = 0
+    var totalImageSize: Long = 0
     private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
         val imageList = filePathView!!.text.toString()
         if (imageList.contains(",")) {
@@ -1444,7 +1476,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
 
                         val file = Uri.fromFile(File(imagePath))
                         val fileRef =
-                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${file.lastPathSegment}")
+                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${System.currentTimeMillis()}.jpg")
                         val uploadTask = fileRef.putFile(file)
                         uploadTask.continueWithTask { task ->
                             if (!task.isSuccessful) {
@@ -1457,8 +1489,6 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                             if (task.isSuccessful) {
                                 val downloadUri = task.result
                                 uploadedUrlList.add(downloadUri.toString())
-//                                totalImageSize = getTotalImagesSize(uploadedUrlList)
-//                                Log.d("TEST199","$totalImageSize")
                                 if (i == array.size - 1) {
                                     url = uploadedUrlList.joinToString(" ")
                                     uploadedUrlList.clear()
@@ -1468,6 +1498,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                         }
                     }
                 }, (1000 * i + 1).toLong())
+
             }
 
         } else {
@@ -1480,7 +1511,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
 
                 val file = Uri.fromFile(File(filePathView!!.text.toString()))
                 val fileRef =
-                    storageReference.child("BarcodeImages/$userId/${file.lastPathSegment}")
+                    storageReference.child("BarcodeImages/$userId/${System.currentTimeMillis()}.jpg")
                 val uploadTask = fileRef.putFile(file)
                 uploadTask.continueWithTask { task ->
                     if (!task.isSuccessful) {
@@ -1493,9 +1524,6 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                     if (task.isSuccessful) {
                         val downloadUri = task.result
                         url = downloadUri.toString()
-//                        uploadedUrlList.add(url)
-//                        totalImageSize = getTotalImagesSize(uploadedUrlList)
-                        Log.d("TEST199","$totalImageSize")
                         listener.onSuccess()
                     }
                 }
@@ -1505,33 +1533,37 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
     }
 
     private fun getTotalImagesSize(uploadedUrlList: MutableList<String>): Long {
-       var total:Long = 0
-        for (i in 0 until uploadedUrlList.size){
-            total +=ImageManager.getFileSize(uploadedUrlList[i])
+        var total: Long = 0
+        for (i in 0 until uploadedUrlList.size) {
+            total += ImageManager.getFileSize(uploadedUrlList[i])
         }
         return total
     }
 
 
-    private fun updateStorageSize(size:Int,type:String){
-        databaseReference.child(Constants.firebaseStorageSizes)
-            .child(Constants.firebaseUserId).addListenerForSingleValueEvent(object: ValueEventListener {
+    private fun updateStorageSize(size: Long, type: String) {
+        var currentStorageSize: Long = 0
+        databaseReference.child(Constants.firebaseUserFeatureDetails)
+            .child(Constants.firebaseUserId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                   var currentStorageSize:Long? = snapshot.child("size").getValue(Long::class.java)
-                    if (currentStorageSize != null){
-                        if (type == "add"){
-                            currentStorageSize +=size
+                    if (snapshot.hasChildren()) {
+                        val pSize: Int? = snapshot.child("memory").getValue(Int::class.java)
+                        if (pSize != null) {
+                            currentStorageSize = if (type == "add") {
+                                Constants.convertMegaBytesToBytes(pSize) + size
+                            } else {
+                                Constants.convertMegaBytesToBytes(pSize) - size
+                            }
+                            val remainingMb:Int = Constants.convertBytesToMegaBytes(currentStorageSize)
+                            val params = HashMap<String, Any>()
+                            params["memory"] = remainingMb
+                            databaseReference.child(Constants.firebaseUserFeatureDetails)
+                                .child(Constants.firebaseUserId).updateChildren(params)
+                            totalImageSize = 0
+                            appSettings.putInt(Constants.memory,remainingMb)
                         }
-                        else{
-                            currentStorageSize -=size
-                        }
-
-                        val params = HashMap<String,Long>()
-                        params["size"] = currentStorageSize
-                        databaseReference.child(Constants.firebaseStorageSizes)
-                            .child(Constants.firebaseUserId).setValue(params)
                     }
-
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -1570,7 +1602,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                     MainActivity.credential!!.selectedAccountName = accountName
                     appSettings.putString("ACCOUNT_NAME", accountName)
                     if (userRecoverableAuthType == 0) {
-                        saveToDriveAppFolder()
+                        saveDataIntoTable()
                     } else {
                         getAllSheets()
                     }
@@ -1635,7 +1667,12 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                         isFileSelected = true
                     }
                 }
-
+                totalImageSize = if (filePathView!!.text.contains(",")){
+                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                } else{
+                    ImageManager.getFileSize(filePathView!!.text.toString())
+                }
+                Log.d("TEST199","$totalImageSize")
             }
         }
 
@@ -1648,6 +1685,14 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                 val data: Intent? = result.data
                 val bitmap = data!!.extras!!.get("data") as Bitmap
                 createImageFile(bitmap)
+
+                totalImageSize = if (filePathView!!.text.contains(",")){
+                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                } else{
+                    ImageManager.getFileSize(filePathView!!.text.toString())
+                }
+
+                Log.d("TEST199","$totalImageSize")
             }
         }
 
@@ -1792,10 +1837,9 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
             val result = CropImage.getActivityResult(data)
             val imgUri = result.uri
             try {
-                if (updateInputBox != null){
+                if (updateInputBox != null) {
                     TextRecogniser.runTextRecognition(requireActivity(), updateInputBox!!, imgUri)
-                }
-                else{
+                } else {
                     showAlert(
                         requireActivity(),
                         getString(R.string.textinput_not_focused_error_text)
@@ -2061,7 +2105,7 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
                     },
                     object : Response.ErrorListener {
                         override fun onErrorResponse(error: VolleyError?) {
-                            Toast.makeText(context, error!!.toString(), Toast.LENGTH_SHORT).show()
+//                            Toast.makeText(context, error!!.toString(), Toast.LENGTH_SHORT).show()
                             BaseActivity.dismiss()
                         }
                     }) {
@@ -2097,10 +2141,10 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
 
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) {
-        updateInputBox  = v as CustomTextInputEditText?
-        if (hasFocus){
-           openDialog()
-       }
+        updateInputBox = v as CustomTextInputEditText?
+        if (hasFocus) {
+            openDialog()
+        }
     }
 
     fun restart() {
@@ -2119,30 +2163,30 @@ class ScannerFragment : Fragment(),CustomAlertDialog.CustomDialogListener, View.
     }
 
     override fun onImageRecognitionBtnClick(alertDialog: CustomAlertDialog) {
-        if (customAlertDialog != null){
+        if (customAlertDialog != null) {
             customAlertDialog!!.dismiss()
 
-                BaseActivity.hideSoftKeyboard(requireActivity(), updateInputBox!!)
-                pickImageFromGallery()
+            BaseActivity.hideSoftKeyboard(requireActivity(), updateInputBox!!)
+            pickImageFromGallery()
 
         }
     }
 
     override fun onPhotoRecognitionBtnClick(alertDialog: CustomAlertDialog) {
-        if (customAlertDialog != null){
+        if (customAlertDialog != null) {
             customAlertDialog!!.dismiss()
 
-                BaseActivity.hideSoftKeyboard(requireActivity(), updateInputBox!!)
-                pickImageFromCamera()
+            BaseActivity.hideSoftKeyboard(requireActivity(), updateInputBox!!)
+            pickImageFromCamera()
 
         }
     }
 
     override fun onDismissBtnClick(alertDialog: CustomAlertDialog) {
-         if (customAlertDialog != null){
-             customAlertDialog!!.dismiss()
-             updateInputBox!!.requestFocus()
-             Constants.openKeyboar(requireActivity())
-         }
+        if (customAlertDialog != null) {
+            customAlertDialog!!.dismiss()
+            updateInputBox!!.requestFocus()
+            Constants.openKeyboar(requireActivity())
+        }
     }
 }
