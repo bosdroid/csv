@@ -757,10 +757,19 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     }
                     submitBtn.setOnClickListener {
                         val availableStorageMemory = Constants.convertMegaBytesToBytes(appSettings.getInt(Constants.memory))
+
                         if (addImageCheckBox.isChecked && totalImageSize <= availableStorageMemory)
                         {
-                            alert.dismiss()
-                            saveDataIntoTable()
+                            val expiredAt:Long = appSettings.getLong(Constants.expiredAt)
+                            if (System.currentTimeMillis() > expiredAt && expiredAt.toInt() != 0){
+                                BaseActivity.showAlert(requireActivity(),getString(R.string.subscription_expired_text))
+                            }
+                            else
+                            {
+                                alert.dismiss()
+                                saveDataIntoTable()
+                            }
+
                         }
                         else
                         {
