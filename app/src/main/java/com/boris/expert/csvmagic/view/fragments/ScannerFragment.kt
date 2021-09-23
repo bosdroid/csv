@@ -2340,7 +2340,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 //                } else {
 //                    BaseActivity.dismiss()
 //                }
-
             } catch (e: Exception) {
                 BaseActivity.dismiss()
                 e.printStackTrace()
