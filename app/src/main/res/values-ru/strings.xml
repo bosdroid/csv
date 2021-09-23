@@ -380,6 +380,7 @@
     <string name="consumer_product_success_text">Purchase Product Consumed Successfully!</string>
     <string name="storage_available_error_text">Available storage not available, Buy more to save images.</string>
     <string name="subscription_expired_text">Your product subscription has been expired!</string>
+    <string name="columns_names_different_error_text">Do you want to create a new spreadsheet to save data? Because format of *name is not correct</string>
 
 
     <string-array name="mode_list">

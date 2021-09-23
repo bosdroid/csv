@@ -55,7 +55,7 @@ class Constants {
         private const val LOGO_IMAGE_PATH = "LogoImages"
         const val BASE_URL = "https://pages.qrmagicapp.com/"
         const val googleAppScriptUrl =
-            "https://script.google.com/macros/s/AKfycbw4-8R85cCh9C5JXD6BTl0q89NNOTFkYfZO1Sp2LRrVA-mCv06LRYu2PqCPUaKab26-/exec"
+            "https://script.google.com/macros/s/AKfycbxguIf9uc5DxTAHvxs4zDwsZfb81isrQpguLGQUk9h929K1LajgjoTe47SL2zwf5VIJ/exec"
         const val licenseKey =
             "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlbIjQZds4JytxrzDIzVQ9EY0FzpTsuLPX7OO/c6SF9kS6TN4REhsgcaXO6BbyBKoVUL5SznysLATryvjpliLtI///8I9ohz1A5AaxAoqzXZgpj0ECHuHk68R+nGs1dzBS9/pjNjh1Gj3rMf5eSNjBTIGqjPPZjtgMW7c+sr/BfHe+L1Mci3Ep0pv17roZPwczsHzPaK8yP308fd5n6KU3VJDmrj4xwcyqdPVQvcbC4bM7/JK523xNNsEtoF10grxj1Izeo6AYplSV5KjvrN/ByqTqGLP4x4KyfDoE0BA/6hyoARTPKoM9clDN1EhwUb/yItH6tAlOO2AcAp7GVWCHQIDAQAB"
         var generatedImage: Bitmap? = null
