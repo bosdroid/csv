@@ -106,7 +106,6 @@ class Constants {
         private fun verifyValidSignature(signedData: String, signature: String): Boolean {
             return try {
                 // To get key go to Developer Console > Select your app > Development Tools > Services & APIs.
-
                 val base64Key = "Add Your Key Here"
                 Security.verifyPurchase(base64Key, signedData, signature)
             } catch (e: IOException) {
