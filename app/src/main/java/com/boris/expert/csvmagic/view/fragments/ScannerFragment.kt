@@ -61,7 +61,6 @@ import com.google.android.material.textview.MaterialTextView
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.drive.model.FileList
 import com.google.api.services.drive.model.Permission
-import com.google.api.services.sheets.v4.model.AppendValuesResponse
 import com.google.api.services.sheets.v4.model.Spreadsheet
 import com.google.api.services.sheets.v4.model.SpreadsheetProperties
 import com.google.api.services.sheets.v4.model.ValueRange
@@ -82,6 +81,8 @@ import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.json.JSONArray
 import java.io.File
 import java.io.IOException
@@ -97,6 +98,7 @@ import kotlin.collections.HashMap
 class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     View.OnFocusChangeListener {
 
+    private var numRows: Int = 0
     private var customAlertDialog: CustomAlertDialog? = null
     private var updateInputBox: CustomTextInputEditText? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
@@ -125,6 +127,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private var mContext: AppCompatActivity? = null
     private var databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storageReference: StorageReference = FirebaseStorage.getInstance().reference
+    private var textRecognitionButtonsLayout: LinearLayout? = null
 
     //private var previewView: PreviewView? = null
     private var imageAnalyzer: MyImageAnalyzer? = null
@@ -235,6 +238,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         }
 
     }
+
 
     private fun getModeList() {
         val modeList = requireActivity().resources.getStringArray(R.array.mode_list)
@@ -391,34 +395,41 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 decodeCallback = DecodeCallback {
 
                     requireActivity().runOnUiThread {
-                        val isFound = tableGenerator.searchItem(tableName, it.text)
-                        if (isFound && appSettings.getString(getString(R.string.key_mode)) == "0") {
-                            val quantity = tableGenerator.getScanQuantity(tableName, it.text)
-                            var qty = 0
-                            qty = if (quantity != null) {
-                                quantity.toInt() + 1
+                        if (it.text.isNotEmpty() && it.text.matches(Regex("[0-9]+"))) {
+
+                            val isFound = tableGenerator.searchItem(tableName, it.text)
+                            if (isFound && appSettings.getString(getString(R.string.key_mode)) == "0") {
+                                val quantity = tableGenerator.getScanQuantity(tableName, it.text)
+                                var qty = 0
+                                qty = if (quantity != null) {
+                                    quantity.toInt() + 1
+                                } else {
+                                    1
+                                }
+
+                                val isUpdate =
+                                    tableGenerator.updateScanQuantity(tableName, it.text, qty)
+                                if (isUpdate) {
+                                    //showAlert(requireActivity(),requireActivity().getString(R.string.scan_quantity_increase_success_text))
+                                    Toast.makeText(
+                                        requireActivity(),
+                                        requireActivity().getString(R.string.scan_quantity_increase_success_text),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    Handler(Looper.myLooper()!!).postDelayed({
+                                        startPreview()
+                                    }, 2000)
+
+                                }
                             } else {
-                                1
-                            }
-
-                            val isUpdate =
-                                tableGenerator.updateScanQuantity(tableName, it.text, qty)
-                            if (isUpdate) {
-                                //showAlert(requireActivity(),requireActivity().getString(R.string.scan_quantity_increase_success_text))
-                                Toast.makeText(
-                                    requireActivity(),
-                                    requireActivity().getString(R.string.scan_quantity_increase_success_text),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                Handler(Looper.myLooper()!!).postDelayed({
-                                    startPreview()
-                                }, 2000)
-
+                                displayDataSubmitDialog(it, "")
                             }
                         } else {
-                            displayDataSubmitDialog(it, "")
+                            showAlert(
+                                requireActivity(),
+                                "${getString(R.string.barcode_data_format_error_text)}\nBarcode Data: ${it.text}"
+                            )
                         }
-
                     }
                 }
                 errorCallback = ErrorCallback { // or ErrorCallback.SUPPRESS
@@ -524,6 +535,18 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 if (tableName.isEmpty()) {
                     showAlert(requireActivity(), text)
                 } else {
+
+//                    requireActivity().startActivity(
+//                        Intent(
+//                            requireActivity(),
+//                            ScanDataActivity::class.java
+//                        ).apply {
+//                            putExtra("TABLE_NAME", tableName)
+//                            putExtra("SCAN_TEXT", text)
+//                            putExtra("SHEET_NAME", selectedSheetName)
+//                            putExtra("SHEET_ID", selectedSheetId)
+//                        })
+
                     val columns = tableGenerator.getTableColumns(tableName)
                     val scanResultLayout = LayoutInflater.from(requireActivity())
                         .inflate(R.layout.scan_result_dialog, null)
@@ -545,6 +568,13 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
                     val photoRecognitionBtn =
                         scanResultLayout.findViewById<LinearLayout>(R.id.photo_recognition_btn)
+                    textRecognitionButtonsLayout =
+                        scanResultLayout.findViewById(R.id.text_recognition_buttons_layout)
+                    val moreBtnView =
+                        scanResultLayout.findViewById<AppCompatImageView>(R.id.more_btn)
+                    moreBtnView.setOnClickListener {
+                        openDialog()
+                    }
 
                     imageRecognitionBtn.setOnClickListener {
                         if (RuntimePermissionHelper.checkCameraPermission(
@@ -660,13 +690,18 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             val columnDropDwonLayout =
                                 tableRowLayout.findViewById<LinearLayout>(R.id.table_column_dropdown_layout)
                             columnName.text = value
+                            val moreBtn =
+                                tableRowLayout.findViewById<AppCompatImageView>(R.id.table_more_btn)
+                            moreBtn.setOnClickListener {
+                                openDialog()
+                            }
                             val pair = tableGenerator.getFieldList(value, tableName)
 
                             if (pair != null) {
                                 arrayList = mutableListOf()
                                 if (!pair.first.contains(",") && pair.second == "listWithValues") {
                                     arrayList.add(pair.first)
-
+                                    moreBtn.visibility = View.INVISIBLE
                                     columnValue.visibility = View.GONE
                                     columnDropDwonLayout.visibility = View.VISIBLE
                                     val adapter = ArrayAdapter(
@@ -680,7 +715,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 } else if (pair.first.contains(",") && pair.second == "listWithValues") {
 
                                     arrayList.addAll(pair.first.split(","))
-
+                                    moreBtn.visibility = View.INVISIBLE
                                     columnValue.visibility = View.GONE
                                     columnDropDwonLayout.visibility = View.VISIBLE
                                     val adapter = ArrayAdapter(
@@ -692,6 +727,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                     columnDropdown.adapter = adapter
                                     spinnerIdsList.add(Pair(value, columnDropdown))
                                 } else {
+                                    moreBtn.visibility = View.VISIBLE
                                     columnDropDwonLayout.visibility = View.GONE
                                     columnValue.visibility = View.VISIBLE
                                     columnValue.setText(
@@ -707,7 +743,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                     textInputIdsList.add(Pair(value, columnValue))
                                     continue
                                 }
-
+                                moreBtn.visibility = View.VISIBLE
                                 columnDropDwonLayout.visibility = View.GONE
                                 columnValue.visibility = View.VISIBLE
 
@@ -717,10 +753,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                             System.currentTimeMillis()
                                         )
                                     )
+                                    moreBtn.visibility = View.INVISIBLE
                                     columnValue.isEnabled = false
                                     columnValue.isFocusable = false
                                     columnValue.isFocusableInTouchMode = false
                                 } else {
+                                    moreBtn.visibility = View.VISIBLE
                                     columnValue.isEnabled = true
                                     columnValue.isFocusable = true
 //                                    columnValue.isFocusableInTouchMode = true
@@ -741,7 +779,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     builder.setCancelable(false)
                     alert = builder.create()
                     alert.show()
-                    checkBothListSame()
+
                     if (appSettings.getBoolean(getString(R.string.key_tips))) {
                         val duration = appSettings.getLong("tt2")
                         if (duration.compareTo(0) == 0 || System.currentTimeMillis() - duration > TimeUnit.DAYS.toMillis(
@@ -765,12 +803,15 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     }
                     submitBtn.setOnClickListener {
                         val availableStorageMemory = Constants.convertMegaBytesToBytes(
-                            appSettings.getInt(
+                            appSettings.getString(
                                 Constants.memory
-                            )
+                            )!!.toFloat()
                         )
 
-                        if (totalImageSize.toInt() == 0) {
+                        if(!checkBothListSame()){
+                            createNewSpreadsheetDialog(tableName)
+                        }
+                        else if (totalImageSize.toInt() == 0) {
                             alert.dismiss()
                             saveDataIntoTable()
                         } else if (addImageCheckBox.isChecked && totalImageSize <= availableStorageMemory) {
@@ -787,7 +828,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                         } else {
                             val b1 = MaterialAlertDialogBuilder(requireActivity())
-                                .setCancelable(true)
+                                .setCancelable(false)
                                 .setTitle(requireActivity().resources.getString(R.string.alert_text))
                                 .setMessage(requireActivity().resources.getString(R.string.storage_available_error_text))
                                 .setNegativeButton(requireActivity().resources.getString(R.string.close_text)) { dialog, which ->
@@ -798,6 +839,16 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                     alert.dismiss()
                                     addImageCheckBox.isChecked = false
                                     saveDataIntoTable()
+                                }
+                                .setNeutralButton(getString(R.string.buy_storage_text)) { dialog, which ->
+                                    dialog.dismiss()
+                                    alert.dismiss()
+                                    requireActivity().startActivity(
+                                        Intent(
+                                            requireActivity(),
+                                            PurchaseFeatureActivity::class.java
+                                        )
+                                    )
                                 }
                             val iAlert = b1.create()
                             iAlert.show()
@@ -1577,28 +1628,33 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
 
     private fun updateStorageSize(size: Long, type: String) {
-        var currentStorageSize: Long = 0
+        var currentStorageSize: Float = 0F
         databaseReference.child(Constants.firebaseUserFeatureDetails)
             .child(Constants.firebaseUserId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.hasChildren()) {
-                        val pSize: Int? = snapshot.child("memory").getValue(Int::class.java)
+                        val pSize: Float? =
+                            snapshot.child("memory").getValue(String::class.java)!!.toFloat()
                         if (pSize != null) {
                             currentStorageSize = if (type == "add") {
                                 Constants.convertMegaBytesToBytes(pSize) + size
                             } else {
                                 Constants.convertMegaBytesToBytes(pSize) - size
                             }
-                            val remainingMb: Int = Constants.convertBytesToMegaBytes(
+                            val remainingMb = Constants.convertBytesToMegaBytes(
                                 currentStorageSize
-                            )
+                            ).toString()
+
                             val params = HashMap<String, Any>()
                             params["memory"] = remainingMb
                             databaseReference.child(Constants.firebaseUserFeatureDetails)
                                 .child(Constants.firebaseUserId).updateChildren(params)
                             totalImageSize = 0
-                            appSettings.putInt(Constants.memory, remainingMb)
+                            appSettings.putString(
+                                Constants.memory,
+                                remainingMb
+                            )
                         }
                     }
                 }
@@ -1762,6 +1818,22 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 appSettings.putBoolean(requireActivity().getString(R.string.key_tips), isChecked)
             }
         })
+
+        setEventListener(
+            requireActivity(),
+            requireActivity(),
+            KeyboardVisibilityEventListener { isOpen ->
+                // some code depending on keyboard visiblity status
+                if (textRecognitionButtonsLayout != null) {
+                    if (isOpen) {
+//                    textRecognitionButtonsLayout!!.visibility = View.VISIBLE
+                        //openDialog()
+                    }
+//                else{
+////                    textRecognitionButtonsLayout!!.visibility = View.GONE
+//                }
+                }
+            })
     }
 
 
@@ -2055,6 +2127,18 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             if (sheetsList.isNotEmpty()) {
                                 Constants.sheetsList.addAll(sheetsList)
                                 displaySheetSpinner()
+                            } else {
+                                MaterialAlertDialogBuilder(requireActivity())
+                                    .setMessage(getString(R.string.google_sheet_empty_list_error))
+                                    .setCancelable(false)
+                                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                                        dialog.dismiss()
+                                    }
+                                    .setPositiveButton(getString(R.string.create)) { dialog, which ->
+                                        dialog.dismiss()
+                                        val defaultSheetArray = mutableListOf<Any>()
+                                        createNewSpreadsheet("default_sheet", defaultSheetArray)
+                                    }.create().show()
                             }
                         }
                     }
@@ -2187,9 +2271,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) {
         updateInputBox = v as CustomTextInputEditText?
-        if (hasFocus) {
-            openDialog()
-        }
+//        if (hasFocus) {
+//            openDialog()
+//        }
     }
 
     fun restart() {
@@ -2197,13 +2281,25 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     }
 
     private fun openDialog() {
-        updateInputBox!!.clearFocus()
-        customAlertDialog = CustomAlertDialog()
-        customAlertDialog!!.setFocusListener(this)
-        customAlertDialog!!.show(childFragmentManager, "dialog")
+        if (updateInputBox != null) {
+            updateInputBox!!.clearFocus()
+            customAlertDialog = CustomAlertDialog()
+            customAlertDialog!!.setFocusListener(this)
+            customAlertDialog!!.show(childFragmentManager, "dialog")
+        } else {
+            Toast.makeText(
+                requireActivity(),
+                "Set the input box focus before click on More Button",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onEraseBtnClick(alertDialog: CustomAlertDialog) {
+        if (customAlertDialog != null) {
+            customAlertDialog!!.dismiss()
+            updateInputBox!!.requestFocus()
+        }
         updateInputBox!!.setText("")
     }
 
@@ -2247,7 +2343,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 response = request.execute()
 
                 if (response != null) {
-                    val numRows = if (response.getValues() != null) response.getValues().size else 0
+                    numRows = if (response.getValues() != null) response.getValues().size else 0
                     if (numRows > 0) {
                         values = response.getValues()[0]
                     }
@@ -2289,24 +2385,38 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     .setValueInputOption("RAW")
                     .setInsertDataOption("INSERT_ROWS")
                     .execute()
+            fetchSheetColumns()
             Log.d("TEST199ROW", "${result.updates.updatedRows}")
         }
     }
 
-    private fun checkBothListSame() {
+    private fun checkBothListSame() :Boolean{
         val first = mutableListOf<Any>()
-         first.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
-        if (values == null || !isEqual(first, values as List<Any>)) {
-            MaterialAlertDialogBuilder(requireActivity())
-                .setMessage("Do you want to create a new spreadsheet to save data? Because format of *$selectedSheetName is not correct")
-                .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                    dialog.dismiss()
-                }.setPositiveButton(getString(R.string.create)) { dialog, which ->
-                    dialog.dismiss()
-                    first.removeAt(0)
-                    createNewSpreadsheet(tableName, first)
-                }.create().show()
+        first.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
+        first.removeAt(0)
+        if (numRows == 0) {
+            appendRow(first)
+            return true
+        } else if (values != null && isEqual(first, values as List<Any>)) {
+         return true
         }
+        return false
+    }
+
+    private fun createNewSpreadsheetDialog(tableName: String){
+        val first = mutableListOf<Any>()
+        first.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
+        first.removeAt(0)
+
+        MaterialAlertDialogBuilder(requireActivity())
+            .setMessage("Do you want to create a new spreadsheet to save data? Because format of *$selectedSheetName is not correct")
+            .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                dialog.dismiss()
+            }.setPositiveButton(getString(R.string.create)) { dialog, which ->
+                dialog.dismiss()
+
+                createNewSpreadsheet(tableName, first)
+            }.create().show()
     }
 
     private fun createNewSpreadsheet(tableName: String, headingsList: List<Any>) {
@@ -2329,17 +2439,16 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 if (values_JSON.length() > 0) {
                     values_JSON = JSONArray()
                 }
-                for (i in 0 until headingsList.size) {
-                    values_JSON.put(headingsList[i].toString())
-                }
+
                 getAllSheets()
                 BaseActivity.dismiss()
-                appendRow(headingsList)
-//                if (values_JSON.length() > 0) {
-//                    sendRequest()
-//                } else {
-//                    BaseActivity.dismiss()
-//                }
+                if (headingsList.isNotEmpty()) {
+                    for (i in 0 until headingsList.size) {
+                        values_JSON.put(headingsList[i].toString())
+                    }
+                    appendRow(headingsList)
+                }
+
             } catch (e: Exception) {
                 BaseActivity.dismiss()
                 e.printStackTrace()

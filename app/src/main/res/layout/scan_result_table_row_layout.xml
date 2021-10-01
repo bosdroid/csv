@@ -42,5 +42,10 @@
             android:id="@+id/table_column_dropdown"
             />
     </LinearLayout>
-
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_more"
+        android:id="@+id/table_more_btn"
+        />
 </LinearLayout>

@@ -136,8 +136,8 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                    reference.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
                                 //reference.removeEventListener(listener!!)
-                                //var previouskey = ""
-                                var foundMemory = 0
+                                var totalMemory = 0
+                                var foundMemory:Float = 0F
                                 var foundStorage = 0
                                 var isFoundValue = false
                                 val params = HashMap<String,Any>()
@@ -145,7 +145,8 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                     if (feature.name.contains("storage")){
                                         if (dataSnapshot.hasChild("memory")){
                                             isFoundValue = true
-                                            foundMemory = dataSnapshot.child("memory").getValue(Int::class.java)!!
+                                            foundMemory = dataSnapshot.child("memory").getValue(String::class.java)!!.toFloat()
+                                            totalMemory = dataSnapshot.child("total_memory").getValue(Int::class.java)!!
                                         }
                                         else{
                                             isFoundValue = false
@@ -161,22 +162,15 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                             isFoundValue = false
                                         }
                                     }
-//                                    for (postSnapshot in dataSnapshot.children) {
-//                                        previouskey = postSnapshot.key as String
-//                                        val item =
-//                                            postSnapshot.getValue(Feature::class.java) as Feature
-//                                        if (item.name == feature.name) {
-//                                            foundFeature = item
-//                                            break
-//                                        }
-//                                    }
 
                                     if (isFoundValue) {
 //                                        reference.removeEventListener(listener!!)
                                         if (feature.name.contains("storage")){
-                                            val totalMemory = foundMemory + feature.memory
-                                            feature.memory = totalMemory
-                                            params["memory"] = totalMemory
+                                            val tMemory = foundMemory + feature.memory
+                                            val total = totalMemory + feature.memory
+                                            feature.memory = tMemory
+                                            params["memory"] = tMemory.toString()
+                                            params["total_memory"] = total
                                         }
                                         else{
                                             feature.createdAt = System.currentTimeMillis()
@@ -208,9 +202,10 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                     } else {
 //                                        reference.removeEventListener(listener!!)
                                         if (feature.name.contains("storage")){
-                                            val totalMemory = feature.memory
-                                            feature.memory = totalMemory
-                                            params["memory"] = totalMemory
+                                            val tMemory = feature.memory
+                                            feature.memory = tMemory
+                                            params["memory"] = tMemory.toString()
+                                            params["total_memory"] = tMemory
                                         }
                                         else{
                                             feature.createdAt = System.currentTimeMillis()
@@ -245,9 +240,10 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                 else{
 //                                    reference.removeEventListener(listener!!)
                                     if (feature.name.contains("storage")){
-                                        val totalMemory = feature.memory
-                                        feature.memory = totalMemory
-                                        params["memory"] = totalMemory
+                                        val tMemory = feature.memory
+                                        feature.memory = tMemory
+                                        params["memory"] = tMemory.toString()
+                                        params["total_memory"] = tMemory
                                     }
                                     else {
                                         feature.createdAt = System.currentTimeMillis()

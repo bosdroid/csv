@@ -7,6 +7,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
@@ -37,6 +39,7 @@ import java.util.*
 
 
 open class BaseActivity : AppCompatActivity() {
+
 
     companion object {
         private var prDownloader: DownloadRequest? = null
@@ -312,7 +315,7 @@ open class BaseActivity : AppCompatActivity() {
                 val userId = auth.currentUser!!.uid
                 Constants.firebaseUserId = userId
                 var duration:Int = 0
-                var memory :Int = 0
+                var memory :Float = 0F
                 var expiredAt:Long = 0
                 firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                     .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
@@ -323,14 +326,14 @@ open class BaseActivity : AppCompatActivity() {
                             }
 
                             if (snapshot.hasChildren() && snapshot.hasChild("memory")) {
-                                memory = snapshot.child("memory").getValue(Int::class.java)!!
+                                memory = snapshot.child("memory").getValue(String::class.java)!!.toFloat()
                             }
 
                             if (snapshot.hasChildren() && snapshot.hasChild("expiredAt")) {
                                 expiredAt = snapshot.child("expiredAt").getValue(Long::class.java)!!
                             }
                             appSettings.putInt(Constants.duration,duration)
-                            appSettings.putInt(Constants.memory,memory)
+                            appSettings.putString(Constants.memory,memory.toString())
                             appSettings.putLong(Constants.expiredAt,expiredAt)
                         }
 

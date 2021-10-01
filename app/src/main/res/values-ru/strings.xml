@@ -381,6 +381,15 @@
     <string name="storage_available_error_text">Available storage not available, Buy more to save images.</string>
     <string name="subscription_expired_text">Your product subscription has been expired!</string>
     <string name="columns_names_different_error_text">Do you want to create a new spreadsheet to save data? Because format of *name is not correct</string>
+    <string name="user_screen">User Screen</string>
+    <string name="us_package_heading_text">Subscription Details</string>
+	<string name="available_storage_space_text">Storage Space:</string>
+	<string name="duration_text">Duration:</string>
+	<string name="expired_at_text">Expired At:</string>
+    <string name="scan_data_text">Scan Data</string>
+    <string name="barcode_data_format_error_text">Barcode data format not corrected!</string>
+    <string name="google_sheet_empty_list_error">Your account have not google sheet for saving data, would you like to create a new empty sheet file?</string>
+    <string name="buy_storage_text">BUY STORAGE</string>
 
 
     <string-array name="mode_list">

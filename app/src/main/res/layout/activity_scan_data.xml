@@ -1,24 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fillViewport="true">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".view.activities.ScanDataActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fff"
+            android:elevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:gravity="center_vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="@dimen/eightDpMargin"
+            android:id="@+id/scan_data_parent_layout"
             android:padding="10dp"
             >
 
@@ -42,7 +64,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_margin="@dimen/eightDpMargin"
-                android:visibility="gone"
                 android:baselineAligned="false">
 
                 <LinearLayout
@@ -144,13 +165,13 @@
                 android:id="@+id/image_layout_wrapper"
                 android:layout_marginTop="@dimen/eightDpMargin"
                 >
-             <com.google.android.material.checkbox.MaterialCheckBox
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:text="@string/add_product_image"
-                 android:layout_gravity="center_horizontal"
-                 android:id="@+id/add_image_checkbox"
-                 />
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_product_image"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/add_image_checkbox"
+                    />
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -215,17 +236,59 @@
                     android:text=""/>
             </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/submit"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:id="@+id/scan_result_dialog_submit_btn"
-                    />
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/submit"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:id="@+id/scan_result_dialog_submit_btn"
+                />
 
         </LinearLayout>
 
 
+
+<!--        <com.github.clans.fab.FloatingActionMenu-->
+<!--            android:id="@+id/menu_yellow"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            android:layout_margin="@dimen/sixtyDpMargin"-->
+<!--            app:menu_labels_style="@style/MenuLabelsStyle"-->
+<!--            app:menu_labels_showAnimation="@anim/jump_from_down"-->
+<!--            app:menu_labels_hideAnimation="@anim/jump_to_down"-->
+<!--            app:menu_animationDelayPerItem="0"-->
+<!--            app:menu_shadowColor="#444"-->
+<!--            app:menu_colorNormal="#FFB805"-->
+<!--            app:menu_colorPressed="#F2AB00"-->
+<!--            app:menu_colorRipple="#D99200">-->
+
+<!--            <com.github.clans.fab.FloatingActionButton-->
+<!--                android:id="@+id/fab12"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_edit"-->
+<!--                app:fab_label="Menu item 1"-->
+<!--                style="@style/MenuButtonsStyle" />-->
+
+<!--            <com.github.clans.fab.FloatingActionButton-->
+<!--                android:id="@+id/fab22"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_edit"-->
+<!--                app:fab_label="Menu item 2"-->
+<!--                style="@style/MenuButtonsStyle" />-->
+
+<!--            <com.github.clans.fab.FloatingActionButton-->
+<!--                android:id="@+id/fab32"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_edit"-->
+<!--                app:fab_label="Menu item 3"-->
+<!--                style="@style/MenuButtonsStyle" />-->
+
+<!--        </com.github.clans.fab.FloatingActionMenu>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -95,12 +95,12 @@ class Constants {
             return File(context.externalCacheDir, LOGO_IMAGE_PATH)
         }
 
-        fun convertBytesToMegaBytes(bytes: Long): Int {
-            return (bytes / megaByte).toInt()
+        fun convertBytesToMegaBytes(bytes: Float): Float {
+            return (bytes / megaByte)
         }
 
-        fun convertMegaBytesToBytes(megaBytes: Int): Int {
-            return (megaBytes * 1048576).toInt()
+        fun convertMegaBytesToBytes(megaBytes: Float): Float {
+            return (megaBytes * 1048576)
         }
 
         private fun verifyValidSignature(signedData: String, signature: String): Boolean {

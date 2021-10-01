@@ -43,7 +43,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.PurchaseFeatureActivity"></activity>
+        <activity
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:name=".view.activities.ScanDataActivity"/>
+        <activity android:name=".view.activities.UserScreenActivity" />
+        <activity android:name=".view.activities.PurchaseFeatureActivity" />
         <activity android:name=".view.activities.OcrActivity" />
         <activity android:name=".view.activities.CreditActivity" />
 

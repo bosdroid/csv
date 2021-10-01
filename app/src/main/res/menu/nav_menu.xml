@@ -28,6 +28,13 @@
                     />
 
                 <item
+                    android:icon="@drawable/ic_user"
+                    android:id="@+id/user_screen"
+                    android:title="@string/user_screen"
+                    android:visible="false"
+                    />
+
+                <item
                     android:title="@string/credits"
                     android:id="@+id/credit"
                     android:icon="@drawable/ic_credit"

@@ -68,6 +68,7 @@ import com.google.api.services.sheets.v4.SheetsScopes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import java.util.*
@@ -99,7 +100,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private var requestLogin: String? = null
     private var scannerFragment: ScannerFragment? = null
     private var callback: LoginCallback? = null
-
+    private lateinit var firebaseDatabase: DatabaseReference
 
     companion object {
         lateinit var context: Context
@@ -150,6 +151,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private fun initViews() {
         context = this
         appSettings = AppSettings(context)
+        firebaseDatabase = FirebaseDatabase.getInstance().reference
         scannerFragment = ScannerFragment()
         auth = Firebase.auth
         viewModel = ViewModelProviders.of(
@@ -411,6 +413,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     startLogin()
                 }
 
+            }
+            R.id.user_screen -> {
+                startActivity(Intent(context, UserScreenActivity::class.java))
             }
             R.id.credit -> {
                 startActivity(Intent(context, CreditActivity::class.java))
@@ -727,16 +732,13 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = true
             mNavigation.menu.findItem(R.id.credit).isVisible = true
+            mNavigation.menu.findItem(R.id.user_screen).isVisible = true
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = true
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
             getUserCredits(context)
             getCurrentSubscriptionDetail(context)
-            Constants.getFirebaseStorageSize(object :FirebaseStorageCallback{
-                override fun onSize(bytes: Long) {
-                    Log.d("TEST199SIZE","$bytes")
-                }
-            })
+            add5MbFreeStorage()
 
         } else {
             mNavigation.menu.findItem(R.id.login).isVisible = true
@@ -744,9 +746,68 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = false
             mNavigation.menu.findItem(R.id.credit).isVisible = false
+            mNavigation.menu.findItem(R.id.user_screen).isVisible = false
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
+        }
+    }
+
+    private fun add5MbFreeStorage(){
+        if (!appSettings.getBoolean("is_first_time")){
+            val params = HashMap<String,Any>()
+
+            var totalMemory = 0
+            var foundMemory:Float = 0F
+            var isFoundValue = false
+            val auth = FirebaseAuth.getInstance()
+            if (auth.currentUser != null) {
+                val id = auth.uid as String
+                Constants.firebaseUserId = id
+                val reference = firebaseDatabase.child(Constants.firebaseUserFeatureDetails).child(id)
+                reference.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if (dataSnapshot.hasChild("memory")) {
+                                isFoundValue = true
+                                foundMemory =
+                                    dataSnapshot.child("memory").getValue(String::class.java)!!
+                                        .toFloat()
+                                totalMemory =
+                                    dataSnapshot.child("total_memory").getValue(Int::class.java)!!
+                            } else {
+                                isFoundValue = false
+                            }
+
+                            if (isFoundValue) {
+                                val tMemory = foundMemory + 5
+                                val total = totalMemory + 5
+                                params["memory"] = tMemory
+                                params["total_memory"] = total
+                            } else {
+                                params["memory"] = "5"
+                                params["total_memory"] = 5
+                            }
+
+                            firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
+                                .child(id)
+                                .setValue(params)
+                            appSettings.putBoolean("is_first_time", true)
+                        } else {
+                            params["memory"] = "5"
+                            params["total_memory"] = 5
+
+                            firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
+                                .child(id)
+                                .setValue(params)
+                            appSettings.putBoolean("is_first_time", true)
+                        }
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                    }
+                })
+            }
         }
     }
 
