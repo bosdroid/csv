@@ -223,6 +223,15 @@
                     android:id="@+id/scan_result_dialog_submit_btn"
                     />
 
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel_text"
+                app:backgroundTint="@color/secondary_positive_color"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:id="@+id/scan_result_dialog_cancel_btn"
+                />
+
         </LinearLayout>
 
 

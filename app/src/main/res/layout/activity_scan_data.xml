@@ -244,51 +244,10 @@
                 android:id="@+id/scan_result_dialog_submit_btn"
                 />
 
+
         </LinearLayout>
 
 
-
-<!--        <com.github.clans.fab.FloatingActionMenu-->
-<!--            android:id="@+id/menu_yellow"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            android:layout_margin="@dimen/sixtyDpMargin"-->
-<!--            app:menu_labels_style="@style/MenuLabelsStyle"-->
-<!--            app:menu_labels_showAnimation="@anim/jump_from_down"-->
-<!--            app:menu_labels_hideAnimation="@anim/jump_to_down"-->
-<!--            app:menu_animationDelayPerItem="0"-->
-<!--            app:menu_shadowColor="#444"-->
-<!--            app:menu_colorNormal="#FFB805"-->
-<!--            app:menu_colorPressed="#F2AB00"-->
-<!--            app:menu_colorRipple="#D99200">-->
-
-<!--            <com.github.clans.fab.FloatingActionButton-->
-<!--                android:id="@+id/fab12"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:src="@drawable/ic_edit"-->
-<!--                app:fab_label="Menu item 1"-->
-<!--                style="@style/MenuButtonsStyle" />-->
-
-<!--            <com.github.clans.fab.FloatingActionButton-->
-<!--                android:id="@+id/fab22"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:src="@drawable/ic_edit"-->
-<!--                app:fab_label="Menu item 2"-->
-<!--                style="@style/MenuButtonsStyle" />-->
-
-<!--            <com.github.clans.fab.FloatingActionButton-->
-<!--                android:id="@+id/fab32"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:src="@drawable/ic_edit"-->
-<!--                app:fab_label="Menu item 3"-->
-<!--                style="@style/MenuButtonsStyle" />-->
-
-<!--        </com.github.clans.fab.FloatingActionMenu>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

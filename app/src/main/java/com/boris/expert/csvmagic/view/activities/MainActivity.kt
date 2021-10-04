@@ -10,6 +10,8 @@ import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.StrictMode
 import android.text.method.LinkMovementMethod
 import android.util.Log
@@ -504,8 +506,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mGoogleSignInClient.signOut().addOnCompleteListener(this) {
                 FirebaseAuth.getInstance().signOut()
                 dismiss()
-                appSettings.remove(Constants.isLogin)
-                appSettings.remove(Constants.user)
+                appSettings.clear()
+//                appSettings.remove(Constants.isLogin)
+//                appSettings.remove(Constants.user)
                 Toast.makeText(context, getString(R.string.logout_success_text), Toast.LENGTH_SHORT)
                     .show()
                 Constants.userData = null
@@ -738,7 +741,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
             getUserCredits(context)
             getCurrentSubscriptionDetail(context)
-            add5MbFreeStorage()
+            Handler(Looper.myLooper()!!).postDelayed({
+                add5MbFreeStorage()
+            },5000)
+
 
         } else {
             mNavigation.menu.findItem(R.id.login).isVisible = true
@@ -755,7 +761,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun add5MbFreeStorage(){
         if (!appSettings.getBoolean("is_first_time")){
-            val params = HashMap<String,Any>()
 
             var totalMemory = 0
             var foundMemory:Float = 0F
@@ -764,8 +769,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             if (auth.currentUser != null) {
                 val id = auth.uid as String
                 Constants.firebaseUserId = id
-                val reference = firebaseDatabase.child(Constants.firebaseUserFeatureDetails).child(id)
-                reference.addListenerForSingleValueEvent(object : ValueEventListener {
+
+            firebaseDatabase.child(Constants.firebaseUserFeatureDetails).child(id)
+                .addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         if (dataSnapshot.exists()) {
                             if (dataSnapshot.hasChild("memory")) {
@@ -778,34 +784,55 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             } else {
                                 isFoundValue = false
                             }
-
+                            val params = HashMap<String,Any>()
                             if (isFoundValue) {
                                 val tMemory = foundMemory + 5
                                 val total = totalMemory + 5
-                                params["memory"] = tMemory
+                                params["memory"] = tMemory.toString()
                                 params["total_memory"] = total
                             } else {
-                                params["memory"] = "5"
+                                params["memory"] = 5.toString()
                                 params["total_memory"] = 5
                             }
 
                             firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                                 .child(id)
                                 .setValue(params)
-                            appSettings.putBoolean("is_first_time", true)
+                                .addOnSuccessListener {
+                                    // Write was successful!
+                                    // ...
+                                    appSettings.putBoolean("is_first_time", true)
+                                }
+                                .addOnFailureListener {
+                                    // Write failed
+                                    // ...
+                                    Log.d("TEST199",it.localizedMessage!!)
+                                }
                         } else {
-                            params["memory"] = "5"
+                            val params = HashMap<String,Any>()
+                            params["memory"] = 5.toString()
                             params["total_memory"] = 5
 
                             firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                                 .child(id)
                                 .setValue(params)
-                            appSettings.putBoolean("is_first_time", true)
+                                .addOnSuccessListener {
+                                    // Write was successful!
+                                    // ...
+                                    appSettings.putBoolean("is_first_time", true)
+                                }
+                                .addOnFailureListener {
+                                    // Write failed
+                                    // ...
+                                    Log.d("TEST199",it.localizedMessage!!)
+                                }
                         }
                     }
 
-                    override fun onCancelled(databaseError: DatabaseError) {
+                    override fun onCancelled(error: DatabaseError) {
+
                     }
+
                 })
             }
         }

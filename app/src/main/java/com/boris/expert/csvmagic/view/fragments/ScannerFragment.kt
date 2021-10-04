@@ -98,6 +98,7 @@ import kotlin.collections.HashMap
 class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     View.OnFocusChangeListener {
 
+    private var availableStorageMemory: Float = 0F
     private var numRows: Int = 0
     private var customAlertDialog: CustomAlertDialog? = null
     private var updateInputBox: CustomTextInputEditText? = null
@@ -556,6 +557,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<LinearLayout>(R.id.table_detail_layout_wrapper)
                     val submitBtn =
                         scanResultLayout.findViewById<MaterialButton>(R.id.scan_result_dialog_submit_btn)
+                    val scanResultCancelBtn =
+                        scanResultLayout.findViewById<MaterialButton>(R.id.scan_result_dialog_cancel_btn)
                     addImageCheckBox =
                         scanResultLayout.findViewById<MaterialCheckBox>(R.id.add_image_checkbox)
                     val severalImagesHintView =
@@ -780,6 +783,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     alert = builder.create()
                     alert.show()
 
+                    scanResultCancelBtn.setOnClickListener {
+                        alert.dismiss()
+                        codeScanner!!.startPreview()
+                    }
+
                     if (appSettings.getBoolean(getString(R.string.key_tips))) {
                         val duration = appSettings.getLong("tt2")
                         if (duration.compareTo(0) == 0 || System.currentTimeMillis() - duration > TimeUnit.DAYS.toMillis(
@@ -802,16 +810,28 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         }
                     }
                     submitBtn.setOnClickListener {
-                        val availableStorageMemory = Constants.convertMegaBytesToBytes(
-                            appSettings.getString(
-                                Constants.memory
-                            )!!.toFloat()
-                        )
+                          if (Constants.userData != null){
+                              availableStorageMemory =
+                                  if (appSettings.getString(Constants.memory)!!.isEmpty()){
+                                      0F
+                                  } else{
+                                      Constants.convertMegaBytesToBytes(
+                                          appSettings.getString(
+                                              Constants.memory
+                                          )!!.toFloat()
+                                      )
+                                  }
+                          }
 
-                        if(!checkBothListSame()){
-                            createNewSpreadsheetDialog(tableName)
-                        }
-                        else if (totalImageSize.toInt() == 0) {
+//                        if(!checkBothListSame()){
+//                            createNewSpreadsheetDialog(tableName)
+//                        }
+//                        else
+                            if(totalImageSize.toInt() == 0){
+                                alert.dismiss()
+                                saveDataIntoTable()
+                            }
+                            else if (addImageCheckBox.isChecked && totalImageSize.toInt() == 0) {
                             alert.dismiss()
                             saveDataIntoTable()
                         } else if (addImageCheckBox.isChecked && totalImageSize <= availableStorageMemory) {
@@ -861,6 +881,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                         }
                     }
+
                 }
             } else {
                 val bundle = Bundle()
@@ -1273,16 +1294,16 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                                                 tableDetailLayoutWrapper.removeAllViews()
                                                 filePathView!!.setText("")
-                                                val tempList = mutableListOf<Any>()
-                                                for (i in 0 until params.size) {
-                                                    val pair = params[i]
-                                                    //values_JSON.put(pair.second)
-                                                    tempList.add(pair.second)
-                                                }
-                                                if (tempList.size > 0) {
-                                                    // sendRequest()
-                                                    appendRow(tempList)
-                                                }
+//                                                val tempList = mutableListOf<Any>()
+//                                                for (i in 0 until params.size) {
+//                                                    val pair = params[i]
+//                                                    //values_JSON.put(pair.second)
+//                                                    tempList.add(pair.second)
+//                                                }
+//                                                if (tempList.size > 0) {
+//                                                    // sendRequest()
+//                                                    appendRow(tempList)
+//                                                }
                                                 params.clear()
                                                 val bundle = Bundle()
                                                 bundle.putString("success", "success")
@@ -1349,25 +1370,25 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 codeScanner!!.startPreview()
                                 filePathView!!.setText("")
 //                                openHistoryBtnTip()
-                                if (Constants.userData != null) {
-                                    val tempList = mutableListOf<Any>()
-                                    for (i in 0 until params.size) {
-                                        val pair = params[i]
-                                        //values_JSON.put(pair.second)
-                                        tempList.add(pair.second)
-                                    }
-                                    if (tempList.size > 0) {
-                                        // sendRequest()
-                                        appendRow(tempList)
-                                    }
+//                                if (Constants.userData != null) {
+//                                    val tempList = mutableListOf<Any>()
 //                                    for (i in 0 until params.size) {
 //                                        val pair = params[i]
-//                                        values_JSON.put(pair.second)
+//                                        //values_JSON.put(pair.second)
+//                                        tempList.add(pair.second)
 //                                    }
-//                                    if (values_JSON.length() > 0) {
-//                                        sendRequest()
+//                                    if (tempList.size > 0) {
+//                                        // sendRequest()
+//                                        appendRow(tempList)
 //                                    }
-                                }
+////                                    for (i in 0 until params.size) {
+////                                        val pair = params[i]
+////                                        values_JSON.put(pair.second)
+////                                    }
+////                                    if (values_JSON.length() > 0) {
+////                                        sendRequest()
+////                                    }
+//                                }
                                 params.clear()
                             }, 1000)
                         }
@@ -1702,7 +1723,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     if (userRecoverableAuthType == 0) {
                         saveDataIntoTable()
                     } else {
-                        getAllSheets()
+                        //getAllSheets()
                     }
 
                 }
@@ -1799,7 +1820,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         startScanner()
         getTableList()
         getModeList()
-        getAllSheets()
+        //getAllSheets()
         val flag = appSettings.getBoolean(requireActivity().getString(R.string.key_tips))
         if (flag) {
             tipsSwitchBtn.setText(requireActivity().getString(R.string.tip_switch_on_text))
