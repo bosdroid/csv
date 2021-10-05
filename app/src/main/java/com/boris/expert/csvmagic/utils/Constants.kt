@@ -86,6 +86,7 @@ class Constants {
         val RECEIVER_INTENT = "RECEIVER_INTENT"
         val RECEIVER_MESSAGE = "RECEIVER_MESSAGE"
         const val megaByte: Long = 1024L * 1024L
+        var isDefaultTableFieldAdded:Boolean = false
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)

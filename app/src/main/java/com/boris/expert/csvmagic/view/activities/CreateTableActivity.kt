@@ -24,6 +24,7 @@ import com.boris.expert.csvmagic.adapters.FieldListsAdapter
 import com.boris.expert.csvmagic.model.ListItem
 import com.boris.expert.csvmagic.room.AppViewModel
 import com.boris.expert.csvmagic.utils.AppSettings
+import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.TableGenerator
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -61,6 +62,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     private var fieldType:String = "none"
     private lateinit var scrollCreateTable:ScrollView
     private lateinit var appSettings: AppSettings
+    private var from = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +86,9 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
         scrollCreateTable = findViewById(R.id.scroll_create_table)
         if (intent != null && intent.hasExtra("TABLE_NAME")) {
             tableName = intent.getStringExtra("TABLE_NAME")!!
+        }
+        if (intent != null && intent.hasExtra("FROM")) {
+            from = intent.getStringExtra("FROM")!!
         }
         createTableFieldHint = findViewById(R.id.create_table_fields_hint)
         createTableFieldHint.text = "${getString(R.string.create_table_fields_hint_text)}"
@@ -490,10 +495,18 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.field_finish_btn -> {
-                val intent = Intent(context, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-                finish()
+                if (from.isNotEmpty() && from == "scan_dialog"){
+                    Constants.isDefaultTableFieldAdded = true
+                   finish()
+                }
+                else{
+                    Constants.isDefaultTableFieldAdded = false
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                }
+
             }
             R.id.list_with_fields_btn -> {
                 openListWithFieldsDialog()

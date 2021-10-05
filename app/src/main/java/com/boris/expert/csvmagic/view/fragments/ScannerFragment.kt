@@ -98,6 +98,8 @@ import kotlin.collections.HashMap
 class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     View.OnFocusChangeListener {
 
+    private var codeDataTInputView: CustomTextInputEditText?=null
+    private var columns: Array<String>?=null
     private var availableStorageMemory: Float = 0F
     private var numRows: Int = 0
     private var customAlertDialog: CustomAlertDialog? = null
@@ -142,6 +144,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private var userRecoverableAuthType = 0
     private var selectedSheetId: String = ""
     private var selectedSheetName: String = ""
+    private var scannedText:String = ""
     private lateinit var connectGoogleSheetsTextView: MaterialTextView
     private lateinit var sheetsTopLayout: LinearLayout
     var values: List<Any>? = null
@@ -548,10 +551,10 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 //                            putExtra("SHEET_ID", selectedSheetId)
 //                        })
 
-                    val columns = tableGenerator.getTableColumns(tableName)
+                    columns = tableGenerator.getTableColumns(tableName)
                     val scanResultLayout = LayoutInflater.from(requireActivity())
                         .inflate(R.layout.scan_result_dialog, null)
-                    val codeDataTInputView =
+                    codeDataTInputView =
                         scanResultLayout.findViewById<CustomTextInputEditText>(R.id.scan_result_dialog_code_data)
                     tableDetailLayoutWrapper =
                         scanResultLayout.findViewById<LinearLayout>(R.id.table_detail_layout_wrapper)
@@ -559,6 +562,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<MaterialButton>(R.id.scan_result_dialog_submit_btn)
                     val scanResultCancelBtn =
                         scanResultLayout.findViewById<MaterialButton>(R.id.scan_result_dialog_cancel_btn)
+                    val scanResultAddFieldBtn =
+                        scanResultLayout.findViewById<MaterialButton>(R.id.scan_result_dialog_add_field_btn)
                     addImageCheckBox =
                         scanResultLayout.findViewById<MaterialCheckBox>(R.id.add_image_checkbox)
                     val severalImagesHintView =
@@ -577,6 +582,13 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<AppCompatImageView>(R.id.more_btn)
                     moreBtnView.setOnClickListener {
                         openDialog()
+                    }
+
+                    scanResultAddFieldBtn.setOnClickListener {
+                        requireActivity().startActivity(Intent(requireActivity(),CreateTableActivity::class.java).apply {
+                            putExtra("TABLE_NAME",tableName)
+                            putExtra("FROM","scan_dialog")
+                        })
                     }
 
                     imageRecognitionBtn.setOnClickListener {
@@ -669,14 +681,13 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             )
                         }
                     }
-
                     for (i in columns!!.indices) {
-                        val value = columns[i]
+                        val value = columns!![i]
                         if (value == "id" || value == "quantity") {
                             continue
                         } else if (value == "code_data") {
-                            textInputIdsList.add(Pair(value, codeDataTInputView))
-                            codeDataTInputView.setText(text)
+                            textInputIdsList.add(Pair(value, codeDataTInputView!!))
+                            codeDataTInputView!!.setText(text)
                         } else {
                             val tableRowLayout =
                                 LayoutInflater.from(requireContext())
@@ -772,6 +783,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             tableDetailLayoutWrapper.addView(tableRowLayout)
                         }
                     }
+
+//                    renderTableColumnViews()
 
                     for (i in 0 until textInputIdsList.size) {
                         textInputIdsList[i].second.onFocusChangeListener = this
@@ -963,6 +976,112 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
             }
         }
     }
+
+    private fun renderTableColumnViews() {
+
+        val updatedColumns = mutableListOf<String>()
+
+        updatedColumns.addAll(tableGenerator.getTableColumns(tableName)!!)
+        updatedColumns.removeAll(columns!!)
+
+        for (i in updatedColumns.indices) {
+            val value = updatedColumns[i]
+
+                val tableRowLayout =
+                    LayoutInflater.from(requireContext())
+                        .inflate(
+                            R.layout.scan_result_table_row_layout,
+                            null
+                        )
+                val columnName =
+                    tableRowLayout.findViewById<MaterialTextView>(R.id.table_column_name)
+                val columnValue =
+                    tableRowLayout.findViewById<CustomTextInputEditText>(R.id.table_column_value)
+                val columnDropdown =
+                    tableRowLayout.findViewById<AppCompatSpinner>(R.id.table_column_dropdown)
+                val columnDropDwonLayout =
+                    tableRowLayout.findViewById<LinearLayout>(R.id.table_column_dropdown_layout)
+                columnName.text = value
+                val moreBtn =
+                    tableRowLayout.findViewById<AppCompatImageView>(R.id.table_more_btn)
+                moreBtn.setOnClickListener {
+                    openDialog()
+                }
+                val pair = tableGenerator.getFieldList(value, tableName)
+
+                if (pair != null) {
+                    arrayList = mutableListOf()
+                    if (!pair.first.contains(",") && pair.second == "listWithValues") {
+                        arrayList.add(pair.first)
+                        moreBtn.visibility = View.INVISIBLE
+                        columnValue.visibility = View.GONE
+                        columnDropDwonLayout.visibility = View.VISIBLE
+                        val adapter = ArrayAdapter(
+                            requireContext(),
+                            android.R.layout.simple_spinner_item,
+                            arrayList
+                        )
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        columnDropdown.adapter = adapter
+                        spinnerIdsList.add(Pair(value, columnDropdown))
+                    } else if (pair.first.contains(",") && pair.second == "listWithValues") {
+
+                        arrayList.addAll(pair.first.split(","))
+                        moreBtn.visibility = View.INVISIBLE
+                        columnValue.visibility = View.GONE
+                        columnDropDwonLayout.visibility = View.VISIBLE
+                        val adapter = ArrayAdapter(
+                            requireContext(),
+                            android.R.layout.simple_spinner_item,
+                            arrayList
+                        )
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        columnDropdown.adapter = adapter
+                        spinnerIdsList.add(Pair(value, columnDropdown))
+                    } else {
+                        moreBtn.visibility = View.VISIBLE
+                        columnDropDwonLayout.visibility = View.GONE
+                        columnValue.visibility = View.VISIBLE
+                        columnValue.setText(
+                            pair.first
+                        )
+                        columnValue.isEnabled = false
+                        columnValue.isFocusable = false
+                        columnValue.isFocusableInTouchMode = false
+                    }
+
+                } else {
+                    if (value == "image") {
+                        textInputIdsList.add(Pair(value, columnValue))
+                        continue
+                    }
+                    moreBtn.visibility = View.VISIBLE
+                    columnDropDwonLayout.visibility = View.GONE
+                    columnValue.visibility = View.VISIBLE
+
+                    if (value == "date") {
+                        columnValue.setText(
+                            BaseActivity.getDateTimeFromTimeStamp(
+                                System.currentTimeMillis()
+                            )
+                        )
+                        moreBtn.visibility = View.INVISIBLE
+                        columnValue.isEnabled = false
+                        columnValue.isFocusable = false
+                        columnValue.isFocusableInTouchMode = false
+                    } else {
+                        moreBtn.visibility = View.VISIBLE
+                        columnValue.isEnabled = true
+                        columnValue.isFocusable = true
+//                                    columnValue.isFocusableInTouchMode = true
+                        columnValue.setText("")
+                    }
+                    textInputIdsList.add(Pair(value, columnValue))
+                }
+                tableDetailLayoutWrapper.addView(tableRowLayout)
+        }
+    }
+
 
     fun pickImageFromGallery() {
         val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -1855,6 +1974,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 //                }
                 }
             })
+
+        if (Constants.isDefaultTableFieldAdded){
+            Constants.isDefaultTableFieldAdded = false
+            renderTableColumnViews()
+        }
     }
 
 
