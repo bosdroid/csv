@@ -325,6 +325,7 @@ open class BaseActivity : AppCompatActivity() {
                                 duration = snapshot.child("duration").getValue(Int::class.java)!!
                             }
 
+
                             if (snapshot.hasChildren() && snapshot.hasChild("memory")) {
                                 memory = snapshot.child("memory").getValue(String::class.java)!!.toFloat()
                             }
