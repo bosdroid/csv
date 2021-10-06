@@ -45,7 +45,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
     private lateinit var regularPackageBtn: AppCompatButton
     private lateinit var premiumPackageBtn: AppCompatButton
     private lateinit var appSettings: AppSettings
-    private var minimumProductId = ""
+    private var productId = ""
     private var featureList = mutableListOf<Feature>()
     private lateinit var featuresRecyclerView: RecyclerView
     private lateinit var totalCreditsView: MaterialTextView
@@ -86,7 +86,6 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
         regularPackageBtn.setOnClickListener(this)
         premiumPackageBtn = findViewById(R.id.premium_package_btn)
         premiumPackageBtn.setOnClickListener(this)
-        minimumProductId = getString(R.string.minimum_product_id)
         totalCreditsView = findViewById(R.id.total_credits_view)
     }
 
@@ -126,7 +125,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
                         userId,
                         purchase.orderId,
                         purchase.packageName,
-                        "single_credit",
+                        productId,
                         purchase.purchaseTime,
                         purchase.purchaseToken
                     )
@@ -181,7 +180,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
         viewModel.callPurchase(
             context,
             context.packageName,
-            "single_credit",
+            productId,
             purchaseDetail!!.purchaseToken
         )
         viewModel.getPurchaseResponse().observe(this, { response ->
@@ -238,6 +237,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.minimum_package_btn -> {
+                productId = "single_credit"
                 if (auth.currentUser != null) {
                     creditsValue = 1
                     userId = auth.currentUser!!.uid
@@ -248,10 +248,26 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
                 }
             }
             R.id.regular_package_btn -> {
+                productId = "six_credits"
+                if (auth.currentUser != null) {
+                    creditsValue = 1
+                    userId = auth.currentUser!!.uid
+                    purchase()
 
+                } else {
+                    showAlert(context, getString(R.string.user_session_expired))
+                }
             }
             R.id.premium_package_btn -> {
+                productId = "ten_credits"
+                if (auth.currentUser != null) {
+                    creditsValue = 1
+                    userId = auth.currentUser!!.uid
+                    purchase()
 
+                } else {
+                    showAlert(context, getString(R.string.user_session_expired))
+                }
             }
             else -> {
 
@@ -293,6 +309,8 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
     private fun initiatePurchase() {
         val skuList: MutableList<String> = ArrayList()
         skuList.add("single_credit")
+        skuList.add("six_credits")
+        skuList.add("ten_credits")
         val params = SkuDetailsParams.newBuilder()
         params.setSkusList(skuList).setType(INAPP)
 
@@ -326,7 +344,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
     private fun handlePurchases(purchases: List<Purchase>) {
         for (purchase in purchases) {
             //if item is purchased
-            if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            if (purchase.skus.equals(productId) && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                 if (!verifyValidSignature(purchase.originalJson, purchase.signature)) {
                     // Invalid purchase
                     // show error to user
@@ -361,14 +379,14 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
                 }
             }
             //if purchase is pending
-            else if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.PENDING) {
+            else if (purchase.skus.equals(productId) && purchase.purchaseState == Purchase.PurchaseState.PENDING) {
 //                Toast.makeText(
 //                    applicationContext,
 //                    "Purchase is Pending. Please complete Transaction", Toast.LENGTH_SHORT
 //                ).show()
             }
             //if purchase is refunded or unknown
-            else if (purchase.skus.equals("single_credit") && purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
+            else if (purchase.skus.equals(productId) && purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
 //                savePurchaseValueToPref(false)
 //                purchaseStatus!!.text = "Purchase Status : Not Purchased"
 //                purchaseButton!!.visibility = View.VISIBLE

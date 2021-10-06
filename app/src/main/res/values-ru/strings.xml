@@ -358,7 +358,7 @@
     <string name="minimum_package_btn">Минимум 1 КРЕДИТ</string>
     <string name="package_heading_text">Выберите кредитный пакет</string>
 	<string name="regular_package_btn">Обычные 6 КРЕДИТОВ</string>
-	<string name="premium_package_btn">Премиум 12 КРЕДИТОВ</string>
+	<string name="premium_package_btn">Премиум 10 КРЕДИТОВ</string>
     <string name="image_recognition_text">Распознавание изображений</string>
 	<string name="photo_recognition_text">Распознавание фотографий</string>
     <string name="choose_image_gallery">Выбрать изображение из галереи</string>
