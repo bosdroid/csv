@@ -108,4 +108,8 @@ class TableGenerator(context: Context) {
     fun createTable(tableName: String,fieldsList: ArrayList<String>){
         database.createTable(tableName,fieldsList)
     }
+
+    fun isFieldExist(tableName: String, fieldName: String):Boolean{
+        return database.isFieldExist(tableName,fieldName)
+    }
 }

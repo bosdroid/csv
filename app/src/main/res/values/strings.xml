@@ -404,6 +404,7 @@
     <string name="google_sheet_empty_list_error">Your account have not google sheet for saving data, would you like to create a new empty sheet file?</string>
     <string name="buy_storage_text">BUY STORAGE</string>
     <string name="add_new_field_below_text">ADD NEW FIELD BELOW</string>
+    <string name="field_exist_error_text">field name already exist in the table</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

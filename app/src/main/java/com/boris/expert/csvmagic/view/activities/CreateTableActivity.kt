@@ -513,42 +513,53 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
             }
             R.id.field_submit_btn -> {
                 if (validation()) {
-                    startLoading(context)
                     val fieldName = tableNewFieldNameTInput.text.toString().trim().toLowerCase(
                         Locale.ENGLISH
                     ).replace(" ", "_")
-                    if (fieldType == "none") {
-                        tableGenerator.addNewColumn(
-                            tableName,
-                            Pair(fieldName, "TEXT"),
-                            ""
-                        )
-                    } else if (fieldType == "nonChangeable") {
-                        defaultColumnValue = defaultValueFieldTInput.text.toString().trim()
-                        tableGenerator.addNewColumn(
-                            tableName,
-                            Pair(fieldName, "TEXT"),
-                            defaultColumnValue
-                        )
-                        tableGenerator.insertFieldList(
-                            fieldName,
-                            tableName,
-                            defaultColumnValue,
-                            "non_changeable"
-                        )
-                    } else if (fieldType == "listWithValues") {
-                        tableGenerator.addNewColumn(
-                            tableName,
-                            Pair(fieldName, "TEXT"),
-                            ""
-                        )
-                        val listOptions: String = tableGenerator.getListValues(listId!!)
-                        tableGenerator.insertFieldList(
-                            fieldName,
-                            tableName,
-                            listOptions,
-                            "listWithValues"
-                        )
+                    if (tableGenerator.isFieldExist(tableName, fieldName)) {
+                          showAlert(context,"*$fieldName ${getString(R.string.field_exist_error_text)}")
+                    }
+                    else
+                    {
+
+                    startLoading(context)
+
+                    when (fieldType) {
+                        "none" -> {
+                            tableGenerator.addNewColumn(
+                                tableName,
+                                Pair(fieldName, "TEXT"),
+                                ""
+                            )
+                        }
+                        "nonChangeable" -> {
+                            defaultColumnValue = defaultValueFieldTInput.text.toString().trim()
+                            tableGenerator.addNewColumn(
+                                tableName,
+                                Pair(fieldName, "TEXT"),
+                                defaultColumnValue
+                            )
+                            tableGenerator.insertFieldList(
+                                fieldName,
+                                tableName,
+                                defaultColumnValue,
+                                "non_changeable"
+                            )
+                        }
+                        "listWithValues" -> {
+                            tableGenerator.addNewColumn(
+                                tableName,
+                                Pair(fieldName, "TEXT"),
+                                ""
+                            )
+                            val listOptions: String = tableGenerator.getListValues(listId!!)
+                            tableGenerator.insertFieldList(
+                                fieldName,
+                                tableName,
+                                listOptions,
+                                "listWithValues"
+                            )
+                        }
                     }
 
 
@@ -570,6 +581,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
                         resetViews()
 
                     }, 2000)
+                }
                 }
 
             }

@@ -99,7 +99,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     View.OnFocusChangeListener {
 
     private var codeDataTInputView: CustomTextInputEditText?=null
-    private var columns: Array<String>?=null
+    private var columns = mutableListOf<String>()
     private var availableStorageMemory: Float = 0F
     private var numRows: Int = 0
     private var customAlertDialog: CustomAlertDialog? = null
@@ -551,7 +551,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 //                            putExtra("SHEET_ID", selectedSheetId)
 //                        })
 
-                    columns = tableGenerator.getTableColumns(tableName)
+                    columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
                     val scanResultLayout = LayoutInflater.from(requireActivity())
                         .inflate(R.layout.scan_result_dialog, null)
                     codeDataTInputView =
@@ -1080,6 +1080,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 }
                 tableDetailLayoutWrapper.addView(tableRowLayout)
         }
+        columns.addAll(updatedColumns)
     }
 
 

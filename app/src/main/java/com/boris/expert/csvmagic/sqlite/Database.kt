@@ -11,7 +11,12 @@ import com.boris.expert.csvmagic.model.TableObject
 import java.util.*
 
 
-class Database(private val context: Context) : SQLiteOpenHelper(context, databaseName, null, databaseVersion) {
+class Database(private val context: Context) : SQLiteOpenHelper(
+    context,
+    databaseName,
+    null,
+    databaseVersion
+) {
 
     companion object {
         private const val databaseVersion = 2
@@ -59,7 +64,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(context, databas
         db.execSQL(defaultTable)
     }
 
-    fun createTable(tableName: String,fieldsList:ArrayList<String>){
+    fun createTable(tableName: String, fieldsList: ArrayList<String>){
         val db = this.writableDatabase
         val queryBuilder = StringBuilder()
         queryBuilder.append("CREATE TABLE IF NOT EXISTS $tableName(id INTEGER PRIMARY KEY AUTOINCREMENT,")
@@ -272,6 +277,22 @@ class Database(private val context: Context) : SQLiteOpenHelper(context, databas
         return count > 0
     }
 
+    fun isFieldExist(tableName: String, fieldName: String):Boolean{
+        var isExist = false
+
+        val db = this.writableDatabase
+        val res = db.rawQuery("PRAGMA table_info($tableName)", null)
+        res.moveToFirst()
+        do {
+            val currentColumn = res.getString(1)
+            if (currentColumn == fieldName) {
+                isExist = true
+            }
+        } while (res.moveToNext())
+
+        return isExist
+    }
+
     fun insertFieldList(fieldName: String, tableName: String, options: String, type: String) {
         val db = this.writableDatabase
         val values = ContentValues()
@@ -414,17 +435,17 @@ class Database(private val context: Context) : SQLiteOpenHelper(context, databas
         return tableObject
     }
 
-    fun removeItem(tableName: String,id: Int):Boolean{
+    fun removeItem(tableName: String, id: Int):Boolean{
         val db = this.writableDatabase
         return db.delete(tableName, "id=$id", null) > 0
     }
 
-    fun deleteItem(tableName: String,code_data: String):Boolean{
+    fun deleteItem(tableName: String, code_data: String):Boolean{
         val db = this.writableDatabase
         return db.delete(tableName, "code_data=$code_data", null) > 0
     }
 
-    fun searchItem(tableName: String,code_d: String):Boolean{
+    fun searchItem(tableName: String, code_d: String):Boolean{
         val db = this.readableDatabase
 //        val columns = getTableColumns(tableName)
 //        val list = mutableListOf<Pair<String, String>>()
@@ -460,7 +481,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(context, databas
         return true
     }
 
-    fun getScanItem(tableName: String,code_d: String): TableObject?{
+    fun getScanItem(tableName: String, code_d: String): TableObject?{
         val db = this.readableDatabase
         val columns = getTableColumns(tableName)
         val list = mutableListOf<Pair<String, String>>()
@@ -490,14 +511,14 @@ class Database(private val context: Context) : SQLiteOpenHelper(context, databas
         return tableObject
     }
 
-    fun updateScanQuantity(tableName: String,code_data: String,quantity:Int):Boolean{
+    fun updateScanQuantity(tableName: String, code_data: String, quantity: Int):Boolean{
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put(COLUMN_QUANTITY, quantity)
         return db.update(tableName, contentValues, "code_data='$code_data'", null) > 0
     }
 
-    fun getScanQuantity(tableName: String,code_d: String):String?{
+    fun getScanQuantity(tableName: String, code_d: String):String?{
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM $tableName WHERE code_data='$code_d'", null)
         return if (cursor != null){
