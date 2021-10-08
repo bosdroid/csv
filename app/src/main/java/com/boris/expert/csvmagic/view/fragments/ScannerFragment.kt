@@ -35,6 +35,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyError
@@ -77,6 +78,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.zxing.Result
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
+import id.zelory.compressor.Compressor
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1759,12 +1761,19 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
     }
 
-    private fun getTotalImagesSize(uploadedUrlList: MutableList<String>): Long {
-        var total: Long = 0
+    private fun getTotalImagesSize(uploadedUrlList: MutableList<String>) {
+        //var total: Long = 0
+        totalImageSize = 0
         for (i in 0 until uploadedUrlList.size) {
-            total += ImageManager.getFileSize(uploadedUrlList[i])
+            Handler(Looper.myLooper()!!).postDelayed({
+                lifecycleScope.launch {
+                    val compressedImageFile = Compressor.compress(requireActivity(), File(uploadedUrlList[i]))
+                    totalImageSize += ImageManager.getFileSize(compressedImageFile.absolutePath)
+                    Log.d("TEST199TOTALSIZE","$totalImageSize")
+                }
+            },(1000 * i + 1).toLong())
         }
-        return total
+//        return totalImageSize
     }
 
 
@@ -1906,11 +1915,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         isFileSelected = true
                     }
                 }
-                totalImageSize = if (filePathView!!.text.contains(",")) {
+//                totalImageSize = if (filePathView!!.text.contains(",")) {
                     getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
-                } else {
-                    ImageManager.getFileSize(filePathView!!.text.toString())
-                }
+//                } else {
+//                    ImageManager.getFileSize(filePathView!!.text.toString())
+//                }
                 Log.d("TEST199", "$totalImageSize")
             }
         }
@@ -1925,11 +1934,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 val bitmap = data!!.extras!!.get("data") as Bitmap
                 createImageFile(bitmap)
 
-                totalImageSize = if (filePathView!!.text.contains(",")) {
+//                totalImageSize = if (filePathView!!.text.contains(",")) {
                     getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
-                } else {
-                    ImageManager.getFileSize(filePathView!!.text.toString())
-                }
+//                } else {
+//                    ImageManager.getFileSize(filePathView!!.text.toString())
+//                }
 
                 Log.d("TEST199", "$totalImageSize")
             }
