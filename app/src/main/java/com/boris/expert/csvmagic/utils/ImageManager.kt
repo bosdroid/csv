@@ -335,6 +335,18 @@ class ImageManager {
             }
         }
 
+        fun convertImageToBase64(context: Context, path: String): String {
+            return FileInputStream(path).use { inputStream ->
+                ByteArrayOutputStream().use { outputStream ->
+                    Base64OutputStream(outputStream, Base64.NO_WRAP).use { base64FilterStream ->
+                        inputStream.copyTo(base64FilterStream)
+                        base64FilterStream.close()
+                        outputStream.toString()
+                    }
+                }
+            }
+        }
+
         // THIS FUNCTION WILL EXTRACT THE DATA FROM QR CODE IMAGE WITHOUT CAMERA
         fun getTextFromQRImage(context: Context, bMap: Bitmap):String{
             val source = RGBLuminanceSource(bMap)

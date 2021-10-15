@@ -147,6 +147,9 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                             isFoundValue = true
                                             foundMemory = dataSnapshot.child("memory").getValue(String::class.java)!!.toFloat()
                                             totalMemory = dataSnapshot.child("total_memory").getValue(Int::class.java)!!
+                                            if (dataSnapshot.hasChild("duration")){
+                                                foundStorage = dataSnapshot.child("duration").getValue(Int::class.java)!!
+                                            }
                                         }
                                         else{
                                             isFoundValue = false
@@ -171,6 +174,12 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                             feature.memory = tMemory
                                             params["memory"] = tMemory.toString()
                                             params["total_memory"] = total
+                                            feature.createdAt = System.currentTimeMillis()
+                                            feature.duration += foundStorage
+                                            feature.expiredAt = addDaysCalenderDate(feature.duration).timeInMillis
+                                            params["createdAt"] = feature.createdAt
+                                            params["duration"] = feature.duration
+                                            params["expiredAt"] = feature.expiredAt
                                         }
                                         else{
                                             feature.createdAt = System.currentTimeMillis()
@@ -206,6 +215,9 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                             feature.memory = tMemory
                                             params["memory"] = tMemory.toString()
                                             params["total_memory"] = tMemory
+                                            params["createdAt"] = System.currentTimeMillis()
+                                            params["duration"] = feature.duration
+                                            params["expiredAt"] = addDaysCalenderDate(feature.duration).timeInMillis
                                         }
                                         else{
                                             feature.createdAt = System.currentTimeMillis()
@@ -244,6 +256,9 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
                                         feature.memory = tMemory
                                         params["memory"] = tMemory.toString()
                                         params["total_memory"] = tMemory
+                                        params["createdAt"] = System.currentTimeMillis()
+                                        params["duration"] = feature.duration
+                                        params["expiredAt"] = addDaysCalenderDate(feature.duration).timeInMillis
                                     }
                                     else {
                                         feature.createdAt = System.currentTimeMillis()

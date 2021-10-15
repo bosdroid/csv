@@ -686,7 +686,7 @@ class ScanDataActivity : BaseActivity(),CustomAlertDialog.CustomDialogListener,
                                 if (i == array.size - 1) {
                                     url = uploadedUrlList.joinToString(" ")
                                     uploadedUrlList.clear()
-                                    listener.onSuccess()
+                                    listener.onSuccess("")
                                 }
                             }
                         }
@@ -718,7 +718,7 @@ class ScanDataActivity : BaseActivity(),CustomAlertDialog.CustomDialogListener,
                     if (task.isSuccessful) {
                         val downloadUri = task.result
                         url = downloadUri.toString()
-                        listener.onSuccess()
+                        listener.onSuccess("")
                     }
                 }
             }
@@ -947,7 +947,7 @@ class ScanDataActivity : BaseActivity(),CustomAlertDialog.CustomDialogListener,
                             .isNotEmpty()
                     ) {
                         uploadImageOnFirebaseStorage(object : UploadImageCallback {
-                            override fun onSuccess() {
+                            override fun onSuccess(imageUrl:String) {
                                 updateStorageSize(totalImageSize, "minus")
                                 // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
                                 // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING

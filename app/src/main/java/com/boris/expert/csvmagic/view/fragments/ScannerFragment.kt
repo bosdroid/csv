@@ -1355,7 +1355,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             .isNotEmpty()
                     ) {
                         uploadImageOnFirebaseStorage(object : UploadImageCallback {
-                            override fun onSuccess() {
+                            override fun onSuccess(imageUrl:String) {
                                 updateStorageSize(totalImageSize, "minus")
                                 // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
                                 // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
@@ -1703,28 +1703,40 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     if (FirebaseAuth.getInstance().currentUser != null) {
                         val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                        val file = Uri.fromFile(File(imagePath))
-                        val fileRef =
-                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${System.currentTimeMillis()}.jpg")
-                        val uploadTask = fileRef.putFile(file)
-                        uploadTask.continueWithTask { task ->
-                            if (!task.isSuccessful) {
-                                task.exception?.let {
-                                    throw it
-                                }
-                            }
-                            fileRef.downloadUrl
-                        }.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val downloadUri = task.result
-                                uploadedUrlList.add(downloadUri.toString())
+//                        val file = Uri.fromFile(File(imagePath))
+                        val imageBase64String = ImageManager.convertImageToBase64(requireActivity(), imagePath)
+                        BaseActivity.uploadImageOnServer(requireContext(),imageBase64String,userId,object :UploadImageCallback{
+                            override fun onSuccess(imageUrl: String) {
+                                uploadedUrlList.add(imageUrl)
                                 if (i == array.size - 1) {
                                     url = uploadedUrlList.joinToString(" ")
                                     uploadedUrlList.clear()
-                                    listener.onSuccess()
+                                    listener.onSuccess("")
                                 }
                             }
-                        }
+
+                        })
+//                        val fileRef =
+//                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${System.currentTimeMillis()}.jpg")
+//                        val uploadTask = fileRef.putFile(file)
+//                        uploadTask.continueWithTask { task ->
+//                            if (!task.isSuccessful) {
+//                                task.exception?.let {
+//                                    throw it
+//                                }
+//                            }
+//                            fileRef.downloadUrl
+//                        }.addOnCompleteListener { task ->
+//                            if (task.isSuccessful) {
+//                                val downloadUri = task.result
+//                                uploadedUrlList.add(downloadUri.toString())
+//                                if (i == array.size - 1) {
+//                                    url = uploadedUrlList.joinToString(" ")
+//                                    uploadedUrlList.clear()
+//                                    listener.onSuccess("")
+//                                }
+//                            }
+//                        }
                     }
                 }, (1000 * i + 1).toLong())
 
@@ -1738,24 +1750,32 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
             if (FirebaseAuth.getInstance().currentUser != null) {
                 val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                val file = Uri.fromFile(File(filePathView!!.text.toString()))
-                val fileRef =
-                    storageReference.child("BarcodeImages/$userId/${System.currentTimeMillis()}.jpg")
-                val uploadTask = fileRef.putFile(file)
-                uploadTask.continueWithTask { task ->
-                    if (!task.isSuccessful) {
-                        task.exception?.let {
-                            throw it
-                        }
+                //val file = Uri.fromFile(File(filePathView!!.text.toString()))
+                val imageBase64String = ImageManager.convertImageToBase64(requireActivity(), filePathView!!.text.toString())
+                BaseActivity.uploadImageOnServer(requireActivity(),imageBase64String,userId,object :UploadImageCallback{
+                    override fun onSuccess(imageUrl: String) {
+                       url = imageUrl
+                        listener.onSuccess("")
                     }
-                    fileRef.downloadUrl
-                }.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val downloadUri = task.result
-                        url = downloadUri.toString()
-                        listener.onSuccess()
-                    }
-                }
+
+                })
+//                val fileRef =
+//                    storageReference.child("BarcodeImages/$userId/${System.currentTimeMillis()}.jpg")
+//                val uploadTask = fileRef.putFile(file)
+//                uploadTask.continueWithTask { task ->
+//                    if (!task.isSuccessful) {
+//                        task.exception?.let {
+//                            throw it
+//                        }
+//                    }
+//                    fileRef.downloadUrl
+//                }.addOnCompleteListener { task ->
+//                    if (task.isSuccessful) {
+//                        val downloadUri = task.result
+//                        url = downloadUri.toString()
+//                        listener.onSuccess("")
+//                    }
+//                }
             }
         }
 

@@ -67,13 +67,15 @@ class FeaturesAdapter(val context: Context, val featuresList: ArrayList<Feature>
         holder.featureNameView.text = feature.name
         if (feature.name.contains("storage")){
             holder.memoryUsageView.text = "${feature.memory} MB"
-            holder.timeDuration.visibility = View.GONE
-            holder.timeDurationHeading.visibility = View.GONE
+            holder.timeDuration.visibility = View.VISIBLE
+            holder.timeDuration.text = "${feature.duration} Days"
+//            holder.timeDurationHeading.visibility = View.GONE
         }
 
         if (feature.name.contains("time")){
             holder.timeDuration.text = "${feature.duration} Days"
             holder.memoryUsageView.visibility = View.GONE
+//            holder.memoryUsageView.text = "${feature.memory} MB"
             holder.memoryUsageHeadingView.visibility = View.GONE
         }
 

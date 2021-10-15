@@ -7,8 +7,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
-import android.os.PersistableBundle
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,11 +18,17 @@ import androidx.appcompat.widget.AppCompatRatingBar
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import com.android.volley.Response
+import com.android.volley.RetryPolicy
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.Constants.Companion.EMAIL_ADDRESS_PATTERN
 import com.boris.expert.csvmagic.utils.DialogPrefs
+import com.boris.expert.csvmagic.utils.VolleySingleton
 import com.downloader.Error
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
@@ -33,9 +37,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 
 open class BaseActivity : AppCompatActivity() {
@@ -129,6 +135,49 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
+
+        fun uploadImageOnServer(
+            context: Context,
+            image: String,
+            user_id: String,
+            listener: UploadImageCallback
+        ){
+            val stringRequest  = object : StringRequest(
+                Method.POST, "https://quotesmakerapp.com/qrmagicapp/api/images_uploader",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    if (response.getInt("status") == 200) {
+                        val url = response.getString("url")
+                        listener.onSuccess(url)
+                    }
+                }, Response.ErrorListener {
+                    Log.d("TEST199", it.localizedMessage!!)
+                }){
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["image"] = image
+                    params["user_id"] = user_id
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
         // THIS FUNCTION WILL ALERT THE DIFFERENT MESSAGES
         fun showAlert(context: Context, message: String) {
             MaterialAlertDialogBuilder(context)
@@ -155,11 +204,11 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
-        fun addDaysCalenderDate(days:Int):Calendar{
-            val sdf = SimpleDateFormat("yyyy-MM-dd kk:mm a",Locale.ENGLISH)
+        fun addDaysCalenderDate(days: Int):Calendar{
+            val sdf = SimpleDateFormat("yyyy-MM-dd kk:mm a", Locale.ENGLISH)
             val c = Calendar.getInstance()
             c.time = sdf.parse(getDateTimeFromTimeStamp(System.currentTimeMillis()))!!
-            c.add(Calendar.DATE,days)
+            c.add(Calendar.DATE, days)
             return c
         }
 
@@ -327,15 +376,16 @@ open class BaseActivity : AppCompatActivity() {
 
 
                             if (snapshot.hasChildren() && snapshot.hasChild("memory")) {
-                                memory = snapshot.child("memory").getValue(String::class.java)!!.toFloat()
+                                memory = snapshot.child("memory").getValue(String::class.java)!!
+                                    .toFloat()
                             }
 
                             if (snapshot.hasChildren() && snapshot.hasChild("expiredAt")) {
                                 expiredAt = snapshot.child("expiredAt").getValue(Long::class.java)!!
                             }
-                            appSettings.putInt(Constants.duration,duration)
-                            appSettings.putString(Constants.memory,memory.toString())
-                            appSettings.putLong(Constants.expiredAt,expiredAt)
+                            appSettings.putInt(Constants.duration, duration)
+                            appSettings.putString(Constants.memory, memory.toString())
+                            appSettings.putLong(Constants.expiredAt, expiredAt)
                         }
 
                         override fun onCancelled(error: DatabaseError) {
