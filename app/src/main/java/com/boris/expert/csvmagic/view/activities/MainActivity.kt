@@ -363,8 +363,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 if (callback != null) {
                     callback!!.onSuccess()
                 } else {
-                    val scannerFragment =
-                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                     scannerFragment.restart()
                 }
                 if (isLastSignUser == "new") {
@@ -514,9 +513,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 Constants.userData = null
                 Constants.sheetService = null
                 Constants.mService = null
-                val scannerFragment =
-                    supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-                scannerFragment.restart()
+                val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                if (currentFragment != null && currentFragment.isVisible){
+                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                    scannerFragment.restart()
+                }
                 checkUserLoginStatus()
             }
 //
