@@ -754,6 +754,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = true
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
+
             getUserCredits(context)
             getCurrentSubscriptionDetail(context)
             DatabaseHandler.importer(context)
