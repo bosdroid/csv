@@ -529,4 +529,14 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         }
     }
 
+    fun getDbPath():String{
+        val db = this.readableDatabase
+        return db.path
+    }
+
+    fun deleteDatabase(){
+        val db = this.writableDatabase
+        context.deleteDatabase(databaseName)
+        onCreate(db)
+    }
 }

@@ -112,4 +112,11 @@ class TableGenerator(context: Context) {
     fun isFieldExist(tableName: String, fieldName: String):Boolean{
         return database.isFieldExist(tableName,fieldName)
     }
+
+    fun getDbPath():String{
+        return database.getDbPath()
+    }
+    fun deleteDatabase(){
+        database.deleteDatabase()
+    }
 }

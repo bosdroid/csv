@@ -29,6 +29,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.interfaces.BackupListener
 import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
@@ -38,6 +39,7 @@ import com.boris.expert.csvmagic.singleton.DriveService
 import com.boris.expert.csvmagic.singleton.SheetService
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.utils.DatabaseHandler
 import com.boris.expert.csvmagic.view.fragments.ScanFragment
 import com.boris.expert.csvmagic.view.fragments.ScannerFragment
 import com.boris.expert.csvmagic.viewmodel.MainActivityViewModel
@@ -455,10 +457,21 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 MaterialAlertDialogBuilder(context)
                     .setTitle(getString(R.string.logout))
                     .setMessage(getString(R.string.logout_warning_text))
-                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which -> dialog.dismiss() }
+                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                        dialog.dismiss() }
                     .setPositiveButton(getString(R.string.logout)) { dialog, which ->
-                        startLoading(context)
-                        signOut()
+                        DatabaseHandler.exporter(context,object : BackupListener{
+                            override fun onSuccess() {
+                                startLoading(context)
+                                signOut()
+                            }
+
+                            override fun onFailure() {
+
+                            }
+
+                        })
+
                     }
                     .create().show()
             }
@@ -505,9 +518,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mGoogleSignInClient.signOut().addOnCompleteListener(this) {
                 FirebaseAuth.getInstance().signOut()
                 dismiss()
-                appSettings.clear()
-//                appSettings.remove(Constants.isLogin)
-//                appSettings.remove(Constants.user)
+//                appSettings.clear()
+                appSettings.remove(Constants.dbImport)
+                appSettings.remove(Constants.isLogin)
+                appSettings.remove(Constants.user)
                 Toast.makeText(context, getString(R.string.logout_success_text), Toast.LENGTH_SHORT)
                     .show()
                 Constants.userData = null
@@ -742,8 +756,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
             getUserCredits(context)
             getCurrentSubscriptionDetail(context)
+            DatabaseHandler.importer(context)
             Handler(Looper.myLooper()!!).postDelayed({
-                add5MbFreeStorage()
+//                add5MbFreeStorage()
             },5000)
 
 

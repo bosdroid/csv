@@ -553,7 +553,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 //                            putExtra("SHEET_ID", selectedSheetId)
 //                        })
 
-                    columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
+
                     val scanResultLayout = LayoutInflater.from(requireActivity())
                         .inflate(R.layout.scan_result_dialog, null)
                     codeDataTInputView =
@@ -683,8 +683,10 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             )
                         }
                     }
-                    for (i in columns!!.indices) {
-                        val value = columns!![i]
+                    columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
+                    Log.d("TEST1999",columns.toString())
+                    for (i in columns.indices) {
+                        val value = columns[i]
                         if (value == "id" || value == "quantity") {
                             continue
                         } else if (value == "code_data") {
@@ -786,7 +788,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         }
                     }
 
-//                    renderTableColumnViews()
 
                     for (i in 0 until textInputIdsList.size) {
                         textInputIdsList[i].second.onFocusChangeListener = this
@@ -800,6 +801,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                     scanResultCancelBtn.setOnClickListener {
                         alert.dismiss()
+                        columns.clear()
                         codeScanner!!.startPreview()
                     }
 
@@ -984,7 +986,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         val updatedColumns = mutableListOf<String>()
 
         updatedColumns.addAll(tableGenerator.getTableColumns(tableName)!!)
-        updatedColumns.removeAll(columns!!)
+        updatedColumns.removeAll(columns)
 
         for (i in updatedColumns.indices) {
             val value = updatedColumns[i]
@@ -1413,7 +1415,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                 ).show()
                                                 textInputIdsList.clear()
                                                 spinnerIdsList.clear()
-
+                                                columns.clear()
                                                 tableDetailLayoutWrapper.removeAllViews()
                                                 filePathView!!.setText("")
 //                                                val tempList = mutableListOf<Any>()
@@ -1487,7 +1489,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 ).show()
                                 textInputIdsList.clear()
                                 spinnerIdsList.clear()
-
+                                columns.clear()
                                 tableDetailLayoutWrapper.removeAllViews()
                                 codeScanner!!.startPreview()
                                 filePathView!!.setText("")

@@ -47,6 +47,7 @@ class Constants {
         const val firebaseUserFeatureDetails = "UserFeatureDetails"
         const val firebaseStorageSizes = "StorageSizes"
         const val firebaseBarcodeImages = "BarcodeImages"
+        const val firebaseDatabaseBackup = "DatabaseBackup"
         const val READ_STORAGE_REQUEST_CODE = 100
         const val CAMERA_REQUEST_CODE = 101
         const val READ_STORAGE_PERMISSION = "android.permission.READ_EXTERNAL_STORAGE"
@@ -62,6 +63,7 @@ class Constants {
         var tipsValue: Boolean = true
         var finalQrImageUri: Uri? = null
         var isLogin: String = "is_login"
+        var dbImport:String = "db_imp"
         var user: String = "user"
         var email: String = "email"
         var duration: String = "duration"
