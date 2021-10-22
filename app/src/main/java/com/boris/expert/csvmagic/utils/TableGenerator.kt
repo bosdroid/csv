@@ -119,4 +119,8 @@ class TableGenerator(context: Context) {
     fun deleteDatabase(){
         database.deleteDatabase()
     }
+
+    fun mergeDatabases(backupDbName: String,backupDbPath: String){
+        database.mergeDatabases(backupDbName,backupDbPath)
+    }
 }

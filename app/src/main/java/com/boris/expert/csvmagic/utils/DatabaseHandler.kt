@@ -103,12 +103,13 @@ object DatabaseHandler {
                     val COPY_DB = "${folder.absolutePath}/${userId}_backup.db"
                     val COPY_DB_PATH = File(COPY_DB)
                      if (COPY_DB_PATH.exists()) {
-                         val srcChannel = FileInputStream(COPY_DB_PATH).channel
-
-                         val dstChannel = FileOutputStream(DB_PATH).channel
-                         dstChannel.transferFrom(srcChannel, 0, srcChannel.size())
-                         srcChannel.close()
-                         dstChannel.close()
+                         tableGenerator.mergeDatabases("${userId}_backup",COPY_DB_PATH.absolutePath)
+//                         val srcChannel = FileInputStream(COPY_DB_PATH).channel
+//
+//                         val dstChannel = FileOutputStream(DB_PATH).channel
+//                         dstChannel.transferFrom(srcChannel, 0, srcChannel.size())
+//                         srcChannel.close()
+//                         dstChannel.close()
                          appSettings.putString(Constants.dbImport, "yes")
                      }
                     BaseActivity.dismiss()
@@ -118,7 +119,8 @@ object DatabaseHandler {
                 }
             } catch (excep: Exception) {
                 BaseActivity.dismiss()
-                Toast.makeText(context, "ERROR IN COPY $excep", Toast.LENGTH_LONG).show()
+                BaseActivity.showAlert(context,"ERROR IN COPY $excep")
+                //Toast.makeText(context, "ERROR IN COPY $excep", Toast.LENGTH_LONG).show()
                 Log.e("FILECOPYERROR>>>>", excep.toString())
                 excep.printStackTrace()
 
