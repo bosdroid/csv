@@ -14,8 +14,6 @@ class App : Application() {
         appSettings = AppSettings(applicationContext)
         getUserDetail()
 
-
-
     }
 
 
