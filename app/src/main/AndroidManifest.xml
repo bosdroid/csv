@@ -43,10 +43,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
+        <activity android:name=".view.activities.BarcodeImageListActivity"></activity>
         <activity
-            android:windowSoftInputMode="stateAlwaysVisible"
+            android:name=".view.activities.ScanDataActivity"
             android:configChanges="orientation|screenSize|screenLayout"
-            android:name=".view.activities.ScanDataActivity"/>
+            android:windowSoftInputMode="stateAlwaysVisible" />
         <activity android:name=".view.activities.UserScreenActivity" />
         <activity android:name=".view.activities.PurchaseFeatureActivity" />
         <activity android:name=".view.activities.OcrActivity" />

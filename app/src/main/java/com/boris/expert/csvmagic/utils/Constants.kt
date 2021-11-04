@@ -31,6 +31,7 @@ import retrofit2.http.Url
 import java.io.File
 import java.io.IOException
 import java.net.URL
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 
@@ -89,6 +90,7 @@ class Constants {
         val RECEIVER_MESSAGE = "RECEIVER_MESSAGE"
         const val megaByte: Long = 1024L * 1024L
         var isDefaultTableFieldAdded:Boolean = false
+        var userServerAvailableStorageSize:String = ""
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
@@ -114,6 +116,14 @@ class Constants {
             } catch (e: IOException) {
                 false
             }
+        }
+
+        fun calculateDays(createdAt: Long, expiredAtx: Long): Int {
+            val diff: Long = expiredAtx - createdAt
+            val totalDays = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS).toInt()
+            val diff1 = System.currentTimeMillis() - createdAt
+            val goneDays = TimeUnit.DAYS.convert(diff1, TimeUnit.MILLISECONDS).toInt()
+            return totalDays - goneDays
         }
 
         // THIS FUNCTION WILL RETURN THE ALL THE EXTERNAL BACKGROUND IMAGES

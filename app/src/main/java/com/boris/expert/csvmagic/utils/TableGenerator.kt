@@ -123,4 +123,9 @@ class TableGenerator(context: Context) {
     fun mergeDatabases(backupDbName: String,backupDbPath: String){
         database.mergeDatabases(backupDbName,backupDbPath)
     }
+
+    fun getBarcodeImages(tableName: String, id: Int): String {
+        return database.getBarcodeImages(tableName,id)
+    }
+
 }

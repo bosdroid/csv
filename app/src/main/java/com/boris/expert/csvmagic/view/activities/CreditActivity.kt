@@ -250,7 +250,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
             R.id.regular_package_btn -> {
                 productId = "six_credits"
                 if (auth.currentUser != null) {
-                    creditsValue = 1
+                    creditsValue = 6
                     userId = auth.currentUser!!.uid
                     purchase()
 
@@ -261,7 +261,7 @@ class CreditActivity : BaseActivity(), View.OnClickListener, PurchasesUpdatedLis
             R.id.premium_package_btn -> {
                 productId = "ten_credits"
                 if (auth.currentUser != null) {
-                    creditsValue = 1
+                    creditsValue = 10
                     userId = auth.currentUser!!.uid
                     purchase()
 

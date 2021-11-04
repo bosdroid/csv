@@ -36,12 +36,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
+import com.android.volley.RetryPolicy
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
+import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.CodeHistory
@@ -86,6 +91,7 @@ import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -94,13 +100,14 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
 class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     View.OnFocusChangeListener {
 
-    private var codeDataTInputView: CustomTextInputEditText?=null
+    private var codeDataTInputView: CustomTextInputEditText? = null
     private var columns = mutableListOf<String>()
     private var availableStorageMemory: Float = 0F
     private var numRows: Int = 0
@@ -110,6 +117,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
     private var arrayList = mutableListOf<String>()
     private var filePathView: MaterialTextView? = null
+    private var barcodeImagesRecyclerView: RecyclerView? = null
+    private var barcodeImageList = mutableListOf<String>()
+    private lateinit var adapter: BarcodeImageAdapter
     var currentPhotoPath: String? = null
     private var codeScanner: CodeScanner? = null
     private lateinit var scannerView: CodeScannerView
@@ -146,7 +156,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private var userRecoverableAuthType = 0
     private var selectedSheetId: String = ""
     private var selectedSheetName: String = ""
-    private var scannedText:String = ""
+    private var scannedText: String = ""
     private lateinit var connectGoogleSheetsTextView: MaterialTextView
     private lateinit var sheetsTopLayout: LinearLayout
     var values: List<Any>? = null
@@ -574,6 +584,49 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<LinearLayout>(R.id.image_sources_layout)
                     filePathView =
                         scanResultLayout.findViewById<MaterialTextView>(R.id.filePath)
+                    barcodeImagesRecyclerView =
+                        scanResultLayout.findViewById(R.id.selected_barcode_images_recyclerview)
+                    barcodeImagesRecyclerView!!.layoutManager = LinearLayoutManager(
+                        requireActivity(), RecyclerView.HORIZONTAL,
+                        false
+                    )
+                    barcodeImagesRecyclerView!!.hasFixedSize()
+                    adapter = BarcodeImageAdapter(
+                        requireContext(),
+                        barcodeImageList as ArrayList<String>
+                    )
+                    barcodeImagesRecyclerView!!.adapter = adapter
+                    adapter.setOnItemClickListener(object :
+                        BarcodeImageAdapter.OnItemClickListener {
+                        override fun onItemDeleteClick(position: Int) {
+//                            val image = barcodeImageList[position]
+                            val builder = MaterialAlertDialogBuilder(requireActivity())
+                            builder.setMessage(getString(R.string.delete_barcode_image_message))
+                            builder.setCancelable(false)
+                            builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                                dialog.dismiss()
+                                barcodeImageList.removeAt(position)
+                                multiImagesList.removeAt(position)
+                                filePathView!!.text = multiImagesList.joinToString(",")
+                                adapter.notifyItemRemoved(position)
+                            }
+                            val alert = builder.create()
+                            alert.show()
+
+                        }
+
+                        override fun onAddItemEditClick(position: Int) {
+
+                        }
+
+                        override fun onImageClick(position: Int) {
+
+                        }
+
+                    })
                     val imageRecognitionBtn =
                         scanResultLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
                     val photoRecognitionBtn =
@@ -587,10 +640,14 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     }
 
                     scanResultAddFieldBtn.setOnClickListener {
-                        requireActivity().startActivity(Intent(requireActivity(),CreateTableActivity::class.java).apply {
-                            putExtra("TABLE_NAME",tableName)
-                            putExtra("FROM","scan_dialog")
-                        })
+                        requireActivity().startActivity(
+                            Intent(
+                                requireActivity(),
+                                CreateTableActivity::class.java
+                            ).apply {
+                                putExtra("TABLE_NAME", tableName)
+                                putExtra("FROM", "scan_dialog")
+                            })
                     }
 
                     imageRecognitionBtn.setOnClickListener {
@@ -641,7 +698,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             } else {
                                 severalImagesHintView.visibility = View.VISIBLE
                                 imageSourcesWrapperLayout.visibility = View.VISIBLE
-                                filePathView!!.visibility = View.VISIBLE
+                                filePathView!!.visibility = View.GONE
                             }
 
                         } else {
@@ -684,7 +741,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         }
                     }
                     columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
-                    Log.d("TEST1999",columns.toString())
+                    Log.d("TEST1999", columns.toString())
                     for (i in columns.indices) {
                         val value = columns[i]
                         if (value == "id" || value == "quantity") {
@@ -827,28 +884,27 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         }
                     }
                     submitBtn.setOnClickListener {
-                          if (Constants.userData != null){
-                              availableStorageMemory =
-                                  if (appSettings.getString(Constants.memory)!!.isEmpty()){
-                                      0F
-                                  } else{
-                                      Constants.convertMegaBytesToBytes(
-                                          appSettings.getString(
-                                              Constants.memory
-                                          )!!.toFloat()
-                                      )
-                                  }
-                          }
+                        if (Constants.userData != null) {
+                            availableStorageMemory =
+                                if (appSettings.getString(Constants.memory)!!.isEmpty()) {
+                                    0F
+                                } else {
+                                    Constants.convertMegaBytesToBytes(
+                                        appSettings.getString(
+                                            Constants.memory
+                                        )!!.toFloat()
+                                    )
+                                }
+                        }
 
 //                        if(!checkBothListSame()){
 //                            createNewSpreadsheetDialog(tableName)
 //                        }
 //                        else
-                            if(totalImageSize.toInt() == 0){
-                                alert.dismiss()
-                                saveDataIntoTable()
-                            }
-                            else if (addImageCheckBox.isChecked && totalImageSize.toInt() == 0) {
+                        if (totalImageSize.toInt() == 0) {
+                            alert.dismiss()
+                            saveDataIntoTable()
+                        } else if (addImageCheckBox.isChecked && totalImageSize.toInt() == 0) {
                             alert.dismiss()
                             saveDataIntoTable()
                         } else if (addImageCheckBox.isChecked && totalImageSize <= availableStorageMemory) {
@@ -991,98 +1047,98 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         for (i in updatedColumns.indices) {
             val value = updatedColumns[i]
 
-                val tableRowLayout =
-                    LayoutInflater.from(requireContext())
-                        .inflate(
-                            R.layout.scan_result_table_row_layout,
-                            null
-                        )
-                val columnName =
-                    tableRowLayout.findViewById<MaterialTextView>(R.id.table_column_name)
-                val columnValue =
-                    tableRowLayout.findViewById<CustomTextInputEditText>(R.id.table_column_value)
-                val columnDropdown =
-                    tableRowLayout.findViewById<AppCompatSpinner>(R.id.table_column_dropdown)
-                val columnDropDwonLayout =
-                    tableRowLayout.findViewById<LinearLayout>(R.id.table_column_dropdown_layout)
-                columnName.text = value
-                val moreBtn =
-                    tableRowLayout.findViewById<AppCompatImageView>(R.id.table_more_btn)
-                moreBtn.setOnClickListener {
-                    openDialog()
-                }
-                val pair = tableGenerator.getFieldList(value, tableName)
+            val tableRowLayout =
+                LayoutInflater.from(requireContext())
+                    .inflate(
+                        R.layout.scan_result_table_row_layout,
+                        null
+                    )
+            val columnName =
+                tableRowLayout.findViewById<MaterialTextView>(R.id.table_column_name)
+            val columnValue =
+                tableRowLayout.findViewById<CustomTextInputEditText>(R.id.table_column_value)
+            val columnDropdown =
+                tableRowLayout.findViewById<AppCompatSpinner>(R.id.table_column_dropdown)
+            val columnDropDwonLayout =
+                tableRowLayout.findViewById<LinearLayout>(R.id.table_column_dropdown_layout)
+            columnName.text = value
+            val moreBtn =
+                tableRowLayout.findViewById<AppCompatImageView>(R.id.table_more_btn)
+            moreBtn.setOnClickListener {
+                openDialog()
+            }
+            val pair = tableGenerator.getFieldList(value, tableName)
 
-                if (pair != null) {
-                    arrayList = mutableListOf()
-                    if (!pair.first.contains(",") && pair.second == "listWithValues") {
-                        arrayList.add(pair.first)
-                        moreBtn.visibility = View.INVISIBLE
-                        columnValue.visibility = View.GONE
-                        columnDropDwonLayout.visibility = View.VISIBLE
-                        val adapter = ArrayAdapter(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            arrayList
-                        )
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        columnDropdown.adapter = adapter
-                        spinnerIdsList.add(Pair(value, columnDropdown))
-                    } else if (pair.first.contains(",") && pair.second == "listWithValues") {
+            if (pair != null) {
+                arrayList = mutableListOf()
+                if (!pair.first.contains(",") && pair.second == "listWithValues") {
+                    arrayList.add(pair.first)
+                    moreBtn.visibility = View.INVISIBLE
+                    columnValue.visibility = View.GONE
+                    columnDropDwonLayout.visibility = View.VISIBLE
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        arrayList
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    columnDropdown.adapter = adapter
+                    spinnerIdsList.add(Pair(value, columnDropdown))
+                } else if (pair.first.contains(",") && pair.second == "listWithValues") {
 
-                        arrayList.addAll(pair.first.split(","))
-                        moreBtn.visibility = View.INVISIBLE
-                        columnValue.visibility = View.GONE
-                        columnDropDwonLayout.visibility = View.VISIBLE
-                        val adapter = ArrayAdapter(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            arrayList
-                        )
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        columnDropdown.adapter = adapter
-                        spinnerIdsList.add(Pair(value, columnDropdown))
-                    } else {
-                        moreBtn.visibility = View.VISIBLE
-                        columnDropDwonLayout.visibility = View.GONE
-                        columnValue.visibility = View.VISIBLE
-                        columnValue.setText(
-                            pair.first
-                        )
-                        columnValue.isEnabled = false
-                        columnValue.isFocusable = false
-                        columnValue.isFocusableInTouchMode = false
-                    }
-
+                    arrayList.addAll(pair.first.split(","))
+                    moreBtn.visibility = View.INVISIBLE
+                    columnValue.visibility = View.GONE
+                    columnDropDwonLayout.visibility = View.VISIBLE
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        arrayList
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    columnDropdown.adapter = adapter
+                    spinnerIdsList.add(Pair(value, columnDropdown))
                 } else {
-                    if (value == "image") {
-                        textInputIdsList.add(Pair(value, columnValue))
-                        continue
-                    }
                     moreBtn.visibility = View.VISIBLE
                     columnDropDwonLayout.visibility = View.GONE
                     columnValue.visibility = View.VISIBLE
-
-                    if (value == "date") {
-                        columnValue.setText(
-                            BaseActivity.getDateTimeFromTimeStamp(
-                                System.currentTimeMillis()
-                            )
-                        )
-                        moreBtn.visibility = View.INVISIBLE
-                        columnValue.isEnabled = false
-                        columnValue.isFocusable = false
-                        columnValue.isFocusableInTouchMode = false
-                    } else {
-                        moreBtn.visibility = View.VISIBLE
-                        columnValue.isEnabled = true
-                        columnValue.isFocusable = true
-//                                    columnValue.isFocusableInTouchMode = true
-                        columnValue.setText("")
-                    }
-                    textInputIdsList.add(Pair(value, columnValue))
+                    columnValue.setText(
+                        pair.first
+                    )
+                    columnValue.isEnabled = false
+                    columnValue.isFocusable = false
+                    columnValue.isFocusableInTouchMode = false
                 }
-                tableDetailLayoutWrapper.addView(tableRowLayout)
+
+            } else {
+                if (value == "image") {
+                    textInputIdsList.add(Pair(value, columnValue))
+                    continue
+                }
+                moreBtn.visibility = View.VISIBLE
+                columnDropDwonLayout.visibility = View.GONE
+                columnValue.visibility = View.VISIBLE
+
+                if (value == "date") {
+                    columnValue.setText(
+                        BaseActivity.getDateTimeFromTimeStamp(
+                            System.currentTimeMillis()
+                        )
+                    )
+                    moreBtn.visibility = View.INVISIBLE
+                    columnValue.isEnabled = false
+                    columnValue.isFocusable = false
+                    columnValue.isFocusableInTouchMode = false
+                } else {
+                    moreBtn.visibility = View.VISIBLE
+                    columnValue.isEnabled = true
+                    columnValue.isFocusable = true
+//                                    columnValue.isFocusableInTouchMode = true
+                    columnValue.setText("")
+                }
+                textInputIdsList.add(Pair(value, columnValue))
+            }
+            tableDetailLayoutWrapper.addView(tableRowLayout)
         }
         columns.addAll(updatedColumns)
     }
@@ -1357,7 +1413,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             .isNotEmpty()
                     ) {
                         uploadImageOnFirebaseStorage(object : UploadImageCallback {
-                            override fun onSuccess(imageUrl:String) {
+                            override fun onSuccess(imageUrl: String) {
                                 updateStorageSize(totalImageSize, "minus")
                                 // IF isUpload IS TRUE THEN DATA SAVE WITH IMAGE URL
                                 // ELSE DISPLAY THE EXCEPTION MESSAGE WITHOUT DATA SAVING
@@ -1706,18 +1762,23 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
 //                        val file = Uri.fromFile(File(imagePath))
-                        val imageBase64String = ImageManager.convertImageToBase64(requireActivity(), imagePath)
-                        BaseActivity.uploadImageOnServer(requireContext(),imageBase64String,userId,object :UploadImageCallback{
-                            override fun onSuccess(imageUrl: String) {
-                                uploadedUrlList.add(imageUrl)
-                                if (i == array.size - 1) {
-                                    url = uploadedUrlList.joinToString(" ")
-                                    uploadedUrlList.clear()
-                                    listener.onSuccess("")
+                        val imageBase64String =
+                            ImageManager.convertImageToBase64(requireActivity(), imagePath)
+                        BaseActivity.uploadImageOnServer(
+                            requireContext(),
+                            imageBase64String,
+                            userId,
+                            object : UploadImageCallback {
+                                override fun onSuccess(imageUrl: String) {
+                                    uploadedUrlList.add(imageUrl)
+                                    if (i == array.size - 1) {
+                                        url = uploadedUrlList.joinToString(" ")
+                                        uploadedUrlList.clear()
+                                        listener.onSuccess("")
+                                    }
                                 }
-                            }
 
-                        })
+                            })
 //                        val fileRef =
 //                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${System.currentTimeMillis()}.jpg")
 //                        val uploadTask = fileRef.putFile(file)
@@ -1753,14 +1814,21 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
                 //val file = Uri.fromFile(File(filePathView!!.text.toString()))
-                val imageBase64String = ImageManager.convertImageToBase64(requireActivity(), filePathView!!.text.toString())
-                BaseActivity.uploadImageOnServer(requireActivity(),imageBase64String,userId,object :UploadImageCallback{
-                    override fun onSuccess(imageUrl: String) {
-                       url = imageUrl
-                        listener.onSuccess("")
-                    }
+                val imageBase64String = ImageManager.convertImageToBase64(
+                    requireActivity(),
+                    filePathView!!.text.toString()
+                )
+                BaseActivity.uploadImageOnServer(
+                    requireActivity(),
+                    imageBase64String,
+                    userId,
+                    object : UploadImageCallback {
+                        override fun onSuccess(imageUrl: String) {
+                            url = imageUrl
+                            listener.onSuccess("")
+                        }
 
-                })
+                    })
 //                val fileRef =
 //                    storageReference.child("BarcodeImages/$userId/${System.currentTimeMillis()}.jpg")
 //                val uploadTask = fileRef.putFile(file)
@@ -1789,11 +1857,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         for (i in 0 until uploadedUrlList.size) {
             Handler(Looper.myLooper()!!).postDelayed({
                 lifecycleScope.launch {
-                    val compressedImageFile = Compressor.compress(requireActivity(), File(uploadedUrlList[i]))
+                    val compressedImageFile =
+                        Compressor.compress(requireActivity(), File(uploadedUrlList[i]))
                     totalImageSize += ImageManager.getFileSize(compressedImageFile.absolutePath)
-                    Log.d("TEST199TOTALSIZE","$totalImageSize")
+                    Log.d("TEST199TOTALSIZE", "$totalImageSize")
                 }
-            },(1000 * i + 1).toLong())
+            }, (1000 * i + 1).toLong())
         }
 //        return totalImageSize
     }
@@ -1801,41 +1870,117 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
     private fun updateStorageSize(size: Long, type: String) {
         var currentStorageSize: Float = 0F
-        databaseReference.child(Constants.firebaseUserFeatureDetails)
-            .child(Constants.firebaseUserId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.hasChildren()) {
-                        val pSize: Float? =
-                            snapshot.child("memory").getValue(String::class.java)!!.toFloat()
-                        if (pSize != null) {
-                            currentStorageSize = if (type == "add") {
-                                Constants.convertMegaBytesToBytes(pSize) + size
-                            } else {
-                                Constants.convertMegaBytesToBytes(pSize) - size
-                            }
-                            val remainingMb = Constants.convertBytesToMegaBytes(
-                                currentStorageSize
-                            ).toString()
+        if (Constants.userServerAvailableStorageSize.isNotEmpty()) {
+            currentStorageSize = Constants.convertMegaBytesToBytes(Constants.userServerAvailableStorageSize.toFloat()) - size
 
-                            val params = HashMap<String, Any>()
-                            params["memory"] = remainingMb
-                            databaseReference.child(Constants.firebaseUserFeatureDetails)
-                                .child(Constants.firebaseUserId).updateChildren(params)
-                            totalImageSize = 0
-                            appSettings.putString(
-                                Constants.memory,
-                                remainingMb
-                            )
-                        }
+            val remainingMb = Constants.convertBytesToMegaBytes(currentStorageSize).toString()
+            BaseActivity.updateMemorySize(
+                requireActivity(),
+                remainingMb,
+                Constants.firebaseUserId,
+                0,
+                object : APICallback {
+                    override fun onSuccess(response: JSONObject) {
+
                     }
+
+                    override fun onError(error: VolleyError) {
+
+                    }
+
+                })
+        } else {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    if (response.getInt("status") == 200) {
+                        val packageDetail: JSONObject? = response.getJSONObject("package")
+                        val availableSize = packageDetail!!.getString("size")
+                        Constants.userServerAvailableStorageSize = availableSize
+
+                        currentStorageSize = Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
+
+                        val remainingMb = Constants.convertBytesToMegaBytes(currentStorageSize).toString()
+                        BaseActivity.updateMemorySize(
+                            requireActivity(),
+                            remainingMb,
+                            Constants.firebaseUserId,
+                            0,
+                            object : APICallback {
+                                override fun onSuccess(response: JSONObject) {
+
+                                }
+
+                                override fun onError(error: VolleyError) {
+
+                                }
+
+                            })
+                    }
+                }, Response.ErrorListener {
+                    Log.d("TEST199", it.localizedMessage!!)
+
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = Constants.firebaseUserId
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
                 }
 
-            })
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(requireActivity()).addToRequestQueue(stringRequest)
+        }
+
+//        databaseReference.child(Constants.firebaseUserFeatureDetails)
+//            .child(Constants.firebaseUserId)
+//            .addListenerForSingleValueEvent(object : ValueEventListener {
+//                override fun onDataChange(snapshot: DataSnapshot) {
+//                    if (snapshot.hasChildren()) {
+//                        val pSize: Float? =
+//                            snapshot.child("memory").getValue(String::class.java)!!.toFloat()
+//                        if (pSize != null) {
+//                            currentStorageSize = if (type == "add") {
+//                                Constants.convertMegaBytesToBytes(pSize) + size
+//                            } else {
+//                                Constants.convertMegaBytesToBytes(pSize) - size
+//                            }
+//                            val remainingMb = Constants.convertBytesToMegaBytes(
+//                                currentStorageSize
+//                            ).toString()
+//
+//                            val params = HashMap<String, Any>()
+//                            params["memory"] = remainingMb
+//                            databaseReference.child(Constants.firebaseUserFeatureDetails)
+//                                .child(Constants.firebaseUserId).updateChildren(params)
+//                            totalImageSize = 0
+//                            appSettings.putString(
+//                                Constants.memory,
+//                                remainingMb
+//                            )
+//                        }
+//                    }
+//                }
+//
+//                override fun onCancelled(error: DatabaseError) {
+//
+//                }
+//
+//            })
     }
 
     @Throws(java.lang.Exception::class)
@@ -1888,6 +2033,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         //Constants.captureImagePath = currentPhotoPath
         multiImagesList.add(currentPhotoPath!!)
         filePathView!!.text = multiImagesList.joinToString(",")
+        barcodeImageList.clear()
+        barcodeImageList.addAll(multiImagesList)
+        adapter.notifyDataSetChanged()
         isFileSelected = true
     }
 
@@ -1921,6 +2069,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             )
                         }
                         filePathView!!.text = multiImagesList.joinToString(",")
+                        barcodeImageList.clear()
+                        barcodeImageList.addAll(multiImagesList)
+                        adapter.notifyDataSetChanged()
                         isFileSelected = true
                         //Log.d("TEST199",multiImagesList.toString())
                     }
@@ -1934,11 +2085,14 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             )!!
                         )
                         filePathView!!.text = multiImagesList.joinToString(",")
+                        barcodeImageList.clear()
+                        barcodeImageList.addAll(multiImagesList)
+                        adapter.notifyDataSetChanged()
                         isFileSelected = true
                     }
                 }
 //                totalImageSize = if (filePathView!!.text.contains(",")) {
-                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
 //                } else {
 //                    ImageManager.getFileSize(filePathView!!.text.toString())
 //                }
@@ -1957,7 +2111,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 createImageFile(bitmap)
 
 //                totalImageSize = if (filePathView!!.text.contains(",")) {
-                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
 //                } else {
 //                    ImageManager.getFileSize(filePathView!!.text.toString())
 //                }
@@ -2007,7 +2161,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 }
             })
 
-        if (Constants.isDefaultTableFieldAdded){
+        if (Constants.isDefaultTableFieldAdded) {
             Constants.isDefaultTableFieldAdded = false
             renderTableColumnViews()
         }
@@ -2567,7 +2721,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         }
     }
 
-    private fun checkBothListSame() :Boolean{
+    private fun checkBothListSame(): Boolean {
         val first = mutableListOf<Any>()
         first.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
         first.removeAt(0)
@@ -2575,12 +2729,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
             appendRow(first)
             return true
         } else if (values != null && isEqual(first, values as List<Any>)) {
-         return true
+            return true
         }
         return false
     }
 
-    private fun createNewSpreadsheetDialog(tableName: String){
+    private fun createNewSpreadsheetDialog(tableName: String) {
         val first = mutableListOf<Any>()
         first.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
         first.removeAt(0)

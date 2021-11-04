@@ -3,10 +3,15 @@ package com.boris.expert.csvmagic.retrofit
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.android.volley.RetryPolicy
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.model.FeedbackResponse
 import com.boris.expert.csvmagic.model.SNPayload
+import com.boris.expert.csvmagic.utils.VolleySingleton
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -160,5 +165,51 @@ class ApiRepository {
         })
 
         return res
+    }
+
+    fun getUserPackageDetail(user_id:String):MutableLiveData<JSONObject?>{
+        val packageResponse = MutableLiveData<JSONObject?>()
+
+        val stringRequest = object : StringRequest(
+            Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+            com.android.volley.Response.Listener {
+                val response = JSONObject(it)
+                if (response.getInt("status") == 200){
+                  if (response.has("package") && !response.isNull("package")){
+//                      val pkg = response.getJSONObject("package")
+                      packageResponse.postValue(response)
+                  }
+                    else{
+                      packageResponse.postValue(null)
+                    }
+                }
+
+            }, com.android.volley.Response.ErrorListener {
+                packageResponse.postValue(null)
+            }) {
+            override fun getParams(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["user_id"] = user_id
+                return params
+            }
+        }
+
+        stringRequest.retryPolicy = object : RetryPolicy {
+            override fun getCurrentTimeout(): Int {
+                return 50000
+            }
+
+            override fun getCurrentRetryCount(): Int {
+                return 50000
+            }
+
+            @Throws(VolleyError::class)
+            override fun retry(error: VolleyError) {
+            }
+        }
+
+        VolleySingleton(context).addToRequestQueue(stringRequest)
+
+        return packageResponse
     }
 }

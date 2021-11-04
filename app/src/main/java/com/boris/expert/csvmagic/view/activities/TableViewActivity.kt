@@ -8,16 +8,17 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.util.TypedValue
+import android.view.*
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.adapters.TableDetailAdapter
 import com.boris.expert.csvmagic.model.TableObject
 import com.boris.expert.csvmagic.utils.TableGenerator
@@ -28,6 +29,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener,
@@ -355,6 +357,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         mutableListOf<Triple<TextInputEditText, AppCompatImageView, String>>()
     private var counter: Int = 0
     private var detailList = mutableListOf<Pair<String, String>>()
+    private var imageList = mutableListOf<String>()
     private fun openQuickEditDialog(item: TableObject) {
 
         val quickEditParentLayout =
@@ -423,32 +426,102 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
         })
         quickEditWrapperLayout.addView(dateLayout)
-        val imageLayout = LayoutInflater.from(context)
-            .inflate(R.layout.quick_edit_single_layout, quickEditWrapperLayout, false)
-        val imageValue =
-            imageLayout.findViewById<TextInputEditText>(R.id.quick_edit_barcode_detail_text_input_field)
-        val imageClearBrushView =
-            imageLayout.findViewById<AppCompatImageView>(R.id.quick_edit_barcode_detail_cleaning_text_view)
+//        val imageLayout = LayoutInflater.from(context)
+//            .inflate(R.layout.quick_edit_single_layout, quickEditWrapperLayout, false)
+//        val imageValue =
+//            imageLayout.findViewById<TextInputEditText>(R.id.quick_edit_barcode_detail_text_input_field)
+//        val imageClearBrushView =
+//            imageLayout.findViewById<AppCompatImageView>(R.id.quick_edit_barcode_detail_cleaning_text_view)
         counter += 1
-        imageClearBrushView.id = counter
-        imageClearBrushView.tag = "qe"
+//        imageClearBrushView.id = counter
+//        imageClearBrushView.tag = "qe"
+        if (item.image.contains(",")) {
+            imageList.addAll(item.image.split(",").toList())
+        } else {
+            imageList.add(item.image)
+        }
+        val params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(5, 5, 5, 5)
+        }
+        val barcodeImageRecyclerView = RecyclerView(context)
+        barcodeImageRecyclerView.setBackgroundColor(ContextCompat.getColor(context,R.color.light_gray))
+        barcodeImageRecyclerView.layoutParams = params
+        barcodeImageRecyclerView.layoutManager =
+            LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        barcodeImageRecyclerView.hasFixedSize()
+        val adapter = BarcodeImageAdapter(
+            context,
+            imageList as ArrayList<String>
+        )
+        barcodeImageRecyclerView.adapter = adapter
+        adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener{
+            override fun onItemDeleteClick(position: Int) {
+                val builder = MaterialAlertDialogBuilder(context)
+                builder.setMessage(getString(R.string.delete_barcode_image_message))
+                builder.setCancelable(false)
+                builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                    dialog.dismiss()
+                }
+                builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                    dialog.dismiss()
+                    imageList.removeAt(position)
 
-        barcodeEditList.add(Triple(imageValue, imageClearBrushView, "image"))
-        imageClearBrushView.setOnClickListener(this)
-        imageValue.setText(item.image)
-        imageValue.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    tableGenerator.updateBarcodeDetail(
+                        tableName, "image", if (imageList.size > 0) {
+                            imageList.joinToString(",")
+                        } else {
+                            ""
+                        }, item.id
+                    )
+                    adapter.notifyItemRemoved(position)
+                    getTableData(tableName,"","")
+                }
+                val alert = builder.create()
+                alert.show()
             }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                updateDialogBtn.isEnabled = true
+            override fun onAddItemEditClick(position: Int) {
+
             }
 
-            override fun afterTextChanged(s: Editable?) {
+            override fun onImageClick(position: Int) {
+                    val url = imageList[position]
+                    openLink(context,url)
             }
 
         })
-        quickEditWrapperLayout.addView(imageLayout)
+//        imageListTextView.setOnClickListener {
+//            val images = tableGenerator.getBarcodeImages(tableName, item.id)
+//            if (images.isNotEmpty()) {
+//                startActivity(Intent(context, BarcodeImageListActivity::class.java).apply {
+//                    putExtra("TABLE_NAME", tableName)
+//                    putExtra("ID", item.id)
+//                })
+//            }
+//            else{
+//                Toast.makeText(context,getString(R.string.empty_barcode_image_message),Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//        barcodeEditList.add(Triple(imageValue, imageClearBrushView, "image"))
+//        imageClearBrushView.setOnClickListener(this)
+//        imageValue.setText(item.image)
+//        imageValue.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+//            }
+//
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//                updateDialogBtn.isEnabled = true
+//            }
+//
+//            override fun afterTextChanged(s: Editable?) {
+//            }
+//
+//        })
+        quickEditWrapperLayout.addView(barcodeImageRecyclerView)
+
         val quantityLayout = LayoutInflater.from(context)
             .inflate(R.layout.quick_edit_single_layout, quickEditWrapperLayout, false)
         val quantityValue =
@@ -619,7 +692,11 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
                 val file = File(filesDir, "$tableName.csv")
                 val path =
-                    FileProvider.getUriForFile(context, context.applicationContext.packageName + ".fileprovider", file)
+                    FileProvider.getUriForFile(
+                        context,
+                        context.applicationContext.packageName + ".fileprovider",
+                        file
+                    )
                 dismiss()
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "text/csv"

@@ -7,6 +7,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,7 +24,10 @@ import com.android.volley.RetryPolicy
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
+import com.boris.expert.csvmagic.model.Feature
+import com.boris.expert.csvmagic.repository.DataRepository
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.Constants.Companion.EMAIL_ADDRESS_PATTERN
@@ -46,15 +50,19 @@ import kotlin.collections.HashMap
 
 open class BaseActivity : AppCompatActivity() {
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        getUserPackageDetail(this)
+    }
 
     companion object {
         private var prDownloader: DownloadRequest? = null
         var alert: AlertDialog? = null
 
         // THIS FUNCTION WILL CHECK THE INTERNET CONNECTION AVAILABLE OR NOT
-        fun isNetworkAvailable(context: Context): Boolean
-        {
-            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        fun isNetworkAvailable(context: Context): Boolean {
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val capabilities = connectivityManager.getNetworkCapabilities(
                     connectivityManager.activeNetwork
@@ -74,8 +82,7 @@ open class BaseActivity : AppCompatActivity() {
                 }
             } else {
                 val activeNetworkInfo = connectivityManager.activeNetworkInfo
-                if (activeNetworkInfo != null && activeNetworkInfo.isConnected)
-                {
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
                     return true
                 }
             }
@@ -127,12 +134,29 @@ open class BaseActivity : AppCompatActivity() {
 
         }
 
-        fun hideKeyboard(context: Context, activity: MainActivity){
+        fun hideKeyboard(context: Context, activity: MainActivity) {
             val view: View? = activity.currentFocus
             if (view != null) {
                 val imm = context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(view.windowToken, 0)
             }
+        }
+
+        fun openLink(context: Context, url: String) {
+            val builder = MaterialAlertDialogBuilder(context)
+            builder.setMessage(context.getString(R.string.barcode_image_open_browser_message))
+            builder.setCancelable(false)
+            builder.setNegativeButton(context.getString(R.string.no_text)) { dialog, which ->
+                dialog.dismiss()
+            }
+            builder.setPositiveButton(context.getString(R.string.yes_text)) { dialog, which ->
+                dialog.dismiss()
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                context.startActivity(i)
+            }
+            val alert = builder.create()
+            alert.show()
         }
 
 
@@ -141,9 +165,9 @@ open class BaseActivity : AppCompatActivity() {
             image: String,
             user_id: String,
             listener: UploadImageCallback
-        ){
-            val stringRequest  = object : StringRequest(
-                Method.POST, "https://quotesmakerapp.com/qrmagicapp/api/images_uploader",
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagicapp.com/api/images_uploader.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
@@ -152,11 +176,129 @@ open class BaseActivity : AppCompatActivity() {
                     }
                 }, Response.ErrorListener {
                     Log.d("TEST199", it.localizedMessage!!)
-                }){
+                }) {
                 override fun getParams(): MutableMap<String, String> {
                     val params = HashMap<String, String>()
                     params["image"] = image
                     params["user_id"] = user_id
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+        fun updateMemorySize(
+            context: Context,
+            size: String,
+            user_id: String,
+            update_total:Int,
+            listener: APICallback
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagicapp.com/api/package_update_size.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                }, Response.ErrorListener {
+                    listener.onError(it)
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["size"] = size
+                    params["user_id"] = user_id
+                    params["update_total"] = "$update_total"
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+        fun getUserPackageDetail(context: Context){
+            val stringRequest  = object : StringRequest(
+                Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    if (response.getInt("status") == 200) {
+                        val packageDetail:JSONObject? = response.getJSONObject("package")
+                        val availableSize = packageDetail!!.getString("size")
+                        Constants.userServerAvailableStorageSize = availableSize
+                    }
+                }, Response.ErrorListener {
+                    Log.d("TEST199", it.localizedMessage!!)
+
+                }){
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = Constants.firebaseUserId
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+        fun purchaseFeatures(context: Context,feature: Feature, user_id: String, listener: APICallback){
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagicapp.com/api/packages_manager.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                }, Response.ErrorListener {
+                    Log.d("TEST199", it.localizedMessage!!)
+                    listener.onError(it)
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = user_id
+                    params["package"] = if (feature.name.contains("storage")){"storage"}else{"time"}
+                    params["duration"] = feature.duration.toString()
+                    params["package_type"] = feature.type
+                    params["size"] = feature.memory.toString()
+                    params["total_size"] = feature.memory.toString()
                     return params
                 }
             }
@@ -190,21 +332,24 @@ open class BaseActivity : AppCompatActivity() {
         }
 
         fun startLoading(context: Context) {
-            val builder = MaterialAlertDialogBuilder(context)
-            val layout = LayoutInflater.from(context).inflate(R.layout.custom_loading, null)
-            builder.setView(layout)
-            builder.setCancelable(false)
-            alert = builder.create()
-            alert!!.show()
+            if (alert == null){
+                val builder = MaterialAlertDialogBuilder(context)
+                val layout = LayoutInflater.from(context).inflate(R.layout.custom_loading, null)
+                builder.setView(layout)
+                builder.setCancelable(false)
+                alert = builder.create()
+                alert!!.show()
+            }
         }
 
         fun dismiss() {
             if (alert != null) {
                 alert!!.dismiss()
+                alert = null
             }
         }
 
-        fun addDaysCalenderDate(days: Int):Calendar{
+        fun addDaysCalenderDate(days: Int): Calendar {
             val sdf = SimpleDateFormat("yyyy-MM-dd kk:mm a", Locale.ENGLISH)
             val c = Calendar.getInstance()
             c.time = sdf.parse(getDateTimeFromTimeStamp(System.currentTimeMillis()))!!
@@ -355,7 +500,7 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
-        fun getCurrentSubscriptionDetail(context: Context){
+        fun getCurrentSubscriptionDetail(context: Context) {
             val appSettings = AppSettings(context)
             val auth = FirebaseAuth.getInstance()
             val firebaseDatabase = FirebaseDatabase.getInstance().reference
@@ -363,9 +508,9 @@ open class BaseActivity : AppCompatActivity() {
             if (auth.currentUser != null) {
                 val userId = auth.currentUser!!.uid
                 Constants.firebaseUserId = userId
-                var duration:Int = 0
-                var memory :Float = 0F
-                var expiredAt:Long = 0
+                var duration: Int = 0
+                var memory: Float = 0F
+                var expiredAt: Long = 0
                 firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
                     .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
@@ -426,7 +571,8 @@ open class BaseActivity : AppCompatActivity() {
 
         fun showSoftKeyboard(context: Context, view: View) {
             if (view.requestFocus()) {
-                val imm: InputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm: InputMethodManager =
+                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
             }
         }
@@ -435,7 +581,6 @@ open class BaseActivity : AppCompatActivity() {
             val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
-
 
 
     }

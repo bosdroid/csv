@@ -52,6 +52,17 @@
             android:layout_marginStart="@dimen/eightDpMargin"
             android:textColor="@color/primary_positive_color"
             android:textSize="@dimen/largeText" />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/get_credits_text"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:textSize="@dimen/mediumText"
+            android:layout_marginStart="@dimen/eightDpMargin"
+            android:id="@+id/get_credits_btn"
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -72,75 +83,115 @@
             android:textColor="@color/secondary_positive_color"
             android:textSize="@dimen/xlargeText" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            >
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:gravity="center"
+               android:layout_marginTop="@dimen/sixtyDpMargin"
+               >
+               <LinearLayout
+                   android:layout_width="0dp"
+                   android:layout_height="wrap_content"
+                   android:layout_weight="1"
+                   android:orientation="horizontal"
+                   android:gravity="center"
+                   >
+                   <com.google.android.material.textview.MaterialTextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:gravity="end"
+                       android:text="@string/available_storage_space_text"
+                       android:textColor="@color/black"
+                       android:textSize="@dimen/mediumText" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="end">
+                   <com.google.android.material.textview.MaterialTextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_marginStart="@dimen/defaultDpMargin"
+                       android:text="0"
+                       android:textColor="@color/primary_positive_color"
+                       android:id="@+id/us_storage_space_view"
+                       android:textSize="@dimen/mediumText" />
+               </LinearLayout>
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:text="@string/available_storage_space_text"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/mediumText" />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:text="@string/duration_text"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/mediumText" />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:text="@string/expired_at_text"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/mediumText" />
-            </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingStart="@dimen/small">
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:text="0"
-                    android:textColor="@color/primary_positive_color"
-                    android:id="@+id/us_storage_space_view"
-                    android:textSize="@dimen/mediumText" />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:text="0"
-                    android:textColor="@color/primary_positive_color"
-                    android:id="@+id/us_duration_view"
-                    android:textSize="@dimen/mediumText" />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/eightDpMargin"
-                    android:text="0"
-                    android:textColor="@color/primary_positive_color"
-                    android:id="@+id/us_expired_at_view"
-                    android:textSize="@dimen/mediumText" />
-            </LinearLayout>
-        </LinearLayout>
+               <LinearLayout
+                   android:layout_width="0dp"
+                   android:layout_height="wrap_content"
+                   android:layout_weight="0.5"
+                   android:orientation="vertical"
+                   >
+                   <com.google.android.material.button.MaterialButton
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:text="@string/increase_storage_text"
+                       android:minHeight="0dp"
+                       android:minWidth="0dp"
+                       android:textSize="@dimen/smallText"
+                       android:textColor="@color/black"
+                       style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                       android:id="@+id/increase_storage_btn"
+                       android:layout_marginStart="@dimen/eightDpMargin"
+                       />
+               </LinearLayout>
+           </LinearLayout>
+
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:gravity="center"
+               android:layout_marginTop="@dimen/sixtyDpMargin"
+               >
+               <LinearLayout
+                   android:layout_width="0dp"
+                   android:layout_height="wrap_content"
+                   android:layout_weight="1"
+                   android:orientation="horizontal"
+                   android:gravity="center"
+                   >
+                   <com.google.android.material.textview.MaterialTextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:gravity="end"
+                       android:text="@string/duration_text"
+                       android:textColor="@color/black"
+                       android:textSize="@dimen/mediumText" />
+
+                   <com.google.android.material.textview.MaterialTextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_marginStart="@dimen/defaultDpMargin"
+                       android:text="0"
+                       android:textColor="@color/black"
+                       android:id="@+id/us_duration_view"
+                       android:textStyle="bold"
+                       android:textSize="@dimen/mediumText" />
+               </LinearLayout>
+
+
+               <LinearLayout
+                   android:layout_width="0dp"
+                   android:layout_height="wrap_content"
+                   android:layout_weight="0.5"
+                   android:orientation="vertical"
+                   >
+                   <com.google.android.material.button.MaterialButton
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:text="@string/extend_usage_text"
+                       android:textColor="@color/black"
+                       android:minHeight="0dp"
+                       android:minWidth="0dp"
+                       android:textSize="@dimen/smallText"
+                       style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                       android:id="@+id/extend_usage_btn"
+                       android:layout_marginStart="@dimen/eightDpMargin"
+                       />
+               </LinearLayout>
+           </LinearLayout>
+
 
     </LinearLayout>
 

@@ -550,11 +550,23 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val query = "ATTACH DATABASE '" + backupDbPath + "' AS $databaseName"
         if (checkDb(dbPath)) {
             db.execSQL(query)
-            val dbCursor = db1.query("$databaseName.default_table", null, null, null, null, null, null)
+            val dbCursor = db1.query(
+                "$databaseName.default_table",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
             val columnNames = mutableListOf<String>()
             columnNames.addAll(dbCursor.columnNames)
             columnNames.removeAt(0)
-            val insertQuery = "INSERT INTO default_table(${columnNames.joinToString(",")}) SELECT ${columnNames.joinToString(",")} FROM $databaseName.default_table;"
+            val insertQuery = "INSERT INTO default_table(${columnNames.joinToString(",")}) SELECT ${
+                columnNames.joinToString(
+                    ","
+                )
+            } FROM $databaseName.default_table;"
             db.execSQL(insertQuery)
         }
 //        else {
@@ -568,14 +580,23 @@ class Database(private val context: Context) : SQLiteOpenHelper(
 
     }
 
-    private fun checkDb(path: String):Boolean{
+    private fun checkDb(path: String): Boolean {
         val file = File(path)
         var checkDB: SQLiteDatabase? = null
-        if (file.exists())
-        {
+        if (file.exists()) {
             checkDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE);
         }
 
         return checkDB != null
+    }
+
+    fun getBarcodeImages(tableName: String, id: Int): String {
+        val db = this.readableDatabase
+        var foundImages = ""
+        val cursor = db.rawQuery("SELECT $COLUMN_IMAGE FROM $tableName WHERE id=$id", null)
+        if (cursor.moveToFirst()) {
+            foundImages = cursor.getString(cursor.getColumnIndex("image"))
+        }
+        return foundImages
     }
 }

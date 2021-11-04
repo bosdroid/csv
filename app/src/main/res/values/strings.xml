@@ -405,6 +405,20 @@
     <string name="buy_storage_text">BUY STORAGE</string>
     <string name="add_new_field_below_text">ADD NEW FIELD BELOW</string>
     <string name="field_exist_error_text">field name already exist in the table</string>
+    <string name="view_image_list">View Barcode Images</string>
+    <string name="barcode_image_list">Barcode Image List</string>
+    <string name="delete_barcode_image_message">Are you sure you want to delete this image?</string>
+    <string name="no_text">No</string>
+    <string name="yes_text">Yes</string>
+    <string name="empty_barcode_image_message">Selected barcode data have no image.</string>
+    <string name="barcode_image_open_browser_message">Do you want to open picture in a browser?</string>
+    <string name="get_credits_text">GET CREDITS</string>
+    <string name="increase_storage_text">INCREASE STORAGE</string>
+    <string name="extend_usage_text">EXTEND USAGE</string>
+    <string name="photo_storage_text">photo_storage</string>
+    <string name="photo_storage_pro_text">photo_storage_pro</string>
+    <string name="usage_time_text">usage_time</string>
+    <string name="usage_time_pro_text">usage_time_pro</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

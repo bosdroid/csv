@@ -16,6 +16,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -37,6 +38,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.adapters.FeedbackAdapter
 import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
 import com.boris.expert.csvmagic.model.CodeHistory
@@ -641,7 +643,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
             .setMultiTouchEnabled(true)
             .start(this)
     }
-
+    private var imageList = mutableListOf<String>()
     private fun displayBarcodeDetail() {
         if (tableObject != null) {
 
@@ -704,12 +706,69 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
             val imageColumnEditView =
                 imageLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
             counter += 1
-            imageColumnEditView.id = counter
-            barcodeEditList.add(Triple(imageColumnEditView, tableObject!!.image, "image"))
-            imageColumnEditView.setOnClickListener(this)
-            imageColumnValue.text = tableObject!!.image
-            imageColumnName.text = "image"
-            barcodeDetailParentLayout.addView(imageLayout)
+//            imageColumnEditView.id = counter
+//            barcodeEditList.add(Triple(imageColumnEditView, tableObject!!.image, "image"))
+//            imageColumnEditView.setOnClickListener(this)
+//            imageColumnValue.text = tableObject!!.image
+//            imageColumnName.text = "image"
+            if (tableObject!!.image.contains(",")) {
+                imageList.addAll(tableObject!!.image.split(",").toList())
+            } else {
+                imageList.add(tableObject!!.image)
+            }
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(5, 5, 5, 5)
+            }
+            val barcodeImageRecyclerView = RecyclerView(context)
+            barcodeImageRecyclerView.setBackgroundColor(ContextCompat.getColor(context,R.color.light_gray))
+            barcodeImageRecyclerView.layoutParams = params
+            barcodeImageRecyclerView.layoutManager =
+                LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+            barcodeImageRecyclerView.hasFixedSize()
+            val adapter = BarcodeImageAdapter(
+                context,
+                imageList as ArrayList<String>
+            )
+            barcodeImageRecyclerView.adapter = adapter
+            adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener{
+                override fun onItemDeleteClick(position: Int) {
+                    val builder = MaterialAlertDialogBuilder(context)
+                    builder.setMessage(getString(R.string.delete_barcode_image_message))
+                    builder.setCancelable(false)
+                    builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                        dialog.dismiss()
+                        imageList.removeAt(position)
+
+                        tableGenerator.updateBarcodeDetail(
+                            tableName, "image", if (imageList.size > 0) {
+                                imageList.joinToString(",")
+                            } else {
+                                ""
+                            }, tableObject!!.id
+                        )
+                        adapter.notifyItemRemoved(position)
+                    }
+                    val alert = builder.create()
+                    alert.show()
+                }
+
+                override fun onAddItemEditClick(position: Int) {
+
+                }
+
+                override fun onImageClick(position: Int) {
+                    val url = imageList[position]
+                    openLink(context,url)
+                }
+
+            })
+            barcodeDetailParentLayout.addView(barcodeImageRecyclerView)
 
             for (i in 0 until tableObject!!.dynamicColumns.size) {
                 val item = tableObject!!.dynamicColumns[i]
