@@ -757,7 +757,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             DatabaseHandler.importer(context)
             getUserCredits(context)
             getCurrentSubscriptionDetail(context)
-
+            getUserPackageDetail(context)
             Handler(Looper.myLooper()!!).postDelayed({
 
                 add5MbFreeStorage()

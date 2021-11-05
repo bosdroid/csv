@@ -165,10 +165,10 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             viewModel.getUserPackageResponse().observe(this, { response->
                 dismiss()
                 if (response != null){
-                    val packageDetail:JSONObject? = response.getJSONObject("package")
+                    if (response.has("package") && !response.isNull("package")) {
 
-                    if (packageDetail != null){
-                        val startDate = packageDetail.getString("start_date")
+                        val packageDetail: JSONObject? = response.getJSONObject("package")
+                        val startDate = packageDetail!!.getString("start_date")
                         val endDate = packageDetail.getString("end_date")
                         val expiredTimeMili = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
 
@@ -484,7 +484,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 .addOnFailureListener {
 
                                 }
-
+                            getUserSubscriptionDetails()
                             showAlert(context, "Congratulation on upgrading the subscription!")
                         } else {
                             val message = response.getString("message")
@@ -502,57 +502,6 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         }else if (feature.name.contains("time") && feature.type == "pro"){
             purchaseFeature(feature)
         }
-
-
-//        var packageType = ""
-//        var pkgName = ""
-//        var duration = 0
-//        var memory = 0F
-//
-//        packageType = if (feature.name.contains("pro")) {
-//            "pro"
-//        } else {
-//            "simple"
-//        }
-//
-//        if (feature.name.contains("storage")) {
-//            pkgName = "storage"
-//            memory = feature.memory
-//
-//            if (goneDays > 0) {
-//                val unitPrice = feature.credit_price / feature.duration
-//                val priceAlreadyDaysGone = unitPrice * goneDays
-//
-//            }
-//
-//
-//        } else {
-//            pkgName = "time"
-//            duration = feature.duration
-//
-//
-//        }
-
-
-//        val params = HashMap<String, Any>()
-//        params["package"] = pkgName
-//        params["user_id"] = Constants.firebaseUserId
-//        params["duration"] = duration
-//        params["package_type"] = packageType
-//        params["size"] = memory
-
-//        val hashMap = HashMap<String, String>()
-//        val remaining = userCurrentCredits.toInt() - feature.credit_price
-//        hashMap["credits"] = remaining.toString()
-//        firebaseDatabase.child(Constants.firebaseUserCredits)
-//            .child(Constants.firebaseUserId)
-//            .setValue(hashMap)
-//            .addOnSuccessListener {
-//
-//            }
-//            .addOnFailureListener {
-//
-//            }
 
     }
 

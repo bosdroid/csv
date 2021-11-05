@@ -52,7 +52,7 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getUserPackageDetail(this)
+
     }
 
     companion object {
@@ -206,7 +206,7 @@ open class BaseActivity : AppCompatActivity() {
             context: Context,
             size: String,
             user_id: String,
-            update_total:Int,
+            update_total: Int,
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
@@ -243,22 +243,23 @@ open class BaseActivity : AppCompatActivity() {
             VolleySingleton(context).addToRequestQueue(stringRequest)
         }
 
-        fun getUserPackageDetail(context: Context){
-            val stringRequest  = object : StringRequest(
+        fun getUserPackageDetail(context: Context) {
+            val stringRequest = object : StringRequest(
                 Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
-                        val packageDetail:JSONObject? = response.getJSONObject("package")
-                        if (packageDetail != null){
-                            val availableSize = packageDetail.getString("size")
+                        if (response.has("package") && !response.isNull("package")) {
+                            val packageDetail: JSONObject? = response.getJSONObject("package")
+
+                            val availableSize = packageDetail!!.getString("size")
                             Constants.userServerAvailableStorageSize = availableSize
                         }
                     }
                 }, Response.ErrorListener {
                     Log.d("TEST199", it.localizedMessage!!)
 
-                }){
+                }) {
                 override fun getParams(): MutableMap<String, String> {
                     val params = HashMap<String, String>()
                     params["user_id"] = Constants.firebaseUserId
@@ -283,7 +284,12 @@ open class BaseActivity : AppCompatActivity() {
             VolleySingleton(context).addToRequestQueue(stringRequest)
         }
 
-        fun purchaseFeatures(context: Context,feature: Feature, user_id: String, listener: APICallback){
+        fun purchaseFeatures(
+            context: Context,
+            feature: Feature,
+            user_id: String,
+            listener: APICallback
+        ) {
             val stringRequest = object : StringRequest(
                 Method.POST, "https://itmagicapp.com/api/packages_manager.php",
                 Response.Listener {
@@ -296,7 +302,11 @@ open class BaseActivity : AppCompatActivity() {
                 override fun getParams(): MutableMap<String, String> {
                     val params = HashMap<String, String>()
                     params["user_id"] = user_id
-                    params["package"] = if (feature.name.contains("storage")){"storage"}else{"time"}
+                    params["package"] = if (feature.name.contains("storage")) {
+                        "storage"
+                    } else {
+                        "time"
+                    }
                     params["duration"] = feature.duration.toString()
                     params["package_type"] = feature.type
                     params["size"] = feature.memory.toString()
@@ -334,7 +344,7 @@ open class BaseActivity : AppCompatActivity() {
         }
 
         fun startLoading(context: Context) {
-            if (alert == null){
+            if (alert == null) {
                 val builder = MaterialAlertDialogBuilder(context)
                 val layout = LayoutInflater.from(context).inflate(R.layout.custom_loading, null)
                 builder.setView(layout)

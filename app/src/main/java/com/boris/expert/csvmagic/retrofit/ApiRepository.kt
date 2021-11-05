@@ -175,14 +175,14 @@ class ApiRepository {
             com.android.volley.Response.Listener {
                 val response = JSONObject(it)
                 if (response.getInt("status") == 200){
-                  if (response.has("package") && !response.isNull("package")){
+//                  if (response.has("package") && !response.isNull("package")){
 //                      val pkg = response.getJSONObject("package")
                       packageResponse.postValue(response)
                   }
                     else{
                       packageResponse.postValue(null)
                     }
-                }
+//                }
 
             }, com.android.volley.Response.ErrorListener {
                 packageResponse.postValue(null)
