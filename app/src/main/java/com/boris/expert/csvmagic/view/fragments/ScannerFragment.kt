@@ -1896,7 +1896,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
                         val packageDetail: JSONObject? = response.getJSONObject("package")
-                        val availableSize = packageDetail!!.getString("size")
+                        if (packageDetail !=null){
+                            val availableSize = packageDetail.getString("size")
                         Constants.userServerAvailableStorageSize = availableSize
 
                         currentStorageSize = Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
@@ -1917,6 +1918,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 }
 
                             })
+                        }
                     }
                 }, Response.ErrorListener {
                     Log.d("TEST199", it.localizedMessage!!)

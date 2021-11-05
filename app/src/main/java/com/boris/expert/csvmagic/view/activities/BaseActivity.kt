@@ -250,8 +250,10 @@ open class BaseActivity : AppCompatActivity() {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
                         val packageDetail:JSONObject? = response.getJSONObject("package")
-                        val availableSize = packageDetail!!.getString("size")
-                        Constants.userServerAvailableStorageSize = availableSize
+                        if (packageDetail != null){
+                            val availableSize = packageDetail.getString("size")
+                            Constants.userServerAvailableStorageSize = availableSize
+                        }
                     }
                 }, Response.ErrorListener {
                     Log.d("TEST199", it.localizedMessage!!)
