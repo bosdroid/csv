@@ -435,8 +435,8 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         counter += 1
 //        imageClearBrushView.id = counter
 //        imageClearBrushView.tag = "qe"
-        if (item.image.contains(",")) {
-            imageList.addAll(item.image.split(",").toList())
+        if (item.image.contains(" ")) {
+            imageList.addAll(item.image.split(" ").toList())
         } else {
             imageList.add(item.image)
         }
@@ -593,7 +593,9 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         val alert = builder.create()
         alert.show()
 
-        cancelDialogBtn.setOnClickListener { alert.dismiss() }
+        cancelDialogBtn.setOnClickListener {
+            imageList.clear()
+            alert.dismiss() }
         updateDialogBtn.setOnClickListener {
             startLoading(context)
             var flag = false
@@ -615,6 +617,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 if (detailList.isNotEmpty()) {
                     val isSuccess = tableGenerator.updateData(tableName, detailList, item.id)
                     if (isSuccess) {
+                        imageList.clear()
                         dismiss()
                         getTableData(tableName, "", "")
                     } else {
@@ -666,7 +669,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             for (j in 0 until dataList.size) {
                 var image = ""
                 val data = dataList[j]
-                if (data.image.contains(",")) {
+                if (data.image.contains(" ")) {
                     val temp = data.image.replace(",", ", ")
                     image = "\"$temp\""
                 } else {

@@ -415,10 +415,11 @@
     <string name="get_credits_text">GET CREDITS</string>
     <string name="increase_storage_text">INCREASE STORAGE</string>
     <string name="extend_usage_text">EXTEND USAGE</string>
-    <string name="photo_storage_text">photo_storage</string>
-    <string name="photo_storage_pro_text">photo_storage_pro</string>
-    <string name="usage_time_text">usage_time</string>
-    <string name="usage_time_pro_text">usage_time_pro</string>
+    <string name="photo_storage_text">Photo Storage</string>
+    <string name="photo_storage_pro_text">Photo Storage Pro</string>
+    <string name="usage_time_text">Usage Time</string>
+    <string name="usage_time_pro_text">Usage Time Pro</string>
+    <string name="usage_text">Usage ends:</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

@@ -749,9 +749,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.logout).isVisible = true
             mNavigation.menu.findItem(R.id.profile).isVisible = false
             mNavigation.menu.findItem(R.id.tables).isVisible = true
-            mNavigation.menu.findItem(R.id.credit).isVisible = true
+            mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.user_screen).isVisible = true
-            mNavigation.menu.findItem(R.id.purchase_feature).isVisible = true
+            mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
             DatabaseHandler.importer(context)
@@ -759,7 +759,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             getCurrentSubscriptionDetail(context)
             getUserPackageDetail(context)
             Handler(Looper.myLooper()!!).postDelayed({
-
                 add5MbFreeStorage()
             },2000)
 

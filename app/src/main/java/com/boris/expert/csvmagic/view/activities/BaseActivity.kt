@@ -375,6 +375,12 @@ open class BaseActivity : AppCompatActivity() {
             return df.format(c).toUpperCase(Locale.ENGLISH)
         }
 
+        fun getDateFormateFromTimeStamp(timeStamp: Long): String {
+            val c: Date = Date(timeStamp)
+            val df = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+            return df.format(c).toUpperCase(Locale.ENGLISH)
+        }
+
         fun getFormattedDate(context: Context?, smsTimeInMilis: Long): String {
             val smsTime = Calendar.getInstance()
             smsTime.timeInMillis = smsTimeInMilis

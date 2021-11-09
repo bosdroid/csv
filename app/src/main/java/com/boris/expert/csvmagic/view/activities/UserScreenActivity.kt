@@ -62,6 +62,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     //    private lateinit var usExpiredAtView:MaterialTextView
     private var billingClient: BillingClient? = null
     private var productId = ""
+    private var productIdIndex = 0
     private var creditsValue: Int = 0
     private var userId: String = ""
     private lateinit var viewModel: UserScreenActivityViewModel
@@ -189,7 +190,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         val availableDuration = packageDetail.getInt("duration")
                         val formatted = String.format("%.2f",availableSize.toDouble())
                         usStorageSpaceView.text = "$formatted MB of $tSize MB"
-                        usDurationView.text = "$remainingDay days left / expires \non ${getDateFromTimeStamp(expiredTimeMili)}"
+                        usDurationView.text = "in $remainingDay days | on ${getDateFormateFromTimeStamp(expiredTimeMili)}"
                     }
 
                 }
@@ -293,6 +294,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
         oneCreditBtn.setOnClickListener {
             productId = "single_credit"
+            productIdIndex = 0
             if (auth.currentUser != null) {
                 alert.dismiss()
                 creditsValue = 1
@@ -306,6 +308,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
         sixCreditBtn.setOnClickListener {
             productId = "six_credits"
+            productIdIndex = 1
             if (auth.currentUser != null) {
                 alert.dismiss()
                 creditsValue = 6
@@ -319,6 +322,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
         tenCreditBtn.setOnClickListener {
             productId = "ten_credits"
+            productIdIndex = 2
             if (auth.currentUser != null) {
                 alert.dismiss()
                 creditsValue = 10
@@ -714,7 +718,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 if (skuDetailsList != null && skuDetailsList.size > 0) {
                     val flowParams = BillingFlowParams.newBuilder()
-                        .setSkuDetails(skuDetailsList[0])
+                        .setSkuDetails(skuDetailsList[productIdIndex])
                         .build()
                     billingClient!!.launchBillingFlow(this, flowParams)
                 } else {

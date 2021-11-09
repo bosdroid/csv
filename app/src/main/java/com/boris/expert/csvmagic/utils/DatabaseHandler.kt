@@ -43,7 +43,6 @@ object DatabaseHandler {
                 tableGenerator.deleteDatabase()
                 BaseActivity.dismiss()
                 listener.onSuccess()
-//                Toast.makeText(context, "Database Exported Successfully", Toast.LENGTH_LONG).show()
 
         } catch (excep: Exception) {
             BaseActivity.dismiss()
@@ -51,33 +50,7 @@ object DatabaseHandler {
             Log.e("FILECOPYERROR>>>>", excep.toString())
             excep.printStackTrace()
         }
-//        val tableList = tableGenerator.getAllDatabaseTables()
-//        val jsonObject = JSONObject()
-//        val array = JSONArray()
-//
-//        for (i in 0 until tableList.size){
-//             val table = tableList[i]
-//             val dataList:List<TableObject> = tableGenerator.getTableDate(table,"","")
-//              val tempJsonArray = JSONArray()
-//              val tempObject = JSONObject()
-//             for (j in 0 until dataList.size){
-//                 val item = JSONObject(Gson().toJson(dataList[j]))
-//                 tempJsonArray.put(item)
-//             }
-//            tempObject.put(table,tempJsonArray)
-//            array.put(tempObject)
-//        }
-//        jsonObject.put("tables",array)
-//        databaseReference.child(Constants.firebaseDatabaseBackup)
-//            .child(Constants.firebaseUserId)
-//            .child("data").setValue(jsonObject.toString()).addOnSuccessListener {
-//                BaseActivity.dismiss()
-//                listener.onSuccess()
-//                Log.d("TEST1999", jsonObject.toString())
-//            }.addOnFailureListener {
-//                BaseActivity.dismiss()
-//                listener.onFailure()
-//            }
+
     }
 
     fun importer(context: Context){
@@ -104,12 +77,6 @@ object DatabaseHandler {
                     val COPY_DB_PATH = File(COPY_DB)
                      if (COPY_DB_PATH.exists()) {
                          tableGenerator.mergeDatabases("${userId}_backup",COPY_DB_PATH.absolutePath)
-//                         val srcChannel = FileInputStream(COPY_DB_PATH).channel
-//
-//                         val dstChannel = FileOutputStream(DB_PATH).channel
-//                         dstChannel.transferFrom(srcChannel, 0, srcChannel.size())
-//                         srcChannel.close()
-//                         dstChannel.close()
                          appSettings.putString(Constants.dbImport, "yes")
                      }
                     BaseActivity.dismiss()
@@ -120,7 +87,6 @@ object DatabaseHandler {
             } catch (excep: Exception) {
                 BaseActivity.dismiss()
                 BaseActivity.showAlert(context,"ERROR IN COPY $excep")
-                //Toast.makeText(context, "ERROR IN COPY $excep", Toast.LENGTH_LONG).show()
                 Log.e("FILECOPYERROR>>>>", excep.toString())
                 excep.printStackTrace()
 

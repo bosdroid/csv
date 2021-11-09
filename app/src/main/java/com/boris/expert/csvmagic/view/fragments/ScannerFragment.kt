@@ -160,6 +160,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private lateinit var connectGoogleSheetsTextView: MaterialTextView
     private lateinit var sheetsTopLayout: LinearLayout
     var values: List<Any>? = null
+    var isScanResultDialogShowing = false
 
     interface ScannerInterface {
         fun login(callback: LoginCallback)
@@ -411,6 +412,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 decodeCallback = DecodeCallback {
 
                     requireActivity().runOnUiThread {
+                        if (isScanResultDialogShowing){
+                            return@runOnUiThread
+                        }
                         if (it.text.isNotEmpty() && it.text.matches(Regex("[0-9]+"))) {
 
                             val isFound = tableGenerator.searchItem(tableName, it.text)
@@ -855,10 +859,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     builder.setCancelable(false)
                     alert = builder.create()
                     alert.show()
-
+                    isScanResultDialogShowing = true
                     scanResultCancelBtn.setOnClickListener {
                         alert.dismiss()
                         columns.clear()
+                        isScanResultDialogShowing = false
                         codeScanner!!.startPreview()
                     }
 
@@ -956,7 +961,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     }
 
                 }
-            } else {
+            } else
+            {
                 val bundle = Bundle()
                 bundle.putString("second scanner", "triggers")
                 mFirebaseAnalytics?.logEvent("scanner", bundle)
@@ -1474,6 +1480,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                 columns.clear()
                                                 tableDetailLayoutWrapper.removeAllViews()
                                                 filePathView!!.setText("")
+                                                isScanResultDialogShowing = false
+                                                barcodeImageList.clear()
+                                                adapter.notifyDataSetChanged()
 //                                                val tempList = mutableListOf<Any>()
 //                                                for (i in 0 until params.size) {
 //                                                    val pair = params[i]
@@ -1549,6 +1558,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 tableDetailLayoutWrapper.removeAllViews()
                                 codeScanner!!.startPreview()
                                 filePathView!!.setText("")
+                                isScanResultDialogShowing = false
+                                barcodeImageList.clear()
+                                adapter.notifyDataSetChanged()
 //                                openHistoryBtnTip()
 //                                if (Constants.userData != null) {
 //                                    val tempList = mutableListOf<Any>()
@@ -1640,6 +1652,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             textInputIdsList.clear()
                             spinnerIdsList.clear()
                             params.clear()
+                            isScanResultDialogShowing = false
                             tableDetailLayoutWrapper.removeAllViews()
                             codeScanner!!.startPreview()
 //                            openHistoryBtnTip()
@@ -1747,64 +1760,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     var array: List<String> = mutableListOf()
     val handler = Handler(Looper.myLooper()!!)
     var totalImageSize: Long = 0
+    var index = 0
     private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
         val imageList = filePathView!!.text.toString()
         if (imageList.contains(",")) {
             array = imageList.split(",")
-
-            for (i in array.indices) {
-
-                handler.postDelayed({
-
-                    val imagePath = array[i]
-
-                    if (FirebaseAuth.getInstance().currentUser != null) {
-                        val userId = FirebaseAuth.getInstance().currentUser!!.uid
-
-//                        val file = Uri.fromFile(File(imagePath))
-                        val imageBase64String =
-                            ImageManager.convertImageToBase64(requireActivity(), imagePath)
-                        BaseActivity.uploadImageOnServer(
-                            requireContext(),
-                            imageBase64String,
-                            userId,
-                            object : UploadImageCallback {
-                                override fun onSuccess(imageUrl: String) {
-                                    uploadedUrlList.add(imageUrl)
-                                    if (i == array.size - 1) {
-                                        url = uploadedUrlList.joinToString(" ")
-                                        uploadedUrlList.clear()
-                                        listener.onSuccess("")
-                                    }
-                                }
-
-                            })
-//                        val fileRef =
-//                            storageReference.child("${Constants.firebaseBarcodeImages}/$userId/${System.currentTimeMillis()}.jpg")
-//                        val uploadTask = fileRef.putFile(file)
-//                        uploadTask.continueWithTask { task ->
-//                            if (!task.isSuccessful) {
-//                                task.exception?.let {
-//                                    throw it
-//                                }
-//                            }
-//                            fileRef.downloadUrl
-//                        }.addOnCompleteListener { task ->
-//                            if (task.isSuccessful) {
-//                                val downloadUri = task.result
-//                                uploadedUrlList.add(downloadUri.toString())
-//                                if (i == array.size - 1) {
-//                                    url = uploadedUrlList.joinToString(" ")
-//                                    uploadedUrlList.clear()
-//                                    listener.onSuccess("")
-//                                }
-//                            }
-//                        }
-                    }
-                }, (1000 * i + 1).toLong())
-
-            }
-
+            uploadImage(listener)
         } else {
             val bundle = Bundle()
             bundle.putString("starts", "starts")
@@ -1813,7 +1774,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
             if (FirebaseAuth.getInstance().currentUser != null) {
                 val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                //val file = Uri.fromFile(File(filePathView!!.text.toString()))
                 val imageBase64String = ImageManager.convertImageToBase64(
                     requireActivity(),
                     filePathView!!.text.toString()
@@ -1829,26 +1789,38 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         }
 
                     })
-//                val fileRef =
-//                    storageReference.child("BarcodeImages/$userId/${System.currentTimeMillis()}.jpg")
-//                val uploadTask = fileRef.putFile(file)
-//                uploadTask.continueWithTask { task ->
-//                    if (!task.isSuccessful) {
-//                        task.exception?.let {
-//                            throw it
-//                        }
-//                    }
-//                    fileRef.downloadUrl
-//                }.addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        val downloadUri = task.result
-//                        url = downloadUri.toString()
-//                        listener.onSuccess("")
-//                    }
-//                }
             }
         }
 
+    }
+
+    private fun uploadImage(callback: UploadImageCallback) {
+        if (FirebaseAuth.getInstance().currentUser != null) {
+
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+            val imagePath = array[index]
+            val imageBase64String = ImageManager.convertImageToBase64(requireActivity(), imagePath)
+            BaseActivity.uploadImageOnServer(
+                requireContext(),
+                imageBase64String,
+                userId,
+                object : UploadImageCallback {
+                    override fun onSuccess(imageUrl: String) {
+                        Log.d("TEST199", imageUrl)
+                        uploadedUrlList.add(imageUrl)
+                        if (index == array.size - 1) {
+                            url = uploadedUrlList.joinToString(" ")
+                            uploadedUrlList.clear()
+                            index = 0
+                            callback.onSuccess("")
+                        } else {
+                            index++
+                            uploadImage(callback)
+                        }
+                    }
+
+                })
+        }
     }
 
     private fun getTotalImagesSize(uploadedUrlList: MutableList<String>) {
@@ -1871,7 +1843,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private fun updateStorageSize(size: Long, type: String) {
         var currentStorageSize: Float = 0F
         if (Constants.userServerAvailableStorageSize.isNotEmpty()) {
-            currentStorageSize = Constants.convertMegaBytesToBytes(Constants.userServerAvailableStorageSize.toFloat()) - size
+            currentStorageSize =
+                Constants.convertMegaBytesToBytes(Constants.userServerAvailableStorageSize.toFloat()) - size
 
             val remainingMb = Constants.convertBytesToMegaBytes(currentStorageSize).toString()
             BaseActivity.updateMemorySize(
@@ -1896,28 +1869,30 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
                         val packageDetail: JSONObject? = response.getJSONObject("package")
-                        if (packageDetail !=null){
+                        if (packageDetail != null) {
                             val availableSize = packageDetail.getString("size")
-                        Constants.userServerAvailableStorageSize = availableSize
+                            Constants.userServerAvailableStorageSize = availableSize
 
-                        currentStorageSize = Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
+                            currentStorageSize =
+                                Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
 
-                        val remainingMb = Constants.convertBytesToMegaBytes(currentStorageSize).toString()
-                        BaseActivity.updateMemorySize(
-                            requireActivity(),
-                            remainingMb,
-                            Constants.firebaseUserId,
-                            0,
-                            object : APICallback {
-                                override fun onSuccess(response: JSONObject) {
+                            val remainingMb =
+                                Constants.convertBytesToMegaBytes(currentStorageSize).toString()
+                            BaseActivity.updateMemorySize(
+                                requireActivity(),
+                                remainingMb,
+                                Constants.firebaseUserId,
+                                0,
+                                object : APICallback {
+                                    override fun onSuccess(response: JSONObject) {
 
-                                }
+                                    }
 
-                                override fun onError(error: VolleyError) {
+                                    override fun onError(error: VolleyError) {
 
-                                }
+                                    }
 
-                            })
+                                })
                         }
                     }
                 }, Response.ErrorListener {

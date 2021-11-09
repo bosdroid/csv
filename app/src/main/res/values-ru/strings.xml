@@ -402,10 +402,11 @@
     <string name="get_credits_text">ПОЛУЧИТЬ КРЕДИТЫ</string>
     <string name="increase_storage_text">УВЕЛИЧИТЬ ХРАНИЛИЩ</string>
     <string name="extend_usage_text">РАСШИРЕНИЕ ИСПОЛЬЗОВАНИЯ</string>
-    <string name="photo_storage_text">photo_storage</string>
-	<string name="photo_storage_pro_text">photo_storage_pro</string>
-    <string name="usage_time_text">usage_time</string>
-	<string name="usage_time_pro_text">usage_time_pro</string>
+    <string name="photo_storage_text">Хранение фотографий</string>
+	<string name="photo_storage_pro_text">Хранение фотографий Pro</string>
+    <string name="usage_time_text">Время использования</string>
+	<string name="usage_time_pro_text">Время использования Pro</string>
+	<string name="usage_text">Окончание использования:</string>
 
 
 	<string-array name="mode_list">

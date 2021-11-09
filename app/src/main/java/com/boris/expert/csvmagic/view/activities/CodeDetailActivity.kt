@@ -711,8 +711,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
 //            imageColumnEditView.setOnClickListener(this)
 //            imageColumnValue.text = tableObject!!.image
 //            imageColumnName.text = "image"
-            if (tableObject!!.image.contains(",")) {
-                imageList.addAll(tableObject!!.image.split(",").toList())
+            if (tableObject!!.image.contains(" ")) {
+                imageList.addAll(tableObject!!.image.split(" ").toList())
             } else {
                 imageList.add(tableObject!!.image)
             }

@@ -109,10 +109,11 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_marginStart="@dimen/defaultDpMargin"
-                       android:text="0"
-                       android:textColor="@color/primary_positive_color"
+                       android:text="N/A"
+                       android:textColor="@color/black"
                        android:id="@+id/us_storage_space_view"
-                       android:textSize="@dimen/mediumText" />
+                       android:textStyle="bold"
+                       android:textSize="@dimen/smallText" />
                </LinearLayout>
 
 
@@ -155,7 +156,7 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:gravity="end"
-                       android:text="@string/duration_text"
+                       android:text="@string/usage_text"
                        android:textColor="@color/black"
                        android:textSize="@dimen/mediumText" />
 
@@ -163,11 +164,11 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_marginStart="@dimen/defaultDpMargin"
-                       android:text="0"
+                       android:text="N/A"
                        android:textColor="@color/black"
                        android:id="@+id/us_duration_view"
                        android:textStyle="bold"
-                       android:textSize="@dimen/mediumText" />
+                       android:textSize="@dimen/smallText" />
                </LinearLayout>
 
 
