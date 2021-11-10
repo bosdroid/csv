@@ -1868,32 +1868,34 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
+                        if (response.has("package") && !response.isNull("package")) {
                         val packageDetail: JSONObject? = response.getJSONObject("package")
                         if (packageDetail != null) {
                             val availableSize = packageDetail.getString("size")
                             Constants.userServerAvailableStorageSize = availableSize
 
                             currentStorageSize =
-                                Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
+                                    Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
 
                             val remainingMb =
-                                Constants.convertBytesToMegaBytes(currentStorageSize).toString()
+                                    Constants.convertBytesToMegaBytes(currentStorageSize).toString()
                             BaseActivity.updateMemorySize(
-                                requireActivity(),
-                                remainingMb,
-                                Constants.firebaseUserId,
-                                0,
-                                object : APICallback {
-                                    override fun onSuccess(response: JSONObject) {
+                                    requireActivity(),
+                                    remainingMb,
+                                    Constants.firebaseUserId,
+                                    0,
+                                    object : APICallback {
+                                        override fun onSuccess(response: JSONObject) {
 
-                                    }
+                                        }
 
-                                    override fun onError(error: VolleyError) {
+                                        override fun onError(error: VolleyError) {
 
-                                    }
+                                        }
 
-                                })
+                                    })
                         }
+                    }
                     }
                 }, Response.ErrorListener {
                     Log.d("TEST199", it.localizedMessage!!)

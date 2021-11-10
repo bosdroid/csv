@@ -56,7 +56,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private lateinit var usDurationView: MaterialTextView
     private lateinit var getCreditsBtn: MaterialButton
     private lateinit var increaseStorageBtn: MaterialButton
-    private lateinit var extendUsageBtn:MaterialButton
+    private lateinit var extendUsageBtn: MaterialButton
     private var userCurrentCredits = ""
 
     //    private lateinit var usExpiredAtView:MaterialTextView
@@ -93,11 +93,11 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         extendUsageBtn.setOnClickListener(this)
         userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
         viewModel = ViewModelProviders.of(
-            this,
-            ViewModelFactory(UserScreenActivityViewModel()).createFor()
+                this,
+                ViewModelFactory(UserScreenActivityViewModel()).createFor()
         )[UserScreenActivityViewModel::class.java]
         billingClient = BillingClient.newBuilder(this)
-            .enablePendingPurchases().setListener(this).build()
+                .enablePendingPurchases().setListener(this).build()
 //        usExpiredAtView = findViewById(R.id.us_expired_at_view)
     }
 
@@ -133,26 +133,26 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             val userId = auth.currentUser!!.uid
             Constants.firebaseUserId = userId
             firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
+                    .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
 
-                        if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
-                            val previousCredits =
-                                snapshot.child("credits").getValue(String::class.java)
-                            userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
-                                previousCredits.toInt()
-                            } else {
-                                0
+                            if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                val previousCredits =
+                                        snapshot.child("credits").getValue(String::class.java)
+                                userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
+                                    previousCredits.toInt()
+                                } else {
+                                    0
+                                }
                             }
+                            usCurrentCreditView.text = "$userCurrentCreditsValue"
                         }
-                        usCurrentCreditView.text = "$userCurrentCreditsValue"
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {
+                        override fun onCancelled(error: DatabaseError) {
 
-                    }
+                        }
 
-                })
+                    })
         }
     }
 
@@ -162,10 +162,10 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             val userId = auth.currentUser!!.uid
 
             startLoading(context)
-            viewModel.callUserPackageDetail(context,userId)
-            viewModel.getUserPackageResponse().observe(this, { response->
+            viewModel.callUserPackageDetail(context, userId)
+            viewModel.getUserPackageResponse().observe(this, { response ->
                 dismiss()
-                if (response != null){
+                if (response != null) {
                     if (response.has("package") && !response.isNull("package")) {
 
                         val packageDetail: JSONObject? = response.getJSONObject("package")
@@ -174,21 +174,21 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         val expiredTimeMili = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
 
                         val diff1 = System.currentTimeMillis() - SimpleDateFormat(
-                            "dd-MM-yyyy HH:mm:ss",
-                            Locale.ENGLISH
+                                "dd-MM-yyyy HH:mm:ss",
+                                Locale.ENGLISH
                         ).parse(startDate)!!.time
 
                         val goneDays = TimeUnit.DAYS.convert(diff1, TimeUnit.MILLISECONDS).toInt()
 
                         val remainingDay = Constants.calculateDays(
-                            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(startDate)!!.time,
-                            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
+                                SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(startDate)!!.time,
+                                SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
                         )
 
                         val availableSize = packageDetail.getString("size")
                         val tSize = packageDetail.getInt("total_size")
                         val availableDuration = packageDetail.getInt("duration")
-                        val formatted = String.format("%.2f",availableSize.toDouble())
+                        val formatted = String.format("%.2f", availableSize.toDouble())
                         usStorageSpaceView.text = "$formatted MB of $tSize MB"
                         usDurationView.text = "in $remainingDay days | on ${getDateFormateFromTimeStamp(expiredTimeMili)}"
                     }
@@ -261,10 +261,10 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             R.id.get_credits_btn -> {
                 getCredits()
             }
-            R.id.increase_storage_btn->{
-               increaseStorage()
+            R.id.increase_storage_btn -> {
+                increaseStorage()
             }
-            R.id.extend_usage_btn->{
+            R.id.extend_usage_btn -> {
                 extendUsage()
             }
             else -> {
@@ -276,14 +276,14 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private fun getCredits() {
 
         val choosePackageLayout =
-            LayoutInflater.from(context).inflate(R.layout.get_credits_dialog_layout, null)
+                LayoutInflater.from(context).inflate(R.layout.get_credits_dialog_layout, null)
 
         val oneCreditBtn =
-            choosePackageLayout.findViewById<AppCompatButton>(R.id.get_credits_minimum_package_btn)
+                choosePackageLayout.findViewById<AppCompatButton>(R.id.get_credits_minimum_package_btn)
         val sixCreditBtn =
-            choosePackageLayout.findViewById<AppCompatButton>(R.id.get_credits_regular_package_btn)
+                choosePackageLayout.findViewById<AppCompatButton>(R.id.get_credits_regular_package_btn)
         val tenCreditBtn =
-            choosePackageLayout.findViewById<AppCompatButton>(R.id.get_credits_premium_package_btn)
+                choosePackageLayout.findViewById<AppCompatButton>(R.id.get_credits_premium_package_btn)
 
 
         val builder = MaterialAlertDialogBuilder(context)
@@ -336,7 +336,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
     }
 
-    private fun increaseStorage(){
+    private fun increaseStorage() {
         val increaseStorageLayout = LayoutInflater.from(context).inflate(R.layout.increase_storage_dialog_layout, null)
         val psPurchaseBtn = increaseStorageLayout.findViewById<AppCompatButton>(R.id.ps_purchase_package_btn)
         val pspPurchaseBtn = increaseStorageLayout.findViewById<AppCompatButton>(R.id.psp_purchase_package_btn)
@@ -346,39 +346,17 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         val alert = builder.create()
         alert.show()
         psPurchaseBtn.setOnClickListener {
-            val feature = Feature(0,"photo_storage","simple",1,30,250f,0,0)
-            purchaseFeature(alert,feature)
-//            MaterialAlertDialogBuilder(context)
-//                .setMessage("Are you sure you want to purchase this feature?")
-//                .setCancelable(false)
-//                .setNegativeButton("No") { dialog, which ->
-//                    dialog.dismiss()
-//                }
-//                .setPositiveButton("Yes") { dialog, which ->
-//                    dialog.dismiss()
-//                    alert.dismiss()
-//                    purchaseFeature(feature)
-//                }.create().show()
+            val feature = Feature(0, "photo_storage", "simple", 1, 30, 250f, 0, 0)
+            purchaseFeature(alert, feature)
         }
 
         pspPurchaseBtn.setOnClickListener {
-            val feature = Feature(0,"photo_storage_pro","pro",2,30,500f,0,0)
-//            MaterialAlertDialogBuilder(context)
-//                .setMessage("Are you sure you want to purchase this feature?")
-//                .setCancelable(false)
-//                .setNegativeButton("No") { dialog, which ->
-//                    dialog.dismiss()
-//                }
-//                .setPositiveButton("Yes") { dialog, which ->
-//                    dialog.dismiss()
-//                    alert.dismiss()
-//                    purchaseFeature(feature)
-//                }.create().show()
-            purchaseFeature(alert,feature)
+            val feature = Feature(0, "photo_storage_pro", "pro", 2, 30, 500f, 0, 0)
+            purchaseFeature(alert, feature)
         }
     }
 
-    private fun purchaseFeature(alert:AlertDialog, feature: Feature){
+    private fun purchaseFeature(alert: AlertDialog, feature: Feature) {
         startLoading(context)
         viewModel.callUserPackageDetail(context, Constants.firebaseUserId)
         viewModel.getUserPackageResponse().observe(this, Observer { response ->
@@ -386,42 +364,76 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             if (response != null) {
 
                 MaterialAlertDialogBuilder(context)
-                    .setMessage("Are you sure you want to purchase this feature?")
-                    .setCancelable(false)
-                    .setNegativeButton("No") { dialog, which ->
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton("Yes") { dialog, which ->
-                        dialog.dismiss()
-                        alert.dismiss()
-                        if (response.has("package") && response.isNull("package")) {
-
-                            if (feature.name.contains("time")) {
-                                showAlert(
-                                    context,
-                                    "You can't purchase this feature because currently do not have any active subscription."
-                                )
-                            } else {
-                                purchaseFeature(feature)
-                            }
-                        } else {
-                            val packageDetail: JSONObject? = response.getJSONObject("package")
-                            userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-                            if (userCurrentCredits.isNotEmpty()) {
-                                if (userCurrentCredits.toInt() >= feature.credit_price) {
-                                    upgradeSubscription(feature, packageDetail!!)
-                                } else {
-                                    showAlert(
-                                        context,
-                                        "You can't purchase this feature due to zero or less credits!"
-                                    )
-                                }
-
-
-                            }
+                        .setMessage("Are you sure you want to purchase this feature?")
+                        .setCancelable(false)
+                        .setNegativeButton("No") { dialog, which ->
+                            dialog.dismiss()
                         }
+                        .setPositiveButton("Yes") { dialog, which ->
+                            dialog.dismiss()
+                            alert.dismiss()
+                            if (response.has("package") && response.isNull("package")) {
 
-                    }.create().show()
+                                if (feature.name.contains("time")) {
+                                    showAlert(
+                                            context,
+                                            "You can't purchase this feature because currently do not have any active subscription."
+                                    )
+                                } else {
+                                    purchaseFeature(feature)
+                                }
+                            } else {
+                                val packageDetail: JSONObject? = response.getJSONObject("package")
+                                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                                if (userCurrentCredits.isNotEmpty()) {
+                                    if (userCurrentCredits.toInt() >= feature.credit_price) {
+                                        upgradeSubscription(feature, packageDetail!!)
+                                    } else {
+                                        showAlert(
+                                                context,
+                                                "You can't purchase this feature due to zero or less credits!"
+                                        )
+                                    }
+                                } else {
+                                    if (auth.currentUser != null) {
+
+                                        val userId = auth.currentUser!!.uid
+                                        Constants.firebaseUserId = userId
+                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                                                .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                                                    override fun onDataChange(snapshot: DataSnapshot) {
+
+                                                        if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                                            val previousCredits =
+                                                                    snapshot.child("credits").getValue(String::class.java)
+                                                            userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
+                                                                previousCredits.toInt()
+                                                            } else {
+                                                                0
+                                                            }
+                                                        }
+                                                        appSettings.putString(Constants.userCreditsValue, "$userCurrentCreditsValue")
+                                                        usCurrentCreditView.text = "$userCurrentCreditsValue"
+                                                        if (userCurrentCreditsValue >= feature.credit_price) {
+                                                            upgradeSubscription(feature, packageDetail!!)
+                                                        } else {
+                                                            showAlert(
+                                                                    context,
+                                                                    "You can't purchase this feature due to zero or less credits!"
+                                                            )
+                                                        }
+                                                    }
+
+                                                    override fun onCancelled(error: DatabaseError) {
+
+                                                    }
+
+                                                })
+                                    }
+                                }
+                            }
+
+                        }.create().show()
             }
         })
     }
@@ -430,18 +442,18 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         val startDate = packageDetail.getString("start_date")
         val endDate = packageDetail.getString("end_date")
         val expiredTimeMili =
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
+                SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
 
         val diff1 = System.currentTimeMillis() - SimpleDateFormat(
-            "dd-MM-yyyy HH:mm:ss",
-            Locale.ENGLISH
+                "dd-MM-yyyy HH:mm:ss",
+                Locale.ENGLISH
         ).parse(startDate)!!.time
 
         val goneDays = TimeUnit.DAYS.convert(diff1, TimeUnit.MILLISECONDS).toInt()
 
         val remainingDay = Constants.calculateDays(
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(startDate)!!.time,
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
+                SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(startDate)!!.time,
+                SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
         )
 
         val p_name = packageDetail.getString("package")
@@ -456,8 +468,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             showAlert(context, "You already have this subscription and not expired yet!")
         } else if ((p_name == "storage" && p_type == "pro") && (feature.name.contains("storage") && feature.type == "pro") && expiredTimeMili >= currentMiliSeconds) {
             showAlert(context, "You already have this subscription and not expired yet!")
-        } else if ((p_name == "storage" && p_type == "simple") && (feature.name.contains("storage") && feature.type == "pro"))
-        {
+        } else if ((p_name == "storage" && p_type == "simple") && (feature.name.contains("storage") && feature.type == "pro")) {
             val simplePackageUnitPrice = 1.toDouble() / 30
             val totalDaysGonePrice = simplePackageUnitPrice * goneDays
             val roundUpValue = BigDecimal(totalDaysGonePrice).setScale(2, RoundingMode.HALF_EVEN)
@@ -467,49 +478,49 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
             startLoading(context)
             updateMemorySize(
-                context,
-                updatedTotalSize.toString(),
-                Constants.firebaseUserId,
-                1,
-                object : APICallback {
-                    override fun onSuccess(response: JSONObject) {
-                        dismiss()
-                        if (response.getInt("status") == 200) {
+                    context,
+                    updatedTotalSize.toString(),
+                    Constants.firebaseUserId,
+                    1,
+                    object : APICallback {
+                        override fun onSuccess(response: JSONObject) {
+                            dismiss()
+                            if (response.getInt("status") == 200) {
 
-                            val hashMap = HashMap<String, String>()
-                            val remaining = userCurrentCredits.toInt() - priceCharge
-                            hashMap["credits"] = remaining.toString()
-                            firebaseDatabase.child(Constants.firebaseUserCredits)
-                                .child(Constants.firebaseUserId)
-                                .setValue(hashMap)
-                                .addOnSuccessListener {
+                                val hashMap = HashMap<String, String>()
+                                val remaining = userCurrentCredits.toInt() - priceCharge
+                                hashMap["credits"] = remaining.toString()
+                                firebaseDatabase.child(Constants.firebaseUserCredits)
+                                        .child(Constants.firebaseUserId)
+                                        .setValue(hashMap)
+                                        .addOnSuccessListener {
 
-                                }
-                                .addOnFailureListener {
+                                        }
+                                        .addOnFailureListener {
 
-                                }
-                            getUserSubscriptionDetails()
-                            showAlert(context, "Congratulation on upgrading the subscription!")
-                        } else {
-                            val message = response.getString("message")
-                            showAlert(context, message)
+                                        }
+                                getUserSubscriptionDetails()
+                                showAlert(context, "Congratulation on upgrading the subscription!")
+                            } else {
+                                val message = response.getString("message")
+                                showAlert(context, message)
+                            }
                         }
-                    }
 
-                    override fun onError(error: VolleyError) {
-                        dismiss()
-                    }
+                        override fun onError(error: VolleyError) {
+                            dismiss()
+                        }
 
-                })
-        } else if (feature.name.contains("time") && feature.type == "simple"){
+                    })
+        } else if (feature.name.contains("time") && feature.type == "simple") {
             purchaseFeature(feature)
-        }else if (feature.name.contains("time") && feature.type == "pro"){
+        } else if (feature.name.contains("time") && feature.type == "pro") {
             purchaseFeature(feature)
         }
 
     }
 
-    private fun extendUsage(){
+    private fun extendUsage() {
         val extendUsageLayout = LayoutInflater.from(context).inflate(R.layout.extend_usage_dialog_layout, null)
         val utPurchaseBtn = extendUsageLayout.findViewById<AppCompatButton>(R.id.ut_purchase_package_btn)
         val utpPurchaseBtn = extendUsageLayout.findViewById<AppCompatButton>(R.id.utp_purchase_package_btn)
@@ -519,7 +530,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         val alert = builder.create()
         alert.show()
         utPurchaseBtn.setOnClickListener {
-            val feature = Feature(0,"usage_time","simple",1,30,0f,0,0)
+            val feature = Feature(0, "usage_time", "simple", 1, 30, 0f, 0, 0)
 //            MaterialAlertDialogBuilder(context)
 //                .setMessage("Are you sure you want to purchase this feature?")
 //                .setCancelable(false)
@@ -531,11 +542,11 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                    alert.dismiss()
 //                    purchaseFeature(feature)
 //                }.create().show()
-            purchaseFeature(alert,feature)
+            purchaseFeature(alert, feature)
         }
 
         utpPurchaseBtn.setOnClickListener {
-            val feature = Feature(0,"usage_time_pro","pro",2,60,0f,0,0)
+            val feature = Feature(0, "usage_time_pro", "pro", 2, 60, 0f, 0, 0)
 //            MaterialAlertDialogBuilder(context)
 //                .setMessage("Are you sure you want to purchase this feature?")
 //                .setCancelable(false)
@@ -547,13 +558,13 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                    alert.dismiss()
 //                    purchaseFeature(feature)
 //                }.create().show()
-            purchaseFeature(alert,feature)
+            purchaseFeature(alert, feature)
         }
     }
 
     override fun onPurchasesUpdated(
-        billingResult: BillingResult,
-        purchases: MutableList<Purchase>?
+            billingResult: BillingResult,
+            purchases: MutableList<Purchase>?
     ) {
 //if item newly purchased
 
@@ -562,14 +573,14 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             if (auth.currentUser != null) {
                 val userId = auth.currentUser!!.uid
                 purchaseDetail =
-                    PurchaseDetail(
-                        userId,
-                        purchase.orderId,
-                        purchase.packageName,
-                        productId,
-                        purchase.purchaseTime,
-                        purchase.purchaseToken
-                    )
+                        PurchaseDetail(
+                                userId,
+                                purchase.orderId,
+                                purchase.packageName,
+                                productId,
+                                purchase.purchaseTime,
+                                purchase.purchaseToken
+                        )
                 CoroutineScope(Dispatchers.IO).launch {
                     val token = purchase.purchaseToken
                     val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(token).build()
@@ -609,24 +620,24 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     }
 
     var consumeListener =
-        ConsumeResponseListener { billingResult, purchaseToken ->
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(
-                    context,
-                    getString(R.string.consumer_product_success_text),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            ConsumeResponseListener { billingResult, purchaseToken ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    Toast.makeText(
+                            context,
+                            getString(R.string.consumer_product_success_text),
+                            Toast.LENGTH_SHORT
+                    ).show()
+                }
 
-        }
+            }
 
     private fun verifyPurchase() {
         startLoading(context)
         viewModel.callPurchase(
-            context,
-            context.packageName,
-            productId,
-            purchaseDetail!!.purchaseToken
+                context,
+                context.packageName,
+                productId,
+                purchaseDetail!!.purchaseToken
         )
         viewModel.getPurchaseResponse().observe(this, { response ->
             dismiss()
@@ -634,25 +645,25 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 when (response.get("purchaseState").asInt) {
                     0 -> {
                         firebaseDatabase.child(Constants.firebasePurchaseHistory).push()
-                            .setValue(purchaseDetail)
+                                .setValue(purchaseDetail)
                         val hashMap = HashMap<String, String>()
                         creditsValue += userCurrentCreditsValue
                         hashMap["credits"] = creditsValue.toString()
                         firebaseDatabase.child(Constants.firebaseUserCredits)
-                            .child(userId)
-                            .setValue(hashMap)
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    context,
-                                    getString(R.string.user_credits_update_success_text),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                getUserCredit()
-                                Log.d("TEST199", "$userCurrentCreditsValue")
-                            }
-                            .addOnFailureListener {
+                                .child(userId)
+                                .setValue(hashMap)
+                                .addOnSuccessListener {
+                                    Toast.makeText(
+                                            context,
+                                            getString(R.string.user_credits_update_success_text),
+                                            Toast.LENGTH_SHORT
+                                    ).show()
+                                    getUserCredit()
+                                    Log.d("TEST199", "$userCurrentCreditsValue")
+                                }
+                                .addOnFailureListener {
 
-                            }
+                                }
                     }
                     else -> {
                         showRetryDialogBox(response.get("error").asString)
@@ -668,15 +679,15 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
     private fun showRetryDialogBox(message: String) {
         MaterialAlertDialogBuilder(context).setCancelable(false)
-            .setMessage(message)
-            .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                dialog.dismiss()
-            }
-            .setPositiveButton(getString(R.string.retry_text)) { dialog, which ->
-                dialog.dismiss()
-                verifyPurchase()
-            }
-            .create().show()
+                .setMessage(message)
+                .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                    dialog.dismiss()
+                }
+                .setPositiveButton(getString(R.string.retry_text)) { dialog, which ->
+                    dialog.dismiss()
+                    verifyPurchase()
+                }
+                .create().show()
     }
 
     private fun purchase() {
@@ -686,16 +697,16 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         //else reconnect service
         else {
             billingClient =
-                BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
+                    BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build()
             billingClient!!.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         initiatePurchase()
                     } else {
                         Toast.makeText(
-                            applicationContext,
-                            "Error " + billingResult.debugMessage,
-                            Toast.LENGTH_SHORT
+                                applicationContext,
+                                "Error " + billingResult.debugMessage,
+                                Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
@@ -718,22 +729,22 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 if (skuDetailsList != null && skuDetailsList.size > 0) {
                     val flowParams = BillingFlowParams.newBuilder()
-                        .setSkuDetails(skuDetailsList[productIdIndex])
-                        .build()
+                            .setSkuDetails(skuDetailsList[productIdIndex])
+                            .build()
                     billingClient!!.launchBillingFlow(this, flowParams)
                 } else {
                     //try to add item/product id "purchase" inside managed product in google play console
 
                     Toast.makeText(
-                        applicationContext,
-                        "Purchase Item not Found",
-                        Toast.LENGTH_SHORT
+                            applicationContext,
+                            "Purchase Item not Found",
+                            Toast.LENGTH_SHORT
                     ).show()
                 }
             } else {
                 Toast.makeText(
-                    applicationContext,
-                    " Error " + billingResult.debugMessage, Toast.LENGTH_SHORT
+                        applicationContext,
+                        " Error " + billingResult.debugMessage, Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -761,7 +772,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         }
     }
 
-    private var listener:ValueEventListener?=null
+    private var listener: ValueEventListener? = null
     private fun purchaseFeature(feature: Feature) {
         userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
         startLoading(context)
@@ -933,24 +944,24 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                        }
 //                    })
 
-                    purchaseFeatures(context,feature,userId,object :APICallback{
+                    purchaseFeatures(context, feature, userId, object : APICallback {
                         override fun onSuccess(response: JSONObject) {
                             dismiss()
                             if (response.getInt("status") == 200) {
 
                                 val hashMap = HashMap<String, String>()
                                 val remaining =
-                                    userCurrentCredits.toInt() - feature.credit_price
+                                        userCurrentCredits.toInt() - feature.credit_price
                                 hashMap["credits"] = remaining.toString()
                                 firebaseDatabase.child(Constants.firebaseUserCredits)
-                                    .child(userId)
-                                    .setValue(hashMap)
-                                    .addOnSuccessListener {
+                                        .child(userId)
+                                        .setValue(hashMap)
+                                        .addOnSuccessListener {
 
-                                    }
-                                    .addOnFailureListener {
+                                        }
+                                        .addOnFailureListener {
 
-                                    }
+                                        }
 
                                 showAlert(context, "Congratulation on purchasing the subscription!")
                             } else {
