@@ -65,13 +65,12 @@ object DatabaseHandler {
             BaseActivity.startLoading(context)
             val tableGenerator = TableGenerator(context)
             Log.d("TEST1999", tableGenerator.getDbPath())
-
+            Thread.sleep(1000)
             try {
                 //Existing DB Path
                 val DB_PATH = tableGenerator.getDbPath()
                 val folder = File(context.filesDir.toString() + File.separator + userId)
                 if (folder.exists()) {
-
 
                     val COPY_DB = "${folder.absolutePath}/${userId}_backup.db"
                     val COPY_DB_PATH = File(COPY_DB)

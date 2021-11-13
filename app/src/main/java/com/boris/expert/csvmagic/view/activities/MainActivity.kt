@@ -123,6 +123,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         setUpToolbar()
         getAccountsPermission()
         initializeGoogleLoginParameters()
+        checkUserLoginStatus()
 
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt1")
@@ -140,9 +141,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     .onDismissListener { tooltip ->
                         tooltip.dismiss()
                         appSettings.putLong("tt1", System.currentTimeMillis())
-                        val fragment =
-                            supportFragmentManager.findFragmentByTag("scanner") as ScannerFragment
-                        fragment.showTableSelectTip()
+                        val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                        if (currentFragment != null && currentFragment.isVisible) {
+                            val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                            fragment.showTableSelectTip()
+                        }
                     }
                     .build()
                     .show()
@@ -227,7 +230,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 .addToBackStack("scanner")
                 .commit()
         }
-//        Constants.tipsValue = appSettings.getBoolean(getString(R.string.key_tips))
 
     }
 
@@ -365,8 +367,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 if (callback != null) {
                     callback!!.onSuccess()
                 } else {
-                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-                    scannerFragment.restart()
+//                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+//                    scannerFragment.restart()
                 }
                 if (isLastSignUser == "new") {
                     appSettings.putBoolean(Constants.isLogin, true)
@@ -738,10 +740,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        checkUserLoginStatus()
-    }
 
     private fun checkUserLoginStatus() {
         if (appSettings.getBoolean(Constants.isLogin)) {
@@ -754,12 +752,13 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
-            DatabaseHandler.importer(context)
+
             getUserCredits(context)
             getCurrentSubscriptionDetail(context)
             getUserPackageDetail(context)
             Handler(Looper.myLooper()!!).postDelayed({
-                add5MbFreeStorage()
+                DatabaseHandler.importer(context)
+                //add5MbFreeStorage()s
             },2000)
 
 
