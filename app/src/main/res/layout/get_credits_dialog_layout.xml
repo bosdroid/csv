@@ -51,6 +51,82 @@
             android:text="@string/premium_package_btn"
             android:textColor="@color/white" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/sixtyDpMargin"
+            android:gravity="center"
+            >
+           <com.google.android.material.textview.MaterialTextView
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="@string/have_coupon_text"
+               android:textSize="@dimen/mediumText"
+               />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/click_enter_coupon_text"
+                android:textSize="@dimen/mediumText"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginStart="@dimen/eightDpMargin"
+                android:id="@+id/click_enter_coupon_view"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDpMargin"
+            android:orientation="vertical"
+            android:id="@+id/coupon_code_wrapper_layout"
+            android:gravity="center"
+            android:padding="@dimen/small"
+            android:background="@drawable/dotted"
+            android:visibility="gone"
+            >
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/coupon_code_dialog_heading_text"
+                android:textSize="@dimen/mediumText"
+                android:textColor="@color/black"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                >
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/coupon_code_input_field"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_text_field_design"
+                    android:singleLine="true"
+                    android:padding="5dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/sixtyDpMargin"
+                    android:text="@string/apply_code_text"
+                    app:backgroundTint="@android:color/holo_green_dark"
+                    android:id="@+id/apply_coupon_code_btn"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

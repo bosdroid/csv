@@ -119,4 +119,12 @@
     <string name="usage_time_text">usage_time</string>
     <string name="usage_time_pro_text">usage_time_pro</string>
     <string name="usage_text">Usage ends:</string>
+    <string name="have_coupon_text">Have a coupon?</string>
+    <string name="click_enter_coupon_text">Click here to enter code</string>
+    <string name="coupon_code_dialog_heading_text">If you have a coupon code, please apply it below.</string>
+    <string name="apply_code_text">Apply code</string>
+    <string name="coupon_not_found_error">Sorry, coupon not found or may be expired!</string>
+    <string name="coupon_code_apply_success_message">Congratulation, Coupon code has been applied!</string>
+    <string name="coupon_expired_error">You entered code has been expired!</string>
+    <string name="already_applied_coupon_error">Already, you applied the coupon code!</string>
 </resources>
