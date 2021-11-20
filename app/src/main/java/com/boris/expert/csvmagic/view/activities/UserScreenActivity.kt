@@ -202,7 +202,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         val availableSize = packageDetail.getString("size")
                         val tSize = packageDetail.getInt("total_size")
 //                        val availableDuration = packageDetail.getInt("duration")
-                        val formatted = String.format("%.2f", availableSize.toDouble())
+                        val usage = tSize - availableSize.toDouble()
+                        val formatted = String.format("%.2f", usage)
                         usStorageSpaceView.text = "$formatted MB of $tSize MB"
                         usDurationView.text = "in $remainingDay days | on ${
                             getDateFormateFromTimeStamp(expiredTimeMili)
