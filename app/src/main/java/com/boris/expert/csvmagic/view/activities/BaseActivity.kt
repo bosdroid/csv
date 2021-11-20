@@ -27,7 +27,6 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.Feature
-import com.boris.expert.csvmagic.repository.DataRepository
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.Constants.Companion.EMAIL_ADDRESS_PATTERN
@@ -205,8 +204,10 @@ open class BaseActivity : AppCompatActivity() {
         fun updateMemorySize(
             context: Context,
             size: String,
+            totalSize:Int,
             user_id: String,
             update_total: Int,
+            endDate:String,
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
@@ -220,7 +221,9 @@ open class BaseActivity : AppCompatActivity() {
                 override fun getParams(): MutableMap<String, String> {
                     val params = HashMap<String, String>()
                     params["size"] = size
+                    params["total_size"] = "$totalSize"
                     params["user_id"] = user_id
+                    params["end_date"] = endDate
                     params["update_total"] = "$update_total"
                     return params
                 }
@@ -243,7 +246,48 @@ open class BaseActivity : AppCompatActivity() {
             VolleySingleton(context).addToRequestQueue(stringRequest)
         }
 
+        fun updateUsageTime(
+            context: Context,
+            endTime: String,
+            user_id: String,
+            listener: APICallback
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagicapp.com/api/update_usage_time.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                }, Response.ErrorListener {
+                    listener.onError(it)
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["end_date"] = endTime
+                    params["user_id"] = user_id
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+
         fun getUserPackageDetail(context: Context) {
+            val appSettings = AppSettings(context)
             val stringRequest = object : StringRequest(
                 Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
                 Response.Listener {
@@ -254,6 +298,8 @@ open class BaseActivity : AppCompatActivity() {
 
                             val availableSize = packageDetail!!.getString("size")
                             Constants.userServerAvailableStorageSize = availableSize
+                            appSettings.putString(Constants.memory,availableSize)
+
                         }
                     }
                 }, Response.ErrorListener {
@@ -302,15 +348,12 @@ open class BaseActivity : AppCompatActivity() {
                 override fun getParams(): MutableMap<String, String> {
                     val params = HashMap<String, String>()
                     params["user_id"] = user_id
-                    params["package"] = if (feature.name.contains("storage")) {
-                        "storage"
-                    } else {
-                        "time"
-                    }
-                    params["duration"] = feature.duration.toString()
-                    params["package_type"] = feature.type
+                    params["package"] = "${feature.packageId}"
+                    params["start_date"] = Constants.getCurrentDateString()
+                    params["end_date"] = Constants.getDateFromDays(feature.duration)
                     params["size"] = feature.memory.toString()
                     params["total_size"] = feature.memory.toString()
+                    params["package_id"] = feature.packageId.toString()
                     return params
                 }
             }
@@ -436,7 +479,7 @@ open class BaseActivity : AppCompatActivity() {
 
         fun getUserCredits(context: Context) {
             val appSettings = AppSettings(context)
-            var userCurrentCreditsValue: Int = 0
+            var userCurrentCreditsValue: Float = 0F
             val auth = FirebaseAuth.getInstance()
             val firebaseDatabase = FirebaseDatabase.getInstance().reference
             if (auth.currentUser != null) {
@@ -451,9 +494,9 @@ open class BaseActivity : AppCompatActivity() {
                                 val previousCredits =
                                     snapshot.child("credits").getValue(String::class.java)
                                 userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
-                                    previousCredits.toInt()
+                                    previousCredits.toFloat()
                                 } else {
-                                    0
+                                    0F
                                 }
                             }
                             appSettings.putString(
@@ -491,9 +534,9 @@ open class BaseActivity : AppCompatActivity() {
                                 ) {
                                     val previousCredits =
                                         snapshot.child("credits").getValue(String::class.java)
-                                    previousCredits!!.toInt()
+                                    previousCredits!!.toFloat()
                                 } else {
-                                    0
+                                    0F
                                 }
                             appSettings.putString(
                                 Constants.userCreditsValue,

@@ -28,12 +28,11 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
-import com.boris.expert.csvmagic.interfaces.BackupListener
-import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
-import com.boris.expert.csvmagic.interfaces.LoginCallback
-import com.boris.expert.csvmagic.interfaces.OnCompleteAction
+import com.boris.expert.csvmagic.interfaces.*
 import com.boris.expert.csvmagic.model.CodeHistory
+import com.boris.expert.csvmagic.model.Feature
 import com.boris.expert.csvmagic.model.User
 import com.boris.expert.csvmagic.singleton.DriveService
 import com.boris.expert.csvmagic.singleton.SheetService
@@ -75,14 +74,16 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
+import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener,
-    OnCompleteAction, ScannerFragment.ScannerInterface {
+        OnCompleteAction, ScannerFragment.ScannerInterface {
 
 
+    private lateinit var eventListener: ValueEventListener
     private lateinit var toolbar: Toolbar
     private lateinit var mDrawer: DrawerLayout
     private lateinit var mNavigation: NavigationView
@@ -123,32 +124,31 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         setUpToolbar()
         getAccountsPermission()
         initializeGoogleLoginParameters()
-        checkUserLoginStatus()
 
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt1")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis() - duration > TimeUnit.DAYS.toMillis(
-                    1
-                )
+                            1
+                    )
             ) {
 
                 SimpleTooltip.Builder(this)
-                    .anchorView(bottomNavigation)
-                    .text(getString(R.string.bottom_navigation_tip_text))
-                    .gravity(Gravity.TOP)
-                    .animated(true)
-                    .transparentOverlay(false)
-                    .onDismissListener { tooltip ->
-                        tooltip.dismiss()
-                        appSettings.putLong("tt1", System.currentTimeMillis())
-                        val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
-                        if (currentFragment != null && currentFragment.isVisible) {
-                            val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-                            fragment.showTableSelectTip()
+                        .anchorView(bottomNavigation)
+                        .text(getString(R.string.bottom_navigation_tip_text))
+                        .gravity(Gravity.TOP)
+                        .animated(true)
+                        .transparentOverlay(false)
+                        .onDismissListener { tooltip ->
+                            tooltip.dismiss()
+                            appSettings.putLong("tt1", System.currentTimeMillis())
+                            val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                            if (currentFragment != null && currentFragment.isVisible) {
+                                val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                                fragment.showTableSelectTip()
+                            }
                         }
-                    }
-                    .build()
-                    .show()
+                        .build()
+                        .show()
             }
         }
     }
@@ -162,8 +162,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         scannerFragment = ScannerFragment()
         auth = Firebase.auth
         viewModel = ViewModelProviders.of(
-            this,
-            ViewModelFactory(MainActivityViewModel()).createFor()
+                this,
+                ViewModelFactory(MainActivityViewModel()).createFor()
         )[MainActivityViewModel::class.java]
         toolbar = findViewById(R.id.toolbar)
         mDrawer = findViewById(R.id.drawer)
@@ -177,8 +177,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         privacyPolicy.setOnClickListener {
             mDrawer.closeDrawer(GravityCompat.START)
             val browserIntent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://qrmagicapp.com/privacy-policy-CSV/")
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://qrmagicapp.com/privacy-policy-CSV/")
             )
             startActivity(browserIntent)
         }
@@ -189,17 +189,17 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             when (item.itemId) {
                 R.id.bottom_scanner -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, ScannerFragment(), "scanner")
-                        .addToBackStack("scanner")
-                        .commit()
+                            .replace(R.id.fragment_container, ScannerFragment(), "scanner")
+                            .addToBackStack("scanner")
+                            .commit()
 //                    nextStepTextView.visibility = View.GONE
 //                    historyBtn.visibility = View.VISIBLE
                 }
                 R.id.bottom_tables -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, ScanFragment(), "tables")
-                        .addToBackStack("tables")
-                        .commit()
+                            .replace(R.id.fragment_container, ScanFragment(), "tables")
+                            .addToBackStack("tables")
+                            .commit()
 //                    historyBtn.visibility = View.GONE
 //                    nextStepTextView.visibility = View.VISIBLE
                 }
@@ -214,46 +214,46 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         if (intent != null && intent.hasExtra("KEY") && intent.getStringExtra("KEY") == "tables") {
             bottomNavigation.selectedItemId = R.id.bottom_tables
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ScanFragment(), "tables")
-                .addToBackStack("tables")
-                .commit()
+                    .replace(R.id.fragment_container, ScanFragment(), "tables")
+                    .addToBackStack("tables")
+                    .commit()
             //historyBtn.visibility = View.GONE
 //            nextStepTextView.visibility = View.VISIBLE
         } else {
 //            nextStepTextView.visibility = View.GONE
             //historyBtn.visibility = View.VISIBLE
             supportFragmentManager.beginTransaction().add(
-                R.id.fragment_container,
-                ScannerFragment(),
-                "scanner"
+                    R.id.fragment_container,
+                    ScannerFragment(),
+                    "scanner"
             )
-                .addToBackStack("scanner")
-                .commit()
+                    .addToBackStack("scanner")
+                    .commit()
         }
 
     }
 
     private fun getAccountsPermission() {
         if (ContextCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.GET_ACCOUNTS
-            ) != PackageManager.PERMISSION_GRANTED
+                        this@MainActivity,
+                        Manifest.permission.GET_ACCOUNTS
+                ) != PackageManager.PERMISSION_GRANTED
         ) {
 
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this@MainActivity,
-                    Manifest.permission.GET_ACCOUNTS
-                )
+                            this@MainActivity,
+                            Manifest.permission.GET_ACCOUNTS
+                    )
             ) {
                 Log.e("Accounts", "Permission Granted")
                 initializeGoogleLoginParameters()
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(
-                    this@MainActivity,
-                    arrayOf(Manifest.permission.GET_ACCOUNTS),
-                    0
+                        this@MainActivity,
+                        arrayOf(Manifest.permission.GET_ACCOUNTS),
+                        0
                 )
             }
         }
@@ -291,47 +291,50 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //        scopes.add(DriveScopes.DRIVE_APPDATA)
 
         val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
 //            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-            .requestScopes(Scope(SheetsScopes.SPREADSHEETS))
+                .requestScopes(Scope(SheetsScopes.SPREADSHEETS))
 //            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-            .build()
+                .build()
         mGoogleSignInClient = GoogleSignIn.getClient(this, signInOptions)
 
         val acct: GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(context)
         if (acct != null) {
 
             credential = GoogleAccountCredential.usingOAuth2(
-                applicationContext, scopes
+                    applicationContext, scopes
             )
-                .setBackOff(ExponentialBackOff())
-                .setSelectedAccount(acct.account)
+                    .setBackOff(ExponentialBackOff())
+                    .setSelectedAccount(acct.account)
 
             mService = Drive.Builder(
-                transport, jsonFactory, credential
+                    transport, jsonFactory, credential
             ).setHttpRequestInitializer { request ->
                 credential!!.initialize(request)
                 request!!.connectTimeout = 300 * 60000  // 300 minutes connect timeout
                 request.readTimeout = 300 * 60000  // 300 minutes read timeout
             }
-                .setApplicationName(getString(R.string.app_name))
-                .build()
+                    .setApplicationName(getString(R.string.app_name))
+                    .build()
 
             try {
                 sheetService = Sheets.Builder(
-                    httpTransport,
-                    jacksonFactory,
-                    credential
+                        httpTransport,
+                        jacksonFactory,
+                        credential
                 )
-                    .setApplicationName(getString(R.string.app_name))
-                    .build()
+                        .setApplicationName(getString(R.string.app_name))
+                        .build()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
             DriveService.saveDriveInstance(mService!!)
             SheetService.saveGoogleSheetInstance(sheetService!!)
             saveUserUpdatedDetail(acct, "last")
+        }
+        else{
+            checkUserLoginStatus()
         }
 
         if (intent != null && intent.hasExtra("REQUEST") && intent.getStringExtra("REQUEST") == "login") {
@@ -355,12 +358,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 val personId = acct.id
                 val personPhoto: Uri? = acct.photoUrl
                 val user = User(
-                    personName!!,
-                    personGivenName!!,
-                    personFamilyName!!,
-                    personEmail!!,
-                    personId!!,
-                    personPhoto!!.toString()
+                        personName!!,
+                        personGivenName!!,
+                        personFamilyName!!,
+                        personEmail!!,
+                        personId!!,
+                        personPhoto!!.toString()
                 )
                 appSettings.putUser(Constants.user, user)
                 Constants.userData = user
@@ -373,9 +376,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 if (isLastSignUser == "new") {
                     appSettings.putBoolean(Constants.isLogin, true)
                     Toast.makeText(
-                        context,
-                        getString(R.string.user_signin_success_text),
-                        Toast.LENGTH_SHORT
+                            context,
+                            getString(R.string.user_signin_success_text),
+                            Toast.LENGTH_SHORT
                     ).show()
                 }
                 checkUserLoginStatus()
@@ -457,25 +460,26 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
             R.id.logout -> {
                 MaterialAlertDialogBuilder(context)
-                    .setTitle(getString(R.string.logout))
-                    .setMessage(getString(R.string.logout_warning_text))
-                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                        dialog.dismiss() }
-                    .setPositiveButton(getString(R.string.logout)) { dialog, which ->
-                        DatabaseHandler.exporter(context,object : BackupListener{
-                            override fun onSuccess() {
-                                startLoading(context)
-                                signOut()
-                            }
+                        .setTitle(getString(R.string.logout))
+                        .setMessage(getString(R.string.logout_warning_text))
+                        .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                            DatabaseHandler.exporter(context, object : BackupListener {
+                                override fun onSuccess() {
+                                    startLoading(context)
+                                    signOut()
+                                }
 
-                            override fun onFailure() {
+                                override fun onFailure() {
 
-                            }
+                                }
 
-                        })
+                            })
 
-                    }
-                    .create().show()
+                        }
+                        .create().show()
             }
             else -> {
             }
@@ -506,8 +510,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "text/plain"
         shareIntent.putExtra(
-            Intent.EXTRA_TEXT,
-            getString(R.string.share_app_message) + "https://play.google.com/store/apps/details?id=" + packageName
+                Intent.EXTRA_TEXT,
+                getString(R.string.share_app_message) + "https://play.google.com/store/apps/details?id=" + packageName
         )
         startActivity(shareIntent)
 
@@ -525,12 +529,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 appSettings.remove(Constants.isLogin)
                 appSettings.remove(Constants.user)
                 Toast.makeText(context, getString(R.string.logout_success_text), Toast.LENGTH_SHORT)
-                    .show()
+                        .show()
                 Constants.userData = null
                 Constants.sheetService = null
                 Constants.mService = null
                 val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
-                if (currentFragment != null && currentFragment.isVisible){
+                if (currentFragment != null && currentFragment.isVisible) {
                     val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                     scannerFragment.restart()
                 }
@@ -543,9 +547,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     // THIS GOOGLE LAUNCHER WILL HANDLE RESULT
     private var googleLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-            if (result.resultCode == Activity.RESULT_OK) {
+                if (result.resultCode == Activity.RESULT_OK) {
 
 //                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
 //                try {
@@ -558,63 +562,63 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //                    Log.w("TAG", "Google sign in failed", e)
 //                }
 
-                GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                    .addOnSuccessListener(object : OnSuccessListener<GoogleSignInAccount> {
-                        override fun onSuccess(googleSignInAccount: GoogleSignInAccount?) {
-                            credential = GoogleAccountCredential.usingOAuth2(
-                                context,
-                                scopes
-                            )
-                                .setBackOff(ExponentialBackOff())
-                                .setSelectedAccount(googleSignInAccount!!.account)
+                    GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                            .addOnSuccessListener(object : OnSuccessListener<GoogleSignInAccount> {
+                                override fun onSuccess(googleSignInAccount: GoogleSignInAccount?) {
+                                    credential = GoogleAccountCredential.usingOAuth2(
+                                            context,
+                                            scopes
+                                    )
+                                            .setBackOff(ExponentialBackOff())
+                                            .setSelectedAccount(googleSignInAccount!!.account)
 //                            if (googleSignInAccount != null) {
 //                                credential.selectedAccount = googleSignInAccount.account
 //                            }
 
-                            mService = Drive.Builder(
-                                transport, jsonFactory, credential
-                            ).setHttpRequestInitializer { request ->
-                                credential!!.initialize(request)
-                                request!!.connectTimeout =
-                                    300 * 60000  // 300 minutes connect timeout
-                                request.readTimeout = 300 * 60000  // 300 minutes read timeout
-                            }
-                                .setApplicationName(getString(R.string.app_name))
-                                .build()
+                                    mService = Drive.Builder(
+                                            transport, jsonFactory, credential
+                                    ).setHttpRequestInitializer { request ->
+                                        credential!!.initialize(request)
+                                        request!!.connectTimeout =
+                                                300 * 60000  // 300 minutes connect timeout
+                                        request.readTimeout = 300 * 60000  // 300 minutes read timeout
+                                    }
+                                            .setApplicationName(getString(R.string.app_name))
+                                            .build()
 
-                            try {
-                                sheetService = Sheets.Builder(
-                                    httpTransport,
-                                    jacksonFactory,
-                                    credential
-                                )
-                                    .setApplicationName(getString(R.string.app_name))
-                                    .build()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                            DriveService.saveDriveInstance(mService!!)
-                            SheetService.saveGoogleSheetInstance(sheetService!!)
-                            firebaseAuthWithGoogle(googleSignInAccount.idToken!!)
-                            saveUserUpdatedDetail(googleSignInAccount, "new")
-                        }
-                    }).addOnFailureListener(object : OnFailureListener {
-                        override fun onFailure(p0: java.lang.Exception) {
-                            showAlert(context, p0.localizedMessage!!)
-                        }
+                                    try {
+                                        sheetService = Sheets.Builder(
+                                                httpTransport,
+                                                jacksonFactory,
+                                                credential
+                                        )
+                                                .setApplicationName(getString(R.string.app_name))
+                                                .build()
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                    DriveService.saveDriveInstance(mService!!)
+                                    SheetService.saveGoogleSheetInstance(sheetService!!)
+                                    firebaseAuthWithGoogle(googleSignInAccount.idToken!!)
+                                    saveUserUpdatedDetail(googleSignInAccount, "new")
+                                }
+                            }).addOnFailureListener(object : OnFailureListener {
+                                override fun onFailure(p0: java.lang.Exception) {
+                                    showAlert(context, p0.localizedMessage!!)
+                                }
 
-                    })
+                            })
+                }
             }
-        }
 
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                    }
                 }
-            }
     }
 
     private fun handleSignInResult(acct: GoogleSignInAccount) {
@@ -660,12 +664,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         } else {
             bottomNavigation.selectedItemId = R.id.bottom_scanner
             supportFragmentManager.beginTransaction().replace(
-                R.id.fragment_container,
-                ScannerFragment(),
-                "scanner"
+                    R.id.fragment_container,
+                    ScannerFragment(),
+                    "scanner"
             )
-                .addToBackStack("scanner")
-                .commit()
+                    .addToBackStack("scanner")
+                    .commit()
         }
     }
 
@@ -693,18 +697,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                         url
                     }
                     val qrHistory = CodeHistory(
-                        hashMap["login"]!!,
-                        hashMap["qrId"]!!,
-                        hashMap["userUrl"]!!,
-                        type,
-                        hashMap["userType"]!!,
-                        "qr",
-                        "create",
-                        "",
-                        "1",
-                        url,
-                        System.currentTimeMillis().toString(),
-                        ""
+                            hashMap["login"]!!,
+                            hashMap["qrId"]!!,
+                            hashMap["userUrl"]!!,
+                            type,
+                            hashMap["userType"]!!,
+                            "qr",
+                            "create",
+                            "",
+                            "1",
+                            url,
+                            System.currentTimeMillis().toString(),
+                            ""
                     )
 
                     val intent = Intent(context, DesignActivity::class.java)
@@ -719,18 +723,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             encodedTextData = data
 
             val qrHistory = CodeHistory(
-                hashMap["login"]!!,
-                hashMap["qrId"]!!,
-                encodedTextData,
-                type,
-                hashMap["userType"]!!,
-                "qr",
-                "create",
-                "",
-                "0",
-                "",
-                System.currentTimeMillis().toString(),
-                ""
+                    hashMap["login"]!!,
+                    hashMap["qrId"]!!,
+                    encodedTextData,
+                    type,
+                    hashMap["userType"]!!,
+                    "qr",
+                    "create",
+                    "",
+                    "0",
+                    "",
+                    System.currentTimeMillis().toString(),
+                    ""
             )
             val intent = Intent(context, DesignActivity::class.java)
             intent.putExtra("ENCODED_TEXT", encodedTextData)
@@ -757,9 +761,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             getCurrentSubscriptionDetail(context)
             getUserPackageDetail(context)
             Handler(Looper.myLooper()!!).postDelayed({
+                add5MbFreeStorage()
                 DatabaseHandler.importer(context)
-                //add5MbFreeStorage()s
-            },2000)
+            }, 2000)
 
 
         } else {
@@ -775,89 +779,127 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    private fun add5MbFreeStorage(){
-        if (!appSettings.getBoolean("is_first_time")){
+    private fun add5MbFreeStorage() {
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser != null) {
+            val id = auth.uid as String
+            Constants.firebaseUserId = id
 
-            var totalMemory = 0
-            var foundMemory:Float = 0F
-            var isFoundValue = false
-            val auth = FirebaseAuth.getInstance()
-            if (auth.currentUser != null) {
-                val id = auth.uid as String
-                Constants.firebaseUserId = id
+            val reference = firebaseDatabase.child("FREE_MB_USERS").child(id)
 
-            firebaseDatabase.child(Constants.firebaseUserFeatureDetails).child(id)
-                .addListenerForSingleValueEvent(object : ValueEventListener{
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            if (dataSnapshot.hasChild("memory")) {
-                                isFoundValue = true
-                                foundMemory =
-                                    dataSnapshot.child("memory").getValue(String::class.java)!!
-                                        .toFloat()
-                                totalMemory =
-                                    dataSnapshot.child("total_memory").getValue(Int::class.java)!!
-                            } else {
-                                isFoundValue = false
-                            }
-                            val params = HashMap<String,Any>()
-                            if (isFoundValue) {
-                                val tMemory = foundMemory + 5
-                                val total = totalMemory + 5
-                                params["memory"] = tMemory.toString()
-                                params["total_memory"] = total
-                            } else {
-                                params["memory"] = 5.toString()
-                                params["total_memory"] = 5
+            reference.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (!snapshot.hasChildren()) {
+
+                                val feature = Feature(0, 1, 1, 30, 250.0F, 0, 0)
+                                purchaseFeatures(context, feature, id, object : APICallback {
+                                    override fun onSuccess(response: JSONObject) {
+                                       if (response.has("package") && !response.isNull("package")){
+                                           firebaseDatabase.child("FREE_MB_USERS")
+                                               .child(id).child("status").setValue("yes")
+                                       }
+
+                                    }
+
+                                    override fun onError(error: VolleyError) {
+                                        Log.d("TEST199", error.localizedMessage!!)
+                                    }
+
+                                })
                             }
 
-                            firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
-                                .child(id)
-                                .setValue(params)
-                                .addOnSuccessListener {
-                                    // Write was successful!
-                                    // ...
-                                    appSettings.putBoolean("is_first_time", true)
-                                }
-                                .addOnFailureListener {
-                                    // Write failed
-                                    // ...
-                                    Log.d("TEST199",it.localizedMessage!!)
-                                }
-                        } else {
-                            val params = HashMap<String,Any>()
-                            params["memory"] = 5.toString()
-                            params["total_memory"] = 5
-
-                            firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
-                                .child(id)
-                                .setValue(params)
-                                .addOnSuccessListener {
-                                    // Write was successful!
-                                    // ...
-                                    appSettings.putBoolean("is_first_time", true)
-                                }
-                                .addOnFailureListener {
-                                    // Write failed
-                                    // ...
-                                    Log.d("TEST199",it.localizedMessage!!)
-                                }
                         }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {
+                        override fun onCancelled(error: DatabaseError) {
 
-                    }
+                        }
 
-                })
-            }
+                    })
+
         }
+
+//        if (!appSettings.getBoolean("is_first_time")){
+//
+//            var totalMemory = 0
+//            var foundMemory:Float = 0F
+//            var isFoundValue = false
+//            val auth = FirebaseAuth.getInstance()
+//            if (auth.currentUser != null) {
+//                val id = auth.uid as String
+//                Constants.firebaseUserId = id
+//
+//            firebaseDatabase.child(Constants.firebaseUserFeatureDetails).child(id)
+//                .addListenerForSingleValueEvent(object : ValueEventListener{
+//                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                        if (dataSnapshot.exists()) {
+//                            if (dataSnapshot.hasChild("memory")) {
+//                                isFoundValue = true
+//                                foundMemory =
+//                                    dataSnapshot.child("memory").getValue(String::class.java)!!
+//                                        .toFloat()
+//                                totalMemory =
+//                                    dataSnapshot.child("total_memory").getValue(Int::class.java)!!
+//                            } else {
+//                                isFoundValue = false
+//                            }
+//                            val params = HashMap<String,Any>()
+//                            if (isFoundValue) {
+//                                val tMemory = foundMemory + 5
+//                                val total = totalMemory + 5
+//                                params["memory"] = tMemory.toString()
+//                                params["total_memory"] = total
+//                            } else {
+//                                params["memory"] = 5.toString()
+//                                params["total_memory"] = 5
+//                            }
+//
+//                            firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
+//                                .child(id)
+//                                .setValue(params)
+//                                .addOnSuccessListener {
+//                                    // Write was successful!
+//                                    // ...
+//                                    appSettings.putBoolean("is_first_time", true)
+//                                }
+//                                .addOnFailureListener {
+//                                    // Write failed
+//                                    // ...
+//                                    Log.d("TEST199",it.localizedMessage!!)
+//                                }
+//                        } else {
+//                            val params = HashMap<String,Any>()
+//                            params["memory"] = 5.toString()
+//                            params["total_memory"] = 5
+//
+//                            firebaseDatabase.child(Constants.firebaseUserFeatureDetails)
+//                                .child(id)
+//                                .setValue(params)
+//                                .addOnSuccessListener {
+//                                    // Write was successful!
+//                                    // ...
+//                                    appSettings.putBoolean("is_first_time", true)
+//                                }
+//                                .addOnFailureListener {
+//                                    // Write failed
+//                                    // ...
+//                                    Log.d("TEST199",it.localizedMessage!!)
+//                                }
+//                        }
+//                    }
+//
+//                    override fun onCancelled(error: DatabaseError) {
+//
+//                    }
+//
+//                })
+//            }
+//        }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 0) {

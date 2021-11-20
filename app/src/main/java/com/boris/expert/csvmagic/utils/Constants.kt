@@ -31,6 +31,8 @@ import retrofit2.http.Url
 import java.io.File
 import java.io.IOException
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -125,6 +127,18 @@ class Constants {
             val diff1 = System.currentTimeMillis() - createdAt
             val goneDays = TimeUnit.DAYS.convert(diff1, TimeUnit.MILLISECONDS).toInt()
             return totalDays - goneDays
+        }
+
+        fun getDateFromDays(days:Int):String{
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            val c = Calendar.getInstance()
+            c.add(Calendar.DATE,days)
+            return sdf.format(c.time)
+        }
+
+        fun getCurrentDateString():String{
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            return sdf.format(System.currentTimeMillis())
         }
 
         // THIS FUNCTION WILL RETURN THE ALL THE EXTERNAL BACKGROUND IMAGES

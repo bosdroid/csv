@@ -10,7 +10,7 @@ class App : Application() {
     private lateinit var appSettings: AppSettings
     override fun onCreate() {
         super.onCreate()
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        //FirebaseDatabase.getInstance().setPersistenceEnabled(true)
         appSettings = AppSettings(applicationContext)
         getUserDetail()
 

@@ -124,188 +124,185 @@ class PurchaseFeatureActivity : BaseActivity(), FeaturesAdapter.OnItemClickListe
     override fun onItemPurchaseBtnClick(position: Int) {
         val feature = featureList[position]
 
-        startLoading(context)
-        viewModel.callUserPackageDetail(context, Constants.firebaseUserId)
-        viewModel.getUserPackageDetail().observe(this, Observer { response ->
-            dismiss()
-            if (response != null) {
-
-                MaterialAlertDialogBuilder(context)
-                    .setMessage("Are you sure you want to purchase this feature?")
-                    .setCancelable(false)
-                    .setNegativeButton("No") { dialog, which ->
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton("Yes") { dialog, which ->
-                        dialog.dismiss()
-                        if (response.has("package") && response.isNull("package")) {
-
-                            if (feature.name.contains("time")) {
-                                showAlert(
-                                    context,
-                                    "You can't purchase this feature because currently do not have any active subscription."
-                                )
-                            } else {
-                                purchaseFeature(feature)
-                            }
-                        } else {
-                            val packageDetail:JSONObject? = response.getJSONObject("package")
-                            userCurrentCredits =
-                                appSettings.getString(Constants.userCreditsValue) as String
-                            if (userCurrentCredits.isNotEmpty()) {
-                                if (userCurrentCredits.toInt() >= feature.credit_price) {
-                                    upgradeSubscription(feature, packageDetail!!)
-                                } else {
-                                    showAlert(
-                                        context,
-                                        "You can't purchase this feature due to zero or less credits!"
-                                    )
-                                }
-
-
-                            }
-                        }
-
-                    }.create().show()
-            }
-        })
+//        startLoading(context)
+//        viewModel.callUserPackageDetail(context, Constants.firebaseUserId)
+//        viewModel.getUserPackageDetail().observe(this, Observer { response ->
+//            dismiss()
+//            if (response != null) {
+//
+//                MaterialAlertDialogBuilder(context)
+//                    .setMessage("Are you sure you want to purchase this feature?")
+//                    .setCancelable(false)
+//                    .setNegativeButton("No") { dialog, which ->
+//                        dialog.dismiss()
+//                    }
+//                    .setPositiveButton("Yes") { dialog, which ->
+//                        dialog.dismiss()
+//                        if (response.has("package") && response.isNull("package")) {
+//
+//                            if (feature.name.contains("time")) {
+//                                showAlert(
+//                                    context,
+//                                    "You can't purchase this feature because currently do not have any active subscription."
+//                                )
+//                            } else {
+//                                purchaseFeature(feature)
+//                            }
+//                        } else {
+//                            val packageDetail:JSONObject? = response.getJSONObject("package")
+//                            userCurrentCredits =
+//                                appSettings.getString(Constants.userCreditsValue) as String
+//                            if (userCurrentCredits.isNotEmpty()) {
+//                                if (userCurrentCredits.toInt() >= feature.credit_price) {
+//                                    upgradeSubscription(feature, packageDetail!!)
+//                                } else {
+//                                    showAlert(
+//                                        context,
+//                                        "You can't purchase this feature due to zero or less credits!"
+//                                    )
+//                                }
+//
+//
+//                            }
+//                        }
+//
+//                    }.create().show()
+//            }
+//        })
 
 
     }
 
-    private fun upgradeSubscription(feature: Feature, packageDetail: JSONObject) {
-        val startDate = packageDetail.getString("start_date")
-        val endDate = packageDetail.getString("end_date")
-        val expiredTimeMili =
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
-
-        val diff1 = System.currentTimeMillis() - SimpleDateFormat(
-            "dd-MM-yyyy HH:mm:ss",
-            Locale.ENGLISH
-        ).parse(startDate)!!.time
-
-        val goneDays = TimeUnit.DAYS.convert(diff1, TimeUnit.MILLISECONDS).toInt()
-
-        val remainingDay = Constants.calculateDays(
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(startDate)!!.time,
-            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
-        )
-
-        val p_name = packageDetail.getString("package")
-        val p_type = packageDetail.getString("package_type")
-        Log.d("TEST1999", "$goneDays")
-
-        val availableSize = packageDetail.getInt("size")
-        val availableDuration = packageDetail.getInt("duration")
-
-        val currentMiliSeconds = System.currentTimeMillis()
-        if ((p_name == "storage" && p_type == "simple") && (feature.name.contains("storage") && feature.type == "simple") && expiredTimeMili >= currentMiliSeconds) {
-            showAlert(context, "You already have this subscription and not expired yet!")
-        } else if ((p_name == "storage" && p_type == "pro") && (feature.name.contains("storage") && feature.type == "pro") && expiredTimeMili >= currentMiliSeconds) {
-            showAlert(context, "You already have this subscription and not expired yet!")
-        } else if ((p_name == "storage" && p_type == "simple") && (feature.name.contains("storage") && feature.type == "pro"))
-        {
-            val simplePackageUnitPrice = 1.toDouble() / 30
-            val totalDaysGonePrice = simplePackageUnitPrice * goneDays
-            val roundUpValue = BigDecimal(totalDaysGonePrice).setScale(2, RoundingMode.HALF_EVEN)
-            val priceCharge = feature.credit_price - roundUpValue.toFloat()
-
-            val updatedTotalSize = feature.memory + availableSize
-
-            startLoading(context)
-            updateMemorySize(
-                context,
-                updatedTotalSize.toString(),
-                Constants.firebaseUserId,
-                1,
-                object : APICallback {
-                    override fun onSuccess(response: JSONObject) {
-                        dismiss()
-                        if (response.getInt("status") == 200) {
-
-                            val hashMap = HashMap<String, String>()
-                            val remaining = userCurrentCredits.toInt() - priceCharge
-                            hashMap["credits"] = remaining.toString()
-                            firebaseDatabase.child(Constants.firebaseUserCredits)
-                                .child(Constants.firebaseUserId)
-                                .setValue(hashMap)
-                                .addOnSuccessListener {
-
-                                }
-                                .addOnFailureListener {
-
-                                }
-
-                            showAlert(context, "Congratulation on upgrading the subscription!")
-                        } else {
-                            val message = response.getString("message")
-                            showAlert(context, message)
-                        }
-                    }
-
-                    override fun onError(error: VolleyError) {
-                        dismiss()
-                    }
-
-                })
-        } else if (feature.name.contains("time") && feature.type == "simple"){
-            purchaseFeature(feature)
-        }else if (feature.name.contains("time") && feature.type == "pro"){
-            purchaseFeature(feature)
-        }
-
-
-//        var packageType = ""
-//        var pkgName = ""
-//        var duration = 0
-//        var memory = 0F
+//    private fun upgradeSubscription(feature: Feature, packageDetail: JSONObject) {
+//        val startDate = packageDetail.getString("start_date")
+//        val endDate = packageDetail.getString("end_date")
+//        val expiredTimeMili = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
 //
-//        packageType = if (feature.name.contains("pro")) {
-//            "pro"
-//        } else {
-//            "simple"
+//        val diff1 = System.currentTimeMillis() - SimpleDateFormat(
+//            "dd-MM-yyyy HH:mm:ss",
+//            Locale.ENGLISH
+//        ).parse(startDate)!!.time
+//
+//        val goneDays = TimeUnit.DAYS.convert(diff1, TimeUnit.MILLISECONDS).toInt()
+//
+//        val remainingDay = Constants.calculateDays(
+//            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(startDate)!!.time,
+//            SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH).parse(endDate)!!.time
+//        )
+//
+//        val currentPackageId = packageDetail.getInt("package")
+//
+////        val availableSize = packageDetail.getInt("size")
+////        val availableDuration = packageDetail.getInt("duration")
+//
+//        val currentMiliSeconds = System.currentTimeMillis()
+//        if ((feature.packageId == 1) && expiredTimeMili >= currentMiliSeconds) {
+//            showAlert(context, "You already have this subscription and not expired yet!")
+//        } else if (feature.packageId == 2 && expiredTimeMili >= currentMiliSeconds) {
+//            showAlert(context, "You already have this subscription and not expired yet!")
+//        } else if (feature.packageId == 1)
+//        {
+//            val simplePackageUnitPrice = 1.toDouble() / 30
+//            val totalDaysGonePrice = simplePackageUnitPrice * goneDays
+//            val roundUpValue = BigDecimal(totalDaysGonePrice).setScale(2, RoundingMode.HALF_EVEN)
+//            val priceCharge = feature.credit_price - roundUpValue.toFloat()
+//
+////            val updatedTotalSize = feature.memory + availableSize
+////
+////            startLoading(context)
+////            updateMemorySize(
+////                context,
+////                updatedTotalSize.toString(),
+////                Constants.firebaseUserId,
+////                1,
+////                object : APICallback {
+////                    override fun onSuccess(response: JSONObject) {
+////                        dismiss()
+////                        if (response.getInt("status") == 200) {
+////
+////                            val hashMap = HashMap<String, String>()
+////                            val remaining = userCurrentCredits.toInt() - priceCharge
+////                            hashMap["credits"] = remaining.toString()
+////                            firebaseDatabase.child(Constants.firebaseUserCredits)
+////                                .child(Constants.firebaseUserId)
+////                                .setValue(hashMap)
+////                                .addOnSuccessListener {
+////
+////                                }
+////                                .addOnFailureListener {
+////
+////                                }
+////
+////                            showAlert(context, "Congratulation on upgrading the subscription!")
+////                        } else {
+////                            val message = response.getString("message")
+////                            showAlert(context, message)
+////                        }
+////                    }
+////
+////                    override fun onError(error: VolleyError) {
+////                        dismiss()
+////                    }
+////
+////                })
+//        } else if (feature.name.contains("time")){
+//            purchaseFeature(feature)
+//        }else if (feature.name.contains("time")){
+//            purchaseFeature(feature)
 //        }
 //
-//        if (feature.name.contains("storage")) {
-//            pkgName = "storage"
-//            memory = feature.memory
 //
-//            if (goneDays > 0) {
-//                val unitPrice = feature.credit_price / feature.duration
-//                val priceAlreadyDaysGone = unitPrice * goneDays
+////        var packageType = ""
+////        var pkgName = ""
+////        var duration = 0
+////        var memory = 0F
+////
+////        packageType = if (feature.name.contains("pro")) {
+////            "pro"
+////        } else {
+////            "simple"
+////        }
+////
+////        if (feature.name.contains("storage")) {
+////            pkgName = "storage"
+////            memory = feature.memory
+////
+////            if (goneDays > 0) {
+////                val unitPrice = feature.credit_price / feature.duration
+////                val priceAlreadyDaysGone = unitPrice * goneDays
+////
+////            }
+////
+////
+////        } else {
+////            pkgName = "time"
+////            duration = feature.duration
+////
+////
+////        }
 //
-//            }
 //
+////        val params = HashMap<String, Any>()
+////        params["package"] = pkgName
+////        params["user_id"] = Constants.firebaseUserId
+////        params["duration"] = duration
+////        params["package_type"] = packageType
+////        params["size"] = memory
 //
-//        } else {
-//            pkgName = "time"
-//            duration = feature.duration
+////        val hashMap = HashMap<String, String>()
+////        val remaining = userCurrentCredits.toInt() - feature.credit_price
+////        hashMap["credits"] = remaining.toString()
+////        firebaseDatabase.child(Constants.firebaseUserCredits)
+////            .child(Constants.firebaseUserId)
+////            .setValue(hashMap)
+////            .addOnSuccessListener {
+////
+////            }
+////            .addOnFailureListener {
+////
+////            }
 //
-//
-//        }
-
-
-//        val params = HashMap<String, Any>()
-//        params["package"] = pkgName
-//        params["user_id"] = Constants.firebaseUserId
-//        params["duration"] = duration
-//        params["package_type"] = packageType
-//        params["size"] = memory
-
-//        val hashMap = HashMap<String, String>()
-//        val remaining = userCurrentCredits.toInt() - feature.credit_price
-//        hashMap["credits"] = remaining.toString()
-//        firebaseDatabase.child(Constants.firebaseUserCredits)
-//            .child(Constants.firebaseUserId)
-//            .setValue(hashMap)
-//            .addOnSuccessListener {
-//
-//            }
-//            .addOnFailureListener {
-//
-//            }
-
-    }
+//    }
 
     private var listener: ValueEventListener? = null
     private fun purchaseFeature(feature: Feature) {

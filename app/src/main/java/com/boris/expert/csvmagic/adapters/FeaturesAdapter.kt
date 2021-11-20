@@ -8,7 +8,6 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Feature
-import com.boris.expert.csvmagic.model.Sheet
 import com.google.android.material.textview.MaterialTextView
 
 class FeaturesAdapter(val context: Context, val featuresList: ArrayList<Feature>) :
@@ -64,23 +63,23 @@ class FeaturesAdapter(val context: Context, val featuresList: ArrayList<Feature>
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
 
         val feature = featuresList[position]
-        holder.featureNameView.text = feature.name
-        if (feature.name.contains("storage")){
-            holder.memoryUsageView.text = "${feature.memory} MB"
-            holder.timeDuration.visibility = View.VISIBLE
-            holder.timeDuration.text = "${feature.duration} Days"
-//            holder.timeDurationHeading.visibility = View.GONE
-        }
-
-        if (feature.name.contains("time")){
-            holder.timeDuration.text = "${feature.duration} Days"
-            holder.memoryUsageView.visibility = View.GONE
+//        holder.featureNameView.text = feature.`package`
+//        if (feature.`package`.contains("storage")){
 //            holder.memoryUsageView.text = "${feature.memory} MB"
-            holder.memoryUsageHeadingView.visibility = View.GONE
-        }
-
-
-        holder.creditPriceView.text = "${feature.credit_price}$"
+//            holder.timeDuration.visibility = View.VISIBLE
+//            holder.timeDuration.text = "${feature.duration} Days"
+////            holder.timeDurationHeading.visibility = View.GONE
+//        }
+//
+//        if (feature.`package`.contains("time")){
+//            holder.timeDuration.text = "${feature.duration} Days"
+//            holder.memoryUsageView.visibility = View.GONE
+////            holder.memoryUsageView.text = "${feature.memory} MB"
+//            holder.memoryUsageHeadingView.visibility = View.GONE
+//        }
+//
+//
+//        holder.creditPriceView.text = "${feature.credit_price}$"
     }
 
     override fun getItemCount(): Int {

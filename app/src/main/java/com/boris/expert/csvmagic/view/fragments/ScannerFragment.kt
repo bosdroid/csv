@@ -412,7 +412,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 decodeCallback = DecodeCallback {
 
                     requireActivity().runOnUiThread {
-                        if (isScanResultDialogShowing){
+                        if (isScanResultDialogShowing) {
                             return@runOnUiThread
                         }
                         if (it.text.isNotEmpty() && it.text.matches(Regex("[0-9]+"))) {
@@ -944,7 +944,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                     requireActivity().startActivity(
                                         Intent(
                                             requireActivity(),
-                                            PurchaseFeatureActivity::class.java
+                                            UserScreenActivity::class.java
                                         )
                                     )
                                 }
@@ -961,8 +961,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     }
 
                 }
-            } else
-            {
+            } else {
                 val bundle = Bundle()
                 bundle.putString("second scanner", "triggers")
                 mFirebaseAnalytics?.logEvent("scanner", bundle)
@@ -1847,11 +1846,14 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 Constants.convertMegaBytesToBytes(Constants.userServerAvailableStorageSize.toFloat()) - size
 
             val remainingMb = Constants.convertBytesToMegaBytes(currentStorageSize).toString()
+            appSettings.putString(Constants.memory, remainingMb)
             BaseActivity.updateMemorySize(
                 requireActivity(),
                 remainingMb,
+                0,
                 Constants.firebaseUserId,
                 0,
+                "",
                 object : APICallback {
                     override fun onSuccess(response: JSONObject) {
 
@@ -1869,21 +1871,23 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
                         if (response.has("package") && !response.isNull("package")) {
-                        val packageDetail: JSONObject? = response.getJSONObject("package")
-                        if (packageDetail != null) {
-                            val availableSize = packageDetail.getString("size")
-                            Constants.userServerAvailableStorageSize = availableSize
+                            val packageDetail: JSONObject? = response.getJSONObject("package")
+                            if (packageDetail != null) {
+                                val availableSize = packageDetail.getString("size")
+                                Constants.userServerAvailableStorageSize = availableSize
 
-                            currentStorageSize =
+                                currentStorageSize =
                                     Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
 
-                            val remainingMb =
+                                val remainingMb =
                                     Constants.convertBytesToMegaBytes(currentStorageSize).toString()
-                            BaseActivity.updateMemorySize(
+                                BaseActivity.updateMemorySize(
                                     requireActivity(),
                                     remainingMb,
+                                    0,
                                     Constants.firebaseUserId,
                                     0,
+                                    "",
                                     object : APICallback {
                                         override fun onSuccess(response: JSONObject) {
 
@@ -1894,8 +1898,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                         }
 
                                     })
+                            }
                         }
-                    }
                     }
                 }, Response.ErrorListener {
                     Log.d("TEST199", it.localizedMessage!!)
