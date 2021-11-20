@@ -1761,36 +1761,102 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     var totalImageSize: Long = 0
     var index = 0
     private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
-        val imageList = filePathView!!.text.toString()
-        if (imageList.contains(",")) {
-            array = imageList.split(",")
-            uploadImage(listener)
-        } else {
-            val bundle = Bundle()
-            bundle.putString("starts", "starts")
-            mFirebaseAnalytics?.logEvent("upload image", bundle)
+        BaseActivity.startLoading(requireActivity())
+        val stringRequest = object : StringRequest(
+            Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+            Response.Listener {
+                val response = JSONObject(it)
+                if (response.getInt("status") == 200) {
+                    BaseActivity.dismiss()
+                    if (response.has("package") && !response.isNull("package")) {
+                        val packageDetail: JSONObject? = response.getJSONObject("package")
 
-            if (FirebaseAuth.getInstance().currentUser != null) {
-                val userId = FirebaseAuth.getInstance().currentUser!!.uid
+                        val availableSize = packageDetail!!.getString("size")
+                        Constants.userServerAvailableStorageSize = availableSize
+                        appSettings.putString(Constants.memory, availableSize)
+                        val endDate = packageDetail.getString("end_date")
+                        val expiredTimeMili =
+                            SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate)!!.time
 
-                val imageBase64String = ImageManager.convertImageToBase64(
-                    requireActivity(),
-                    filePathView!!.text.toString()
-                )
-                BaseActivity.uploadImageOnServer(
-                    requireActivity(),
-                    imageBase64String,
-                    userId,
-                    object : UploadImageCallback {
-                        override fun onSuccess(imageUrl: String) {
-                            url = imageUrl
-                            listener.onSuccess("")
+                        var currentStorageSize: Float = 0F
+                        if (availableSize.isNotEmpty()) {
+                            currentStorageSize =
+                                Constants.convertMegaBytesToBytes(availableSize.toFloat())
+                            if (totalImageSize <= currentStorageSize) {
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                if (expiredTimeMili >= currentMiliSeconds) {
+                                    val imageList = filePathView!!.text.toString()
+                                    if (imageList.contains(",")) {
+                                        array = imageList.split(",")
+                                        uploadImage(listener)
+                                    } else {
+                                        val bundle = Bundle()
+                                        bundle.putString("starts", "starts")
+                                        mFirebaseAnalytics?.logEvent("upload image", bundle)
+
+                                        if (FirebaseAuth.getInstance().currentUser != null) {
+                                            val userId =
+                                                FirebaseAuth.getInstance().currentUser!!.uid
+
+                                            val imageBase64String =
+                                                ImageManager.convertImageToBase64(
+                                                    requireActivity(),
+                                                    filePathView!!.text.toString()
+                                                )
+                                            BaseActivity.uploadImageOnServer(
+                                                requireActivity(),
+                                                imageBase64String,
+                                                userId,
+                                                object : UploadImageCallback {
+                                                    override fun onSuccess(imageUrl: String) {
+                                                        url = imageUrl
+                                                        listener.onSuccess("")
+                                                    }
+
+                                                })
+                                        }
+                                    }
+                                } else {
+                                    showAlert(requireActivity(), "Your subscription has expired!")
+                                }
+                            } else {
+                                showAlert(
+                                    requireActivity(),
+                                    "Insufficient storage for saving Images!"
+                                )
+                            }
                         }
 
-                    })
+
+                    }
+                }
+            }, Response.ErrorListener {
+                BaseActivity.dismiss()
+                Log.d("TEST199", it.localizedMessage!!)
+
+            }) {
+            override fun getParams(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["user_id"] = Constants.firebaseUserId
+                return params
             }
         }
 
+        stringRequest.retryPolicy = object : RetryPolicy {
+            override fun getCurrentTimeout(): Int {
+                return 50000
+            }
+
+            override fun getCurrentRetryCount(): Int {
+                return 50000
+            }
+
+            @Throws(VolleyError::class)
+            override fun retry(error: VolleyError) {
+            }
+        }
+
+        VolleySingleton(requireActivity()).addToRequestQueue(stringRequest)
     }
 
     private fun uploadImage(callback: UploadImageCallback) {
@@ -1856,7 +1922,46 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 "",
                 object : APICallback {
                     override fun onSuccess(response: JSONObject) {
+                        val stringRequest = object : StringRequest(
+                            Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                            Response.Listener {
+                                val updatedResponse = JSONObject(it)
+                                if (updatedResponse.getInt("status") == 200) {
+                                    if (updatedResponse.has("package") && !updatedResponse.isNull("package")) {
+                                        val packageDetail: JSONObject? =
+                                            updatedResponse.getJSONObject("package")
+                                        if (packageDetail != null) {
+                                            val availableSize = packageDetail.getString("size")
+                                            Constants.userServerAvailableStorageSize = availableSize
+                                        }
+                                    }
+                                }
+                            }, Response.ErrorListener {
+                                Log.d("TEST199", it.localizedMessage!!)
 
+                            }) {
+                            override fun getParams(): MutableMap<String, String> {
+                                val params = HashMap<String, String>()
+                                params["user_id"] = Constants.firebaseUserId
+                                return params
+                            }
+                        }
+
+                        stringRequest.retryPolicy = object : RetryPolicy {
+                            override fun getCurrentTimeout(): Int {
+                                return 50000
+                            }
+
+                            override fun getCurrentRetryCount(): Int {
+                                return 50000
+                            }
+
+                            @Throws(VolleyError::class)
+                            override fun retry(error: VolleyError) {
+                            }
+                        }
+
+                        VolleySingleton(requireActivity()).addToRequestQueue(stringRequest)
                     }
 
                     override fun onError(error: VolleyError) {
