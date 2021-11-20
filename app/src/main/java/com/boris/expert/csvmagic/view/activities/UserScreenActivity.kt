@@ -496,7 +496,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                     (requiredCreditForNewPackageRoundPrice - previousPackageRemainingRoundBalance).toFloat()
                 updateDays = remainingDay + feature.duration
 
-            val payedPriceCredits = (newPackagePricePerDay * feature.duration * minimumPackageCredit).toDouble()
+            val payedPriceCredits = (newPackagePricePerDay * feature.duration).toDouble()
             val priceChargeForExtendDays =  BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
 
             val totalPriceCharge = priceCharge + priceChargeForExtendDays
@@ -581,7 +581,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 (requiredCreditForNewPackageRoundPrice - previousPackageRemainingRoundBalance).toFloat()
             updateDays = remainingDay + feature.duration
 
-            val payedPriceCredits = (newPackagePricePerDay * feature.duration * minimumPackageCredit).toDouble()
+            val payedPriceCredits = (newPackagePricePerDay * feature.duration).toDouble()
             val priceChargeForExtendDays =  BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
 
             val totalPriceCharge = priceCharge + priceChargeForExtendDays
