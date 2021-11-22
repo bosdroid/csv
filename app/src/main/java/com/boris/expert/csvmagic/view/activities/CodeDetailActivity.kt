@@ -62,9 +62,10 @@ import java.util.*
 import java.util.regex.Pattern
 
 
-class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialog.CustomDialogListener,View.OnFocusChangeListener {
+class CodeDetailActivity : BaseActivity(), View.OnClickListener,
+    CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
 
-    private var customAlertDialog: CustomAlertDialog?=null
+    private var customAlertDialog: CustomAlertDialog? = null
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
     private var codeHistory: CodeHistory? = null
@@ -96,7 +97,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
     private lateinit var feedbackCsvExportImageView: AppCompatImageView
     private lateinit var qrCodeHistoryNotesInputField: TextInputEditText
     private lateinit var updateNotesBtn: AppCompatButton
-    private lateinit var contentView:ConstraintLayout
+    private lateinit var contentView: ConstraintLayout
+
     //    private lateinit var viewModel: DynamicQrViewModel
     private lateinit var barcodeDetailParentLayout: LinearLayout
     private lateinit var dialogSubHeading: MaterialTextView
@@ -110,7 +112,6 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
     var selectedProtocol = ""
     var barcodeEditList = mutableListOf<Triple<AppCompatImageView, String, String>>()
     private var counter: Int = 0
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -511,7 +512,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
         }
     }
 
-    private lateinit var updateInputBox:CustomTextInputEditText
+    private lateinit var updateInputBox: CustomTextInputEditText
     private fun updateBarcodeDetail(id: Int, triple: Triple<AppCompatImageView, String, String>) {
         val updateBarcodeLayout =
             LayoutInflater.from(context).inflate(R.layout.update_barcode_detail_dialog, null)
@@ -525,7 +526,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
         val updateBtn =
             updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_update_btn)
 
-        val imageRecognitionBtn = updateBarcodeLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
+        val imageRecognitionBtn =
+            updateBarcodeLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
         val photoRecognitionBtn =
             updateBarcodeLayout.findViewById<LinearLayout>(R.id.photo_recognition_btn)
 
@@ -622,8 +624,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
             // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
             if (result.resultCode == Activity.RESULT_OK) {
                 val text = result.data!!.getStringExtra("SCAN_TEXT")
-                 updateInputBox.setText(text)
-                 updateInputBox.setSelection(updateInputBox.text.toString().length)
+                updateInputBox.setText(text)
+                updateInputBox.setSelection(updateInputBox.text.toString().length)
 //                val data: Intent? = result.data
 //                val bitmap = data!!.extras!!.get("data") as Bitmap
 //                val file = ImageManager.readWriteImage(context,bitmap)
@@ -643,6 +645,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
             .setMultiTouchEnabled(true)
             .start(this)
     }
+
     private var imageList = mutableListOf<String>()
     private fun displayBarcodeDetail() {
         if (tableObject != null) {
@@ -711,10 +714,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
 //            imageColumnEditView.setOnClickListener(this)
 //            imageColumnValue.text = tableObject!!.image
 //            imageColumnName.text = "image"
-            if (tableObject!!.image.contains(" ")) {
-                imageList.addAll(tableObject!!.image.split(" ").toList())
-            } else {
-                imageList.add(tableObject!!.image)
+            if (tableObject!!.image.isNotEmpty()) {
+                if (tableObject!!.image.contains(" ")) {
+                    imageList.addAll(tableObject!!.image.split(" ").toList())
+                } else {
+                    imageList.add(tableObject!!.image)
+                }
             }
             val params = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -723,7 +728,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
                 setMargins(5, 5, 5, 5)
             }
             val barcodeImageRecyclerView = RecyclerView(context)
-            barcodeImageRecyclerView.setBackgroundColor(ContextCompat.getColor(context,R.color.light_gray))
+            barcodeImageRecyclerView.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.light_gray
+                )
+            )
             barcodeImageRecyclerView.layoutParams = params
             barcodeImageRecyclerView.layoutManager =
                 LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -733,7 +743,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
                 imageList as ArrayList<String>
             )
             barcodeImageRecyclerView.adapter = adapter
-            adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener{
+            adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener {
                 override fun onItemDeleteClick(position: Int) {
                     val builder = MaterialAlertDialogBuilder(context)
                     builder.setMessage(getString(R.string.delete_barcode_image_message))
@@ -764,7 +774,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
 
                 override fun onImageClick(position: Int) {
                     val url = imageList[position]
-                    openLink(context,url)
+                    openLink(context, url)
                 }
 
             })
@@ -953,7 +963,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
             val result = CropImage.getActivityResult(data)
             val imgUri = result.uri
             try {
@@ -966,9 +976,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
 
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) {
-       if (hasFocus){
-           openDialog()
-       }
+        if (hasFocus) {
+            openDialog()
+        }
     }
 
     private fun openDialog() {
@@ -982,7 +992,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
     }
 
     override fun onImageRecognitionBtnClick(alertDialog: CustomAlertDialog) {
-        if (customAlertDialog != null){
+        if (customAlertDialog != null) {
             customAlertDialog!!.dismiss()
             if (RuntimePermissionHelper.checkCameraPermission(
                     context,
@@ -996,7 +1006,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
     }
 
     override fun onPhotoRecognitionBtnClick(alertDialog: CustomAlertDialog) {
-        if (customAlertDialog != null){
+        if (customAlertDialog != null) {
             customAlertDialog!!.dismiss()
             if (RuntimePermissionHelper.checkCameraPermission(
                     context, Constants.CAMERA_PERMISSION
@@ -1009,10 +1019,10 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,CustomAlertDialo
     }
 
     override fun onDismissBtnClick(alertDialog: CustomAlertDialog) {
-         if (customAlertDialog != null){
-             customAlertDialog!!.dismiss()
-             Constants.openKeyboar(context)
-         }
+        if (customAlertDialog != null) {
+            customAlertDialog!!.dismiss()
+            Constants.openKeyboar(context)
+        }
     }
 
 

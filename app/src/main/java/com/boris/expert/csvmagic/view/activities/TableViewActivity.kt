@@ -435,10 +435,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         counter += 1
 //        imageClearBrushView.id = counter
 //        imageClearBrushView.tag = "qe"
-        if (item.image.contains(" ")) {
-            imageList.addAll(item.image.split(" ").toList())
-        } else {
-            imageList.add(item.image)
+        if (item.image.isNotEmpty()) {
+            if (item.image.contains(" ")) {
+                imageList.addAll(item.image.split(" ").toList())
+            } else {
+                imageList.add(item.image)
+            }
         }
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -447,7 +449,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             setMargins(5, 5, 5, 5)
         }
         val barcodeImageRecyclerView = RecyclerView(context)
-        barcodeImageRecyclerView.setBackgroundColor(ContextCompat.getColor(context,R.color.light_gray))
+        barcodeImageRecyclerView.setBackgroundColor(
+            ContextCompat.getColor(
+                context,
+                R.color.light_gray
+            )
+        )
         barcodeImageRecyclerView.layoutParams = params
         barcodeImageRecyclerView.layoutManager =
             LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -457,7 +464,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             imageList as ArrayList<String>
         )
         barcodeImageRecyclerView.adapter = adapter
-        adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener{
+        adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener {
             override fun onItemDeleteClick(position: Int) {
                 val builder = MaterialAlertDialogBuilder(context)
                 builder.setMessage(getString(R.string.delete_barcode_image_message))
@@ -477,7 +484,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                         }, item.id
                     )
                     adapter.notifyItemRemoved(position)
-                    getTableData(tableName,"","")
+                    getTableData(tableName, "", "")
                 }
                 val alert = builder.create()
                 alert.show()
@@ -488,8 +495,8 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             }
 
             override fun onImageClick(position: Int) {
-                    val url = imageList[position]
-                    openLink(context,url)
+                val url = imageList[position]
+                openLink(context, url)
             }
 
         })
@@ -595,7 +602,8 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
         cancelDialogBtn.setOnClickListener {
             imageList.clear()
-            alert.dismiss() }
+            alert.dismiss()
+        }
         updateDialogBtn.setOnClickListener {
             startLoading(context)
             var flag = false

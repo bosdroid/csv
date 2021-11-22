@@ -381,7 +381,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             Toast.LENGTH_SHORT
                     ).show()
                 }
-                checkUserLoginStatus()
+
                 if (requestLogin!!.isNotEmpty() && requestLogin == "login") {
                     startActivity(Intent(context, TablesActivity::class.java))
                 }
@@ -617,6 +617,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
+                        checkUserLoginStatus()
                     }
                 }
     }
@@ -757,9 +758,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
 
-            getUserCredits(context)
-            getCurrentSubscriptionDetail(context)
-            getUserPackageDetail(context)
+//            getCurrentSubscriptionDetail(context)
+            if (auth.currentUser != null){
+                getUserCredits(context)
+                Constants.firebaseUserId = auth.uid!!
+                getUserPackageDetail(context)
+            }
             Handler(Looper.myLooper()!!).postDelayed({
                 add5MbFreeStorage()
                 DatabaseHandler.importer(context)
