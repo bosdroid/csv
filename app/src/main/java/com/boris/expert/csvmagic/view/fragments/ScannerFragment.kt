@@ -1860,31 +1860,35 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     }
 
     private fun uploadImage(callback: UploadImageCallback) {
+        BaseActivity.startLoading(requireActivity())
         if (FirebaseAuth.getInstance().currentUser != null) {
 
             val userId = FirebaseAuth.getInstance().currentUser!!.uid
             val imagePath = array[index]
             val imageBase64String = ImageManager.convertImageToBase64(requireActivity(), imagePath)
-            BaseActivity.uploadImageOnServer(
-                requireContext(),
-                imageBase64String,
-                userId,
-                object : UploadImageCallback {
-                    override fun onSuccess(imageUrl: String) {
-                        Log.d("TEST199", imageUrl)
-                        uploadedUrlList.add(imageUrl)
-                        if (index == array.size - 1) {
-                            url = uploadedUrlList.joinToString(" ")
-                            uploadedUrlList.clear()
-                            index = 0
-                            callback.onSuccess("")
-                        } else {
-                            index++
-                            uploadImage(callback)
+            Handler(Looper.myLooper()!!).postDelayed({
+                BaseActivity.uploadImageOnServer(
+                    requireContext(),
+                    imageBase64String,
+                    userId,
+                    object : UploadImageCallback {
+                        override fun onSuccess(imageUrl: String) {
+                            Log.d("TEST199", imageUrl)
+                            uploadedUrlList.add(imageUrl)
+                            if (index == array.size - 1) {
+                                url = uploadedUrlList.joinToString(" ")
+                                uploadedUrlList.clear()
+                                index = 0
+                                BaseActivity.dismiss()
+                                callback.onSuccess("")
+                            } else {
+                                index++
+                                uploadImage(callback)
+                            }
                         }
-                    }
 
-                })
+                    })
+            }, 1000)
         }
     }
 
