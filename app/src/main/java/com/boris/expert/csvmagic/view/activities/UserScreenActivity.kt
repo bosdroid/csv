@@ -63,6 +63,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private var userCurrentCredits = ""
     private var couponCodeCredits = 0
     private var isCouponCodeApplied = false
+    private lateinit var couponCodeInputBox:TextInputEditText
+    private lateinit var applyCouponCodeBtn :MaterialButton
 
     //    private lateinit var usExpiredAtView:MaterialTextView
     private var billingClient: BillingClient? = null
@@ -103,6 +105,9 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         )[UserScreenActivityViewModel::class.java]
         billingClient = BillingClient.newBuilder(this)
             .enablePendingPurchases().setListener(this).build()
+        couponCodeInputBox = findViewById(R.id.coupon_code_input_field)
+        applyCouponCodeBtn = findViewById(R.id.apply_coupon_code_btn)
+        applyCouponCodeBtn.setOnClickListener(this)
 //        usExpiredAtView = findViewById(R.id.us_expired_at_view)
     }
 
@@ -150,7 +155,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 0F
                             }
                         }
-                        usCurrentCreditView.text = "$userCurrentCreditsValue"
+                        val roundedCreditValues = userCurrentCreditsValue.toBigDecimal().setScale(2, RoundingMode.UP).toDouble()
+                        usCurrentCreditView.text = "$roundedCreditValues"
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -227,6 +233,19 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
     override fun onClick(v: View?) {
         when (v!!.id) {
+            R.id.apply_coupon_code_btn->{
+                val code = couponCodeInputBox.text.toString().trim()
+                if (code.isNotEmpty()) {
+                    if (isCouponCodeApplied) {
+                        showAlert(context, getString(R.string.already_applied_coupon_error))
+                    } else {
+                        getCouponsAndApply(code)
+                    }
+
+                } else {
+                    showAlert(context, getString(R.string.empty_text_error))
+                }
+            }
             R.id.get_credits_btn -> {
                 getCredits()
             }

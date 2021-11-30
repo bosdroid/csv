@@ -428,6 +428,7 @@
     <string name="coupon_code_apply_success_message">Congratulation, Coupon code has been applied!</string>
     <string name="coupon_expired_error">You entered code has been expired!</string>
     <string name="already_applied_coupon_error">Already, you applied the coupon code!</string>
+    <string name="empty_image_list_error_message">No images yet</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

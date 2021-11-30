@@ -282,6 +282,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openDefaultColumnsTipsDialog(tableColumnsDetailLayout: LinearLayout) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt13")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -305,6 +306,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openAddNewFieldLayoutTipsDialog(addNewFieldLayoutWrapper: CardView) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt14")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -328,6 +330,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openInputFieldRadioTipsDialog(noneRadioBtn: MaterialRadioButton) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt15")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -351,6 +354,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openPredefinedFieldRadioTipsDialog(nonChangeableCheckBoxRadioButton: MaterialRadioButton) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt16")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -374,6 +378,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openDropDownListFieldRadioTipsDialog(listWithValuesFieldRadioButton: MaterialRadioButton) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt17")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -397,6 +402,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openAddingAnotherFieldTipsDialog(submitBtnView: MaterialButton) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt18")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -420,6 +426,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
     }
 
     private fun openFinishBtnTipsDialog(finishBtnView: MaterialButton) {
+        scrollDown()
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt19")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis()-duration > TimeUnit.DAYS.toMillis(
@@ -456,6 +463,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
                     .onDismissListener { tooltip ->
                         appSettings.putLong("tt20", System.currentTimeMillis())
                         tooltip.dismiss()
+                        scrollDown()
                     }
                     .build()
                     .show()
@@ -478,6 +486,7 @@ class CreateTableActivity : BaseActivity(), View.OnClickListener {
                     .onDismissListener { tooltip ->
                         appSettings.putLong("tt21", System.currentTimeMillis())
                         tooltip.dismiss()
+                        scrollDown()
                     }
                     .build()
                     .show()

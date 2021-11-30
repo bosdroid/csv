@@ -714,71 +714,81 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 //            imageColumnEditView.setOnClickListener(this)
 //            imageColumnValue.text = tableObject!!.image
 //            imageColumnName.text = "image"
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(10, 5, 5, 5)
+            }
             if (tableObject!!.image.isNotEmpty()) {
                 if (tableObject!!.image.contains(" ")) {
                     imageList.addAll(tableObject!!.image.split(" ").toList())
                 } else {
                     imageList.add(tableObject!!.image)
                 }
-            }
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(5, 5, 5, 5)
-            }
-            val barcodeImageRecyclerView = RecyclerView(context)
-            barcodeImageRecyclerView.setBackgroundColor(
-                ContextCompat.getColor(
-                    context,
-                    R.color.light_gray
+
+
+                val barcodeImageRecyclerView = RecyclerView(context)
+                barcodeImageRecyclerView.setBackgroundColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.light_gray
+                    )
                 )
-            )
-            barcodeImageRecyclerView.layoutParams = params
-            barcodeImageRecyclerView.layoutManager =
-                LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-            barcodeImageRecyclerView.hasFixedSize()
-            val adapter = BarcodeImageAdapter(
-                context,
-                imageList as ArrayList<String>
-            )
-            barcodeImageRecyclerView.adapter = adapter
-            adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener {
-                override fun onItemDeleteClick(position: Int) {
-                    val builder = MaterialAlertDialogBuilder(context)
-                    builder.setMessage(getString(R.string.delete_barcode_image_message))
-                    builder.setCancelable(false)
-                    builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                        dialog.dismiss()
+                barcodeImageRecyclerView.layoutParams = params
+                barcodeImageRecyclerView.layoutManager =
+                    LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+                barcodeImageRecyclerView.hasFixedSize()
+                val adapter = BarcodeImageAdapter(
+                    context,
+                    imageList as ArrayList<String>
+                )
+                barcodeImageRecyclerView.adapter = adapter
+                adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener {
+                    override fun onItemDeleteClick(position: Int) {
+                        val builder = MaterialAlertDialogBuilder(context)
+                        builder.setMessage(getString(R.string.delete_barcode_image_message))
+                        builder.setCancelable(false)
+                        builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                            dialog.dismiss()
+                            imageList.removeAt(position)
+
+                            tableGenerator.updateBarcodeDetail(
+                                tableName, "image", if (imageList.size > 0) {
+                                    imageList.joinToString(",")
+                                } else {
+                                    ""
+                                }, tableObject!!.id
+                            )
+                            adapter.notifyItemRemoved(position)
+                        }
+                        val alert = builder.create()
+                        alert.show()
                     }
-                    builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
-                        dialog.dismiss()
-                        imageList.removeAt(position)
 
-                        tableGenerator.updateBarcodeDetail(
-                            tableName, "image", if (imageList.size > 0) {
-                                imageList.joinToString(",")
-                            } else {
-                                ""
-                            }, tableObject!!.id
-                        )
-                        adapter.notifyItemRemoved(position)
+                    override fun onAddItemEditClick(position: Int) {
+
                     }
-                    val alert = builder.create()
-                    alert.show()
-                }
 
-                override fun onAddItemEditClick(position: Int) {
+                    override fun onImageClick(position: Int) {
+                        val url = imageList[position]
+                        openLink(context, url)
+                    }
 
-                }
-
-                override fun onImageClick(position: Int) {
-                    val url = imageList[position]
-                    openLink(context, url)
-                }
-
-            })
-            barcodeDetailParentLayout.addView(barcodeImageRecyclerView)
+                })
+                barcodeDetailParentLayout.addView(barcodeImageRecyclerView)
+            } else {
+                val emptyTextView = MaterialTextView(context)
+                emptyTextView.layoutParams = params
+                emptyTextView.text = getString(R.string.empty_image_list_error_message)
+                emptyTextView.setTextColor(ContextCompat.getColor(context, R.color.dark_gray))
+                emptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18F)
+                barcodeDetailParentLayout.addView(emptyTextView)
+            }
+//
 
             for (i in 0 until tableObject!!.dynamicColumns.size) {
                 val item = tableObject!!.dynamicColumns[i]
