@@ -157,6 +157,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         }
                         val roundedCreditValues = userCurrentCreditsValue.toBigDecimal().setScale(2, RoundingMode.UP).toDouble()
                         usCurrentCreditView.text = "$roundedCreditValues"
+                        appSettings.putString(Constants.userCreditsValue,"$roundedCreditValues")
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -845,12 +846,13 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         dismiss()
                         if (response.getInt("status") == 200) {
 
-                            val hashMap = HashMap<String, String>()
+                            val hashMap = HashMap<String, Any>()
                             val remaining = userCurrentCredits.toFloat() - priceCharge
+                            Log.d("TEST199","$remaining")
                             hashMap["credits"] = remaining.toString()
                             firebaseDatabase.child(Constants.firebaseUserCredits)
                                 .child(Constants.firebaseUserId)
-                                .setValue(hashMap)
+                                .updateChildren(hashMap)
                                 .addOnSuccessListener {
                                  getUserCredit()
                                 }
