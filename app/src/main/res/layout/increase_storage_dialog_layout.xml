@@ -109,7 +109,7 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            android:text="250.0 MB"
+                            android:text="100.0 MB"
                             android:layout_marginTop="@dimen/sixtyDpMargin"
                             android:id="@+id/ps_memory_usage_size_view"
                             android:textColor="@color/primary_positive_color"
@@ -170,6 +170,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/card_top"
             android:layout_margin="@dimen/defaultDpMargin"
+            android:visibility="gone"
             >
 
             <androidx.constraintlayout.widget.ConstraintLayout

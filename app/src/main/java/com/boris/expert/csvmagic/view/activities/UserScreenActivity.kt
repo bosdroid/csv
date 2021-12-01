@@ -425,7 +425,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         val alert = builder.create()
         alert.show()
         psPurchaseBtn.setOnClickListener {
-            val feature = Feature(0, 1, 10, 30, 250.0f, 0, 0)
+            val feature = Feature(0, 1, 10, 30, 100.0f, 0, 0)
             purchaseFeature(alert, feature)
         }
 
@@ -500,13 +500,13 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             var priceCharge: Float = 0F
             var updateDays = 0
 
-                val minimumPackageCredit = totalSize / 250
+                val minimumPackageCredit = totalSize / 100
                 val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration).toFloat()
                 val packageRemainingBalance = (perDayPrice * remainingDay).toDouble()
                 val previousPackageRemainingRoundBalance =
                     BigDecimal(packageRemainingBalance).setScale(2, RoundingMode.HALF_EVEN)
 
-                val newPackageCredit = (feature.memory+totalSize) / 250
+                val newPackageCredit = (feature.memory+totalSize) / 100
                 val newPackagePricePerDay = newPackageCredit / 30.toFloat()
                 val requiredCreditForNewPackage =
                     remainingDay * newPackagePricePerDay.toDouble()

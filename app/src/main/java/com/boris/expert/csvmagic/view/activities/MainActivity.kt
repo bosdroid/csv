@@ -797,7 +797,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (!snapshot.hasChildren()) {
 
-                                val feature = Feature(0, 1, 1, 30, 250.0F, 0, 0)
+                                val feature = Feature(0, 1, 1, 30, 100.0F, 0, 0)
                                 purchaseFeatures(context, feature, id, object : APICallback {
                                     override fun onSuccess(response: JSONObject) {
                                        if (response.has("package") && !response.isNull("package")){
