@@ -18,6 +18,7 @@ import com.android.billingclient.api.*
 import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.APICallback
+import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.CouponCode
 import com.boris.expert.csvmagic.model.Feature
 import com.boris.expert.csvmagic.model.PurchaseDetail
@@ -63,8 +64,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private var userCurrentCredits = ""
     private var couponCodeCredits = 0
     private var isCouponCodeApplied = false
-    private lateinit var couponCodeInputBox:TextInputEditText
-    private lateinit var applyCouponCodeBtn :MaterialButton
+    private lateinit var couponCodeInputBox: TextInputEditText
+    private lateinit var applyCouponCodeBtn: MaterialButton
 
     //    private lateinit var usExpiredAtView:MaterialTextView
     private var billingClient: BillingClient? = null
@@ -155,9 +156,11 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 0F
                             }
                         }
-                        val roundedCreditValues = userCurrentCreditsValue.toBigDecimal().setScale(2, RoundingMode.UP).toDouble()
+                        val roundedCreditValues =
+                            userCurrentCreditsValue.toBigDecimal().setScale(2, RoundingMode.UP)
+                                .toDouble()
                         usCurrentCreditView.text = "$roundedCreditValues"
-                        appSettings.putString(Constants.userCreditsValue,"$roundedCreditValues")
+                        appSettings.putString(Constants.userCreditsValue, "$roundedCreditValues")
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -234,14 +237,14 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
     override fun onClick(v: View?) {
         when (v!!.id) {
-            R.id.apply_coupon_code_btn->{
+            R.id.apply_coupon_code_btn -> {
                 val code = couponCodeInputBox.text.toString().trim()
                 if (code.isNotEmpty()) {
-                    if (isCouponCodeApplied) {
-                        showAlert(context, getString(R.string.already_applied_coupon_error))
-                    } else {
+//                    if (isCouponCodeApplied) {
+//                        showAlert(context, getString(R.string.already_applied_coupon_error))
+//                    } else {
                         getCouponsAndApply(code)
-                    }
+//                    }
 
                 } else {
                     showAlert(context, getString(R.string.empty_text_error))
@@ -290,19 +293,19 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             }
         }
 
-        applyCouponCodeBtn.setOnClickListener {
-            val code = couponCodeInputBox.text.toString().trim()
-            if (code.isNotEmpty()) {
-                if (isCouponCodeApplied) {
-                    showAlert(context, getString(R.string.already_applied_coupon_error))
-                } else {
-                    getCouponsAndApply(code)
-                }
-
-            } else {
-                showAlert(context, getString(R.string.empty_text_error))
-            }
-        }
+//        applyCouponCodeBtn.setOnClickListener {
+//            val code = couponCodeInputBox.text.toString().trim()
+//            if (code.isNotEmpty()) {
+////                if (isCouponCodeApplied) {
+////                    showAlert(context, getString(R.string.already_applied_coupon_error))
+////                } else {
+//                    getCouponsAndApply(code)
+////                }
+//
+//            } else {
+//                showAlert(context, getString(R.string.empty_text_error))
+//            }
+//        }
 
 
         val builder = MaterialAlertDialogBuilder(context)
@@ -356,15 +359,121 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     }
 
     private fun getCouponsAndApply(code: String) {
-        startLoading(context)
+
+        checkCouponAlreadyUsed(code, object : ResponseListener {
+            override fun onSuccess(result: String) {
+                if (result == "used") {
+                    couponCodeInputBox.setText("")
+                    showAlert(context, getString(R.string.coupon_already_used_error))
+                } else {
+                    startLoading(context)
+                    val list = mutableListOf<CouponCode>()
+                    var isFound = false
+                    var tempObject: CouponCode? = null
+                    firebaseDatabase.child(Constants.firebaseCouponCodes)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                if (dataSnapshot.exists()) {
+
+                                    list.clear()
+                                    for (postSnapshot in dataSnapshot.children) {
+                                        val item =
+                                            postSnapshot.getValue(CouponCode::class.java) as CouponCode
+                                        list.add(item)
+                                    }
+                                    dismiss()
+                                    if (list.isNotEmpty()) {
+                                        for (i in 0 until list.size) {
+                                            val codeDetail = list[i]
+                                            if (codeDetail.code.equals(code, ignoreCase = true)) {
+                                                tempObject = codeDetail
+                                                isFound = true
+                                                break
+                                            } else {
+                                                isFound = false
+                                            }
+                                        }
+
+                                        if (isFound) {
+                                            val df = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                            if (df.parse(tempObject!!.expired)!!.time > System.currentTimeMillis()) {
+                                                couponCodeCredits = tempObject!!.credits
+                                                isCouponCodeApplied = true
+
+                                                val hashMap = HashMap<String, String>()
+                                                userCurrentCreditsValue += couponCodeCredits
+                                                hashMap["credits"] = userCurrentCreditsValue.toString()
+
+                                                firebaseDatabase.child(Constants.firebaseUserCredits)
+                                                    .child(Constants.firebaseUserId)
+                                                    .setValue(hashMap)
+                                                    .addOnSuccessListener {
+                                                        Toast.makeText(
+                                                            context,
+                                                            getString(R.string.user_credits_update_success_text),
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        updateCouponsHistory(tempObject!!)
+                                                        couponCodeInputBox.setText("")
+                                                        getUserCredit()
+                                                    }
+                                                    .addOnFailureListener {
+
+                                                    }
+
+
+//                                                showAlert(
+//                                                    context,
+//                                                    getString(R.string.coupon_code_apply_success_message)
+//                                                )
+                                            } else {
+                                                showAlert(
+                                                    context,
+                                                    getString(R.string.coupon_expired_error)
+                                                )
+                                            }
+
+                                        } else {
+                                            showAlert(
+                                                context,
+                                                getString(R.string.coupon_not_found_error)
+                                            )
+                                        }
+
+                                    }
+                                } else {
+                                    showAlert(context, getString(R.string.coupon_not_found_error))
+                                }
+                            }
+
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                dismiss()
+                                showAlert(context, databaseError.message)
+                            }
+                        })
+                }
+            }
+
+        })
+    }
+
+    private fun updateCouponsHistory(tempObject: CouponCode) {
+        tempObject.isUsed = 1
+        tempObject.user_id = Constants.firebaseUserId
+        firebaseDatabase.child(Constants.firebaseCouponHistory).push()
+            .setValue(tempObject)
+    }
+
+    private fun checkCouponAlreadyUsed(code: String, listener: ResponseListener) {
         val list = mutableListOf<CouponCode>()
         var isFound = false
         var tempObject: CouponCode? = null
-        firebaseDatabase.child(Constants.firebaseCouponCodes)
-            .addValueEventListener(object : ValueEventListener {
+
+        startLoading(context)
+        firebaseDatabase.child(Constants.firebaseCouponHistory)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
-
                         list.clear()
                         for (postSnapshot in dataSnapshot.children) {
                             val item = postSnapshot.getValue(CouponCode::class.java) as CouponCode
@@ -374,8 +483,12 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         if (list.isNotEmpty()) {
                             for (i in 0 until list.size) {
                                 val codeDetail = list[i]
-                                if (codeDetail.code.equals(code, ignoreCase = true)) {
-                                    tempObject = codeDetail
+                                if (codeDetail.code.equals(
+                                        code,
+                                        ignoreCase = true
+                                    ) && (codeDetail.user_id == Constants.firebaseUserId || codeDetail.user_id.isEmpty())
+                                ) {
+                                    //tempObject = codeDetail
                                     isFound = true
                                     break
                                 } else {
@@ -384,25 +497,14 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                             }
 
                             if (isFound) {
-                                val df = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                                if (df.parse(tempObject!!.expired)!!.time > System.currentTimeMillis()) {
-                                    couponCodeCredits = tempObject!!.credits
-                                    isCouponCodeApplied = true
-                                    showAlert(
-                                        context,
-                                        getString(R.string.coupon_code_apply_success_message)
-                                    )
-                                } else {
-                                    showAlert(context, getString(R.string.coupon_expired_error))
-                                }
-
+                                listener.onSuccess("used")
                             } else {
-                                showAlert(context, getString(R.string.coupon_not_found_error))
+                                listener.onSuccess("notused")
                             }
 
                         }
                     } else {
-                        showAlert(context, getString(R.string.coupon_not_found_error))
+                        listener.onSuccess("notused")
                     }
                 }
 
@@ -464,7 +566,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                             }
                         } else {
                             val packageDetail: JSONObject? = response.getJSONObject("package")
-                                    upgradeSubscription(feature, packageDetail!!)
+                            upgradeSubscription(feature, packageDetail!!)
                         }
 
                     }.create().show()
@@ -501,98 +603,13 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             var priceCharge: Float = 0F
             var updateDays = 0
 
-                val minimumPackageCredit = totalSize / 100
-                val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration).toFloat()
-                val packageRemainingBalance = (perDayPrice * remainingDay).toDouble()
-                val previousPackageRemainingRoundBalance =
-                    BigDecimal(packageRemainingBalance).setScale(2, RoundingMode.HALF_EVEN)
-
-                val newPackageCredit = (feature.memory+totalSize) / 100
-                val newPackagePricePerDay = newPackageCredit / 30.toFloat()
-                val requiredCreditForNewPackage =
-                    remainingDay * newPackagePricePerDay.toDouble()
-                val requiredCreditForNewPackageRoundPrice =
-                    BigDecimal(requiredCreditForNewPackage).setScale(2, RoundingMode.HALF_EVEN)
-                priceCharge =
-                    (requiredCreditForNewPackageRoundPrice - previousPackageRemainingRoundBalance).toFloat()
-                updateDays = remainingDay //+ feature.duration
-
-            val payedPriceCredits = (newPackagePricePerDay * feature.duration).toDouble()
-            val priceChargeForExtendDays =  BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
-
-            val totalPriceCharge = priceCharge //+ priceChargeForExtendDays
-
-
-            userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-                if (userCurrentCredits.isNotEmpty()) {
-                    if (userCurrentCredits.toFloat() >= totalPriceCharge) {
-                        updateStorageSize(feature,totalPriceCharge,availableSize,totalSize,Constants.getDateFromDays(updateDays))
-                    } else {
-                        showAlert(
-                            context,
-                            "You can't purchase this feature due to zero or less credits!"
-                        )
-                    }
-                }
-                else {
-                    if (auth.currentUser != null) {
-
-                        val userId = auth.currentUser!!.uid
-                        Constants.firebaseUserId = userId
-                        firebaseDatabase.child(Constants.firebaseUserCredits)
-                            .child(userId).addListenerForSingleValueEvent(object :
-                                ValueEventListener {
-                                override fun onDataChange(snapshot: DataSnapshot) {
-
-                                    if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
-                                        val previousCredits =
-                                            snapshot.child("credits")
-                                                .getValue(String::class.java)
-                                        userCurrentCreditsValue =
-                                            if (previousCredits!!.isNotEmpty()) {
-                                                previousCredits.toFloat()
-                                            } else {
-                                                0F
-                                            }
-                                    }
-                                    appSettings.putString(
-                                        Constants.userCreditsValue,
-                                        "$userCurrentCreditsValue"
-                                    )
-                                    usCurrentCreditView.text =
-                                        "$userCurrentCreditsValue"
-                                    if (userCurrentCreditsValue >= totalPriceCharge) {
-                                        updateStorageSize(feature,totalPriceCharge,availableSize,totalSize,Constants.getDateFromDays(updateDays))
-                                    } else {
-                                        showAlert(
-                                            context,
-                                            "You can't purchase this feature due to zero or less credits!"
-                                        )
-                                    }
-                                }
-
-                                override fun onCancelled(error: DatabaseError) {
-
-                                }
-
-                            })
-                    }
-                }
-
-        }
-
-        else if (feature.packageId == 2 && expiredTimeMili >= currentMiliSeconds) {
-
-            var priceCharge: Float = 0F
-            var updateDays = 0
-
-            val minimumPackageCredit = totalSize.toFloat() / 250
+            val minimumPackageCredit = totalSize / 100
             val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration).toFloat()
             val packageRemainingBalance = (perDayPrice * remainingDay).toDouble()
             val previousPackageRemainingRoundBalance =
                 BigDecimal(packageRemainingBalance).setScale(2, RoundingMode.HALF_EVEN)
 
-            val newPackageCredit = (feature.memory+totalSize) / 250
+            val newPackageCredit = (feature.memory + totalSize) / 100
             val newPackagePricePerDay = newPackageCredit / 30.toFloat()
             val requiredCreditForNewPackage =
                 remainingDay * newPackagePricePerDay.toDouble()
@@ -603,22 +620,29 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             updateDays = remainingDay //+ feature.duration
 
             val payedPriceCredits = (newPackagePricePerDay * feature.duration).toDouble()
-            val priceChargeForExtendDays =  BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
+            val priceChargeForExtendDays =
+                BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
 
             val totalPriceCharge = priceCharge //+ priceChargeForExtendDays
+
 
             userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
             if (userCurrentCredits.isNotEmpty()) {
                 if (userCurrentCredits.toFloat() >= totalPriceCharge) {
-                    updateStorageSize(feature,totalPriceCharge,availableSize,totalSize,Constants.getDateFromDays(updateDays))
+                    updateStorageSize(
+                        feature,
+                        totalPriceCharge,
+                        availableSize,
+                        totalSize,
+                        Constants.getDateFromDays(updateDays)
+                    )
                 } else {
                     showAlert(
                         context,
                         "You can't purchase this feature due to zero or less credits!"
                     )
                 }
-            }
-            else {
+            } else {
                 if (auth.currentUser != null) {
 
                     val userId = auth.currentUser!!.uid
@@ -646,7 +670,13 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 usCurrentCreditView.text =
                                     "$userCurrentCreditsValue"
                                 if (userCurrentCreditsValue >= totalPriceCharge) {
-                                    updateStorageSize(feature,totalPriceCharge,availableSize,totalSize,Constants.getDateFromDays(updateDays))
+                                    updateStorageSize(
+                                        feature,
+                                        totalPriceCharge,
+                                        availableSize,
+                                        totalSize,
+                                        Constants.getDateFromDays(updateDays)
+                                    )
                                 } else {
                                     showAlert(
                                         context,
@@ -662,26 +692,119 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         })
                 }
             }
-        }
-        else if (feature.packageId == 3) {
-            var totalDays = 0
-            val minimumPackageCredit = totalSize / 250
-            val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration)
-            val payedPriceCredits = (perDayPrice * feature.duration).toDouble()
-            val priceChargeForExtendDays =  BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
-            totalDays = remainingDay + feature.duration
+
+        } else if (feature.packageId == 2 && expiredTimeMili >= currentMiliSeconds) {
+
+            var priceCharge: Float = 0F
+            var updateDays = 0
+
+            val minimumPackageCredit = totalSize.toFloat() / 250
+            val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration).toFloat()
+            val packageRemainingBalance = (perDayPrice * remainingDay).toDouble()
+            val previousPackageRemainingRoundBalance =
+                BigDecimal(packageRemainingBalance).setScale(2, RoundingMode.HALF_EVEN)
+
+            val newPackageCredit = (feature.memory + totalSize) / 250
+            val newPackagePricePerDay = newPackageCredit / 30.toFloat()
+            val requiredCreditForNewPackage =
+                remainingDay * newPackagePricePerDay.toDouble()
+            val requiredCreditForNewPackageRoundPrice =
+                BigDecimal(requiredCreditForNewPackage).setScale(2, RoundingMode.HALF_EVEN)
+            priceCharge =
+                (requiredCreditForNewPackageRoundPrice - previousPackageRemainingRoundBalance).toFloat()
+            updateDays = remainingDay //+ feature.duration
+
+            val payedPriceCredits = (newPackagePricePerDay * feature.duration).toDouble()
+            val priceChargeForExtendDays =
+                BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
+
+            val totalPriceCharge = priceCharge //+ priceChargeForExtendDays
+
             userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
             if (userCurrentCredits.isNotEmpty()) {
-                if (userCurrentCredits.toFloat() >= priceChargeForExtendDays) {
-                    updateExtendUsage(priceChargeForExtendDays,totalDays)
+                if (userCurrentCredits.toFloat() >= totalPriceCharge) {
+                    updateStorageSize(
+                        feature,
+                        totalPriceCharge,
+                        availableSize,
+                        totalSize,
+                        Constants.getDateFromDays(updateDays)
+                    )
                 } else {
                     showAlert(
                         context,
                         "You can't purchase this feature due to zero or less credits!"
                     )
                 }
+            } else {
+                if (auth.currentUser != null) {
+
+                    val userId = auth.currentUser!!.uid
+                    Constants.firebaseUserId = userId
+                    firebaseDatabase.child(Constants.firebaseUserCredits)
+                        .child(userId).addListenerForSingleValueEvent(object :
+                            ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+
+                                if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                    val previousCredits =
+                                        snapshot.child("credits")
+                                            .getValue(String::class.java)
+                                    userCurrentCreditsValue =
+                                        if (previousCredits!!.isNotEmpty()) {
+                                            previousCredits.toFloat()
+                                        } else {
+                                            0F
+                                        }
+                                }
+                                appSettings.putString(
+                                    Constants.userCreditsValue,
+                                    "$userCurrentCreditsValue"
+                                )
+                                usCurrentCreditView.text =
+                                    "$userCurrentCreditsValue"
+                                if (userCurrentCreditsValue >= totalPriceCharge) {
+                                    updateStorageSize(
+                                        feature,
+                                        totalPriceCharge,
+                                        availableSize,
+                                        totalSize,
+                                        Constants.getDateFromDays(updateDays)
+                                    )
+                                } else {
+                                    showAlert(
+                                        context,
+                                        "You can't purchase this feature due to zero or less credits!"
+                                    )
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+
+                            }
+
+                        })
+                }
             }
-            else {
+        } else if (feature.packageId == 3) {
+            var totalDays = 0
+            val minimumPackageCredit = totalSize / 250
+            val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration)
+            val payedPriceCredits = (perDayPrice * feature.duration).toDouble()
+            val priceChargeForExtendDays =
+                BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
+            totalDays = remainingDay + feature.duration
+            userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+            if (userCurrentCredits.isNotEmpty()) {
+                if (userCurrentCredits.toFloat() >= priceChargeForExtendDays) {
+                    updateExtendUsage(priceChargeForExtendDays, totalDays)
+                } else {
+                    showAlert(
+                        context,
+                        "You can't purchase this feature due to zero or less credits!"
+                    )
+                }
+            } else {
                 if (auth.currentUser != null) {
 
                     val userId = auth.currentUser!!.uid
@@ -724,27 +847,26 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         })
                 }
             }
-        }
-        else if (feature.packageId == 4) {
+        } else if (feature.packageId == 4) {
             var totalDays = 0
             val minimumPackageCredit = totalSize / 250
             val perDayPrice = (minimumPackageCredit.toFloat() / feature.duration)
             val payedPriceCredits = (perDayPrice * feature.duration).toDouble()
-            val priceChargeForExtendDays =  BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
+            val priceChargeForExtendDays =
+                BigDecimal(payedPriceCredits).setScale(1, RoundingMode.HALF_EVEN).toFloat()
             totalDays = remainingDay + feature.duration
 
             userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
             if (userCurrentCredits.isNotEmpty()) {
                 if (userCurrentCredits.toFloat() >= priceChargeForExtendDays) {
-                    updateExtendUsage(priceChargeForExtendDays,totalDays)
+                    updateExtendUsage(priceChargeForExtendDays, totalDays)
                 } else {
                     showAlert(
                         context,
                         "You can't purchase this feature due to zero or less credits!"
                     )
                 }
-            }
-            else {
+            } else {
                 if (auth.currentUser != null) {
 
                     val userId = auth.currentUser!!.uid
@@ -794,83 +916,93 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
     private fun updateExtendUsage(priceChargeForExtendDays: Float, totalDays: Int) {
         startLoading(context)
-        updateUsageTime(context,Constants.getDateFromDays(totalDays),Constants.firebaseUserId,object :APICallback{
-            override fun onSuccess(response: JSONObject) {
-                dismiss()
-                if (response.getInt("status") == 200) {
+        updateUsageTime(
+            context,
+            Constants.getDateFromDays(totalDays),
+            Constants.firebaseUserId,
+            object : APICallback {
+                override fun onSuccess(response: JSONObject) {
+                    dismiss()
+                    if (response.getInt("status") == 200) {
 
-                    val hashMap = HashMap<String, String>()
-                    val remaining = userCurrentCredits.toFloat() - priceChargeForExtendDays
-                    hashMap["credits"] = remaining.toString()
-                    firebaseDatabase.child(Constants.firebaseUserCredits)
-                        .child(Constants.firebaseUserId)
-                        .setValue(hashMap)
-                        .addOnSuccessListener {
-                            getUserCredit()
-                        }
-                        .addOnFailureListener {
+                        val hashMap = HashMap<String, String>()
+                        val remaining = userCurrentCredits.toFloat() - priceChargeForExtendDays
+                        hashMap["credits"] = remaining.toString()
+                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                            .child(Constants.firebaseUserId)
+                            .setValue(hashMap)
+                            .addOnSuccessListener {
+                                getUserCredit()
+                            }
+                            .addOnFailureListener {
 
-                        }
-                    getUserSubscriptionDetails()
-                } else {
-                    val message = response.getString("message")
-                    showAlert(context, message)
+                            }
+                        getUserSubscriptionDetails()
+                    } else {
+                        val message = response.getString("message")
+                        showAlert(context, message)
+                    }
                 }
-            }
 
-            override fun onError(error: VolleyError) {
-                dismiss()
-                Log.d("TEST199","ERROR: ${error.localizedMessage}")
-            }
+                override fun onError(error: VolleyError) {
+                    dismiss()
+                    Log.d("TEST199", "ERROR: ${error.localizedMessage}")
+                }
 
-        })
+            })
     }
 
-    private fun updateStorageSize(feature: Feature,priceCharge:Float,availableSize:Float,totalSize:Int,endDate:String){
+    private fun updateStorageSize(
+        feature: Feature,
+        priceCharge: Float,
+        availableSize: Float,
+        totalSize: Int,
+        endDate: String
+    ) {
         var updatedStorageSize = 0F
         var updatedTotalSize = 0
 
-            updatedStorageSize = availableSize + feature.memory
-            updatedTotalSize = totalSize + feature.memory.toInt()
+        updatedStorageSize = availableSize + feature.memory
+        updatedTotalSize = totalSize + feature.memory.toInt()
 
-            startLoading(context)
-            updateMemorySize(
-                context,
-                updatedStorageSize.toString(),
-                updatedTotalSize,
-                Constants.firebaseUserId,
-                1,
-                endDate,
-                object : APICallback {
-                    override fun onSuccess(response: JSONObject) {
-                        dismiss()
-                        if (response.getInt("status") == 200) {
+        startLoading(context)
+        updateMemorySize(
+            context,
+            updatedStorageSize.toString(),
+            updatedTotalSize,
+            Constants.firebaseUserId,
+            1,
+            endDate,
+            object : APICallback {
+                override fun onSuccess(response: JSONObject) {
+                    dismiss()
+                    if (response.getInt("status") == 200) {
 
-                            val hashMap = HashMap<String, Any>()
-                            val remaining = userCurrentCredits.toFloat() - priceCharge
-                            Log.d("TEST199","$remaining")
-                            hashMap["credits"] = remaining.toString()
-                            firebaseDatabase.child(Constants.firebaseUserCredits)
-                                .child(Constants.firebaseUserId)
-                                .updateChildren(hashMap)
-                                .addOnSuccessListener {
-                                 getUserCredit()
-                                }
-                                .addOnFailureListener {
+                        val hashMap = HashMap<String, Any>()
+                        val remaining = userCurrentCredits.toFloat() - priceCharge
+                        Log.d("TEST199", "$remaining")
+                        hashMap["credits"] = remaining.toString()
+                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                            .child(Constants.firebaseUserId)
+                            .updateChildren(hashMap)
+                            .addOnSuccessListener {
+                                getUserCredit()
+                            }
+                            .addOnFailureListener {
 
-                                }
-                            getUserSubscriptionDetails()
-                        } else {
-                            val message = response.getString("message")
-                            showAlert(context, message)
-                        }
+                            }
+                        getUserSubscriptionDetails()
+                    } else {
+                        val message = response.getString("message")
+                        showAlert(context, message)
                     }
+                }
 
-                    override fun onError(error: VolleyError) {
-                        dismiss()
-                    }
+                override fun onError(error: VolleyError) {
+                    dismiss()
+                }
 
-                })
+            })
 
     }
 
@@ -982,14 +1114,14 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         firebaseDatabase.child(Constants.firebasePurchaseHistory).push()
                             .setValue(purchaseDetail)
                         val hashMap = HashMap<String, String>()
-                        if (isCouponCodeApplied && couponCodeCredits != 0) {
-                            creditsValue += couponCodeCredits
-                            creditsValue += userCurrentCreditsValue
-                            hashMap["credits"] = creditsValue.toString()
-                        } else {
-                            creditsValue += userCurrentCreditsValue
-                            hashMap["credits"] = creditsValue.toString()
-                        }
+//                        if (isCouponCodeApplied && couponCodeCredits != 0) {
+//                            creditsValue += couponCodeCredits
+//                            creditsValue += userCurrentCreditsValue
+//                            hashMap["credits"] = creditsValue.toString()
+//                        } else {
+                        creditsValue += userCurrentCreditsValue
+                        hashMap["credits"] = creditsValue.toString()
+//                        }
 
                         firebaseDatabase.child(Constants.firebaseUserCredits)
                             .child(userId)

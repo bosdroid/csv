@@ -20,7 +20,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="com.android.vending.BILLING" />
 
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -44,7 +43,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.BarcodeImageListActivity"/>
+        <activity
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:name=".view.activities.HelpActivity"/>
+        <activity android:name=".view.activities.BarcodeImageListActivity" />
         <activity
             android:name=".view.activities.ScanDataActivity"
             android:configChanges="orientation|screenSize|screenLayout"
@@ -91,8 +93,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
-        <activity
-            android:name=".view.activities.BarcodeHistoryActivity">
+        <activity android:name=".view.activities.BarcodeHistoryActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />

@@ -416,6 +416,8 @@
     <string name="coupon_expired_error">You entered code has been expired!</string>
 	<string name="already_applied_coupon_error">Already, you applied the coupon code!</string>
     <string name="empty_image_list_error_message">No images yet</string>
+    <string name="help_center_text">Help Center</string>
+    <string name="coupon_already_used_error">You already used this coupon. Please try another!</string>
 
 
     <string-array name="mode_list">

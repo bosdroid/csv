@@ -8,7 +8,8 @@ data class CouponCode(
     val credits:Int,
     val expired: String
 ) : Serializable {
-
+     var isUsed:Int = 0 // 1 is used
+    var user_id:String = ""
 
     constructor() : this("", "", 0,"")
 

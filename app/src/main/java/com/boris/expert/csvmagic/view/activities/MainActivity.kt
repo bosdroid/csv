@@ -16,6 +16,7 @@ import android.os.StrictMode
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.Gravity
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -488,10 +489,19 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         return true
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu,menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 //hideSoftKeyboard(context, mDrawer)
+                return true
+            }
+            R.id.help->{
+                startActivity(Intent(context,HelpActivity::class.java))
                 return true
             }
             else -> {

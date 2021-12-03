@@ -11,6 +11,7 @@ import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.Feature
 import com.boris.expert.csvmagic.model.Fonts
+import com.boris.expert.csvmagic.model.HelpObject
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.VolleySingleton
 import com.google.firebase.database.*
@@ -190,6 +191,35 @@ class DataRepository {
 
         return userPackageDetail
 
+    }
+
+    fun getHelpVideosList(langVideoRef:String):MutableLiveData<List<HelpObject>>{
+        val helpVideosList = MutableLiveData<List<HelpObject>>()
+        val list = mutableListOf<HelpObject>()
+
+        databaseReference.child(langVideoRef)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+
+                        for (postSnapshot in dataSnapshot.children) {
+
+                            val video = HelpObject(postSnapshot.child("type").getValue(String::class.java)!!,
+                                postSnapshot.child("link").getValue(String::class.java)!!)
+                            list.add(video)
+
+                        }
+                        helpVideosList.postValue(list)
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.w("TEST199", "loadPost:onCancelled", databaseError.toException())
+                    helpVideosList.postValue(null)
+                }
+            })
+
+        return helpVideosList
     }
 
 }
