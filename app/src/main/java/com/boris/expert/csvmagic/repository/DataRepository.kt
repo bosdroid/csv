@@ -156,7 +156,7 @@ class DataRepository {
 
 
             val stringRequest  = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                Method.POST, "https://itmagic.app/api/get_user_packages.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
@@ -205,7 +205,7 @@ class DataRepository {
                         for (postSnapshot in dataSnapshot.children) {
 
                             val video = HelpObject(postSnapshot.child("type").getValue(String::class.java)!!,
-                                postSnapshot.child("link").getValue(String::class.java)!!)
+                                postSnapshot.child("link").getValue(String::class.java)!!,postSnapshot.child("thumbnail").getValue(String::class.java)!!)
                             list.add(video)
 
                         }

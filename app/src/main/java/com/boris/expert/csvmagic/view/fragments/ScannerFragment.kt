@@ -1763,7 +1763,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
         BaseActivity.startLoading(requireActivity())
         val stringRequest = object : StringRequest(
-            Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+            Method.POST, "https://itmagic.app/api/get_user_packages.php",
             Response.Listener {
                 val response = JSONObject(it)
                 if (response.getInt("status") == 200) {
@@ -1927,7 +1927,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 object : APICallback {
                     override fun onSuccess(response: JSONObject) {
                         val stringRequest = object : StringRequest(
-                            Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                            Method.POST, "https://itmagic.app/api/get_user_packages.php",
                             Response.Listener {
                                 val updatedResponse = JSONObject(it)
                                 if (updatedResponse.getInt("status") == 200) {
@@ -1975,7 +1975,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 })
         } else {
             val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                Method.POST, "https://itmagic.app/api/get_user_packages.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {

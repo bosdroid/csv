@@ -4,14 +4,13 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.HelpObject
+import com.bumptech.glide.Glide
 import com.google.android.material.textview.MaterialTextView
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import java.util.*
 
 
@@ -23,6 +22,7 @@ class HelpsVideoAdapter(
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
+        fun onItemFullScreenView(position: Int)
 
     }
     var count = 0
@@ -42,30 +42,17 @@ class HelpsVideoAdapter(
             itemView
         ) {
         var typeTitle: MaterialTextView
-        var playerView: YouTubePlayerView
-        var youTubePlayer: YouTubePlayer? = null
-        var currentVideoId: String = ""
-        private var youTubePlayerView: YouTubePlayerView? = null
+        var thumbnailView: AppCompatImageView
 
         init {
 
-            playerView = itemView.findViewById(R.id.exoplayer_view)
+            thumbnailView = itemView.findViewById(R.id.playerview)
             typeTitle = itemView.findViewById(R.id.help_video_item_title)
-            youTubePlayerView = playerView
-            youTubePlayerView!!.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-                override fun onReady(initializedYouTubePlayer: YouTubePlayer) {
-                    youTubePlayer = initializedYouTubePlayer
-                    youTubePlayer!!.cueVideo(currentVideoId, 0F)
-                }
-            })
 
-        }
+            thumbnailView.setOnClickListener {
+                mListener!!.onItemFullScreenView(layoutPosition)
+            }
 
-        fun cueVideo(videoId: String) {
-            currentVideoId = videoId
-            if (youTubePlayer == null)
-                return
-            youTubePlayer!!.cueVideo(videoId, 0F)
         }
     }
 
@@ -85,12 +72,7 @@ class HelpsVideoAdapter(
     override fun onBindViewHolder(holder: VideoItemViewHolder, position: Int) {
         val help = helpVideoList[position]
 
-        holder.typeTitle.text = help.type.toUpperCase(Locale.ENGLISH)
-        val parts = help.link.split("=")
-        if (parts.size == 2) {
-            holder.cueVideo(help.link.split("=")[1])
-        }
-
+        Glide.with(context).load(help.thumbnail).into(holder.thumbnailView)
 
     }
 

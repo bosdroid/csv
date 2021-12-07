@@ -44,8 +44,13 @@
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
         <activity
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
-            android:name=".view.activities.HelpActivity"/>
+            android:name=".view.activities.VideoFullScreenActivity"/>
+        <activity
+            android:name=".view.activities.HelpActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
         <activity android:name=".view.activities.BarcodeImageListActivity" />
         <activity
             android:name=".view.activities.ScanDataActivity"

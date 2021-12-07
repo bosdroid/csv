@@ -1,10 +1,8 @@
 package com.boris.expert.csvmagic.view.activities
 
 import android.content.Context
-import android.content.res.Resources
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -13,14 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.HelpsVideoAdapter
-import com.boris.expert.csvmagic.adapters.TablesDataAdapter
-import com.boris.expert.csvmagic.interfaces.AddLifecycleCallbackListener
 import com.boris.expert.csvmagic.model.HelpObject
-import com.boris.expert.csvmagic.viewmodel.DesignActivityViewModel
 import com.boris.expert.csvmagic.viewmodel.HelpActivityViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
-import com.google.firebase.database.*
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import java.util.*
 
 class HelpActivity : BaseActivity(),HelpsVideoAdapter.OnItemClickListener {
@@ -115,5 +110,12 @@ class HelpActivity : BaseActivity(),HelpsVideoAdapter.OnItemClickListener {
 
     override fun onItemClick(position: Int) {
 
+    }
+
+    override fun onItemFullScreenView(position: Int) {
+        val video = helpsVideoList[position]
+        startActivity(Intent(context,VideoFullScreenActivity::class.java).apply {
+            putExtra("VIDEO_ID",video.link)
+        })
     }
 }

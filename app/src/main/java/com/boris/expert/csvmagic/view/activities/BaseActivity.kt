@@ -166,7 +166,7 @@ open class BaseActivity : AppCompatActivity() {
             listener: UploadImageCallback
         ) {
             val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/images_uploader.php",
+                Method.POST, "https://itmagic.app/api/images_uploader.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
@@ -211,7 +211,7 @@ open class BaseActivity : AppCompatActivity() {
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/package_update_size.php",
+                Method.POST, "https://itmagic.app/api/package_update_size.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     listener.onSuccess(response)
@@ -253,7 +253,7 @@ open class BaseActivity : AppCompatActivity() {
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/update_usage_time.php",
+                Method.POST, "https://itmagic.app/api/update_usage_time.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     listener.onSuccess(response)
@@ -289,7 +289,7 @@ open class BaseActivity : AppCompatActivity() {
         fun getUserPackageDetail(context: Context) {
             val appSettings = AppSettings(context)
             val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+                Method.POST, "https://itmagic.app/api/get_user_packages.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     if (response.getInt("status") == 200) {
@@ -337,7 +337,7 @@ open class BaseActivity : AppCompatActivity() {
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagicapp.com/api/packages_manager.php",
+                Method.POST, "https://itmagic.app/api/packages_manager.php",
                 Response.Listener {
                     val response = JSONObject(it)
                     listener.onSuccess(response)
