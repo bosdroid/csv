@@ -69,6 +69,12 @@
                     android:visible="false" />
 
                 <item
+                    android:icon="@drawable/ic_inbox"
+                    android:id="@+id/tickets"
+                    android:title="@string/tickets"
+                    android:visible="false" />
+
+                <item
                     android:id="@+id/nav_setting"
                     android:icon="@drawable/ic_settings"
                     android:title="@string/settings" />

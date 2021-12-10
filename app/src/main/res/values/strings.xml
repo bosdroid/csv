@@ -431,6 +431,9 @@
     <string name="empty_image_list_error_message">No images yet</string>
     <string name="help_center_text">Help Center</string>
     <string name="coupon_already_used_error">You already used this coupon. Please try another!</string>
+    <string name="tickets">Tickets</string>
+    <string name="add_image_text">+ add image</string>
+    <string name="image_attach_error">Please attach the images!</string>
 
     <string-array name="mode_list">
         <item>Inventory</item>

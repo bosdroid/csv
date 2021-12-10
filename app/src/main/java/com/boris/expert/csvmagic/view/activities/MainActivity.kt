@@ -432,6 +432,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             R.id.purchase_feature -> {
                 startActivity(Intent(context, PurchaseFeatureActivity::class.java))
             }
+            R.id.tickets -> {
+                startActivity(Intent(context, SupportTicketsActivity::class.java))
+            }
             R.id.nav_setting -> {
                 startActivity(Intent(context, SettingsActivity::class.java))
             }
@@ -764,6 +767,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tables).isVisible = true
             mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.user_screen).isVisible = true
+            mNavigation.menu.findItem(R.id.tickets).isVisible = false
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
@@ -789,6 +793,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tables).isVisible = false
             mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.user_screen).isVisible = false
+            mNavigation.menu.findItem(R.id.tickets).isVisible = false
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false

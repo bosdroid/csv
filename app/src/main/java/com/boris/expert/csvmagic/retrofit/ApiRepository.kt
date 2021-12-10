@@ -171,7 +171,7 @@ class ApiRepository {
         val packageResponse = MutableLiveData<JSONObject?>()
 
         val stringRequest = object : StringRequest(
-            Method.POST, "https://itmagicapp.com/api/get_user_packages.php",
+            Method.POST, "https://itmagic.app/api/get_user_packages.php",
             com.android.volley.Response.Listener {
                 val response = JSONObject(it)
                 if (response.getInt("status") == 200){

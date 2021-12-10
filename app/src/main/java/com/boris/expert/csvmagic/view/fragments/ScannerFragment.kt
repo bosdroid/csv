@@ -924,7 +924,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 saveDataIntoTable()
                             }
 
-                        } else {
+                        }
+                        else {
                             val b1 = MaterialAlertDialogBuilder(requireActivity())
                                 .setCancelable(false)
                                 .setTitle(requireActivity().resources.getString(R.string.alert_text))

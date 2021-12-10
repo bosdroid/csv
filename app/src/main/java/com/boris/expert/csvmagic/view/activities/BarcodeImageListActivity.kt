@@ -114,4 +114,5 @@ class BarcodeImageListActivity : BaseActivity(), BarcodeImageAdapter.OnItemClick
     override fun onImageClick(position: Int) {
 
     }
+
 }
