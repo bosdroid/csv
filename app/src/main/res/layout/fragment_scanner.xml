@@ -222,6 +222,18 @@
         app:layout_constraintTop_toBottomOf="@id/sheets_wrapper_layout"
         app:maskColor="#77000000" />
 
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          android:layout_marginBottom="@dimen/defaultDpMargin"
+          android:src="@drawable/img_barcode_scanner"
+          app:tint="@color/white"
+          android:id="@+id/image_barcode_scanner_view"
+          />
+
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"

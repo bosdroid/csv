@@ -133,4 +133,5 @@
     <string name="tickets">Tickets</string>
     <string name="add_image_text">+ add image</string>
     <string name="image_attach_error">Please attach the images!</string>
+    <string name="barcode_scan_image_error">Something went wrong while decode the data from barcode image, try again</string>
 </resources>

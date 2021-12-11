@@ -525,7 +525,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             else -> {
                 val position = v.id
                 val id = barcodeEditList[0].second.toInt()
-                val triple = barcodeEditList[position + 1]
+                val triple = barcodeEditList[position]
                 //Toast.makeText(context, triple.second,Toast.LENGTH_SHORT).show()
                 updateBarcodeDetail(id, triple)
             }

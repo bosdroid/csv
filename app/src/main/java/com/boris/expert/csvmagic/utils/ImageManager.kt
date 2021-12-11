@@ -18,12 +18,16 @@ import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import androidx.core.content.FileProvider
+import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.google.zxing.*
+import com.google.zxing.Reader
 import com.google.zxing.common.HybridBinarizer
 import java.io.*
+import java.lang.Boolean
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
 
 
 class ImageManager {
@@ -348,7 +352,7 @@ class ImageManager {
         }
 
         // THIS FUNCTION WILL EXTRACT THE DATA FROM QR CODE IMAGE WITHOUT CAMERA
-        fun getTextFromQRImage(context: Context, bMap: Bitmap):String{
+        fun getTextFromQRImage(context: Context, bMap: Bitmap): String {
             val source = RGBLuminanceSource(bMap)
             val bitmap = BinaryBitmap(HybridBinarizer(source))
             val reader = MultiFormatReader()
@@ -371,8 +375,36 @@ class ImageManager {
             }
         }
 
+        // THIS FUNCTION WILL EXTRACT THE DATA FROM QR CODE IMAGE WITHOUT CAMERA
+        fun getTextFromBarcodeImage(context: Context, bMap: Bitmap, listener: ResponseListener) {
+            val intArray = IntArray(bMap.width * bMap.height)
+            bMap.getPixels(intArray, 0, bMap.width, 0, 0, bMap.width, bMap.height)
+            val source: LuminanceSource = RGBLuminanceSource(bMap.width, bMap.height, intArray)
+            val bitmap = BinaryBitmap(HybridBinarizer(source))
+            try {
+                val decodeHints: Hashtable<DecodeHintType, Any> = Hashtable<DecodeHintType, Any>()
+                decodeHints[DecodeHintType.TRY_HARDER] = Boolean.TRUE
+                decodeHints[DecodeHintType.PURE_BARCODE] = Boolean.TRUE
+                val reader: Reader = MultiFormatReader()
+                val result: Result = reader.decode(bitmap, decodeHints)
+                listener.onSuccess(result.text)
+            } catch (e: NotFoundException) {
+                e.printStackTrace()
+                listener.onSuccess("ERROR: Nothing Found")
+            } catch (e: ChecksumException) {
+                e.printStackTrace()
+                listener.onSuccess("ERROR: Something weird happen, i was probably tired to solve this issue")
+            } catch (e: FormatException) {
+                e.printStackTrace()
+                listener.onSuccess("ERROR: Wrong Barcode format")
+            } catch (e: NullPointerException) {
+                e.printStackTrace()
+                listener.onSuccess("ERROR: Something weird happen, i was probably tired to solve this issue")
+            }
+        }
+
         // THIS FUNCTION WILL GENERATE THE BARCODE AND RETURN AS A BITMAP IMAGE
-        fun generateBarcode(encodedText: String):Bitmap?{
+        fun generateBarcode(encodedText: String): Bitmap? {
             val multiFormatWriter = MultiFormatWriter()
             try {
                 val bitMatrix = multiFormatWriter.encode(
@@ -401,7 +433,8 @@ class ImageManager {
 
         fun readWriteImage(context: Context, bitmap: Bitmap): File {
             // store in DCIM/Camera directory
-            val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+            val dir =
+                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
             val cameraDir = File(dir, "Camera/")
 
             val file = if (cameraDir.exists()) {
@@ -419,7 +452,7 @@ class ImageManager {
             return file
         }
 
-        fun getFileSize(path:String):Long{
+        fun getFileSize(path: String): Long {
             val f = File(path)
             return f.length()
         }
