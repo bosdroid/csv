@@ -81,7 +81,7 @@ import java.util.regex.Pattern
 
 
 class CodeDetailActivity : BaseActivity(), View.OnClickListener,
-        CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
+    CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
 
     private var customAlertDialog: CustomAlertDialog? = null
     private lateinit var context: Context
@@ -148,12 +148,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         appSettings = AppSettings(context)
         tableGenerator = TableGenerator(context)
         viewModel = ViewModelProviders.of(
-                this,
-                ViewModelFactory(CodeDetailViewModel()).createFor()
+            this,
+            ViewModelFactory(CodeDetailViewModel()).createFor()
         )[CodeDetailViewModel::class.java]
         appViewModel = ViewModelProvider(
-                this,
-                ViewModelProvider.AndroidViewModelFactory(this.application)
+            this,
+            ViewModelProvider.AndroidViewModelFactory(this.application)
         ).get(AppViewModel::class.java)
         toolbar = findViewById(R.id.toolbar)
         if (intent != null && intent.hasExtra("HISTORY_ITEM")) {
@@ -258,7 +258,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 if (codeHistory!!.isDynamic.toInt() == 1) {
                     dynamicLinkUpdateLayout.visibility = View.VISIBLE
                     dialogSubHeading.text =
-                            "${getString(R.string.current_link_text)} ${codeHistory!!.data}"
+                        "${getString(R.string.current_link_text)} ${codeHistory!!.data}"
                 } else {
                     dynamicLinkUpdateLayout.visibility = View.GONE
 
@@ -296,25 +296,25 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                     feedbackDetailWrapperLayout.visibility = View.VISIBLE
                     feedbackAdapter.notifyItemRangeChanged(0, feedbacksList.size)
                     feedbackAdapter.setOnItemClickListener(object :
-                            FeedbackAdapter.OnItemClickListener {
+                        FeedbackAdapter.OnItemClickListener {
                         override fun onItemClick(position: Int) {
                             val item = feedbacksList[position]
                             val sharingText =
-                                    "Feedback: ${item.comment}\nEmail: ${item.email}\nPhone: ${item.phone}\nStars: ${item.rating}\n ${
-                                        getString(
-                                                R.string.qr_sign
-                                        )
-                                    }"
+                                "Feedback: ${item.comment}\nEmail: ${item.email}\nPhone: ${item.phone}\nStars: ${item.rating}\n ${
+                                    getString(
+                                        R.string.qr_sign
+                                    )
+                                }"
                             MaterialAlertDialogBuilder(context)
-                                    .setMessage(sharingText)
-                                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                                        dialog.dismiss()
-                                    }
-                                    .setPositiveButton(getString(R.string.share_text)) { dialog, which ->
-                                        dialog.dismiss()
-                                        shareFeedback(sharingText)
-                                    }
-                                    .create().show()
+                                .setMessage(sharingText)
+                                .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                                    dialog.dismiss()
+                                }
+                                .setPositiveButton(getString(R.string.share_text)) { dialog, which ->
+                                    dialog.dismiss()
+                                    shareFeedback(sharingText)
+                                }
+                                .create().show()
                         }
 
                     })
@@ -347,7 +347,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
                 val file = File(filesDir, fileName)
                 val path =
-                        FileProvider.getUriForFile(context, "com.expert.qrgenerator.fileprovider", file)
+                    FileProvider.getUriForFile(context, "com.expert.qrgenerator.fileprovider", file)
                 dismiss()
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "text/csv"
@@ -383,21 +383,21 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         when (v!!.id) {
             R.id.code_detail_clipboard_copy_view -> {
                 val clipboard: ClipboardManager =
-                        getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                    getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText(
-                        clipboard.primaryClipDescription!!.label,
-                        encodeDataTextView.text.toString()
+                    clipboard.primaryClipDescription!!.label,
+                    encodeDataTextView.text.toString()
                 )
                 clipboard.setPrimaryClip(clip)
                 Toast.makeText(
-                        context,
-                        getString(R.string.text_saved_clipboard),
-                        Toast.LENGTH_SHORT
+                    context,
+                    getString(R.string.text_saved_clipboard),
+                    Toast.LENGTH_SHORT
                 ).show()
             }
             R.id.code_detail_text_search_button -> {
                 val escapedQuery: String = URLEncoder.encode(
-                        encodeDataTextView.text.toString().trim(), "UTF-8"
+                    encodeDataTextView.text.toString().trim(), "UTF-8"
                 )
                 val intent = Intent(Intent.ACTION_WEB_SEARCH)
                 intent.putExtra(SearchManager.QUERY, escapedQuery)
@@ -408,9 +408,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             }
             R.id.code_detail_pdf_save_button -> {
                 if (RuntimePermissionHelper.checkStoragePermission(
-                                context,
-                                Constants.READ_STORAGE_PERMISSION
-                        )
+                        context,
+                        Constants.READ_STORAGE_PERMISSION
+                    )
                 ) {
                     createPdf(false)
                 }
@@ -418,9 +418,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             R.id.code_detail_pdf_share_button -> {
                 isShareAfterCreated = true
                 if (RuntimePermissionHelper.checkStoragePermission(
-                                context,
-                                Constants.READ_STORAGE_PERMISSION
-                        )
+                        context,
+                        Constants.READ_STORAGE_PERMISSION
+                    )
                 ) {
                     if (pdfFile == null) {
                         createPdf(true)
@@ -434,28 +434,28 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 val value = updateDynamicLinkInput.text.toString().trim()
                 if (selectedProtocol.isEmpty()) {
                     showAlert(
-                            context,
-                            getString(R.string.protocol_error)
+                        context,
+                        getString(R.string.protocol_error)
                     )
                 } else if (value.isEmpty()) {
 
                     showAlert(
-                            context,
-                            getString(R.string.required_data_input_error)
+                        context,
+                        getString(R.string.required_data_input_error)
                     )
 
                 } else if (value.contains("http://") || value.contains("https://")
                 ) {
                     showAlert(
-                            context,
-                            getString(R.string.without_protocol_error)
+                        context,
+                        getString(R.string.without_protocol_error)
                     )
                 } else if (!Pattern.compile("^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?\$")
-                                .matcher(value).find()
+                        .matcher(value).find()
                 ) {
                     showAlert(
-                            context,
-                            getString(R.string.valid_website_error)
+                        context,
+                        getString(R.string.valid_website_error)
                     )
                 } else {
                     val hashMap = hashMapOf<String, String>()
@@ -477,7 +477,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                 url
                             }
                             dialogSubHeading.text =
-                                    "${getString(R.string.current_link_text)} $selectedProtocol$value"
+                                "${getString(R.string.current_link_text)} $selectedProtocol$value"
                             encodeDataTextView.text = "$selectedProtocol$value"
                             appViewModel.update("$selectedProtocol$value", url, codeHistory!!.id)
                             showAlert(context, getString(R.string.dynamic_update_success_text))
@@ -498,9 +498,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 //                        val isSuccess = tableGenerator.updateBarcodeDetail(tableName,"notes",notesText,tableObject!!.id)
 //                        if (isSuccess){
                     Toast.makeText(
-                            context,
-                            getString(R.string.notes_update_success_text),
-                            Toast.LENGTH_SHORT
+                        context,
+                        getString(R.string.notes_update_success_text),
+                        Toast.LENGTH_SHORT
                     ).show()
                     qrCodeHistoryNotesInputField.clearFocus()
                     hideSoftKeyboard(context, qrCodeHistoryNotesInputField)
@@ -523,9 +523,16 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 }
             }
             else -> {
+
                 val position = v.id
                 val id = barcodeEditList[0].second.toInt()
-                val triple = barcodeEditList[position]
+                val triple = if (position == barcodeEditList.size-1) {
+                    barcodeEditList[position - 1]
+                } else {
+                    barcodeEditList[position + 1]
+                }
+
+
                 //Toast.makeText(context, triple.second,Toast.LENGTH_SHORT).show()
                 updateBarcodeDetail(id, triple)
             }
@@ -535,21 +542,21 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private lateinit var updateInputBox: CustomTextInputEditText
     private fun updateBarcodeDetail(id: Int, triple: Triple<AppCompatImageView, String, String>) {
         val updateBarcodeLayout =
-                LayoutInflater.from(context).inflate(R.layout.update_barcode_detail_dialog, null)
+            LayoutInflater.from(context).inflate(R.layout.update_barcode_detail_dialog, null)
         updateInputBox =
-                updateBarcodeLayout.findViewById(R.id.update_barcode_detail_text_input_field)
+            updateBarcodeLayout.findViewById(R.id.update_barcode_detail_text_input_field)
         updateInputBox.onFocusChangeListener = this
         val cleanBrushView =
-                updateBarcodeLayout.findViewById<AppCompatImageView>(R.id.update_barcode_detail_cleaning_text_view)
+            updateBarcodeLayout.findViewById<AppCompatImageView>(R.id.update_barcode_detail_cleaning_text_view)
         val cancelBtn =
-                updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_cancel_btn)
+            updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_cancel_btn)
         val updateBtn =
-                updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_update_btn)
+            updateBarcodeLayout.findViewById<MaterialButton>(R.id.update_barcode_detail_dialog_update_btn)
 
         val imageRecognitionBtn =
-                updateBarcodeLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
+            updateBarcodeLayout.findViewById<LinearLayout>(R.id.image_recognition_btn)
         val photoRecognitionBtn =
-                updateBarcodeLayout.findViewById<LinearLayout>(R.id.photo_recognition_btn)
+            updateBarcodeLayout.findViewById<LinearLayout>(R.id.photo_recognition_btn)
 
 
         val builder = MaterialAlertDialogBuilder(context)
@@ -569,9 +576,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         imageRecognitionBtn.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
-                            context,
-                            Constants.READ_STORAGE_PERMISSION
-                    )
+                    context,
+                    Constants.READ_STORAGE_PERMISSION
+                )
             ) {
                 hideSoftKeyboard(context, updateInputBox)
                 pickImageFromGallery()
@@ -580,8 +587,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         photoRecognitionBtn.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
-                            context, Constants.CAMERA_PERMISSION
-                    )
+                    context, Constants.CAMERA_PERMISSION
+                )
             ) {
                 hideSoftKeyboard(context, updateInputBox)
                 pickImageFromCamera()
@@ -598,10 +605,10 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 hideSoftKeyboard(context, updateBtn)
                 alert.dismiss()
                 val isUpdate = tableGenerator.updateBarcodeDetail(
-                        tableName,
-                        triple.third,
-                        value,
-                        id
+                    tableName,
+                    triple.third,
+                    value,
+                    id
                 )
                 if (isUpdate) {
                     tableObject = tableGenerator.getUpdateBarcodeDetail(tableName, id)
@@ -609,7 +616,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 }
             } else {
                 Toast.makeText(context, getString(R.string.empty_text_error), Toast.LENGTH_SHORT)
-                        .show()
+                    .show()
             }
         }
 
@@ -623,9 +630,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private fun pickImageFromGallery() {
         val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         resultLauncher.launch(
-                Intent.createChooser(
-                        pickPhoto, getString(R.string.choose_image_gallery)
-                )
+            Intent.createChooser(
+                pickPhoto, getString(R.string.choose_image_gallery)
+            )
         )
 
     }
@@ -638,101 +645,101 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     }
 
     private var resultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val data: Intent? = result.data
-                    val cropPicUri = CropImage.getPickImageResultUri(this, data)
-                    cropImage(cropPicUri)
-                }
-
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val cropPicUri = CropImage.getPickImageResultUri(this, data)
+                cropImage(cropPicUri)
             }
 
+        }
+
     private var resultLauncher1 =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 //                if (result.resultCode == Activity.RESULT_OK) {
 //                    val data: Intent? = result.data
 //                    val cropPicUri = CropImage.getPickImageResultUri(this, data)
 //                    cropImage(cropPicUri)
 //                }
-                if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == Activity.RESULT_OK) {
 //                val path: String? = null
-                    val data: Intent? = result.data
-                    val clipData: ClipData? = data!!.clipData
+                val data: Intent? = result.data
+                val clipData: ClipData? = data!!.clipData
 
-                    if (clipData != null) {
-                        if (clipData.itemCount > 0) {
-                            for (i in 0 until clipData.itemCount) {
-                                val imageUri = clipData.getItemAt(i).uri
-                                multiImagesList.add(
-                                        ImageManager.getRealPathFromUri(
-                                                context,
-                                                imageUri
-                                        )!!
-                                )
-                            }
-                            filePathView!!.text = multiImagesList.joinToString(",")
-                            barcodeImageList.clear()
-                            barcodeImageList.addAll(multiImagesList)
-                            adapter.notifyDataSetChanged()
-                            //Log.d("TEST199",multiImagesList.toString())
-                        }
-                    } else {
-                        if (data.data != null) {
-                            val imageUri = data.data!!
+                if (clipData != null) {
+                    if (clipData.itemCount > 0) {
+                        for (i in 0 until clipData.itemCount) {
+                            val imageUri = clipData.getItemAt(i).uri
                             multiImagesList.add(
-                                    ImageManager.getRealPathFromUri(
-                                            context,
-                                            imageUri
-                                    )!!
+                                ImageManager.getRealPathFromUri(
+                                    context,
+                                    imageUri
+                                )!!
                             )
-                            filePathView!!.text = multiImagesList.joinToString(",")
-                            barcodeImageList.clear()
-                            barcodeImageList.addAll(multiImagesList)
-                            adapter.notifyDataSetChanged()
                         }
+                        filePathView!!.text = multiImagesList.joinToString(",")
+                        barcodeImageList.clear()
+                        barcodeImageList.addAll(multiImagesList)
+                        adapter.notifyDataSetChanged()
+                        //Log.d("TEST199",multiImagesList.toString())
                     }
+                } else {
+                    if (data.data != null) {
+                        val imageUri = data.data!!
+                        multiImagesList.add(
+                            ImageManager.getRealPathFromUri(
+                                context,
+                                imageUri
+                            )!!
+                        )
+                        filePathView!!.text = multiImagesList.joinToString(",")
+                        barcodeImageList.clear()
+                        barcodeImageList.addAll(multiImagesList)
+                        adapter.notifyDataSetChanged()
+                    }
+                }
 //                totalImageSize = if (filePathView!!.text.contains(",")) {
-                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
 //                } else {
 //                    ImageManager.getFileSize(filePathView!!.text.toString())
 //                }
-                    Log.d("TEST199", "$totalImageSize")
-                }
+                Log.d("TEST199", "$totalImageSize")
             }
+        }
 
     private var cameraResultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
 
 //                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val text = result.data!!.getStringExtra("SCAN_TEXT")
-                    updateInputBox.setText(text)
-                    updateInputBox.setSelection(updateInputBox.text.toString().length)
+            if (result.resultCode == Activity.RESULT_OK) {
+                val text = result.data!!.getStringExtra("SCAN_TEXT")
+                updateInputBox.setText(text)
+                updateInputBox.setSelection(updateInputBox.text.toString().length)
 //                val data: Intent? = result.data
 //                val bitmap = data!!.extras!!.get("data") as Bitmap
 //                val file = ImageManager.readWriteImage(context,bitmap)
 //                cropImage(Uri.fromFile(file))
-                }
             }
+        }
 
     private var cameraResultLauncher1 =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val data: Intent? = result.data
-                    val bitmap = data!!.extras!!.get("data") as Bitmap
-                    createImageFile(bitmap)
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val bitmap = data!!.extras!!.get("data") as Bitmap
+                createImageFile(bitmap)
 
 //                totalImageSize = if (filePathView!!.text.contains(",")) {
-                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
 //                } else {
 //                    ImageManager.getFileSize(filePathView!!.text.toString())
 //                }
 
-                    Log.d("TEST199", "$totalImageSize")
-                }
+                Log.d("TEST199", "$totalImageSize")
+            }
 
 //                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
 //                if (result.resultCode == Activity.RESULT_OK) {
@@ -744,7 +751,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 ////                val file = ImageManager.readWriteImage(context,bitmap)
 ////                cropImage(Uri.fromFile(file))
 //                }
-            }
+        }
 
     var currentPhotoPath: String? = null
     var totalImageSize: Long = 0
@@ -765,7 +772,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             Handler(Looper.myLooper()!!).postDelayed({
                 lifecycleScope.launch {
                     val compressedImageFile =
-                            Compressor.compress(context, File(uploadedUrlList[i]))
+                        Compressor.compress(context, File(uploadedUrlList[i]))
                     totalImageSize += ImageManager.getFileSize(compressedImageFile.absolutePath)
                     Log.d("TEST199TOTALSIZE", "$totalImageSize")
                 }
@@ -783,22 +790,22 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private fun pickImageFromCamera1() {
 
         val cameraIntent =
-                Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraResultLauncher1.launch(cameraIntent)
     }
 
     private fun cropImage(imageUri: Uri) {
 
         CropImage.activity(imageUri)
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .setMultiTouchEnabled(true)
-                .start(this)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setMultiTouchEnabled(true)
+            .start(this)
     }
 
     private var imageList = mutableListOf<String>()
     private fun displayBarcodeDetail() {
         if (tableObject != null) {
-
+            counter = 0
             barcodeDetailWrapperLayout.visibility = View.VISIBLE
             encodeDataTextView.text = tableObject!!.code_data
             codeSequenceView.text = "${getString(R.string.code_text)} ${tableObject!!.id}"
@@ -809,38 +816,38 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             }
 
             barcodeEditList.add(
-                    Triple(
-                            AppCompatImageView(context),
-                            tableObject!!.id.toString(),
-                            "id"
-                    )
+                Triple(
+                    AppCompatImageView(context),
+                    tableObject!!.id.toString(),
+                    "id"
+                )
             )
             val codeDataLayout = LayoutInflater.from(context)
-                    .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
+                .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
             val codeDataColumnValue =
-                    codeDataLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                codeDataLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
             val codeDataColumnName =
-                    codeDataLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
+                codeDataLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
             val codeDataColumnEditView =
-                    codeDataLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
+                codeDataLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
             codeDataColumnEditView.id = counter
             barcodeEditList.add(
-                    Triple(
-                            codeDataColumnEditView,
-                            tableObject!!.code_data,
-                            "code_data"
-                    )
+                Triple(
+                    codeDataColumnEditView,
+                    tableObject!!.code_data,
+                    "code_data"
+                )
             )
             codeDataColumnEditView.setOnClickListener(this)
             codeDataColumnValue.text = tableObject!!.code_data
             codeDataColumnName.text = "code_data"
             barcodeDetailParentLayout.addView(codeDataLayout)
             val dateLayout = LayoutInflater.from(context)
-                    .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
+                .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
             val dateColumnValue =
-                    dateLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                dateLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
             val dateColumnName =
-                    dateLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
+                dateLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
             val dateColumnEditView = dateLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
             counter += 1
             dateColumnEditView.id = counter
@@ -850,22 +857,22 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             dateColumnName.text = "date"
             barcodeDetailParentLayout.addView(dateLayout)
             val imageLayout = LayoutInflater.from(context)
-                    .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
+                .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
             val imageColumnValue =
-                    imageLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                imageLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
             val imageColumnName =
-                    imageLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
+                imageLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
             val imageColumnEditView =
-                    imageLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
-            counter += 1
+                imageLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
+            //counter += 1
 //            imageColumnEditView.id = counter
 //            barcodeEditList.add(Triple(imageColumnEditView, tableObject!!.image, "image"))
 //            imageColumnEditView.setOnClickListener(this)
 //            imageColumnValue.text = tableObject!!.image
 //            imageColumnName.text = "image"
             val params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
                 setMargins(10, 5, 5, 5)
             }
@@ -882,18 +889,18 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
                 val barcodeImageRecyclerView = RecyclerView(context)
                 barcodeImageRecyclerView.setBackgroundColor(
-                        ContextCompat.getColor(
-                                context,
-                                R.color.light_gray
-                        )
+                    ContextCompat.getColor(
+                        context,
+                        R.color.light_gray
+                    )
                 )
                 barcodeImageRecyclerView.layoutParams = params
                 barcodeImageRecyclerView.layoutManager =
-                        LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+                    LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
                 barcodeImageRecyclerView.hasFixedSize()
                 val adapter = BarcodeImageAdapter(
-                        context,
-                        imageList as ArrayList<String>
+                    context,
+                    imageList as ArrayList<String>
                 )
                 barcodeImageRecyclerView.adapter = adapter
                 adapter.setOnItemClickListener(object : BarcodeImageAdapter.OnItemClickListener {
@@ -909,11 +916,11 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                             imageList.removeAt(position)
 
                             tableGenerator.updateBarcodeDetail(
-                                    tableName, "image", if (imageList.size > 0) {
-                                imageList.joinToString(",")
-                            } else {
-                                ""
-                            }, tableObject!!.id
+                                tableName, "image", if (imageList.size > 0) {
+                                    imageList.joinToString(",")
+                                } else {
+                                    ""
+                                }, tableObject!!.id
                             )
                             adapter.notifyItemRemoved(position)
                         }
@@ -936,7 +943,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 val emptyTextView = MaterialTextView(context)
                 emptyTextView.layoutParams = params
                 emptyTextView.text = getString(R.string.add_image_text)
-                emptyTextView.setTextColor(ContextCompat.getColor(context, R.color.primary_positive_color))
+                emptyTextView.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.primary_positive_color
+                    )
+                )
                 emptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18F)
                 barcodeDetailParentLayout.addView(emptyTextView)
                 emptyTextView.setOnClickListener {
@@ -949,7 +961,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 val item = tableObject!!.dynamicColumns[i]
 
                 val layout = LayoutInflater.from(context)
-                        .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
+                    .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
                 val columnValue = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
                 val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
                 val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
@@ -962,7 +974,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 barcodeDetailParentLayout.addView(layout)
 
             }
-            counter = 0
+
         }
     }
 
@@ -974,10 +986,14 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private var availableStorageMemory: Float = 0F
     var url = " "
     private fun openAddImageDialog() {
-        val dialogLayout = LayoutInflater.from(context).inflate(R.layout.add_barcode_image_dialog, null)
-        barcodeImagesRecyclerView = dialogLayout.findViewById(R.id.selected_barcode_images_recyclerview)
-        val submitBtn = dialogLayout.findViewById<MaterialButton>(R.id.add_barcode_image_dialog_submit_btn)
-        val cancelBtn = dialogLayout.findViewById<MaterialButton>(R.id.add_barcode_image_dialog_cancel_btn)
+        val dialogLayout =
+            LayoutInflater.from(context).inflate(R.layout.add_barcode_image_dialog, null)
+        barcodeImagesRecyclerView =
+            dialogLayout.findViewById(R.id.selected_barcode_images_recyclerview)
+        val submitBtn =
+            dialogLayout.findViewById<MaterialButton>(R.id.add_barcode_image_dialog_submit_btn)
+        val cancelBtn =
+            dialogLayout.findViewById<MaterialButton>(R.id.add_barcode_image_dialog_cancel_btn)
         filePathView = dialogLayout.findViewById(R.id.filePath)
 
         val cameraImageView = dialogLayout.findViewById<AppCompatImageView>(R.id.camera_image_view)
@@ -985,8 +1001,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         cameraImageView.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
-                            context, Constants.CAMERA_PERMISSION
-                    )
+                    context, Constants.CAMERA_PERMISSION
+                )
             ) {
                 pickImageFromCamera1()
             }
@@ -994,27 +1010,27 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         imagesImageView.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
-                            context,
-                            Constants.READ_STORAGE_PERMISSION
-                    )
+                    context,
+                    Constants.READ_STORAGE_PERMISSION
+                )
             ) {
                 pickImageFromGallery1()
             }
         }
 
         barcodeImagesRecyclerView!!.layoutManager = LinearLayoutManager(
-                context, RecyclerView.HORIZONTAL,
-                false
+            context, RecyclerView.HORIZONTAL,
+            false
         )
         barcodeImagesRecyclerView!!.hasFixedSize()
         adapter = BarcodeImageAdapter(
-                context,
-                barcodeImageList as ArrayList<String>
+            context,
+            barcodeImageList as ArrayList<String>
         )
         barcodeImagesRecyclerView!!.adapter = adapter
 
         adapter.setOnItemClickListener(object :
-                BarcodeImageAdapter.OnItemClickListener {
+            BarcodeImageAdapter.OnItemClickListener {
             override fun onItemDeleteClick(position: Int) {
 //                            val image = barcodeImageList[position]
                 val builder = MaterialAlertDialogBuilder(context)
@@ -1057,27 +1073,27 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         submitBtn.setOnClickListener {
             availableStorageMemory =
-                    if (appSettings.getString(Constants.memory)!!.isEmpty()) {
-                        0F
-                    } else {
-                        Constants.convertMegaBytesToBytes(
-                                appSettings.getString(
-                                        Constants.memory
-                                )!!.toFloat()
-                        )
-                    }
+                if (appSettings.getString(Constants.memory)!!.isEmpty()) {
+                    0F
+                } else {
+                    Constants.convertMegaBytesToBytes(
+                        appSettings.getString(
+                            Constants.memory
+                        )!!.toFloat()
+                    )
+                }
 
             if (totalImageSize.toInt() == 0) {
                 showAlert(
-                        context,
-                        getString(R.string.image_attach_error)
+                    context,
+                    getString(R.string.image_attach_error)
                 )
             } else if (totalImageSize <= availableStorageMemory) {
                 val expiredAt: Long = appSettings.getLong(Constants.expiredAt)
                 if (System.currentTimeMillis() > expiredAt && expiredAt.toInt() != 0) {
                     showAlert(
-                            context,
-                            getString(R.string.subscription_expired_text)
+                        context,
+                        getString(R.string.subscription_expired_text)
                     )
                 } else {
                     alert.dismiss()
@@ -1100,7 +1116,11 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                     } else {
                                         imageList.add(url)
                                     }
-                                    tableGenerator.updateBarcodeDetail(tableName, "image", imageList.joinToString(" "), tableObject!!.id
+                                    tableGenerator.updateBarcodeDetail(
+                                        tableName,
+                                        "image",
+                                        imageList.joinToString(" "),
+                                        tableObject!!.id
                                     )
                                     tableObject!!.image = url
                                     adapter.notifyDataSetChanged()
@@ -1115,29 +1135,29 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 }
             } else {
                 val b1 = MaterialAlertDialogBuilder(context)
-                        .setCancelable(false)
-                        .setTitle(getString(R.string.alert_text))
-                        .setMessage(getString(R.string.storage_available_error_text))
-                        .setNegativeButton(getString(R.string.close_text)) { dialog, which ->
-                            dialog.dismiss()
-                        }
-                        .setNeutralButton(getString(R.string.buy_storage_text)) { dialog, which ->
-                            dialog.dismiss()
-                            alert.dismiss()
-                            startActivity(
-                                    Intent(
-                                            context,
-                                            UserScreenActivity::class.java
-                                    )
+                    .setCancelable(false)
+                    .setTitle(getString(R.string.alert_text))
+                    .setMessage(getString(R.string.storage_available_error_text))
+                    .setNegativeButton(getString(R.string.close_text)) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .setNeutralButton(getString(R.string.buy_storage_text)) { dialog, which ->
+                        dialog.dismiss()
+                        alert.dismiss()
+                        startActivity(
+                            Intent(
+                                context,
+                                UserScreenActivity::class.java
                             )
-                        }
+                        )
+                    }
                 val iAlert = b1.create()
                 iAlert.show()
                 iAlert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
-                        ContextCompat.getColor(
-                                context,
-                                R.color.purple_700
-                        )
+                    ContextCompat.getColor(
+                        context,
+                        R.color.purple_700
+                    )
                 )
 
             }
@@ -1150,75 +1170,75 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private fun uploadImageOnFirebaseStorage(listener: UploadImageCallback) {
         startLoading(context)
         val stringRequest = object : StringRequest(
-                Method.POST, "https://itmagic.app/api/get_user_packages.php",
-                Response.Listener {
-                    val response = JSONObject(it)
-                    if (response.getInt("status") == 200) {
-                        dismiss()
-                        if (response.has("package") && !response.isNull("package")) {
-                            val packageDetail: JSONObject? = response.getJSONObject("package")
+            Method.POST, "https://itmagic.app/api/get_user_packages.php",
+            Response.Listener {
+                val response = JSONObject(it)
+                if (response.getInt("status") == 200) {
+                    dismiss()
+                    if (response.has("package") && !response.isNull("package")) {
+                        val packageDetail: JSONObject? = response.getJSONObject("package")
 
-                            val availableSize = packageDetail!!.getString("size")
-                            Constants.userServerAvailableStorageSize = availableSize
-                            appSettings.putString(Constants.memory, availableSize)
-                            val endDate = packageDetail.getString("end_date")
-                            val expiredTimeMili =
-                                    SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate)!!.time
+                        val availableSize = packageDetail!!.getString("size")
+                        Constants.userServerAvailableStorageSize = availableSize
+                        appSettings.putString(Constants.memory, availableSize)
+                        val endDate = packageDetail.getString("end_date")
+                        val expiredTimeMili =
+                            SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate)!!.time
 
-                            var currentStorageSize: Float = 0F
-                            if (availableSize.isNotEmpty()) {
-                                currentStorageSize =
-                                        Constants.convertMegaBytesToBytes(availableSize.toFloat())
-                                if (totalImageSize <= currentStorageSize) {
-                                    val currentMiliSeconds = System.currentTimeMillis()
-                                    if (expiredTimeMili >= currentMiliSeconds) {
-                                        val imageList = filePathView!!.text.toString()
-                                        if (imageList.contains(",")) {
-                                            array = imageList.split(",")
-                                            uploadImage(listener)
-                                        } else {
-
-                                            if (FirebaseAuth.getInstance().currentUser != null) {
-                                                val userId =
-                                                        FirebaseAuth.getInstance().currentUser!!.uid
-
-                                                val imageBase64String =
-                                                        ImageManager.convertImageToBase64(
-                                                                context,
-                                                                filePathView!!.text.toString()
-                                                        )
-                                                uploadImageOnServer(
-                                                        context,
-                                                        imageBase64String,
-                                                        userId,
-                                                        object : UploadImageCallback {
-                                                            override fun onSuccess(imageUrl: String) {
-                                                                url = imageUrl
-                                                                listener.onSuccess("")
-                                                            }
-
-                                                        })
-                                            }
-                                        }
+                        var currentStorageSize: Float = 0F
+                        if (availableSize.isNotEmpty()) {
+                            currentStorageSize =
+                                Constants.convertMegaBytesToBytes(availableSize.toFloat())
+                            if (totalImageSize <= currentStorageSize) {
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                if (expiredTimeMili >= currentMiliSeconds) {
+                                    val imageList = filePathView!!.text.toString()
+                                    if (imageList.contains(",")) {
+                                        array = imageList.split(",")
+                                        uploadImage(listener)
                                     } else {
-                                        showAlert(context, "Your subscription has expired!")
+
+                                        if (FirebaseAuth.getInstance().currentUser != null) {
+                                            val userId =
+                                                FirebaseAuth.getInstance().currentUser!!.uid
+
+                                            val imageBase64String =
+                                                ImageManager.convertImageToBase64(
+                                                    context,
+                                                    filePathView!!.text.toString()
+                                                )
+                                            uploadImageOnServer(
+                                                context,
+                                                imageBase64String,
+                                                userId,
+                                                object : UploadImageCallback {
+                                                    override fun onSuccess(imageUrl: String) {
+                                                        url = imageUrl
+                                                        listener.onSuccess("")
+                                                    }
+
+                                                })
+                                        }
                                     }
                                 } else {
-                                    showAlert(
-                                            context,
-                                            "Insufficient storage for saving Images!"
-                                    )
+                                    showAlert(context, "Your subscription has expired!")
                                 }
+                            } else {
+                                showAlert(
+                                    context,
+                                    "Insufficient storage for saving Images!"
+                                )
                             }
-
-
                         }
-                    }
-                }, Response.ErrorListener {
-            dismiss()
-            Log.d("TEST199", it.localizedMessage!!)
 
-        }) {
+
+                    }
+                }
+            }, Response.ErrorListener {
+                dismiss()
+                Log.d("TEST199", it.localizedMessage!!)
+
+            }) {
             override fun getParams(): MutableMap<String, String> {
                 val params = HashMap<String, String>()
                 params["user_id"] = Constants.firebaseUserId
@@ -1252,26 +1272,26 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             val imageBase64String = ImageManager.convertImageToBase64(context, imagePath)
             Handler(Looper.myLooper()!!).postDelayed({
                 uploadImageOnServer(
-                        context,
-                        imageBase64String,
-                        userId,
-                        object : UploadImageCallback {
-                            override fun onSuccess(imageUrl: String) {
-                                Log.d("TEST199", imageUrl)
-                                uploadedUrlList.add(imageUrl)
-                                if (index == array.size - 1) {
-                                    url = uploadedUrlList.joinToString(" ")
-                                    uploadedUrlList.clear()
-                                    index = 0
-                                    dismiss()
-                                    callback.onSuccess("")
-                                } else {
-                                    index++
-                                    uploadImage(callback)
-                                }
+                    context,
+                    imageBase64String,
+                    userId,
+                    object : UploadImageCallback {
+                        override fun onSuccess(imageUrl: String) {
+                            Log.d("TEST199", imageUrl)
+                            uploadedUrlList.add(imageUrl)
+                            if (index == array.size - 1) {
+                                url = uploadedUrlList.joinToString(" ")
+                                uploadedUrlList.clear()
+                                index = 0
+                                dismiss()
+                                callback.onSuccess("")
+                            } else {
+                                index++
+                                uploadImage(callback)
                             }
+                        }
 
-                        })
+                    })
             }, 1000)
         }
     }
@@ -1280,107 +1300,107 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         var currentStorageSize: Float = 0F
         if (Constants.userServerAvailableStorageSize.isNotEmpty()) {
             currentStorageSize =
-                    Constants.convertMegaBytesToBytes(Constants.userServerAvailableStorageSize.toFloat()) - size
+                Constants.convertMegaBytesToBytes(Constants.userServerAvailableStorageSize.toFloat()) - size
 
             val remainingMb = Constants.convertBytesToMegaBytes(currentStorageSize).toString()
             appSettings.putString(Constants.memory, remainingMb)
             updateMemorySize(
-                    context,
-                    remainingMb,
-                    0,
-                    Constants.firebaseUserId,
-                    0,
-                    "",
-                    object : APICallback {
-                        override fun onSuccess(response: JSONObject) {
-                            val stringRequest = object : StringRequest(
-                                    Method.POST, "https://itmagic.app/api/get_user_packages.php",
-                                    Response.Listener {
-                                        val updatedResponse = JSONObject(it)
-                                        if (updatedResponse.getInt("status") == 200) {
-                                            if (updatedResponse.has("package") && !updatedResponse.isNull("package")) {
-                                                val packageDetail: JSONObject? =
-                                                        updatedResponse.getJSONObject("package")
-                                                if (packageDetail != null) {
-                                                    val availableSize = packageDetail.getString("size")
-                                                    Constants.userServerAvailableStorageSize = availableSize
-                                                }
-                                            }
+                context,
+                remainingMb,
+                0,
+                Constants.firebaseUserId,
+                0,
+                "",
+                object : APICallback {
+                    override fun onSuccess(response: JSONObject) {
+                        val stringRequest = object : StringRequest(
+                            Method.POST, "https://itmagic.app/api/get_user_packages.php",
+                            Response.Listener {
+                                val updatedResponse = JSONObject(it)
+                                if (updatedResponse.getInt("status") == 200) {
+                                    if (updatedResponse.has("package") && !updatedResponse.isNull("package")) {
+                                        val packageDetail: JSONObject? =
+                                            updatedResponse.getJSONObject("package")
+                                        if (packageDetail != null) {
+                                            val availableSize = packageDetail.getString("size")
+                                            Constants.userServerAvailableStorageSize = availableSize
                                         }
-                                    }, Response.ErrorListener {
+                                    }
+                                }
+                            }, Response.ErrorListener {
                                 Log.d("TEST199", it.localizedMessage!!)
 
                             }) {
-                                override fun getParams(): MutableMap<String, String> {
-                                    val params = HashMap<String, String>()
-                                    params["user_id"] = Constants.firebaseUserId
-                                    return params
-                                }
+                            override fun getParams(): MutableMap<String, String> {
+                                val params = HashMap<String, String>()
+                                params["user_id"] = Constants.firebaseUserId
+                                return params
                             }
-
-                            stringRequest.retryPolicy = object : RetryPolicy {
-                                override fun getCurrentTimeout(): Int {
-                                    return 50000
-                                }
-
-                                override fun getCurrentRetryCount(): Int {
-                                    return 50000
-                                }
-
-                                @Throws(VolleyError::class)
-                                override fun retry(error: VolleyError) {
-                                }
-                            }
-
-                            VolleySingleton(context).addToRequestQueue(stringRequest)
                         }
 
-                        override fun onError(error: VolleyError) {
+                        stringRequest.retryPolicy = object : RetryPolicy {
+                            override fun getCurrentTimeout(): Int {
+                                return 50000
+                            }
 
+                            override fun getCurrentRetryCount(): Int {
+                                return 50000
+                            }
+
+                            @Throws(VolleyError::class)
+                            override fun retry(error: VolleyError) {
+                            }
                         }
 
-                    })
+                        VolleySingleton(context).addToRequestQueue(stringRequest)
+                    }
+
+                    override fun onError(error: VolleyError) {
+
+                    }
+
+                })
         } else {
             val stringRequest = object : StringRequest(
-                    Method.POST, "https://itmagic.app/api/get_user_packages.php",
-                    Response.Listener {
-                        val response = JSONObject(it)
-                        if (response.getInt("status") == 200) {
-                            if (response.has("package") && !response.isNull("package")) {
-                                val packageDetail: JSONObject? = response.getJSONObject("package")
-                                if (packageDetail != null) {
-                                    val availableSize = packageDetail.getString("size")
-                                    Constants.userServerAvailableStorageSize = availableSize
+                Method.POST, "https://itmagic.app/api/get_user_packages.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    if (response.getInt("status") == 200) {
+                        if (response.has("package") && !response.isNull("package")) {
+                            val packageDetail: JSONObject? = response.getJSONObject("package")
+                            if (packageDetail != null) {
+                                val availableSize = packageDetail.getString("size")
+                                Constants.userServerAvailableStorageSize = availableSize
 
-                                    currentStorageSize =
-                                            Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
+                                currentStorageSize =
+                                    Constants.convertMegaBytesToBytes(availableSize.toFloat()) - size
 
-                                    val remainingMb =
-                                            Constants.convertBytesToMegaBytes(currentStorageSize).toString()
-                                    updateMemorySize(
-                                            context,
-                                            remainingMb,
-                                            0,
-                                            Constants.firebaseUserId,
-                                            0,
-                                            "",
-                                            object : APICallback {
-                                                override fun onSuccess(response: JSONObject) {
+                                val remainingMb =
+                                    Constants.convertBytesToMegaBytes(currentStorageSize).toString()
+                                updateMemorySize(
+                                    context,
+                                    remainingMb,
+                                    0,
+                                    Constants.firebaseUserId,
+                                    0,
+                                    "",
+                                    object : APICallback {
+                                        override fun onSuccess(response: JSONObject) {
 
-                                                }
+                                        }
 
-                                                override fun onError(error: VolleyError) {
+                                        override fun onError(error: VolleyError) {
 
-                                                }
+                                        }
 
-                                            })
-                                }
+                                    })
                             }
                         }
-                    }, Response.ErrorListener {
-                Log.d("TEST199", it.localizedMessage!!)
+                    }
+                }, Response.ErrorListener {
+                    Log.d("TEST199", it.localizedMessage!!)
 
-            }) {
+                }) {
                 override fun getParams(): MutableMap<String, String> {
                     val params = HashMap<String, String>()
                     params["user_id"] = Constants.firebaseUserId
@@ -1447,7 +1467,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private fun textShare() {
         val intent = Intent(Intent.ACTION_SEND)
         val shareBody =
-                "${getString(R.string.app_name)} \n ${encodeDataTextView.text.toString().trim()}"
+            "${getString(R.string.app_name)} \n ${encodeDataTextView.text.toString().trim()}"
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, shareBody)
         startActivity(Intent.createChooser(intent, getString(R.string.share_using)))
@@ -1494,16 +1514,16 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             val appName = getString(R.string.app_name)
             val xPos = (canvas.width / 2) - (appName.length) / 2
             val yPos =
-                    (canvas.height / 2 - (titlePaint.descent() + titlePaint.ascent()) / 2).toInt()
+                (canvas.height / 2 - (titlePaint.descent() + titlePaint.ascent()) / 2).toInt()
             canvas.drawText(appName, xPos.toFloat(), 40.toFloat(), titlePaint)
             paint.textAlign = Paint.Align.CENTER
             val xCodePos = (canvas.width / 2) - (bitmap!!.width) / 2
             canvas.drawBitmap(bitmap!!, xCodePos.toFloat(), 50.toFloat(), paint)
             canvas.drawText(
-                    encodeDataTextView.text.toString(),
-                    30.toFloat(),
-                    280.toFloat(),
-                    dataPaint
+                encodeDataTextView.text.toString(),
+                30.toFloat(),
+                280.toFloat(),
+                dataPaint
             )
             val typePaint = Paint()
             typePaint.textAlign = Paint.Align.RIGHT
@@ -1514,17 +1534,17 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             val datePaint = Paint()
             datePaint.textSize = 16.toFloat()
             canvas.drawText(
-                    getFormattedDate(context, codeHistory!!.createdAt.toLong()),
-                    30.toFloat(),
-                    300.toFloat(),
-                    datePaint
+                getFormattedDate(context, codeHistory!!.createdAt.toLong()),
+                30.toFloat(),
+                300.toFloat(),
+                datePaint
             )
 
             document.finishPage(page)
             document.writeTo(fOut)
             document.close()
             Toast.makeText(this, getString(R.string.pdf_saved_success_text), Toast.LENGTH_SHORT)
-                    .show()
+                .show()
             if (isShareAfterCreated) {
                 sharePdfFile()
             }
@@ -1537,9 +1557,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
@@ -1553,12 +1573,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                     }
                 } else {
                     MaterialAlertDialogBuilder(context)
-                            .setMessage(getString(R.string.external_storage_permission_error))
-                            .setCancelable(false)
-                            .setPositiveButton(getString(R.string.ok_text)) { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .create().show()
+                        .setMessage(getString(R.string.external_storage_permission_error))
+                        .setCancelable(false)
+                        .setPositiveButton(getString(R.string.ok_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .create().show()
                 }
             }
             Constants.CAMERA_REQUEST_CODE -> {
@@ -1580,8 +1600,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             if (pdfFile!!.exists()) {
                 val fileUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     FileProvider.getUriForFile(
-                            context,
-                            context.applicationContext.packageName + ".fileprovider", pdfFile!!
+                        context,
+                        context.applicationContext.packageName + ".fileprovider", pdfFile!!
                     )
 
                 } else {
@@ -1619,7 +1639,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) {
         if (hasFocus) {
-            openDialog()
+            //openDialog()
+            Constants.openKeyboar(context)
         }
     }
 
@@ -1637,9 +1658,9 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         if (customAlertDialog != null) {
             customAlertDialog!!.dismiss()
             if (RuntimePermissionHelper.checkCameraPermission(
-                            context,
-                            Constants.READ_STORAGE_PERMISSION
-                    )
+                    context,
+                    Constants.READ_STORAGE_PERMISSION
+                )
             ) {
                 hideSoftKeyboard(context, updateInputBox)
                 pickImageFromGallery()
@@ -1651,8 +1672,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         if (customAlertDialog != null) {
             customAlertDialog!!.dismiss()
             if (RuntimePermissionHelper.checkCameraPermission(
-                            context, Constants.CAMERA_PERMISSION
-                    )
+                    context, Constants.CAMERA_PERMISSION
+                )
             ) {
                 hideSoftKeyboard(context, updateInputBox)
                 pickImageFromCamera()
