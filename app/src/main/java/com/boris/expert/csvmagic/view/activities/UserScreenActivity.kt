@@ -370,15 +370,13 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                     val list = mutableListOf<CouponCode>()
                     var isFound = false
                     var tempObject: CouponCode? = null
-                    firebaseDatabase.child(Constants.firebaseCouponCodes)
+                    firebaseDatabase.child(Constants.firebaseValidCouponCodes)
                         .addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
                                 if (dataSnapshot.exists()) {
-
                                     list.clear()
                                     for (postSnapshot in dataSnapshot.children) {
-                                        val item =
-                                            postSnapshot.getValue(CouponCode::class.java) as CouponCode
+                                        val item = postSnapshot.getValue(CouponCode::class.java) as CouponCode
                                         list.add(item)
                                     }
                                     dismiss()
@@ -413,7 +411,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                                             getString(R.string.user_credits_update_success_text),
                                                             Toast.LENGTH_SHORT
                                                         ).show()
-                                                        updateCouponsHistory(tempObject!!)
+                                                        updateCouponsHistory(code,tempObject!!)
                                                         couponCodeInputBox.setText("")
                                                         getUserCredit()
                                                     }
@@ -457,10 +455,10 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         })
     }
 
-    private fun updateCouponsHistory(tempObject: CouponCode) {
+    private fun updateCouponsHistory(code: String,tempObject: CouponCode) {
         tempObject.isUsed = 1
         tempObject.user_id = Constants.firebaseUserId
-        firebaseDatabase.child(Constants.firebaseCouponHistory).push()
+        firebaseDatabase.child(Constants.firebaseUsedCoupons).child(code.toLowerCase(Locale.ENGLISH))
             .setValue(tempObject)
     }
 
@@ -470,7 +468,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         var tempObject: CouponCode? = null
 
         startLoading(context)
-        firebaseDatabase.child(Constants.firebaseCouponHistory)
+        firebaseDatabase.child(Constants.firebaseUsedCoupons)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
@@ -483,11 +481,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         if (list.isNotEmpty()) {
                             for (i in 0 until list.size) {
                                 val codeDetail = list[i]
-                                if (codeDetail.code.equals(
-                                        code,
-                                        ignoreCase = true
-                                    ) && (codeDetail.user_id == Constants.firebaseUserId || codeDetail.user_id.isEmpty())
-                                ) {
+                                if (codeDetail.code.equals(code, ignoreCase = true) && codeDetail.user_id == Constants.firebaseUserId) {
                                     //tempObject = codeDetail
                                     isFound = true
                                     break
@@ -501,7 +495,6 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                             } else {
                                 listener.onSuccess("notused")
                             }
-
                         }
                     } else {
                         listener.onSuccess("notused")
