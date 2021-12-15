@@ -50,6 +50,13 @@ class HelpActivity : BaseActivity(),HelpsVideoAdapter.OnItemClickListener {
             this,
             ViewModelFactory(HelpActivityViewModel()).createFor()
         )[HelpActivityViewModel::class.java]
+
+        helpsVideoListRecyclerview.layoutManager = LinearLayoutManager(context)
+        helpsVideoListRecyclerview.hasFixedSize()
+        adapter = HelpsVideoAdapter(context, helpsVideoList as ArrayList<HelpObject>,lifecycle)
+        helpsVideoListRecyclerview.adapter = adapter
+        adapter.setOnItemClickListener(this)
+
     }
 
     // THIS FUNCTION WILL RENDER THE ACTION BAR/TOOLBAR
@@ -58,12 +65,6 @@ class HelpActivity : BaseActivity(),HelpsVideoAdapter.OnItemClickListener {
         supportActionBar!!.title = getString(R.string.help_center_text)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setTitleTextColor(ContextCompat.getColor(context, R.color.black))
-
-        helpsVideoListRecyclerview.layoutManager = LinearLayoutManager(context)
-        helpsVideoListRecyclerview.hasFixedSize()
-        adapter = HelpsVideoAdapter(context, helpsVideoList as ArrayList<HelpObject>,lifecycle)
-        helpsVideoListRecyclerview.adapter = adapter
-        adapter.setOnItemClickListener(this)
 
     }
 

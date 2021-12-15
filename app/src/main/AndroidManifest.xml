@@ -43,7 +43,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.SupportTicketsActivity"></activity>
+        <activity android:name=".view.activities.SupportChatActivity"></activity>
+        <activity android:name=".view.activities.SupportTicketsActivity" />
         <activity
             android:name=".view.activities.VideoFullScreenActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"

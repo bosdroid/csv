@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDpMargin"
+        android:orientation="vertical"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="@dimen/largeText"
+            android:text="@string/create_ticket_heading_text"
+            android:id="@+id/dialog_heading"
+            android:layout_gravity="center_horizontal"
+            />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/create_ticket_title_input_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/http_protocol_group"
+            android:background="@drawable/input_text_field_design"
+            android:padding="5dp"
+            android:layout_marginTop="@dimen/eightDpMargin"
+            android:inputType="text"
+            android:hint="@string/create_ticket_title_hint_text"
+            android:gravity="start"
+            />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="@dimen/eightDpMargin"
+            android:id="@+id/create_ticket_message_input_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/http_protocol_group"
+            android:background="@drawable/input_text_field_design"
+            android:padding="5dp"
+            android:inputType="text"
+            android:imeOptions="actionDone"
+            android:hint="@string/create_ticket_message_hint_text"
+            android:gravity="start"
+            />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/create_ticket_dialog_submit_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDpMargin"
+            android:text="@string/submit" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/create_ticket_dialog_cancel_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eightDpMargin"
+            android:text="@string/cancel_text"
+            app:backgroundTint="@color/secondary_positive_color" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

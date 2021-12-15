@@ -422,6 +422,11 @@
     <string name="add_image_text">+ add image</string>
     <string name="image_attach_error">Please attach the images!</string>
     <string name="barcode_scan_image_error">Something went wrong while decode the data from barcode image, try again</string>
+    <string name="support_tickets_text">Support Tickets</string>
+    <string name="create_ticket_message_hint_text">Message</string>
+	<string name="create_ticket_title_hint_text">Title</string>
+    <string name="create_ticket_heading_text">Create the support ticket</string>
+    <string name="type_message_hint_text">Type a message</string>
 
 
     <string-array name="mode_list">
