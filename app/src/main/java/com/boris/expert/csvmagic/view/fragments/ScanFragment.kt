@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,9 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.TablesDataAdapter
+import com.boris.expert.csvmagic.interfaces.LoginCallback
+import com.boris.expert.csvmagic.interfaces.ScannerInterface
+import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.FileUtil
 import com.boris.expert.csvmagic.utils.TableGenerator
+import com.boris.expert.csvmagic.utils.TranslatorManager
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.boris.expert.csvmagic.view.activities.MainActivity
 import com.boris.expert.csvmagic.view.activities.TableViewActivity
@@ -40,9 +45,12 @@ private lateinit var tableDataRecyclerView: RecyclerView
     private var tableList = mutableListOf<String>()
     private lateinit var adapter: TablesDataAdapter
     private lateinit var fabUploadFile:FloatingActionButton
+    private var listener: ScannerInterface? = null
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        listener = context as ScannerInterface
 //        appViewModel = ViewModelProvider(
 //            this,
 //            ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
@@ -86,11 +94,15 @@ private lateinit var tableDataRecyclerView: RecyclerView
                     }
                     .setPositiveButton(getString(R.string.login_text)){dialog,which->
                         dialog.dismiss()
-//                        val intent = Intent(context, MainActivity::class.java)
-//                        intent.putExtra("REQUEST","login")
-//                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-//                        startActivity(intent)
-//                        finish()
+                        listener!!.login(object : LoginCallback {
+                            override fun onSuccess() {
+                                Log.d("TEST199", "success")
+                                onResume()
+                            }
+
+                        })
+//                        importCsv()
+
                     }
                     .create().show()
             }
@@ -132,7 +144,8 @@ private lateinit var tableDataRecyclerView: RecyclerView
                 try {
                     val file = FileUtil.from(requireActivity(), filePath!!)
                     val ext = file.name.substring(file.name.lastIndexOf(".")+1)
-                    val fileName = file.name.substring(0,file.name.lastIndexOf("."))
+                    var fileName = file.name.substring(0,file.name.lastIndexOf("."))
+                     fileName = fileName.replace("[-+.^:,]".toRegex(), " ").replace(" ", "_").trim()
                     if (ext != "csv") {
                         BaseActivity.showAlert(
                             requireActivity(),
@@ -141,83 +154,107 @@ private lateinit var tableDataRecyclerView: RecyclerView
                     } else {
                         try {
 
-                            var nextLine: Array<String>
                             var counter = 0
                             val columnsList = mutableListOf<String>()
                             var tableData = mutableListOf<Pair<String, String>>()
                             val listRecord = mutableListOf<List<Pair<String,String>>>()
-                            val tableName =
-                                fileName.replace(" ", "_").replace("[-+.^:,]", "").trim()
+                            val tableName = "${fileName}_import"
+
                             BaseActivity.startLoading(requireActivity())
                             val reader = CSVReader(FileReader(file))
-                            while (reader.readNext().also { nextLine = it } != null) {
-                                // nextLine[] is an array of values from the line
-                                if (counter == 0) {
-                                    for (i in nextLine.indices) {
-                                        columnsList.add(nextLine[i].replace(" ","_").trim())
-                                    }
-                                    counter += 1
-                                    continue
-                                }
-                                if (nextLine.isNotEmpty() && columnsList.size == nextLine.size) {
-                                    for (i in nextLine.indices) {
-                                        tableData.add(Pair(columnsList[i], nextLine[i]))
-                                    }
-                                    listRecord.add(tableData)
-                                    tableData = mutableListOf()
-                                    counter += 1
-                                } else {
-                                    break
-                                }
-                                if (reader.readNext() == null) {
-                                    break
-                                }
-                            }
+                            var line: Array<String>? = reader.readNext()
 
-                            if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
-                                val isFound = tableGenerator.tableExists(tableName)
-                                if (isFound) {
-                                    BaseActivity.dismiss()
-                                    BaseActivity.showAlert(
-                                        requireActivity(),
-                                        getString(R.string.table_already_exist_message)
-                                    )
-                                } else {
+                            if (line != null){
 
-                                    tableGenerator.createTable(
-                                        tableName,
-                                        columnsList as ArrayList<String>
-                                    )
-
-                                    Handler(Looper.myLooper()!!).postDelayed({
-
-                                        val isExist = tableGenerator.tableExists(tableName)
-                                        if (isExist) {
-                                            displayTableList()
-                                            for (j in 0 until listRecord.size){
-                                                tableGenerator.insertData(tableName, listRecord[j])
+                                TranslatorManager.translate(line.joinToString(","),object : TranslationCallback{
+                                    override fun onTextTranslation(translatedText: String) {
+                                        if (translatedText.isNotEmpty()){
+                                            val array = translatedText.split(",")
+                                            val translatedColumnText = mutableListOf<String>()
+                                            for (i in 0 until array.size) {
+                                                translatedColumnText.add(array[i].trim().replace("[-+.^:,?()]".toRegex(), "").replace(" ","_").trim())
                                             }
-                                            BaseActivity.dismiss()
-                                            BaseActivity.showAlert(
-                                                requireActivity(),
-                                                getString(R.string.table_created_success_message)
-                                            )
-                                        } else {
-                                            BaseActivity.dismiss()
-                                            BaseActivity.showAlert(
-                                                requireActivity(),
-                                                getString(R.string.table_created_failed_message)
-                                            )
+
+                                            while (line != null) {
+                                                // nextLine[] is an array of values from the line
+                                                if (counter == 0) {
+
+                                                    counter += 1
+                                                    line = reader.readNext()
+                                                    continue
+                                                }
+                                                if (line!!.isNotEmpty() && translatedColumnText.size == line!!.size) {
+                                                    for (j in 0 until line!!.size) {
+                                                        tableData.add(Pair(translatedColumnText[j], line!![j]))
+                                                    }
+                                                    listRecord.add(tableData)
+                                                    tableData = mutableListOf()
+                                                    counter += 1
+                                                } else {
+                                                    break
+                                                }
+                                                if (reader.readNext() == null) {
+                                                    break
+                                                }
+                                                line = reader.readNext()
+                                            }
+
+
+                                            if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
+                                                val isFound = tableGenerator.tableExists(tableName)
+                                                if (isFound) {
+                                                    BaseActivity.dismiss()
+                                                    BaseActivity.showAlert(
+                                                        requireActivity(),
+                                                        getString(R.string.table_already_exist_message)
+                                                    )
+                                                } else {
+
+                                                    tableGenerator.createTableFromCsv(
+                                                        tableName,
+                                                        translatedColumnText as ArrayList<String>
+                                                    )
+
+                                                    Handler(Looper.myLooper()!!).postDelayed({
+
+                                                        val isExist = tableGenerator.tableExists(tableName)
+                                                        if (isExist) {
+                                                            displayTableList()
+                                                            for (j in 0 until listRecord.size){
+                                                                tableGenerator.insertData(tableName, listRecord[j])
+                                                            }
+                                                            BaseActivity.dismiss()
+                                                            BaseActivity.showAlert(
+                                                                requireActivity(),
+                                                                getString(R.string.table_created_success_message)
+                                                            )
+                                                        } else {
+                                                            BaseActivity.dismiss()
+                                                            BaseActivity.showAlert(
+                                                                requireActivity(),
+                                                                getString(R.string.table_created_failed_message)
+                                                            )
+                                                        }
+                                                    }, 5000)
+                                                }
+                                            } else {
+                                                BaseActivity.dismiss()
+                                                BaseActivity.showAlert(
+                                                    requireActivity(),
+                                                    getString(R.string.table_csv_import_error_message)
+                                                )
+                                            }
+
                                         }
-                                    }, 5000)
-                                }
-                            } else {
-                                BaseActivity.dismiss()
-                                BaseActivity.showAlert(
-                                    requireActivity(),
-                                    getString(R.string.table_csv_import_error_message)
-                                )
+                                        else
+                                        {
+                                            Log.d("TEST199",translatedText)
+                                        }
+                                    }
+
+                                })
                             }
+
 
                         } catch (e: IOException) {
                             BaseActivity.dismiss()

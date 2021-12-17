@@ -18,6 +18,10 @@ class TableGenerator(context: Context) {
         return database.updateData(tableName,data,id)
     }
 
+    fun updateDataCsv(tableName: String, data: List<Pair<String, String>>,id: Int):Boolean {
+        return database.updateDataCsv(tableName,data,id)
+    }
+
     fun generateTable(tableName: String){
         database.generateTable(tableName)
     }
@@ -40,6 +44,10 @@ class TableGenerator(context: Context) {
 
     fun getTableDate(tableName: String,column:String,order:String):List<TableObject>{
         return database.getTableDate(tableName,column,order)
+    }
+
+    fun getTableDateFromCsv(tableName: String,column:String,order:String):List<List<Pair<String,String>>>{
+        return database.getTableDateFromCsv(tableName,column,order)
     }
 
     fun insertDefaultTable(code_data:String,date:String){
@@ -107,6 +115,10 @@ class TableGenerator(context: Context) {
 
     fun createTable(tableName: String,fieldsList: ArrayList<String>){
         database.createTable(tableName,fieldsList)
+    }
+
+    fun createTableFromCsv(tableName: String,fieldsList: ArrayList<String>){
+        database.createTableFromCsv(tableName,fieldsList)
     }
 
     fun isFieldExist(tableName: String, fieldName: String):Boolean{

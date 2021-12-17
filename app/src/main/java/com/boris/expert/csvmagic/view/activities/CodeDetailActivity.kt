@@ -131,7 +131,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     var selectedProtocol = ""
     var barcodeEditList = mutableListOf<Triple<AppCompatImageView, String, String>>()
     private var counter: Int = 0
-
+    private var csvTableObject:List<Pair<String,String>>?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -165,6 +165,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         }
         if (intent != null && intent.hasExtra("TABLE_NAME")) {
             tableName = intent.getStringExtra("TABLE_NAME") as String
+        }
+
+        if (tableName.contains("import")){
+            if (Constants.csvItemData != null) {
+                csvTableObject = Constants.csvItemData
+            }
         }
 
         topImageCodeType = findViewById(R.id.code_detail_top_image_type)
@@ -270,6 +276,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             if (tableObject != null) {
                 codeDetailNotesWrapperLayout.visibility = View.GONE
                 displayBarcodeDetail()
+            }
+            else{
+                if (csvTableObject != null){
+                    codeDetailNotesWrapperLayout.visibility = View.GONE
+                    displayBarcodeDetail()
+                }
             }
         }
 
@@ -975,6 +987,31 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
             }
 
+        }
+        else if (tableName.contains("import") && csvTableObject != null){
+            counter = 0
+            if (barcodeDetailParentLayout.childCount > 0) {
+                barcodeDetailParentLayout.removeAllViews()
+            }
+
+            for (i in 0 until csvTableObject!!.size) {
+                if (i == 0){continue}
+                val item = csvTableObject!![i]
+
+                val layout = LayoutInflater.from(context)
+                    .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
+                val columnValue = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
+                val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
+                counter += 1
+                columnEditView.id = counter
+                barcodeEditList.add(Triple(columnEditView, item.second, item.first))
+                columnEditView.setOnClickListener(this)
+                columnValue.text = item.second
+                columnName.text = item.first
+                barcodeDetailParentLayout.addView(layout)
+
+            }
         }
     }
 

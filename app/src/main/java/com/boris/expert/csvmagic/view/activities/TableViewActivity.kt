@@ -21,6 +21,7 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.adapters.TableDetailAdapter
 import com.boris.expert.csvmagic.model.TableObject
+import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.TableGenerator
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
@@ -41,6 +42,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
     private lateinit var tableMainLayout: TableLayout
     private var tableName: String = ""
     private var dataList = mutableListOf<TableObject>()
+    private var dataListCsv = mutableListOf<List<Pair<String, String>>>()
     private var sortingImages = mutableListOf<AppCompatImageView>()
     private lateinit var csvExportImageView: AppCompatImageView
     private lateinit var quickEditCheckbox: MaterialCheckBox
@@ -64,7 +66,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
     override fun onResume() {
         super.onResume()
-        getTableData(tableName, "", "")
+        if (tableName.contains("import")) {
+            getTableDataFromCsv(tableName, "", "")
+        } else {
+            getTableData(tableName, "", "")
+        }
+
     }
 
     private fun initViews() {
@@ -81,7 +88,8 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         val columns = tableGenerator.getTableColumns(tableName)
 
         val tableHeaders = TableRow(context)
-        for (i in 0 until columns!!.size + 1) {
+        for (i in 0 until columns!!.size +1) {
+
             if (i == 0) {
                 val headerLayout =
                     LayoutInflater.from(context).inflate(R.layout.header_table_row_cell, null)
@@ -256,6 +264,60 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
     }
 
+    private fun getTableDataFromCsv(tName: String, column: String, order: String) {
+        val tempList = tableGenerator.getTableDateFromCsv(tName, column, order)
+        if (tempList.isNotEmpty()) {
+            dataListCsv.clear()
+        }
+        if (tableMainLayout.childCount > 1) {
+            tableMainLayout.removeViews(1, tableMainLayout.childCount - 1)
+        }
+
+        dataListCsv.addAll(tempList)
+        tableMainLayout.weightSum = dataListCsv.size * 2F
+
+        if (dataListCsv.isNotEmpty()) {
+            startLoading(context)
+            for (j in 0 until dataListCsv.size) {
+
+                val listPair = dataListCsv[j]
+
+                val tableRow = TableRow(context)
+                tableRow.id = j
+                tableRow.tag = "row"
+                tableRow.setOnClickListener(this)
+
+                if (listPair.isNotEmpty()) {
+                    for (i in 0 until listPair.size) {
+
+                        val item = listPair[i]
+                        val cell =
+                            LayoutInflater.from(context).inflate(R.layout.table_row_cell, null)
+                        cell.layoutParams = layoutParams
+                        val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
+
+//                        if (item.second.length > 8){
+//                            textV.text = item.second.substring(0,9)
+//                        }
+//                        else{
+                            textV.text = item.second
+//                        }
+                        tableRow.addView(cell)
+                    }
+                }
+
+                if (j % 2 == 0) {
+                    tableRow.setBackgroundColor(Color.parseColor("#EAEAF6"))
+                } else {
+                    tableRow.setBackgroundColor(Color.parseColor("#f2f2f2"))
+                }
+                tableMainLayout.addView(tableRow)
+            }
+            dismiss()
+        }
+
+    }
+
     override fun onItemClick(position: Int) {
         val tableObject = dataList[position]
         showAlert(context, tableObject.toString())
@@ -265,14 +327,26 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         val view = v!!
         if (view.tag == "row") {
             val position = view.id
-            val item = dataList[position]
-            if (quickEditFlag) {
-                openQuickEditDialog(item)
+            if (tableName.contains("import")) {
+                val item = dataListCsv[position]
+                if (quickEditFlag) {
+                    openQuickEditDialogCsv(item)
+                } else {
+//                    Constants.csvItemData = item
+//                    val intent = Intent(context, CodeDetailActivity::class.java)
+//                    intent.putExtra("TABLE_NAME", tableName)
+//                    startActivity(intent)
+                }
             } else {
-                val intent = Intent(context, CodeDetailActivity::class.java)
-                intent.putExtra("TABLE_NAME", tableName)
-                intent.putExtra("TABLE_ITEM", item)
-                startActivity(intent)
+                val item = dataList[position]
+                if (quickEditFlag) {
+                    openQuickEditDialog(item)
+                } else {
+                    val intent = Intent(context, CodeDetailActivity::class.java)
+                    intent.putExtra("TABLE_NAME", tableName)
+                    intent.putExtra("TABLE_ITEM", item)
+                    startActivity(intent)
+                }
             }
 
 
@@ -323,7 +397,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
                 val image = sortingImages[view.id]
                 updateSortingImage(image, currentOrder)
-                getTableData(tableName, currentColumn, currentOrder)
+                if (tableName.contains("import")) {
+                    getTableDataFromCsv(tableName, currentColumn, currentOrder)
+                } else {
+                    getTableData(tableName, currentColumn, currentOrder)
+                }
+
 
             }
 
@@ -346,7 +425,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                         getString(R.string.remove_item_success_text),
                         Toast.LENGTH_SHORT
                     ).show()
-                    getTableData(tableName, "", "")
+                    if (tableName.contains("import")) {
+                        getTableDataFromCsv(tableName, "", "")
+                    } else {
+                        getTableData(tableName, "", "")
+                    }
+
                 }
             }
             .create().show()
@@ -485,7 +569,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                             }, item.id
                         )
                         adapter.notifyItemRemoved(position)
-                        getTableData(tableName, "", "")
+                        if (tableName.contains("import")) {
+                            getTableDataFromCsv(tableName, "", "")
+                        } else {
+                            getTableData(tableName, "", "")
+                        }
+
                     }
                     val alert = builder.create()
                     alert.show()
@@ -502,13 +591,11 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
             })
             quickEditWrapperLayout.addView(barcodeImageRecyclerView)
-        }
-        else
-        {
+        } else {
             val emptyTextView = MaterialTextView(context)
             emptyTextView.layoutParams = params
             emptyTextView.text = getString(R.string.empty_image_list_error_message)
-            emptyTextView.setTextColor(ContextCompat.getColor(context,R.color.dark_gray))
+            emptyTextView.setTextColor(ContextCompat.getColor(context, R.color.dark_gray))
             emptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18F)
             quickEditWrapperLayout.addView(emptyTextView)
         }
@@ -640,6 +727,111 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                         imageList.clear()
                         dismiss()
                         getTableData(tableName, "", "")
+                    } else {
+                        dismiss()
+                        showAlert(context, getString(R.string.database_update_failed_error))
+                    }
+                }
+            } else {
+                dismiss()
+                showAlert(context, getString(R.string.empty_text_error))
+            }
+
+        }
+
+    }
+
+    private fun openQuickEditDialogCsv(item: List<Pair<String, String>>) {
+
+        val quickEditParentLayout =
+            LayoutInflater.from(context).inflate(R.layout.update_quick_edit_table_layout, null)
+        val cancelDialogBtn =
+            quickEditParentLayout.findViewById<MaterialButton>(R.id.quick_edit_dialog_cancel_btn)
+        val updateDialogBtn =
+            quickEditParentLayout.findViewById<MaterialButton>(R.id.quick_edit_dialog_update_btn)
+        val quickEditWrapperLayout =
+            quickEditParentLayout.findViewById<LinearLayout>(R.id.quick_edit_parent_layout)
+
+
+        for (i in 0 until item.size) {
+            if (i == 0) {
+                continue
+            }
+            val item1 = item[i]
+            val layout = LayoutInflater.from(context)
+                .inflate(R.layout.quick_edit_single_layout, quickEditWrapperLayout, false)
+            val value =
+                layout.findViewById<TextInputEditText>(R.id.quick_edit_barcode_detail_text_input_field)
+            val clearBrushView =
+                layout.findViewById<AppCompatImageView>(R.id.quick_edit_barcode_detail_cleaning_text_view)
+            counter += 1
+            clearBrushView.id = counter
+            clearBrushView.tag = "qe"
+
+            barcodeEditList.add(Triple(value, clearBrushView, item1.first))
+            clearBrushView.setOnClickListener(this)
+            value.setText(item1.second)
+            value.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    updateDialogBtn.isEnabled = true
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                }
+
+            })
+            quickEditWrapperLayout.addView(layout)
+
+        }
+        counter = 0
+
+        val builder = MaterialAlertDialogBuilder(context)
+        builder.setView(quickEditParentLayout)
+        builder.setCancelable(false)
+        val alert = builder.create()
+        alert.show()
+
+        cancelDialogBtn.setOnClickListener {
+            alert.dismiss()
+        }
+        updateDialogBtn.setOnClickListener {
+            startLoading(context)
+            var flag = false
+
+            for (i in 0 until barcodeEditList.size) {
+                val triple = barcodeEditList[i]
+                val value = triple.first.text.toString().trim()
+                if (value.isEmpty()) {
+                    //flag = false
+                    detailList.add(Pair(triple.third, ""))
+                    break
+                } else {
+                    //flag = true
+                    detailList.add(Pair(triple.third, value))
+                }
+            }
+            if (updateDialogBtn.isEnabled) {
+                alert.dismiss()
+                if (detailList.isNotEmpty()) {
+                    val isSuccess =
+                        tableGenerator.updateDataCsv(tableName, detailList, item[0].second.toInt())
+                    if (isSuccess) {
+                        imageList.clear()
+                        dismiss()
+                        if (tableName.contains("import")) {
+                            getTableDataFromCsv(tableName, "", "")
+                        } else {
+                            getTableData(tableName, "", "")
+                        }
+
                     } else {
                         dismiss()
                         showAlert(context, getString(R.string.database_update_failed_error))

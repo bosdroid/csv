@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
 import com.boris.expert.csvmagic.interfaces.LoginCallback
+import com.boris.expert.csvmagic.interfaces.ScannerInterface
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.room.AppViewModel
@@ -86,7 +87,7 @@ class ScanDataActivity : BaseActivity(),CustomAlertDialog.CustomDialogListener,
     private var spinnerIdsList = mutableListOf<Pair<String, AppCompatSpinner>>()
     private lateinit var appSettings: AppSettings
     private var isFileSelected = false
-    private var listener: ScannerFragment.ScannerInterface? = null
+    private var listener: ScannerInterface? = null
     private var databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storageReference: StorageReference = FirebaseStorage.getInstance().reference
     private var sheetsList = mutableListOf<Sheet>()

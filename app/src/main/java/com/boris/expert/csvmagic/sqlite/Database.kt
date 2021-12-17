@@ -9,14 +9,15 @@ import android.util.Log
 import com.boris.expert.csvmagic.model.ListItem
 import com.boris.expert.csvmagic.model.TableObject
 import java.io.File
+import java.io.UnsupportedEncodingException
 import java.util.*
 
 
 class Database(private val context: Context) : SQLiteOpenHelper(
-        context,
-        databaseName,
-        null,
-        databaseVersion
+    context,
+    databaseName,
+    null,
+    databaseVersion
 ) {
 
     companion object {
@@ -84,6 +85,25 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         db.execSQL(queryBuilder.toString())
     }
 
+    fun createTableFromCsv(tableName: String, fieldsList: ArrayList<String>) {
+        val db = this.writableDatabase
+        val queryBuilder = StringBuilder()
+        queryBuilder.append("CREATE TABLE IF NOT EXISTS $tableName(_id INTEGER PRIMARY KEY AUTOINCREMENT,")
+        for (i in 0 until fieldsList.size) {
+            if (fieldsList[i].toLowerCase(Locale.ENGLISH) == "quantity") {
+                queryBuilder.append(" ${fieldsList[i].toLowerCase(Locale.ENGLISH)} INTEGER")
+            } else {
+                queryBuilder.append(" ${fieldsList[i].toLowerCase(Locale.ENGLISH)} TEXT")
+            }
+
+            if (i != fieldsList.size - 1) {
+                queryBuilder.append(",")
+            }
+        }
+        queryBuilder.append(")")
+        db.execSQL(queryBuilder.toString())
+    }
+
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         db!!.execSQL("DROP TABLE IF EXISTS $DEFAULT_TABLE_NAME")
         onCreate(db)
@@ -103,10 +123,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             if (cursor.moveToFirst()) {
                 do {
                     tableObject = TableObject(
-                            cursor.getString(0).toInt(),
-                            cursor.getString(1),
-                            cursor.getString(2),
-                            if (cursor.isNull(3)) "" else cursor.getString(3)
+                        cursor.getString(0).toInt(),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        if (cursor.isNull(3)) "" else cursor.getString(3)
                     )
                     tableObject.quantity = cursor.getInt(4)
                     if (columns!!.size >= 6) {
@@ -132,10 +152,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             if (cursor.moveToFirst()) {
                 do {
                     tableObject = TableObject(
-                            cursor.getString(0).toInt(),
-                            cursor.getString(1),
-                            cursor.getString(2),
-                            if (cursor.isNull(3)) "" else cursor.getString(3)
+                        cursor.getString(0).toInt(),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        if (cursor.isNull(3)) "" else cursor.getString(3)
                     )
                     tableObject.quantity = cursor.getInt(4)
                     if (columns!!.size >= 6) {
@@ -150,6 +170,60 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                         list.clear()
                     }
                     tableObjectList.add(tableObject)
+                } while (cursor.moveToNext())
+            }
+        }
+
+        db.close()
+        return tableObjectList
+
+    }
+
+    fun getTableDateFromCsv(
+        tableName: String,
+        column: String,
+        order: String
+    ): List<List<Pair<String, String>>> {
+        val db = this.readableDatabase
+        val columns = getTableColumns(tableName)
+        val tableObjectList = mutableListOf<List<Pair<String, String>>>()
+        if (column.isEmpty() && order.isEmpty()) {
+            val selectQuery = "SELECT  * FROM $tableName"
+
+            var list = mutableListOf<Pair<String, String>>()
+
+            val cursor: Cursor = db.rawQuery(selectQuery, null)
+            if (cursor.moveToFirst()) {
+                do {
+                    for (i in columns!!.indices) {
+                        val col = columns[i]
+                        var pair: Pair<String, String>? = null
+                        pair = Pair(col, cursor.getString(i))
+
+                        list.add(pair)
+                    }
+                    tableObjectList.add(list)
+                    list = mutableListOf()
+
+                } while (cursor.moveToNext())
+            }
+        } else {
+            val selectQuery =
+                "SELECT  * FROM $tableName ORDER BY $column ${order.toUpperCase(Locale.ENGLISH)}"
+            var list = mutableListOf<Pair<String, String>>()
+            val cursor: Cursor = db.rawQuery(selectQuery, null)
+            if (cursor.moveToFirst()) {
+                do {
+                    for (i in columns!!.indices) {
+                        val col = columns[i]
+                        var pair: Pair<String, String>? = null
+                        pair = Pair(col, cursor.getString(i))
+
+                        list.add(pair)
+                    }
+                    tableObjectList.add(list)
+                    list = mutableListOf()
+
                 } while (cursor.moveToNext())
             }
         }
@@ -178,8 +252,18 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                 values.put(data[i].first, data[i].second)
             }
         }
-        db.insert(tableName, null, values)
+            val res = db.insert(tableName, null, values)
         db.close()
+    }
+
+    fun convertStringToUTF8(s: String): String? {
+        var out: String? = null
+        out = try {
+            String(s.toByteArray(charset("UTF-8")), charset("ISO-8859-1"))
+        } catch (e: UnsupportedEncodingException) {
+            return null
+        }
+        return out
     }
 
     fun updateData(tableName: String, data: List<Pair<String, String>>, id: Int): Boolean {
@@ -193,6 +277,20 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             }
         }
         return db.update(tableName, values, "id=$id", null) > 0
+
+    }
+
+    fun updateDataCsv(tableName: String, data: List<Pair<String, String>>, id: Int): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        for (i in data.indices) {
+            if (data[i].second.isEmpty()) {
+                continue
+            } else {
+                values.put(data[i].first, data[i].second)
+            }
+        }
+        return db.update(tableName, values, "_id=$id", null) > 0
 
     }
 
@@ -247,8 +345,8 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val db = this.readableDatabase
         val list = mutableListOf<String>()
         val c: Cursor = db.rawQuery(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN('sqlite_sequence','android_metadata','codes_history','dynamic_qr_codes','list_fields','list','list_metadata')",
-                null
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN('sqlite_sequence','android_metadata','codes_history','dynamic_qr_codes','list_fields','list','list_metadata')",
+            null
         )
 
         if (c.moveToFirst()) {
@@ -266,8 +364,8 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             return false
         }
         val cursor = db.rawQuery(
-                "SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?",
-                arrayOf("table", tableName)
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?",
+            arrayOf("table", tableName)
         )
         if (!cursor.moveToFirst()) {
             cursor.close()
@@ -311,7 +409,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
 
         val selectQuery = "SELECT  * FROM $LIST_FIELDS_TABLE_NAME WHERE $LIST_COLUMN_FIELD_NAME='${
             fieldName.toLowerCase(
-                    Locale.ENGLISH
+                Locale.ENGLISH
             )
         }' AND $LIST_COLUMN_TABLE_NAME='${tableName.toLowerCase(Locale.ENGLISH)}'"
 
@@ -415,10 +513,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         if (cursor.moveToFirst()) {
             do {
                 tableObject = TableObject(
-                        cursor.getString(0).toInt(),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        if (cursor.isNull(3)) "" else cursor.getString(3)
+                    cursor.getString(0).toInt(),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    if (cursor.isNull(3)) "" else cursor.getString(3)
                 )
                 tableObject.quantity = cursor.getInt(4)
                 if (columns!!.size >= 6) {
@@ -491,10 +589,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         if (cursor.moveToFirst()) {
             do {
                 tableObject = TableObject(
-                        cursor.getString(0).toInt(),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        if (cursor.isNull(3)) "" else cursor.getString(3)
+                    cursor.getString(0).toInt(),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    if (cursor.isNull(3)) "" else cursor.getString(3)
                 )
                 tableObject.quantity = cursor.getInt(4)
                 if (columns!!.size >= 6) {
@@ -558,30 +656,31 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             Log.d("TEST199", defaultTableColumnList.toString())
 
             val dbCursor = db1.query(
-                    "$databaseName.default_table",
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
+                "$databaseName.default_table",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
             )
             val backupDefaultTableColumnList = mutableListOf<String>()
             backupDefaultTableColumnList.addAll(dbCursor.columnNames)
             val result = mutableListOf<String>()
             result.addAll(backupDefaultTableColumnList.filterNotIn(defaultColumnsList))
-            if (result.isNotEmpty()){
-                    for (i in 0 until result.size) {
-                        val col = result[i]
-                        addNewColumn("default_table", Pair(col,"TEXT"),"")
-                    }
+            if (result.isNotEmpty()) {
+                for (i in 0 until result.size) {
+                    val col = result[i]
+                    addNewColumn("default_table", Pair(col, "TEXT"), "")
+                }
             }
             backupDefaultTableColumnList.removeAt(0)
-            val insertQuery = "INSERT INTO default_table(${backupDefaultTableColumnList.joinToString(",")}) SELECT ${
-                backupDefaultTableColumnList.joinToString(
+            val insertQuery =
+                "INSERT INTO default_table(${backupDefaultTableColumnList.joinToString(",")}) SELECT ${
+                    backupDefaultTableColumnList.joinToString(
                         ","
-                )
-            } FROM $databaseName.default_table;"
+                    )
+                } FROM $databaseName.default_table;"
             db.execSQL(insertQuery)
         }
 //        else {

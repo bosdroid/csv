@@ -130,6 +130,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.mlkit:translate:16.1.2'
 
     // RETROFIT NETWORK LIBRARY
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"

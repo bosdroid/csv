@@ -83,6 +83,7 @@ class Constants {
         var sheetService: Sheets? = null
         var captureImagePath: String? = null
         var sheetsList = mutableListOf<Sheet>()
+        var csvItemData:List<Pair<String,String>>?=null
         val EMAIL_ADDRESS_PATTERN: Pattern = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
                     "\\@" +

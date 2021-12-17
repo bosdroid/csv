@@ -81,7 +81,7 @@ import java.util.concurrent.TimeUnit
 
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener,
-        OnCompleteAction, ScannerFragment.ScannerInterface {
+        OnCompleteAction, ScannerInterface {
 
 
     private lateinit var eventListener: ValueEventListener

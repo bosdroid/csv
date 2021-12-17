@@ -46,10 +46,7 @@ import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
-import com.boris.expert.csvmagic.interfaces.APICallback
-import com.boris.expert.csvmagic.interfaces.LoginCallback
-import com.boris.expert.csvmagic.interfaces.ResponseListener
-import com.boris.expert.csvmagic.interfaces.UploadImageCallback
+import com.boris.expert.csvmagic.interfaces.*
 import com.boris.expert.csvmagic.model.CodeHistory
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.model.TableObject
@@ -165,9 +162,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     var isScanResultDialogShowing = false
     private var galleryIntentType = 0
 
-    interface ScannerInterface {
-        fun login(callback: LoginCallback)
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

@@ -40,6 +40,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.mlkit.common.model.DownloadConditions
+import com.google.mlkit.common.model.RemoteModelManager
+import com.google.mlkit.nl.translate.TranslateLanguage
+import com.google.mlkit.nl.translate.TranslateRemoteModel
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -51,6 +55,22 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val modelManager = RemoteModelManager.getInstance()
+        // Download the RUSSIAN model.
+        val ruModel = TranslateRemoteModel.Builder(TranslateLanguage.RUSSIAN).build()
+        val conditions = DownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        modelManager.download(ruModel, conditions)
+            .addOnSuccessListener {
+                // Model downloaded.
+                Log.d("TEST199", "test")
+            }
+            .addOnFailureListener {
+                // Error.
+                Log.d("TEST199",it.localizedMessage!!.toString())
+            }
 
     }
 
