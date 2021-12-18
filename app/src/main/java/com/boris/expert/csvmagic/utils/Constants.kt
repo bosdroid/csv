@@ -1,5 +1,6 @@
 package com.boris.expert.csvmagic.utils
 
+import android.R.string
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -17,8 +18,6 @@ import com.boris.expert.csvmagic.model.QRTypes
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.model.User
 import com.boris.expert.csvmagic.view.activities.BaseActivity
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -26,11 +25,8 @@ import com.google.android.material.textview.MaterialTextView
 import com.google.api.services.drive.Drive
 import com.google.api.services.sheets.v4.Sheets
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageMetadata
-import retrofit2.http.Url
 import java.io.File
 import java.io.IOException
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -83,7 +79,7 @@ class Constants {
         var sheetService: Sheets? = null
         var captureImagePath: String? = null
         var sheetsList = mutableListOf<Sheet>()
-        var csvItemData:List<Pair<String,String>>?=null
+        var csvItemData:List<Pair<String, String>>?=null
         val EMAIL_ADDRESS_PATTERN: Pattern = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
                     "\\@" +
@@ -115,6 +111,19 @@ class Constants {
             return (megaBytes * 1048576)
         }
 
+        fun transLit(str: String): String {
+            var tempStr = str
+            val lat_up = arrayOf("A", "B", "V", "G", "D", "E", "Yo", "Zh", "Z", "I", "Y", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "F", "Kh", "Ts", "Ch", "Sh", "Shch", "\"", "Y", "'", "E", "Yu", "Ya")
+            val lat_low = arrayOf("a", "b", "v", "g", "d", "e", "yo", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "kh", "ts", "ch", "sh", "shch", "\"", "y", "'", "e", "yu", "ya")
+            val rus_up = arrayOf("А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я")
+            val rus_low = arrayOf("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я")
+
+            for (i in 0..32){
+                tempStr = tempStr.replace(rus_up[i],lat_up[i]).replace(rus_low[i],lat_low[i])
+            }
+            return tempStr
+        }
+
         private fun verifyValidSignature(signedData: String, signature: String): Boolean {
             return try {
                 // To get key go to Developer Console > Select your app > Development Tools > Services & APIs.
@@ -133,10 +142,10 @@ class Constants {
             return totalDays - goneDays
         }
 
-        fun getDateFromDays(days:Int):String{
+        fun getDateFromDays(days: Int):String{
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
             val c = Calendar.getInstance()
-            c.add(Calendar.DATE,days)
+            c.add(Calendar.DATE, days)
             return sdf.format(c.time)
         }
 

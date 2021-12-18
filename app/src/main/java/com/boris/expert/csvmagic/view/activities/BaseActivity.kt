@@ -56,21 +56,21 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val modelManager = RemoteModelManager.getInstance()
-        // Download the RUSSIAN model.
-        val ruModel = TranslateRemoteModel.Builder(TranslateLanguage.RUSSIAN).build()
-        val conditions = DownloadConditions.Builder()
-            .requireWifi()
-            .build()
-        modelManager.download(ruModel, conditions)
-            .addOnSuccessListener {
-                // Model downloaded.
-                Log.d("TEST199", "test")
-            }
-            .addOnFailureListener {
-                // Error.
-                Log.d("TEST199",it.localizedMessage!!.toString())
-            }
+//        val modelManager = RemoteModelManager.getInstance()
+//        // Download the RUSSIAN model.
+//        val ruModel = TranslateRemoteModel.Builder(TranslateLanguage.RUSSIAN).build()
+//        val conditions = DownloadConditions.Builder()
+//            .requireWifi()
+//            .build()
+//        modelManager.download(ruModel, conditions)
+//            .addOnSuccessListener {
+//                // Model downloaded.
+//                Log.d("TEST199", "test")
+//            }
+//            .addOnFailureListener {
+//                // Error.
+//                Log.d("TEST199",it.localizedMessage!!.toString())
+//            }
 
     }
 

@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
@@ -132,7 +133,13 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         tableMainLayout.addView(tableHeaders)
 
         csvExportImageView.setOnClickListener {
-            exportCsv(tableName)
+            if (tableName.contains("import")){
+                exportCsv1(tableName)
+            }
+            else{
+                exportCsv(tableName)
+            }
+
         }
 
         // QUICK EDIT TABLE CHECKBOX LISTENER
@@ -899,6 +906,59 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 }
             }
 
+            try {
+
+                val out = openFileOutput("$tableName.csv", Context.MODE_PRIVATE)
+                out.write((builder.toString()).toByteArray())
+                out.close()
+
+                val file = File(filesDir, "$tableName.csv")
+                val path =
+                    FileProvider.getUriForFile(
+                        context,
+                        context.applicationContext.packageName + ".fileprovider",
+                        file
+                    )
+                dismiss()
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.type = "text/csv"
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                intent.putExtra(Intent.EXTRA_STREAM, path)
+                startActivity(Intent.createChooser(intent, "Share with"))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        } else {
+            showAlert(context, getString(R.string.table_export_error_text))
+        }
+    }
+
+    private fun exportCsv1(tableName: String) {
+        if (dataListCsv.isNotEmpty()) {
+            startLoading(context)
+            val columns = mutableListOf<String>()
+            columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
+//            if (columns[0].toLowerCase(Locale.ENGLISH) == "_id"){
+//                columns.removeAt(0)
+//            }
+            val builder = StringBuilder()
+            builder.append(columns.joinToString(","))
+
+            for (j in 0 until dataListCsv.size) {
+
+                val data = dataListCsv[j]
+                if (data.isNotEmpty()) {
+                    builder.append("\n")
+                    for (k in data.indices) {
+                        val item = data[k]
+                        builder.append(Constants.transLit(item.second))
+                        if (k != data.size) {
+                            builder.append(",")
+                        }
+                    }
+                }
+            }
+             Log.d("TEST199","$builder")
             try {
 
                 val out = openFileOutput("$tableName.csv", Context.MODE_PRIVATE)

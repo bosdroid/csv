@@ -31,6 +31,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.opencsv.CSVReader
 import java.io.FileReader
 import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
@@ -101,7 +103,7 @@ private lateinit var tableDataRecyclerView: RecyclerView
                             }
 
                         })
-//                        importCsv()
+                       // importCsv()
 
                     }
                     .create().show()
@@ -154,6 +156,7 @@ private lateinit var tableDataRecyclerView: RecyclerView
                     } else {
                         try {
 
+                            var nextLine: Array<String>
                             var counter = 0
                             val columnsList = mutableListOf<String>()
                             var tableData = mutableListOf<Pair<String, String>>()
@@ -163,107 +166,203 @@ private lateinit var tableDataRecyclerView: RecyclerView
                             BaseActivity.startLoading(requireActivity())
                             val reader = CSVReader(FileReader(file))
                             var line: Array<String>? = reader.readNext()
-
-                            if (line != null){
-
-                                TranslatorManager.translate(line.joinToString(","),object : TranslationCallback{
-                                    override fun onTextTranslation(translatedText: String) {
-                                        if (translatedText.isNotEmpty()){
-                                            val array = translatedText.split(",")
-                                            val translatedColumnText = mutableListOf<String>()
-                                            for (i in 0 until array.size) {
-                                                translatedColumnText.add(array[i].trim().replace("[-+.^:,?()]".toRegex(), "").replace(" ","_").trim())
-                                            }
-
-                                            while (line != null) {
-                                                // nextLine[] is an array of values from the line
-                                                if (counter == 0) {
-
-                                                    counter += 1
-                                                    line = reader.readNext()
-                                                    continue
-                                                }
-                                                if (line!!.isNotEmpty() && translatedColumnText.size == line!!.size) {
-                                                    for (j in 0 until line!!.size) {
-                                                        tableData.add(Pair(translatedColumnText[j], line!![j]))
-                                                    }
-                                                    listRecord.add(tableData)
-                                                    tableData = mutableListOf()
-                                                    counter += 1
-                                                } else {
-                                                    break
-                                                }
-                                                if (reader.readNext() == null) {
-                                                    break
-                                                }
-                                                line = reader.readNext()
-                                            }
-
-
-                                            if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
-                                                val isFound = tableGenerator.tableExists(tableName)
-                                                if (isFound) {
-                                                    BaseActivity.dismiss()
-                                                    BaseActivity.showAlert(
-                                                        requireActivity(),
-                                                        getString(R.string.table_already_exist_message)
-                                                    )
-                                                } else {
-
-                                                    tableGenerator.createTableFromCsv(
-                                                        tableName,
-                                                        translatedColumnText as ArrayList<String>
-                                                    )
-
-                                                    Handler(Looper.myLooper()!!).postDelayed({
-
-                                                        val isExist = tableGenerator.tableExists(tableName)
-                                                        if (isExist) {
-                                                            displayTableList()
-                                                            for (j in 0 until listRecord.size){
-                                                                tableGenerator.insertData(tableName, listRecord[j])
-                                                            }
-                                                            BaseActivity.dismiss()
-                                                            BaseActivity.showAlert(
-                                                                requireActivity(),
-                                                                getString(R.string.table_created_success_message)
-                                                            )
-                                                        } else {
-                                                            BaseActivity.dismiss()
-                                                            BaseActivity.showAlert(
-                                                                requireActivity(),
-                                                                getString(R.string.table_created_failed_message)
-                                                            )
-                                                        }
-                                                    }, 5000)
-                                                }
-                                            } else {
-                                                BaseActivity.dismiss()
-                                                BaseActivity.showAlert(
-                                                    requireActivity(),
-                                                    getString(R.string.table_csv_import_error_message)
-                                                )
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            Log.d("TEST199",translatedText)
-                                        }
+                            while (line != null) {
+                                // nextLine[] is an array of values from the line
+//                               if (line.toString().contains("\t".toRegex())){
+//                                   val tempLine = line.toString().replace("\t".toRegex(),",")
+//                                   line = tempLine.split(",").toTypedArray()
+//                               }
+                                if (counter == 0) {
+                                    for (i in line.indices) {
+                                        columnsList.add(Constants.transLit(line[i].trim()).replace("[-+.^:,?'()]".toRegex(), "").replace(" ","_").toLowerCase(
+                                            Locale.ENGLISH
+                                        ))
                                     }
 
-                                })
+                                    counter += 1
+                                    line = reader.readNext()
+                                    continue
+                                }
+                                if (line.isNotEmpty() && columnsList.size == line.size) {
+                                    for (j in line.indices) {
+                                        tableData.add(Pair(columnsList[j], line[j].trim()))
+                                    }
+                                    listRecord.add(tableData)
+                                    tableData = mutableListOf()
+                                    counter += 1
+                                } else {
+                                    break
+                                }
+                                if (reader.readNext() == null) {
+                                    break
+                                }
+                                line = reader.readNext()
                             }
 
+                            if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
+                                val isFound = tableGenerator.tableExists(tableName)
+                                if (isFound) {
+                                    BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        getString(R.string.table_already_exist_message)
+                                    )
+                                } else {
+
+                                    tableGenerator.createTableFromCsv(
+                                        tableName,
+                                        columnsList as ArrayList<String>
+                                    )
+
+                                    Handler(Looper.myLooper()!!).postDelayed({
+
+                                        val isExist = tableGenerator.tableExists(tableName)
+                                        if (isExist) {
+                                            displayTableList()
+                                            for (j in 0 until listRecord.size){
+                                                tableGenerator.insertData(tableName, listRecord[j])
+                                            }
+                                            BaseActivity.dismiss()
+                                            BaseActivity.showAlert(
+                                                requireActivity(),
+                                                getString(R.string.table_created_success_message)
+                                            )
+                                        } else {
+                                            BaseActivity.dismiss()
+                                            BaseActivity.showAlert(
+                                                requireActivity(),
+                                                getString(R.string.table_created_failed_message)
+                                            )
+                                        }
+                                    }, 5000)
+                                }
+                            } else {
+                                BaseActivity.dismiss()
+                                BaseActivity.showAlert(
+                                    requireActivity(),
+                                    getString(R.string.table_csv_import_error_message)
+                                )
+                            }
 
                         } catch (e: IOException) {
                             BaseActivity.dismiss()
                             BaseActivity.showAlert(
                                 requireActivity(),
-                                getString(R.string.table_csv_import_error_message)
+                                "${getString(R.string.table_csv_import_error_message)}\n${e.localizedMessage}\nNote: Please use the correct CSV file"
                             )
                             e.printStackTrace()
                         }
+//                        try {
+//                            var counter = 0
+//                            val columnsList = mutableListOf<String>()
+//                            var tableData = mutableListOf<Pair<String, String>>()
+//                            val listRecord = mutableListOf<List<Pair<String,String>>>()
+//                            val tableName = "${fileName}_import"
+//
+//                            BaseActivity.startLoading(requireActivity())
+//                            val reader = CSVReader(FileReader(file))
+//                            var line: Array<String>? = reader.readNext()
+//
+//                            if (line != null){
+//
+//                                TranslatorManager.translate(line.joinToString(","),object : TranslationCallback{
+//                                    override fun onTextTranslation(translatedText: String) {
+//                                        if (translatedText.isNotEmpty()){
+//                                            val array = translatedText.split(",")
+//                                            val translatedColumnText = mutableListOf<String>()
+//                                            for (i in 0 until array.size) {
+//                                                translatedColumnText.add(array[i].trim().replace("[-+.^:,?()]".toRegex(), "").replace(" ","_").trim())
+//                                            }
+//
+//                                            while (line != null) {
+//                                                // nextLine[] is an array of values from the line
+//                                                if (counter == 0) {
+//
+//                                                    counter += 1
+//                                                    line = reader.readNext()
+//                                                    continue
+//                                                }
+//                                                if (line!!.isNotEmpty() && translatedColumnText.size == line!!.size) {
+//                                                    for (j in 0 until line!!.size) {
+//                                                        tableData.add(Pair(translatedColumnText[j], line!![j]))
+//                                                    }
+//                                                    listRecord.add(tableData)
+//                                                    tableData = mutableListOf()
+//                                                    counter += 1
+//                                                } else {
+//                                                    break
+//                                                }
+//                                                if (reader.readNext() == null) {
+//                                                    break
+//                                                }
+//                                                line = reader.readNext()
+//                                            }
+//
+//
+//                                            if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
+//                                                val isFound = tableGenerator.tableExists(tableName)
+//                                                if (isFound) {
+//                                                    BaseActivity.dismiss()
+//                                                    BaseActivity.showAlert(
+//                                                        requireActivity(),
+//                                                        getString(R.string.table_already_exist_message)
+//                                                    )
+//                                                } else {
+//
+//                                                    tableGenerator.createTableFromCsv(
+//                                                        tableName,
+//                                                        translatedColumnText as ArrayList<String>
+//                                                    )
+//
+//                                                    Handler(Looper.myLooper()!!).postDelayed({
+//
+//                                                        val isExist = tableGenerator.tableExists(tableName)
+//                                                        if (isExist) {
+//                                                            displayTableList()
+//                                                            for (j in 0 until listRecord.size){
+//                                                                tableGenerator.insertData(tableName, listRecord[j])
+//                                                            }
+//                                                            BaseActivity.dismiss()
+//                                                            BaseActivity.showAlert(
+//                                                                requireActivity(),
+//                                                                getString(R.string.table_created_success_message)
+//                                                            )
+//                                                        } else {
+//                                                            BaseActivity.dismiss()
+//                                                            BaseActivity.showAlert(
+//                                                                requireActivity(),
+//                                                                getString(R.string.table_created_failed_message)
+//                                                            )
+//                                                        }
+//                                                    }, 5000)
+//                                                }
+//                                            } else {
+//                                                BaseActivity.dismiss()
+//                                                BaseActivity.showAlert(
+//                                                    requireActivity(),
+//                                                    getString(R.string.table_csv_import_error_message)
+//                                                )
+//                                            }
+//
+//                                        }
+//                                        else
+//                                        {
+//                                            Log.d("TEST199",translatedText)
+//                                        }
+//                                    }
+//
+//                                })
+//                            }
+//
+//
+//                        } catch (e: IOException) {
+//                            BaseActivity.dismiss()
+//                            BaseActivity.showAlert(
+//                                requireActivity(),
+//                                getString(R.string.table_csv_import_error_message)
+//                            )
+//                            e.printStackTrace()
+//                        }
                     }
 
                 } catch (e: Exception) {
