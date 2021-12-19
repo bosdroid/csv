@@ -7,46 +7,41 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.TablesDataAdapter
 import com.boris.expert.csvmagic.interfaces.LoginCallback
 import com.boris.expert.csvmagic.interfaces.ScannerInterface
-import com.boris.expert.csvmagic.interfaces.TranslationCallback
-import com.boris.expert.csvmagic.utils.Constants
-import com.boris.expert.csvmagic.utils.FileUtil
-import com.boris.expert.csvmagic.utils.TableGenerator
-import com.boris.expert.csvmagic.utils.TranslatorManager
+import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.activities.BaseActivity
-import com.boris.expert.csvmagic.view.activities.MainActivity
 import com.boris.expert.csvmagic.view.activities.TableViewActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.opencsv.CSVReader
-import java.io.FileReader
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStreamReader
+import java.nio.charset.Charset
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
 
-//    private lateinit var qrCodeHistoryRecyclerView: RecyclerView
+    //    private lateinit var qrCodeHistoryRecyclerView: RecyclerView
 //    private lateinit var emptyView: MaterialTextView
 //    private var qrCodeHistoryList = mutableListOf<CodeHistory>()
 //    private lateinit var adapter: QrCodeHistoryAdapter
 //    private lateinit var appViewModel: AppViewModel
-private lateinit var tableDataRecyclerView: RecyclerView
+    private lateinit var tableDataRecyclerView: RecyclerView
     private lateinit var tableGenerator: TableGenerator
     private var tableList = mutableListOf<String>()
     private lateinit var adapter: TablesDataAdapter
-    private lateinit var fabUploadFile:FloatingActionButton
+    private lateinit var fabUploadFile: FloatingActionButton
     private var listener: ScannerInterface? = null
 
 
@@ -72,7 +67,7 @@ private lateinit var tableDataRecyclerView: RecyclerView
         return v
     }
 
-    private fun initViews(view:View){
+    private fun initViews(view: View) {
         tableGenerator = TableGenerator(requireActivity())
         tableDataRecyclerView = view.findViewById(R.id.tables_data_recyclerview)
         fabUploadFile = view.findViewById(R.id.fab_upload_file)
@@ -83,18 +78,17 @@ private lateinit var tableDataRecyclerView: RecyclerView
 
 
         fabUploadFile.setOnClickListener {
-            if (Constants.userData != null){
+            if (Constants.userData != null) {
                 importCsv()
-            }
-            else{
+            } else {
                 //showAlert(context,"You can not create dynamic table without account login!")
                 MaterialAlertDialogBuilder(requireActivity())
                     .setTitle(getString(R.string.alert_text))
                     .setMessage(getString(R.string.login_error_text))
-                    .setNegativeButton(getString(R.string.later_text)){dialog,which->
+                    .setNegativeButton(getString(R.string.later_text)) { dialog, which ->
                         dialog.dismiss()
                     }
-                    .setPositiveButton(getString(R.string.login_text)){dialog,which->
+                    .setPositiveButton(getString(R.string.login_text)) { dialog, which ->
                         dialog.dismiss()
                         listener!!.login(object : LoginCallback {
                             override fun onSuccess() {
@@ -103,7 +97,7 @@ private lateinit var tableDataRecyclerView: RecyclerView
                             }
 
                         })
-                       // importCsv()
+                        // importCsv()
 
                     }
                     .create().show()
@@ -145,9 +139,9 @@ private lateinit var tableDataRecyclerView: RecyclerView
                 val filePath = result.data!!.data
                 try {
                     val file = FileUtil.from(requireActivity(), filePath!!)
-                    val ext = file.name.substring(file.name.lastIndexOf(".")+1)
-                    var fileName = file.name.substring(0,file.name.lastIndexOf("."))
-                     fileName = fileName.replace("[-+.^:,]".toRegex(), " ").replace(" ", "_").trim()
+                    val ext = file.name.substring(file.name.lastIndexOf(".") + 1)
+                    var fileName = file.name.substring(0, file.name.lastIndexOf("."))
+                    fileName = fileName.replace("[-+.^:,]".toRegex(), " ").replace(" ", "_").trim()
                     if (ext != "csv") {
                         BaseActivity.showAlert(
                             requireActivity(),
@@ -155,49 +149,81 @@ private lateinit var tableDataRecyclerView: RecyclerView
                         )
                     } else {
                         try {
-
-                            var nextLine: Array<String>
-                            var counter = 0
+                            BaseActivity.startLoading(requireActivity())
+                            val listContents = CSVFile.readFile(file.inputStream())
+                            Log.d("TEST199", "$listContents")
+//                            var nextLine: Array<String>
+//                            var counter = 0
                             val columnsList = mutableListOf<String>()
                             var tableData = mutableListOf<Pair<String, String>>()
-                            val listRecord = mutableListOf<List<Pair<String,String>>>()
+                            val listRecord = mutableListOf<List<Pair<String, String>>>()
                             val tableName = "${fileName}_import"
-
-                            BaseActivity.startLoading(requireActivity())
-                            val reader = CSVReader(FileReader(file))
-                            var line: Array<String>? = reader.readNext()
-                            while (line != null) {
-                                // nextLine[] is an array of values from the line
-//                               if (line.toString().contains("\t".toRegex())){
-//                                   val tempLine = line.toString().replace("\t".toRegex(),",")
-//                                   line = tempLine.split(",").toTypedArray()
-//                               }
-                                if (counter == 0) {
-                                    for (i in line.indices) {
-                                        columnsList.add(Constants.transLit(line[i].trim()).replace("[-+.^:,?'()]".toRegex(), "").replace(" ","_").toLowerCase(
-                                            Locale.ENGLISH
-                                        ))
-                                    }
-
-                                    counter += 1
-                                    line = reader.readNext()
-                                    continue
-                                }
-                                if (line.isNotEmpty() && columnsList.size == line.size) {
-                                    for (j in line.indices) {
-                                        tableData.add(Pair(columnsList[j], line[j].trim()))
-                                    }
-                                    listRecord.add(tableData)
-                                    tableData = mutableListOf()
-                                    counter += 1
-                                } else {
-                                    break
-                                }
-                                if (reader.readNext() == null) {
-                                    break
-                                }
-                                line = reader.readNext()
+//                            var tempLine:String = ""
+//
+//                            BaseActivity.startLoading(requireActivity())
+//                            //val reader = CSVReader(FileReader(file))
+//                            val reader = BufferedReader(
+//                                InputStreamReader(
+//                                    file.inputStream(), Charset.forName(
+//                                        "UTF-8"
+//                                    )
+//                                )
+//                            )
+//                            var line = reader.readLine()
+//                            while (line != null) {
+//
+//                                line = String(line.toByteArray(), Charset.forName("UTF-8"))
+//                                if (line.toString().contains("\t".toRegex())){
+//                                    tempLine = line.replace("\t".toRegex(), ",")
+//                                }
+//                                else{
+//                                    tempLine = line
+//                                }
+//
+                            val row = listContents[0]
+//
+//                                if (counter == 0) {
+                            for (i in row.indices) {
+                                columnsList.add(
+                                    Constants.transLit(row[i]!!.trim()).replace(
+                                        "[-+.^:,?'()]".toRegex(),
+                                        ""
+                                    ).replace(" ", "_").toLowerCase(
+                                        Locale.ENGLISH
+                                    )
+                                )
                             }
+                            for (j in 1 until listContents.size) {
+                                val row1 = listContents[j]
+                                for (k in row1.indices) {
+                                    tableData.add(Pair(columnsList[k], row1[k]!!.trim()))
+                                }
+                                listRecord.add(tableData)
+                                tableData = mutableListOf()
+                            }
+//
+//                                    counter += 1
+//                                    line = reader.readLine()
+//                                    continue
+//                                }
+//                                if (row.isNotEmpty() && columnsList.size == row.size) {
+//                                    for (j in row.indices) {
+//                                        tableData.add(Pair(columnsList[j], row[j].trim()))
+//                                    }
+//                                    listRecord.add(tableData)
+//                                    tableData = mutableListOf()
+//                                    counter += 1
+//                                } else {
+//                                    break
+//                                }
+//                                if (reader.readLine() == null) {
+//                                    break
+//                                }
+//                                else{
+//                                    line = reader.readLine()
+//                                }
+//
+//                            }
 
                             if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
                                 val isFound = tableGenerator.tableExists(tableName)
@@ -219,7 +245,7 @@ private lateinit var tableDataRecyclerView: RecyclerView
                                         val isExist = tableGenerator.tableExists(tableName)
                                         if (isExist) {
                                             displayTableList()
-                                            for (j in 0 until listRecord.size){
+                                            for (j in 0 until listRecord.size) {
                                                 tableGenerator.insertData(tableName, listRecord[j])
                                             }
                                             BaseActivity.dismiss()
@@ -409,7 +435,7 @@ private lateinit var tableDataRecyclerView: RecyclerView
     override fun onItemClick(position: Int) {
         val table = tableList[position]
         val intent = Intent(requireActivity(), TableViewActivity::class.java)
-        intent.putExtra("TABLE_NAME",table)
+        intent.putExtra("TABLE_NAME", table)
         requireActivity().startActivity(intent)
     }
 
