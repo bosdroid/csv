@@ -1,22 +1,30 @@
 package com.boris.expert.csvmagic.utils
 
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.nio.charset.Charset
+import android.content.Context
+import java.io.*
 
 object CSVFile {
 
-    fun readFile(inputStream: InputStream): MutableList<Array<String?>> {
+    fun readFile(context: Context, inputStream: InputStream): MutableList<Array<String?>> {
         val resultList = mutableListOf<Array<String?>>()
-        val reader = BufferedReader(InputStreamReader(inputStream,Charset.forName("UTF-8")))
+        val reader = BufferedReader(InputStreamReader(inputStream, "UTF-16"))
+        val dir = File(context.filesDir, "tempcsv")
+        dir.mkdirs()
+        val file = File(dir, "tempCsvFile.csv")
+        val out = OutputStreamWriter(FileOutputStream(file), "UTF-8")
+        val cbuf = CharArray(2048)
+        var len: Int
+        while (reader.read(cbuf, 0, cbuf.size).also { len = it } != -1) {
+            out.write(cbuf, 0, len)
+        }
+        val reader1 = BufferedReader(InputStreamReader(file.inputStream(), "UTF-8"))
         val Separator = ','
         val Delimiter = '"'
         val LF = '\n'
         val CR = '\r'
         var quote_open = false
 
-        var line = reader.readLine()
+        var line = reader1.readLine()
         while (line != null) {
             if (line.contains("\t".toRegex())){
                 line = line.replace("\t".toRegex(), ",")
@@ -68,10 +76,10 @@ object CSVFile {
 //                val tempLine = csvLine.replace("\t".toRegex(), ",")
 //                val row = tempLine.split(",".toRegex()).toTypedArray()
 //                resultList.add(row)
-                if (reader.readLine() == null) {
+                if (reader1.readLine() == null) {
                     break
                 } else {
-                    line = reader.readLine()
+                    line = reader1.readLine()
                 }
 //            }
 //        } catch (ex: IOException) {

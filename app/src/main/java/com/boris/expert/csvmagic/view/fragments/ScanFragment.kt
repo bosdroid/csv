@@ -150,7 +150,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                     } else {
                         try {
                             BaseActivity.startLoading(requireActivity())
-                            val listContents = CSVFile.readFile(file.inputStream())
+                            val listContents = CSVFile.readFile(requireActivity(),file.inputStream())
                             Log.d("TEST199", "$listContents")
 //                            var nextLine: Array<String>
 //                            var counter = 0
