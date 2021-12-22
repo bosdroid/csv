@@ -97,7 +97,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                             }
 
                         })
-                        // importCsv()
+//                         importCsv()
 
                     }
                     .create().show()
@@ -150,7 +150,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                     } else {
                         try {
                             BaseActivity.startLoading(requireActivity())
-                            val listContents = CSVFile.readFile(requireActivity(),file.inputStream())
+                            val listContents = CSVFile.readFile(requireActivity(),file)
                             Log.d("TEST199", "$listContents")
 //                            var nextLine: Array<String>
 //                            var counter = 0
@@ -196,7 +196,11 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                             for (j in 1 until listContents.size) {
                                 val row1 = listContents[j]
                                 for (k in row1.indices) {
-                                    tableData.add(Pair(columnsList[k], row1[k]!!.trim()))
+                                    var data = row1[k]!!
+                                    if (data.contains("|")){
+                                        data = data.replace("|",",")
+                                    }
+                                    tableData.add(Pair(columnsList[k], data.trim()))
                                 }
                                 listRecord.add(tableData)
                                 tableData = mutableListOf()

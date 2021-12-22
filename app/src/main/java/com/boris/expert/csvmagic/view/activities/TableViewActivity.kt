@@ -951,7 +951,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                     builder.append("\n")
                     for (k in data.indices) {
                         val item = data[k]
-                        builder.append(Constants.transLit(item.second))
+                        builder.append(item.second)
                         if (k != data.size) {
                             builder.append(",")
                         }
