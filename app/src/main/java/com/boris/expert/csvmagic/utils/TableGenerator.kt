@@ -90,6 +90,10 @@ class TableGenerator(context: Context) {
         return database.getUpdateBarcodeDetail(tableName,id)
     }
 
+    fun getUpdateBarcodeDetail1(tableName: String,id:Int): List<Pair<String,String>> {
+        return database.getUpdateBarcodeDetail1(tableName,id)
+    }
+
     fun removeItem(tableName: String,id: Int):Boolean{
         return database.removeItem(tableName,id)
     }

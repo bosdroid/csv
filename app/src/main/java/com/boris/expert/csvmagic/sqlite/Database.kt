@@ -500,7 +500,12 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put(column, value)
-        return db.update(tableName, contentValues, "id=$id", null) > 0
+        return if (tableName.contains("import")){
+            db.update(tableName, contentValues, "_id=$id", null) > 0
+        } else{
+            db.update(tableName, contentValues, "id=$id", null) > 0
+        }
+
     }
 
     fun getUpdateBarcodeDetail(tableName: String, id: Int): TableObject? {
@@ -532,6 +537,32 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             } while (cursor.moveToNext())
         }
         return tableObject
+    }
+
+    fun getUpdateBarcodeDetail1(tableName: String, id: Int): List<Pair<String,String>> {
+        val db = this.readableDatabase
+        val columns = getTableColumns(tableName)
+        //val tableObjectList = mutableListOf<Pair<String, String>?>()
+            val selectQuery = "SELECT  * FROM $tableName WHERE _id=$id"
+
+            val list = mutableListOf<Pair<String, String>>()
+
+            val cursor: Cursor = db.rawQuery(selectQuery, null)
+            if (cursor.moveToFirst()) {
+                do {
+                    for (i in columns!!.indices) {
+                        val col = columns[i]
+                        var pair: Pair<String, String>? = null
+                        pair = Pair(col, cursor.getString(i))
+
+                        list.add(pair)
+                    }
+                    //tableObjectList.addAll(list)
+                    //list = mutableListOf()
+
+                } while (cursor.moveToNext())
+            }
+        return list
     }
 
     fun removeItem(tableName: String, id: Int): Boolean {

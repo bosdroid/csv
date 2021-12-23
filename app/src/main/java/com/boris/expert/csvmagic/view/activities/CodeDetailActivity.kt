@@ -623,8 +623,15 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                     id
                 )
                 if (isUpdate) {
-                    tableObject = tableGenerator.getUpdateBarcodeDetail(tableName, id)
-                    displayBarcodeDetail()
+                    if (tableName.contains("import")){
+                        csvTableObject = tableGenerator.getUpdateBarcodeDetail1(tableName, id)
+                        displayBarcodeDetail()
+                    }
+                    else{
+                        tableObject = tableGenerator.getUpdateBarcodeDetail(tableName, id)
+                        displayBarcodeDetail()
+                    }
+
                 }
             } else {
                 Toast.makeText(context, getString(R.string.empty_text_error), Toast.LENGTH_SHORT)
@@ -996,7 +1003,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             }
 
             for (i in 0 until csvTableObject!!.size) {
-                if (i == 0){continue}
+                //if (i == 0){continue}
                 val item = csvTableObject!![i]
 
                 val layout = LayoutInflater.from(context)
@@ -1004,12 +1011,14 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 val columnValue = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
                 val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
                 val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
-                counter += 1
+
                 columnEditView.id = counter
                 barcodeEditList.add(Triple(columnEditView, item.second, item.first))
                 columnEditView.setOnClickListener(this)
                 columnValue.text = item.second
                 columnName.text = item.first
+                if (i == 0){continue}
+                counter += 1
                 barcodeDetailParentLayout.addView(layout)
 
             }
