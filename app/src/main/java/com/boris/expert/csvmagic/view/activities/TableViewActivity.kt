@@ -339,10 +339,10 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 if (quickEditFlag) {
                     openQuickEditDialogCsv(item)
                 } else {
-//                    Constants.csvItemData = item
-//                    val intent = Intent(context, CodeDetailActivity::class.java)
-//                    intent.putExtra("TABLE_NAME", tableName)
-//                    startActivity(intent)
+                    Constants.csvItemData = item
+                    val intent = Intent(context, CodeDetailActivity::class.java)
+                    intent.putExtra("TABLE_NAME", tableName)
+                    startActivity(intent)
                 }
             } else {
                 val item = dataList[position]
@@ -767,6 +767,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             val item1 = item[i]
             val layout = LayoutInflater.from(context)
                 .inflate(R.layout.quick_edit_single_layout, quickEditWrapperLayout, false)
+            val columnHeadingView = layout.findViewById<MaterialTextView>(R.id.quick_edit_barcode_heading_text_view)
             val value =
                 layout.findViewById<TextInputEditText>(R.id.quick_edit_barcode_detail_text_input_field)
             val clearBrushView =
@@ -774,7 +775,8 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             counter += 1
             clearBrushView.id = counter
             clearBrushView.tag = "qe"
-
+            columnHeadingView.text = item1.first.toUpperCase(Locale.ENGLISH)
+            columnHeadingView.visibility = View.VISIBLE
             barcodeEditList.add(Triple(value, clearBrushView, item1.first))
             clearBrushView.setOnClickListener(this)
             value.setText(item1.second)
@@ -888,11 +890,11 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             for (j in 0 until dataList.size) {
                 var image = ""
                 val data = dataList[j]
-                if (data.image.contains(" ")) {
+                image = if (data.image.contains(" ")) {
                     val temp = data.image.replace(",", ", ")
-                    image = "\"$temp\""
+                    "\"$temp\""
                 } else {
-                    image = data.image
+                    data.image
                 }
                 builder.append("\n${data.id},${data.code_data},${data.date},$image,${data.quantity}")
                 if (data.dynamicColumns.size > 0) {
@@ -942,7 +944,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 //                columns.removeAt(0)
 //            }
             val builder = StringBuilder()
-            builder.append(columns.joinToString(","))
+            builder.append(Constants.transLit(columns.joinToString(",")))
 
             for (j in 0 until dataListCsv.size) {
 
@@ -950,8 +952,14 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 if (data.isNotEmpty()) {
                     builder.append("\n")
                     for (k in data.indices) {
+                        var temp = ""
                         val item = data[k]
-                        builder.append(item.second)
+                        if (item.second.contains(",")){
+                            temp = "\"${item.second}\""
+                        }else{
+                            temp = item.second
+                        }
+                        builder.append(Constants.transLit(temp))
                         if (k != data.size) {
                             builder.append(",")
                         }

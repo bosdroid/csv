@@ -200,7 +200,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                                     if (data.contains("|")){
                                         data = data.replace("|",",")
                                     }
-                                    tableData.add(Pair(columnsList[k], data.trim()))
+                                    tableData.add(Pair(columnsList[k],Constants.transLit( data.trim())))
                                 }
                                 listRecord.add(tableData)
                                 tableData = mutableListOf()

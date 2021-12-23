@@ -989,6 +989,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         }
         else if (tableName.contains("import") && csvTableObject != null){
+            barcodeDetailWrapperLayout.visibility = View.VISIBLE
             counter = 0
             if (barcodeDetailParentLayout.childCount > 0) {
                 barcodeDetailParentLayout.removeAllViews()
