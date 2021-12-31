@@ -8,9 +8,11 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.util.TypedValue
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
@@ -29,9 +31,13 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
+import java.io.BufferedWriter
 import java.io.File
+import java.io.FileWriter
+import java.io.PrintWriter
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener,
@@ -89,7 +95,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         val columns = tableGenerator.getTableColumns(tableName)
 
         val tableHeaders = TableRow(context)
-        for (i in 0 until columns!!.size +1) {
+        for (i in 0 until columns!!.size + 1) {
 
             if (i == 0) {
                 val headerLayout =
@@ -133,10 +139,9 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         tableMainLayout.addView(tableHeaders)
 
         csvExportImageView.setOnClickListener {
-            if (tableName.contains("import")){
+            if (tableName.contains("import")) {
                 exportCsv1(tableName)
-            }
-            else{
+            } else {
                 exportCsv(tableName)
             }
 
@@ -307,7 +312,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 //                            textV.text = item.second.substring(0,9)
 //                        }
 //                        else{
-                            textV.text = item.second
+                        textV.text = item.second
 //                        }
                         tableRow.addView(cell)
                     }
@@ -767,7 +772,8 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             val item1 = item[i]
             val layout = LayoutInflater.from(context)
                 .inflate(R.layout.quick_edit_single_layout, quickEditWrapperLayout, false)
-            val columnHeadingView = layout.findViewById<MaterialTextView>(R.id.quick_edit_barcode_heading_text_view)
+            val columnHeadingView =
+                layout.findViewById<MaterialTextView>(R.id.quick_edit_barcode_heading_text_view)
             val value =
                 layout.findViewById<TextInputEditText>(R.id.quick_edit_barcode_detail_text_input_field)
             val clearBrushView =
@@ -821,7 +827,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 if (value.isEmpty()) {
                     //flag = false
                     detailList.add(Pair(triple.third, ""))
-                    break
+                    //break
                 } else {
                     //flag = true
                     detailList.add(Pair(triple.third, value))
@@ -938,13 +944,25 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
     private fun exportCsv1(tableName: String) {
         if (dataListCsv.isNotEmpty()) {
             startLoading(context)
-            val columns = mutableListOf<String>()
-            columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
-//            if (columns[0].toLowerCase(Locale.ENGLISH) == "_id"){
-//                columns.removeAt(0)
-//            }
+//            val columns = mutableListOf<String>()
+//            columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
+////            if (columns[0].toLowerCase(Locale.ENGLISH) == "_id"){
+////                columns.removeAt(0)
+////            }
+//            val builder = StringBuilder()
+//            builder.append(Constants.transLit(columns.joinToString(",")))
+
             val builder = StringBuilder()
-            builder.append(Constants.transLit(columns.joinToString(",")))
+            var tempColumns = ""
+            val originalColumns = tableGenerator.getTableOriginalColumns(tableName)
+            tempColumns = if (originalColumns.isNotEmpty()) {
+                originalColumns
+            } else {
+                val columns = tableGenerator.getTableColumns(tableName)
+                columns!!.joinToString(",")
+            }
+
+            builder.append(tempColumns)
 
             for (j in 0 until dataListCsv.size) {
 
@@ -952,28 +970,36 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 if (data.isNotEmpty()) {
                     builder.append("\n")
                     for (k in data.indices) {
+                        if (k == 0) {
+                            continue
+                        }
                         var temp = ""
                         val item = data[k]
-                        if (item.second.contains(",")){
-                            temp = "\"${item.second}\""
-                        }else{
-                            temp = item.second
+                        temp = if (item.second.contains(",")) {
+                            "\"${item.second}\""
+                        } else {
+                            item.second
                         }
-                        builder.append(Constants.transLit(temp))
+                        builder.append(temp)
                         if (k != data.size) {
                             builder.append(",")
                         }
                     }
                 }
             }
-             Log.d("TEST199","$builder")
             try {
+                //val file = File(filesDir, "$tableName.csv")
+                val dir = File(context.filesDir, "ExportedCsv")
+                dir.mkdirs()
+                val file = File(dir, "$tableName.csv")
 
-                val out = openFileOutput("$tableName.csv", Context.MODE_PRIVATE)
-                out.write((builder.toString()).toByteArray())
-                out.close()
-
-                val file = File(filesDir, "$tableName.csv")
+//                val out = openFileOutput("$tableName.csv", Context.MODE_WORLD_WRITABLE)
+//                out.write((builder.toString()).toByteArray())
+//                out.close()
+                val fw = FileWriter(file.absolutePath)
+                fw.append(builder.toString())
+//                fw.write(builder.toString())
+                fw.close()
                 val path =
                     FileProvider.getUriForFile(
                         context,
@@ -992,6 +1018,26 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         } else {
             showAlert(context, getString(R.string.table_export_error_text))
         }
+    }
+
+    fun charset(value: String, charsets: Array<String?>): String? {
+        val probe: String = StandardCharsets.UTF_8.name()
+        for (c in charsets) {
+            val charset: Charset = Charset.forName(c)
+            if (value == convert(
+                    convert(value, charset.name(), probe),
+                    probe,
+                    charset.name()
+                )
+            ) {
+                return c
+            }
+        }
+        return StandardCharsets.UTF_8.name()
+    }
+
+    private fun convert(value: String, fromEncoding: String?, toEncoding: String?): String {
+        return String(value.toByteArray(charset(fromEncoding!!)), Charset.forName(toEncoding))
     }
 
 }

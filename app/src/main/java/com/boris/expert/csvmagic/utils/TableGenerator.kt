@@ -144,4 +144,12 @@ class TableGenerator(context: Context) {
         return database.getBarcodeImages(tableName,id)
     }
 
+    fun insertExportColumns(tableName: String,columns:String): Long {
+        return database.insertExportColumns(tableName,columns)
+    }
+
+    fun getTableOriginalColumns(tableName: String):String{
+        return database.getTableOriginalColumns(tableName)
+    }
+
 }

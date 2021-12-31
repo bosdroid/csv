@@ -3,6 +3,7 @@ package com.boris.expert.csvmagic.view.fragments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,10 +24,7 @@ import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.boris.expert.csvmagic.view.activities.TableViewActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.nio.charset.Charset
 import java.util.*
 
 
@@ -150,7 +148,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                     } else {
                         try {
                             BaseActivity.startLoading(requireActivity())
-                            val listContents = CSVFile.readFile(requireActivity(),file)
+                            val listContents = CSVFile.readFile(requireActivity(), file)
                             Log.d("TEST199", "$listContents")
 //                            var nextLine: Array<String>
 //                            var counter = 0
@@ -181,26 +179,43 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
 //                                }
 //
                             val row = listContents[0]
+                            val originalColumns = listContents[0]
 //
 //                                if (counter == 0) {
-                            for (i in row.indices) {
-                                columnsList.add(
-                                    Constants.transLit(row[i]!!.trim()).replace(
-                                        "[-+.^:,?'()]".toRegex(),
-                                        ""
-                                    ).replace(" ", "_").toLowerCase(
-                                        Locale.ENGLISH
+                            if (checkCyrillicCharacter(row.joinToString(","))){
+                                for (i in row.indices) {
+                                    columnsList.add(
+                                        Constants.transLit(row[i]!!.trim()).replace(
+                                            "[-+.^:,?'()]".toRegex(),
+                                            ""
+                                        ).replace(" ", "_").toLowerCase(
+                                            Locale.ENGLISH
+                                        )
                                     )
-                                )
+                                }
                             }
+                            else{
+                                for (i in row.indices) {
+                                    columnsList.add(
+                                        row[i]!!.trim().replace(
+                                            "[-+.^:,?'()]".toRegex(),
+                                            ""
+                                        ).replace(" ", "_").toLowerCase(
+                                            Locale.ENGLISH
+                                        )
+                                    )
+                                }
+                            }
+
+
                             for (j in 1 until listContents.size) {
                                 val row1 = listContents[j]
                                 for (k in row1.indices) {
                                     var data = row1[k]!!
                                     if (data.contains("|")){
-                                        data = data.replace("|",",")
+                                        data = data.replace("|", ",")
                                     }
-                                    tableData.add(Pair(columnsList[k],Constants.transLit( data.trim())))
+                                    tableData.add(Pair(columnsList[k], data.trim()))
                                 }
                                 listRecord.add(tableData)
                                 tableData = mutableListOf()
@@ -253,6 +268,9 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                                                 tableGenerator.insertData(tableName, listRecord[j])
                                             }
                                             BaseActivity.dismiss()
+                                            if (checkCyrillicCharacter(originalColumns.joinToString(","))){
+                                                tableGenerator.insertExportColumns(tableName,originalColumns.joinToString(","))
+                                            }
                                             BaseActivity.showAlert(
                                                 requireActivity(),
                                                 getString(R.string.table_created_success_message)
@@ -441,6 +459,23 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
         val intent = Intent(requireActivity(), TableViewActivity::class.java)
         intent.putExtra("TABLE_NAME", table)
         requireActivity().startActivity(intent)
+    }
+
+    private fun checkCyrillicCharacter(text: String): Boolean {
+        var isCyrillicCharacter = false
+        for (c: Char in text.toCharArray()) {
+            if (isCyrillicCharacter(c)) {
+                isCyrillicCharacter = true
+                break
+            }
+        }
+        return isCyrillicCharacter
+    }
+
+    private fun isCyrillicCharacter(c: Char): Boolean {
+        val isPriorToKitkat = Build.VERSION.SDK_INT < 19
+        val block: Character.UnicodeBlock = Character.UnicodeBlock.of(c)!!
+        return block == Character.UnicodeBlock.CYRILLIC || block == Character.UnicodeBlock.CYRILLIC_SUPPLEMENTARY || if (isPriorToKitkat) false else block == Character.UnicodeBlock.CYRILLIC_EXTENDED_A || block == Character.UnicodeBlock.CYRILLIC_EXTENDED_B
     }
 
 }

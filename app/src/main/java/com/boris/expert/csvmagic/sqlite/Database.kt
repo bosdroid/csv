@@ -45,6 +45,8 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         private const val LIST_META_DATA_COLUMN_ID = "id"
         private const val LIST_META_DATA_COLUMN_LIST_ID = "list_id"
         private const val LIST_META_DATA_COLUMN_VALUE = "value"
+
+        private const val EXPORT_TABLE_COLUMNS = "export_data_columns"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -60,10 +62,15 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val listMetaDataTable =
             ("CREATE TABLE IF NOT EXISTS $LIST_META_DATA_TABLE_NAME($LIST_META_DATA_COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,$LIST_META_DATA_COLUMN_LIST_ID INTEGER,$LIST_META_DATA_COLUMN_VALUE TEXT)")
 
+        val exportColumnsTable =
+            ("CREATE TABLE IF NOT EXISTS $EXPORT_TABLE_COLUMNS(id INTEGER PRIMARY KEY AUTOINCREMENT,table_name TEXT,columns TEXT)")
+
+
         db!!.execSQL(listFieldTable)
         db.execSQL(listTable)
         db.execSQL(listMetaDataTable)
         db.execSQL(defaultTable)
+        db.execSQL(exportColumnsTable)
     }
 
     fun createTable(tableName: String, fieldsList: ArrayList<String>) {
@@ -345,7 +352,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val db = this.readableDatabase
         val list = mutableListOf<String>()
         val c: Cursor = db.rawQuery(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN('sqlite_sequence','android_metadata','codes_history','dynamic_qr_codes','list_fields','list','list_metadata')",
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN('sqlite_sequence','android_metadata','codes_history','dynamic_qr_codes','list_fields','list','list_metadata','export_data_columns')",
             null
         )
 
@@ -438,6 +445,15 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         //db.close()
     }
 
+    fun insertExportColumns(tableName: String,columns:String): Long {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put("table_name", tableName)
+        values.put("columns", columns)
+        return db.insert(EXPORT_TABLE_COLUMNS, null, values)
+        //db.close()
+    }
+
     fun insertListValue(listId: Int, value: String) {
         val db = this.writableDatabase
         val values = ContentValues()
@@ -478,6 +494,19 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         listOptions = list.joinToString()
         Log.d("TEST199", listOptions)
         return listOptions
+    }
+
+    fun getTableOriginalColumns(tableName: String):String{
+        val db = this.readableDatabase
+        var columns = ""
+        val selectQuery = "SELECT  * FROM $EXPORT_TABLE_COLUMNS WHERE table_name='$tableName'"
+        val cursor: Cursor = db.rawQuery(selectQuery, null)
+        if (cursor.moveToFirst()) {
+            do {
+                columns = cursor.getString(2)
+            } while (cursor.moveToNext())
+        }
+        return columns
     }
 
     fun getFieldListValues(listId: Int): List<String> {
