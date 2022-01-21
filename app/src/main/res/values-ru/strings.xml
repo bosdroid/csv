@@ -427,6 +427,9 @@
 	<string name="create_ticket_title_hint_text">Title</string>
     <string name="create_ticket_heading_text">Create the support ticket</string>
     <string name="type_message_hint_text">Type a message</string>
+	<string name="search_hint_text">Search...</string>
+	<string name="search_text">Search</string>
+    <string name="attach_text">Attach</string>
 
 
     <string-array name="mode_list">

@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="@dimen/defaultDpMargin">
 
     <LinearLayout
@@ -18,12 +19,18 @@
            android:layout_marginEnd="@dimen/eightDpMargin"
            android:orientation="vertical"
            >
-           <com.google.android.material.textview.MaterialTextView
+           <com.borjabravo.readmoretextview.ReadMoreTextView
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:textSize="@dimen/largeText"
                android:id="@+id/bcd_table_column_value"
                android:textColor="@color/black"
+               app:showTrimExpandedText="true"
+               app:trimMode="trimModeLine"
+               app:trimLines="3"
+               app:trimCollapsedText="See More"
+               app:trimExpandedText="See Less"
+               app:colorClickableText="@color/primary_positive_color"
                />
            <com.google.android.material.textview.MaterialTextView
                android:layout_width="wrap_content"

@@ -1,5 +1,6 @@
 package com.boris.expert.csvmagic.utils
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -209,6 +210,38 @@ class ImageManager {
 //            )
 //        }
 
+        fun saveMediaToStorage(context: Context,bitmap: Bitmap,listener: ResponseListener) {
+            //BaseActivity.startLoading(context)
+            val filename = "Image_${System.currentTimeMillis()}.jpg"
+            var saveImageUri:String = ""
+            var fos: OutputStream? = null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                context.contentResolver?.also { resolver ->
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                    }
+                    val imageUri: Uri? =
+                        resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                    saveImageUri = imageUri.toString()
+                    fos = imageUri?.let { resolver.openOutputStream(it)
+                    }
+                }
+            } else {
+                val imagesDir =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                val image = File(imagesDir, filename)
+                saveImageUri = image.absolutePath
+                fos = FileOutputStream(image)
+            }
+            fos?.use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+                //BaseActivity.dismiss()
+                listener.onSuccess(saveImageUri)
+            }
+        }
+
         // THIS FUNCTION WILL GET ALL THE BACKGROUND IMAGE THAT USER HAVE SELECTED FROM EXTERNAL STORAGE
         fun getFilesFromBackgroundImagesFolder(dir: File): MutableList<String> {
             val fileList = mutableListOf<String>()
@@ -340,6 +373,18 @@ class ImageManager {
         }
 
         fun convertImageToBase64(context: Context, path: String): String {
+            if (path.contains("http") || path.contains("https")){
+               return URL(path).openStream().use { inputStream ->
+                   ByteArrayOutputStream().use { outputStream ->
+                       Base64OutputStream(outputStream, Base64.NO_WRAP).use { base64FilterStream ->
+                           inputStream.copyTo(base64FilterStream)
+                           base64FilterStream.close()
+                           outputStream.toString()
+                       }
+                   }
+               }
+
+            }
             return FileInputStream(path).use { inputStream ->
                 ByteArrayOutputStream().use { outputStream ->
                     Base64OutputStream(outputStream, Base64.NO_WRAP).use { base64FilterStream ->

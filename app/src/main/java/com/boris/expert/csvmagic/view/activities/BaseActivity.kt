@@ -19,6 +19,7 @@ import androidx.appcompat.widget.AppCompatRatingBar
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.RetryPolicy
 import com.android.volley.VolleyError
@@ -224,10 +225,10 @@ open class BaseActivity : AppCompatActivity() {
         fun updateMemorySize(
             context: Context,
             size: String,
-            totalSize:Int,
+            totalSize: Int,
             user_id: String,
             update_total: Int,
-            endDate:String,
+            endDate: String,
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
@@ -318,7 +319,7 @@ open class BaseActivity : AppCompatActivity() {
 
                             val availableSize = packageDetail!!.getString("size")
                             Constants.userServerAvailableStorageSize = availableSize
-                            appSettings.putString(Constants.memory,availableSize)
+                            appSettings.putString(Constants.memory, availableSize)
 
                         }
                     }
@@ -377,6 +378,37 @@ open class BaseActivity : AppCompatActivity() {
                     return params
                 }
             }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+        fun searchInternetImages(context: Context, query: String, listener: APICallback) {
+
+            val stringRequest = StringRequest(
+                Request.Method.GET,
+                "https://www.googleapis.com/customsearch/v1?key=AIzaSyCZlMizckEu0kcFm3hk9CCNAfLckXrx5ik&cx=1bc14d2483baa3917&q=${query}&searchType=image",
+                {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                },
+                {
+                    Log.d("TEST199", it.localizedMessage!!)
+                    listener.onError(it)
+                })
 
             stringRequest.retryPolicy = object : RetryPolicy {
                 override fun getCurrentTimeout(): Int {

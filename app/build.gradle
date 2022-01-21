@@ -222,5 +222,10 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.16.1'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.16.1'
 
+    // jsoup HTML parser library @ https://jsoup.org/
+    implementation 'org.jsoup:jsoup:1.14.3'
+
+    implementation 'com.borjabravo:readmoretextview:2.1.0'
+
 
 }

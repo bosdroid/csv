@@ -123,6 +123,10 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
         openFilePicker()
     }
 
+    public fun restart(){
+        onResume()
+    }
+
 
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -182,19 +186,19 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                             val originalColumns = listContents[0]
 //
 //                                if (counter == 0) {
-                            if (checkCyrillicCharacter(row.joinToString(","))){
-                                for (i in row.indices) {
-                                    columnsList.add(
-                                        Constants.transLit(row[i]!!.trim()).replace(
-                                            "[-+.^:,?'()]".toRegex(),
-                                            ""
-                                        ).replace(" ", "_").toLowerCase(
-                                            Locale.ENGLISH
-                                        )
-                                    )
-                                }
-                            }
-                            else{
+//                            if (checkCyrillicCharacter(row.joinToString(","))){
+//                                for (i in row.indices) {
+//                                    columnsList.add(
+//                                        Constants.transLit(row[i]!!.trim()).replace(
+//                                            "[-+.^:,?'()]".toRegex(),
+//                                            ""
+//                                        ).replace(" ", "_").toLowerCase(
+//                                            Locale.ENGLISH
+//                                        )
+//                                    )
+//                                }
+//                            }
+//                            else{
                                 for (i in row.indices) {
                                     columnsList.add(
                                         row[i]!!.trim().replace(
@@ -205,7 +209,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                                         )
                                     )
                                 }
-                            }
+//                            }
 
 
                             for (j in 1 until listContents.size) {
@@ -268,9 +272,9 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                                                 tableGenerator.insertData(tableName, listRecord[j])
                                             }
                                             BaseActivity.dismiss()
-                                            if (checkCyrillicCharacter(originalColumns.joinToString(","))){
-                                                tableGenerator.insertExportColumns(tableName,originalColumns.joinToString(","))
-                                            }
+//                                            if (checkCyrillicCharacter(originalColumns.joinToString(","))){
+//                                                tableGenerator.insertExportColumns(tableName,originalColumns.joinToString(","))
+//                                            }
                                             BaseActivity.showAlert(
                                                 requireActivity(),
                                                 getString(R.string.table_created_success_message)

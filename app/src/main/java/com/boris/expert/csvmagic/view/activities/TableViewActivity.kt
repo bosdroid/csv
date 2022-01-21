@@ -129,6 +129,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 )
 
                 textView.text = columns[i - 1].toUpperCase(Locale.ENGLISH)
+                textView.setBackgroundResource(R.drawable.left_border)
                 headerLayout.id = i - 1
                 headerLayout.tag = columns[i - 1].toLowerCase(Locale.ENGLISH)
                 headerLayout.setOnClickListener(this)
@@ -953,16 +954,16 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 //            builder.append(Constants.transLit(columns.joinToString(",")))
 
             val builder = StringBuilder()
-            var tempColumns = ""
-            val originalColumns = tableGenerator.getTableOriginalColumns(tableName)
-            tempColumns = if (originalColumns.isNotEmpty()) {
-                originalColumns
-            } else {
+//            var tempColumns = ""
+//            val originalColumns = tableGenerator.getTableOriginalColumns(tableName)
+//            tempColumns = if (originalColumns.isNotEmpty()) {
+//                originalColumns
+//            } else {
                 val columns = tableGenerator.getTableColumns(tableName)
                 columns!!.joinToString(",")
-            }
+//            }
 
-            builder.append(tempColumns)
+            builder.append(columns)
 
             for (j in 0 until dataListCsv.size) {
 

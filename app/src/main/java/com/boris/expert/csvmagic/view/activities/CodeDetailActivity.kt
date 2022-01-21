@@ -23,10 +23,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.RadioGroup
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
@@ -38,9 +35,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.size
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
@@ -51,8 +50,10 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.BImagesAdapter
 import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.adapters.FeedbackAdapter
+import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
 import com.boris.expert.csvmagic.interfaces.APICallback
+import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.interfaces.UploadImageCallback
 import com.boris.expert.csvmagic.model.CodeHistory
 import com.boris.expert.csvmagic.model.Feedback
@@ -844,7 +845,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             val codeDataLayout = LayoutInflater.from(context)
                 .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
             val codeDataColumnValue =
-                codeDataLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                codeDataLayout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
             val codeDataColumnName =
                 codeDataLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
             val codeDataColumnEditView =
@@ -864,7 +865,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             val dateLayout = LayoutInflater.from(context)
                 .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
             val dateColumnValue =
-                dateLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                dateLayout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
             val dateColumnName =
                 dateLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
             val dateColumnEditView = dateLayout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
@@ -878,7 +879,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             val imageLayout = LayoutInflater.from(context)
                 .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
             val imageColumnValue =
-                imageLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                imageLayout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
             val imageColumnName =
                 imageLayout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
             val imageColumnEditView =
@@ -981,9 +982,11 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
                 val layout = LayoutInflater.from(context)
                     .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
-                val columnValue = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                val columnValue = layout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
                 val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
                 val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
+                columnValue.setTrimCollapsedText("See More")
+                columnValue.setTrimExpandedText("See Less")
                 counter += 1
                 columnEditView.id = counter
                 barcodeEditList.add(Triple(columnEditView, item.second, item.first))
@@ -1008,10 +1011,11 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
                 val layout = LayoutInflater.from(context)
                     .inflate(R.layout.barcode_detail_item_row, barcodeDetailParentLayout, false)
-                val columnValue = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_value)
+                val columnValue = layout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
                 val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
                 val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
-
+                columnValue.setTrimCollapsedText("See More")
+                columnValue.setTrimExpandedText("See Less")
                 columnEditView.id = counter
                 barcodeEditList.add(Triple(columnEditView, item.second, item.first))
                 columnEditView.setOnClickListener(this)
@@ -1045,6 +1049,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         val cameraImageView = dialogLayout.findViewById<AppCompatImageView>(R.id.camera_image_view)
         val imagesImageView = dialogLayout.findViewById<AppCompatImageView>(R.id.images_image_view)
+        val internetImageView = dialogLayout.findViewById<AppCompatImageView>(R.id.internet_image_view)
 
         cameraImageView.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
@@ -1063,6 +1068,146 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             ) {
                 pickImageFromGallery1()
             }
+        }
+
+        internetImageView.setOnClickListener {
+            val searchedImagesList = mutableListOf<String>()
+            val internetSearchLayout = LayoutInflater.from(context)
+                .inflate(R.layout.internet_image_search_dialog_layout, null)
+            val loader =
+                internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
+            val searchBoxView =
+                internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
+            val searchBtnView =
+                internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
+            val internetImageRecyclerView =
+                internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
+            val closeBtn = internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+            val builder = MaterialAlertDialogBuilder(context)
+            builder.setCancelable(false)
+            builder.setView(internetSearchLayout)
+            val iAlert = builder.create()
+            iAlert.show()
+
+            closeBtn.setOnClickListener {
+                iAlert.dismiss()
+            }
+
+            internetImageRecyclerView.layoutManager =
+                GridLayoutManager(context, 2)
+            internetImageRecyclerView.hasFixedSize()
+            val internetImageAdapter = InternetImageAdapter(
+                context,
+                searchedImagesList as ArrayList<String>
+            )
+            internetImageRecyclerView.adapter = internetImageAdapter
+            internetImageAdapter.setOnItemClickListener(object :
+                InternetImageAdapter.OnItemClickListener {
+                override fun onItemClick(position: Int) {
+                    val selectedImage = searchedImagesList[position]
+
+                }
+
+                override fun onItemAttachClick(position: Int) {
+                    runOnUiThread {
+                        loader.visibility = View.VISIBLE
+                    }
+
+                    val selectedImage = searchedImagesList[position]
+                    val bitmap:Bitmap? = ImageManager.getBitmapFromURL(context,selectedImage)
+                    if (bitmap != null){
+                        ImageManager.saveMediaToStorage(context,bitmap,object:
+                            ResponseListener {
+                            override fun onSuccess(result: String) {
+                                if (loader.visibility == View.VISIBLE) {
+                                    loader.visibility = View.INVISIBLE
+                                }
+
+                                if (result.isNotEmpty()){
+                                    multiImagesList.add(
+                                        ImageManager.getRealPathFromUri(context,
+                                            Uri.parse(result))!!
+                                    )
+                                    filePathView!!.text = multiImagesList.joinToString(",")
+                                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                                    barcodeImageList.clear()
+                                    barcodeImageList.addAll(multiImagesList)
+                                    adapter.notifyDataSetChanged()
+                                    iAlert.dismiss()
+                                }
+                                else{
+                                    showAlert(context,getString(R.string.something_wrong_error))
+                                }
+                            }
+
+                        })
+                    }
+                    else
+                    {
+                        if (loader.visibility == View.VISIBLE) {
+                            loader.visibility = View.INVISIBLE
+                        }
+                    }
+                }
+
+            })
+
+
+            searchBtnView.setOnClickListener {
+                if (searchBoxView.text.toString().trim().isNotEmpty()) {
+                    hideSoftKeyboard(context,searchBtnView)
+                    //Constants.hideKeyboar(requireActivity())
+                    val query = searchBoxView.text.toString().trim()
+                    runOnUiThread {
+                        loader.visibility = View.VISIBLE
+                    }
+
+                    searchInternetImages(
+                        context,
+                        query,
+                        object : APICallback {
+                            override fun onSuccess(response: JSONObject) {
+                                if (loader.visibility == View.VISIBLE) {
+                                    loader.visibility = View.INVISIBLE
+                                }
+
+                                val items = response.getJSONArray("items")
+                                if (items.length() > 0) {
+                                    searchedImagesList.clear()
+                                    for (i in 0 until items.length()) {
+                                        val item = items.getJSONObject(i)
+                                        if (item.has("link")) {
+                                            searchedImagesList.add(item.getString("link"))
+                                        }
+                                    }
+                                    internetImageAdapter.notifyItemRangeChanged(
+                                        0,
+                                        searchedImagesList.size
+                                    )
+                                }
+                            }
+
+                            override fun onError(error: VolleyError) {
+                                if (loader.visibility == View.VISIBLE) {
+                                    loader.visibility = View.INVISIBLE
+                                }
+
+                                showAlert(context, error.localizedMessage!!)
+                            }
+
+                        })
+                } else {
+                    if (loader.visibility == View.VISIBLE) {
+                        loader.visibility = View.INVISIBLE
+                    }
+
+                    showAlert(
+                        context,
+                        getString(R.string.empty_text_error)
+                    )
+                }
+            }
+
         }
 
         barcodeImagesRecyclerView!!.layoutManager = LinearLayoutManager(
@@ -1091,6 +1236,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                     barcodeImageList.removeAt(position)
                     multiImagesList.removeAt(position)
                     filePathView!!.text = multiImagesList.joinToString(",")
+                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
                     adapter.notifyItemRemoved(position)
                 }
                 val alert = builder.create()

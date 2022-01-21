@@ -42,6 +42,7 @@
             android:textSize="@dimen/mediumText"
             android:textStyle="bold"
             android:textColor="@color/white"
+            android:paddingStart="@dimen/eightDpMargin"
             android:id="@+id/header_cell_name"
             />
     </LinearLayout>

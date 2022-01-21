@@ -2,10 +2,8 @@ package com.boris.expert.csvmagic.view.activities
 
 import android.Manifest
 import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.net.Uri
@@ -16,8 +14,11 @@ import android.os.StrictMode
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.WebSettings
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -28,7 +29,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.*
@@ -38,6 +38,7 @@ import com.boris.expert.csvmagic.model.User
 import com.boris.expert.csvmagic.singleton.DriveService
 import com.boris.expert.csvmagic.singleton.SheetService
 import com.boris.expert.csvmagic.utils.AppSettings
+import com.boris.expert.csvmagic.utils.AppWebViewClients
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.DatabaseHandler
 import com.boris.expert.csvmagic.view.fragments.ScanFragment
@@ -76,8 +77,14 @@ import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import org.json.JSONObject
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import java.io.IOException
+import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener,
@@ -129,8 +136,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         if (appSettings.getBoolean(getString(R.string.key_tips))) {
             val duration = appSettings.getLong("tt1")
             if (duration.compareTo(0) == 0 || System.currentTimeMillis() - duration > TimeUnit.DAYS.toMillis(
-                            1
-                    )
+                    1
+                )
             ) {
 
                 SimpleTooltip.Builder(this)
@@ -163,8 +170,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         scannerFragment = ScannerFragment()
         auth = Firebase.auth
         viewModel = ViewModelProviders.of(
-                this,
-                ViewModelFactory(MainActivityViewModel()).createFor()
+            this,
+            ViewModelFactory(MainActivityViewModel()).createFor()
         )[MainActivityViewModel::class.java]
         toolbar = findViewById(R.id.toolbar)
         mDrawer = findViewById(R.id.drawer)
@@ -178,8 +185,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         privacyPolicy.setOnClickListener {
             mDrawer.closeDrawer(GravityCompat.START)
             val browserIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://qrmagicapp.com/privacy-policy-CSV/")
+                Intent.ACTION_VIEW,
+                Uri.parse("https://qrmagicapp.com/privacy-policy-CSV/")
             )
             startActivity(browserIntent)
         }
@@ -190,17 +197,17 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             when (item.itemId) {
                 R.id.bottom_scanner -> {
                     supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragment_container, ScannerFragment(), "scanner")
-                            .addToBackStack("scanner")
-                            .commit()
+                        .replace(R.id.fragment_container, ScannerFragment(), "scanner")
+                        .addToBackStack("scanner")
+                        .commit()
 //                    nextStepTextView.visibility = View.GONE
 //                    historyBtn.visibility = View.VISIBLE
                 }
                 R.id.bottom_tables -> {
                     supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragment_container, ScanFragment(), "tables")
-                            .addToBackStack("tables")
-                            .commit()
+                        .replace(R.id.fragment_container, ScanFragment(), "tables")
+                        .addToBackStack("tables")
+                        .commit()
 //                    historyBtn.visibility = View.GONE
 //                    nextStepTextView.visibility = View.VISIBLE
                 }
@@ -224,9 +231,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //            nextStepTextView.visibility = View.GONE
             //historyBtn.visibility = View.VISIBLE
             supportFragmentManager.beginTransaction().add(
-                    R.id.fragment_container,
-                    ScannerFragment(),
-                    "scanner"
+                R.id.fragment_container,
+                ScannerFragment(),
+                "scanner"
             )
                     .addToBackStack("scanner")
                     .commit()
@@ -236,25 +243,25 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun getAccountsPermission() {
         if (ContextCompat.checkSelfPermission(
-                        this@MainActivity,
-                        Manifest.permission.GET_ACCOUNTS
-                ) != PackageManager.PERMISSION_GRANTED
+                this@MainActivity,
+                Manifest.permission.GET_ACCOUNTS
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
 
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                            this@MainActivity,
-                            Manifest.permission.GET_ACCOUNTS
-                    )
+                    this@MainActivity,
+                    Manifest.permission.GET_ACCOUNTS
+                )
             ) {
                 Log.e("Accounts", "Permission Granted")
                 initializeGoogleLoginParameters()
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(
-                        this@MainActivity,
-                        arrayOf(Manifest.permission.GET_ACCOUNTS),
-                        0
+                    this@MainActivity,
+                    arrayOf(Manifest.permission.GET_ACCOUNTS),
+                    0
                 )
             }
         }
@@ -304,13 +311,13 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         if (acct != null) {
 
             credential = GoogleAccountCredential.usingOAuth2(
-                    applicationContext, scopes
+                applicationContext, scopes
             )
                     .setBackOff(ExponentialBackOff())
                     .setSelectedAccount(acct.account)
 
             mService = Drive.Builder(
-                    transport, jsonFactory, credential
+                transport, jsonFactory, credential
             ).setHttpRequestInitializer { request ->
                 credential!!.initialize(request)
                 request!!.connectTimeout = 300 * 60000  // 300 minutes connect timeout
@@ -321,9 +328,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
             try {
                 sheetService = Sheets.Builder(
-                        httpTransport,
-                        jacksonFactory,
-                        credential
+                    httpTransport,
+                    jacksonFactory,
+                    credential
                 )
                         .setApplicationName(getString(R.string.app_name))
                         .build()
@@ -359,12 +366,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 val personId = acct.id
                 val personPhoto: Uri? = acct.photoUrl
                 val user = User(
-                        personName!!,
-                        personGivenName!!,
-                        personFamilyName!!,
-                        personEmail!!,
-                        personId!!,
-                        personPhoto!!.toString()
+                    personName!!,
+                    personGivenName!!,
+                    personFamilyName!!,
+                    personEmail!!,
+                    personId!!,
+                    personPhoto!!.toString()
                 )
                 appSettings.putUser(Constants.user, user)
                 Constants.userData = user
@@ -377,9 +384,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 if (isLastSignUser == "new") {
                     appSettings.putBoolean(Constants.isLogin, true)
                     Toast.makeText(
-                            context,
-                            getString(R.string.user_signin_success_text),
-                            Toast.LENGTH_SHORT
+                        context,
+                        getString(R.string.user_signin_success_text),
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
                 checkUserLoginStatus()
@@ -464,26 +471,26 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
             R.id.logout -> {
                 MaterialAlertDialogBuilder(context)
-                        .setTitle(getString(R.string.logout))
-                        .setMessage(getString(R.string.logout_warning_text))
-                        .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                            dialog.dismiss()
-                        }
-                        .setPositiveButton(getString(R.string.logout)) { dialog, which ->
-                            DatabaseHandler.exporter(context, object : BackupListener {
-                                override fun onSuccess() {
-                                    startLoading(context)
-                                    signOut()
-                                }
+                    .setTitle(getString(R.string.logout))
+                    .setMessage(getString(R.string.logout_warning_text))
+                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                        DatabaseHandler.exporter(context, object : BackupListener {
+                            override fun onSuccess() {
+                                startLoading(context)
+                                signOut()
+                            }
 
-                                override fun onFailure() {
+                            override fun onFailure() {
 
-                                }
+                            }
 
-                            })
+                        })
 
-                        }
-                        .create().show()
+                    }
+                    .create().show()
             }
             else -> {
             }
@@ -493,7 +500,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu,menu)
+        menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
@@ -503,8 +510,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 //hideSoftKeyboard(context, mDrawer)
                 return true
             }
-            R.id.help->{
-                startActivity(Intent(context,HelpActivity::class.java))
+            R.id.help -> {
+                startActivity(Intent(context, HelpActivity::class.java))
                 return true
             }
             else -> {
@@ -523,8 +530,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "text/plain"
         shareIntent.putExtra(
-                Intent.EXTRA_TEXT,
-                getString(R.string.share_app_message) + "https://play.google.com/store/apps/details?id=" + packageName
+            Intent.EXTRA_TEXT,
+            getString(R.string.share_app_message) + "https://play.google.com/store/apps/details?id=" + packageName
         )
         startActivity(shareIntent)
 
@@ -551,6 +558,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                     scannerFragment.restart()
                 }
+                else{
+                    val scanFragment = supportFragmentManager.findFragmentByTag("tables")
+                    if (scanFragment != null && scanFragment.isVisible) {
+                        val scannerFragment1 = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+                        scannerFragment1.restart()
+                    }
+                }
+
                 checkUserLoginStatus()
             }
 //
@@ -579,34 +594,35 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             .addOnSuccessListener(object : OnSuccessListener<GoogleSignInAccount> {
                                 override fun onSuccess(googleSignInAccount: GoogleSignInAccount?) {
                                     credential = GoogleAccountCredential.usingOAuth2(
-                                            context,
-                                            scopes
+                                        context,
+                                        scopes
                                     )
-                                            .setBackOff(ExponentialBackOff())
-                                            .setSelectedAccount(googleSignInAccount!!.account)
+                                        .setBackOff(ExponentialBackOff())
+                                        .setSelectedAccount(googleSignInAccount!!.account)
 //                            if (googleSignInAccount != null) {
 //                                credential.selectedAccount = googleSignInAccount.account
 //                            }
 
                                     mService = Drive.Builder(
-                                            transport, jsonFactory, credential
+                                        transport, jsonFactory, credential
                                     ).setHttpRequestInitializer { request ->
                                         credential!!.initialize(request)
                                         request!!.connectTimeout =
-                                                300 * 60000  // 300 minutes connect timeout
-                                        request.readTimeout = 300 * 60000  // 300 minutes read timeout
+                                            300 * 60000  // 300 minutes connect timeout
+                                        request.readTimeout =
+                                            300 * 60000  // 300 minutes read timeout
                                     }
-                                            .setApplicationName(getString(R.string.app_name))
-                                            .build()
+                                        .setApplicationName(getString(R.string.app_name))
+                                        .build()
 
                                     try {
                                         sheetService = Sheets.Builder(
-                                                httpTransport,
-                                                jacksonFactory,
-                                                credential
+                                            httpTransport,
+                                            jacksonFactory,
+                                            credential
                                         )
-                                                .setApplicationName(getString(R.string.app_name))
-                                                .build()
+                                            .setApplicationName(getString(R.string.app_name))
+                                            .build()
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     }
@@ -616,11 +632,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                                     saveUserUpdatedDetail(googleSignInAccount, "new")
                                 }
                             }).addOnFailureListener(object : OnFailureListener {
-                                override fun onFailure(p0: java.lang.Exception) {
-                                    showAlert(context, p0.localizedMessage!!)
-                                }
+                            override fun onFailure(p0: java.lang.Exception) {
+                                showAlert(context, p0.localizedMessage!!)
+                            }
 
-                            })
+                        })
                 }
             }
 
@@ -678,9 +694,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         } else {
             bottomNavigation.selectedItemId = R.id.bottom_scanner
             supportFragmentManager.beginTransaction().replace(
-                    R.id.fragment_container,
-                    ScannerFragment(),
-                    "scanner"
+                R.id.fragment_container,
+                ScannerFragment(),
+                "scanner"
             )
                     .addToBackStack("scanner")
                     .commit()
@@ -711,18 +727,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                         url
                     }
                     val qrHistory = CodeHistory(
-                            hashMap["login"]!!,
-                            hashMap["qrId"]!!,
-                            hashMap["userUrl"]!!,
-                            type,
-                            hashMap["userType"]!!,
-                            "qr",
-                            "create",
-                            "",
-                            "1",
-                            url,
-                            System.currentTimeMillis().toString(),
-                            ""
+                        hashMap["login"]!!,
+                        hashMap["qrId"]!!,
+                        hashMap["userUrl"]!!,
+                        type,
+                        hashMap["userType"]!!,
+                        "qr",
+                        "create",
+                        "",
+                        "1",
+                        url,
+                        System.currentTimeMillis().toString(),
+                        ""
                     )
 
                     val intent = Intent(context, DesignActivity::class.java)
@@ -737,18 +753,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             encodedTextData = data
 
             val qrHistory = CodeHistory(
-                    hashMap["login"]!!,
-                    hashMap["qrId"]!!,
-                    encodedTextData,
-                    type,
-                    hashMap["userType"]!!,
-                    "qr",
-                    "create",
-                    "",
-                    "0",
-                    "",
-                    System.currentTimeMillis().toString(),
-                    ""
+                hashMap["login"]!!,
+                hashMap["qrId"]!!,
+                encodedTextData,
+                type,
+                hashMap["userType"]!!,
+                "qr",
+                "create",
+                "",
+                "0",
+                "",
+                System.currentTimeMillis().toString(),
+                ""
             )
             val intent = Intent(context, DesignActivity::class.java)
             intent.putExtra("ENCODED_TEXT", encodedTextData)
@@ -775,7 +791,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //            getCurrentSubscriptionDetail(context)
 
             Handler(Looper.myLooper()!!).postDelayed({
-                if (auth.currentUser != null){
+                if (auth.currentUser != null) {
                     getUserCredits(context)
                     Constants.firebaseUserId = auth.uid!!
                     getUserPackageDetail(context)
@@ -798,6 +814,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
         }
+
     }
 
     private fun add5MbFreeStorage() {
@@ -809,33 +826,33 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             val reference = firebaseDatabase.child("FREE_MB_USERS").child(id)
 
             reference.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            if (!snapshot.hasChildren()) {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (!snapshot.hasChildren()) {
 
-                                val feature = Feature(0, 1, 1, 30, 100.0F, 0, 0)
-                                purchaseFeatures(context, feature, id, object : APICallback {
-                                    override fun onSuccess(response: JSONObject) {
-                                       if (response.has("package") && !response.isNull("package")){
-                                           firebaseDatabase.child("FREE_MB_USERS")
-                                               .child(id).child("status").setValue("yes")
-                                       }
+                        val feature = Feature(0, 1, 1, 30, 100.0F, 0, 0)
+                        purchaseFeatures(context, feature, id, object : APICallback {
+                            override fun onSuccess(response: JSONObject) {
+                                if (response.has("package") && !response.isNull("package")) {
+                                    firebaseDatabase.child("FREE_MB_USERS")
+                                        .child(id).child("status").setValue("yes")
+                                }
 
-                                    }
-
-                                    override fun onError(error: VolleyError) {
-                                        Log.d("TEST199", error.localizedMessage!!)
-                                    }
-
-                                })
                             }
 
-                        }
+                            override fun onError(error: VolleyError) {
+                                Log.d("TEST199", error.localizedMessage!!)
+                            }
 
-                        override fun onCancelled(error: DatabaseError) {
+                        })
+                    }
 
-                        }
+                }
 
-                    })
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
 
         }
 
@@ -918,9 +935,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 0) {
@@ -956,5 +973,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val fragment = supportFragmentManager.findFragmentByTag("scanner")
         fragment?.onActivityResult(requestCode, resultCode, data)
     }
+
 
 }

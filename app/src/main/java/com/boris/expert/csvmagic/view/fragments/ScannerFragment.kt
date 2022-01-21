@@ -36,6 +36,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.DefaultRetryPolicy
@@ -45,6 +46,7 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
+import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.customviews.CustomTextInputEditText
 import com.boris.expert.csvmagic.interfaces.*
 import com.boris.expert.csvmagic.model.CodeHistory
@@ -61,6 +63,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.drive.model.FileList
@@ -557,8 +560,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                 if (tableName.isEmpty()) {
                     showAlert(requireActivity(), text)
-                }
-                else {
+                } else {
 
 //                    requireActivity().startActivity(
 //                        Intent(
@@ -619,6 +621,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 barcodeImageList.removeAt(position)
                                 multiImagesList.removeAt(position)
                                 filePathView!!.text = multiImagesList.joinToString(",")
+                                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
                                 adapter.notifyItemRemoved(position)
                             }
                             val alert = builder.create()
@@ -720,6 +723,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<AppCompatImageView>(R.id.camera_image_view)
                     val imagesImageView =
                         scanResultLayout.findViewById<AppCompatImageView>(R.id.images_image_view)
+                    val internetImageView =
+                        scanResultLayout.findViewById<AppCompatImageView>(R.id.internet_image_view)
 
                     cameraImageView.setOnClickListener {
                         if (RuntimePermissionHelper.checkCameraPermission(
@@ -750,6 +755,147 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             )
                         }
                     }
+
+                    internetImageView.setOnClickListener {
+                        val searchedImagesList = mutableListOf<String>()
+                        val internetSearchLayout = LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.internet_image_search_dialog_layout, null)
+                        val loader =
+                            internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
+                        val searchBoxView =
+                            internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
+                        val searchBtnView =
+                            internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
+                        val internetImageRecyclerView =
+                            internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
+                        val closeBtn = internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                        val builder = MaterialAlertDialogBuilder(requireActivity())
+                        builder.setCancelable(false)
+                        builder.setView(internetSearchLayout)
+                        val iAlert = builder.create()
+                        iAlert.show()
+
+                        closeBtn.setOnClickListener {
+                            iAlert.dismiss()
+                        }
+
+                        internetImageRecyclerView.layoutManager =
+                            GridLayoutManager(requireActivity(), 2)
+                        internetImageRecyclerView.hasFixedSize()
+                        val internetImageAdapter = InternetImageAdapter(
+                            requireActivity(),
+                            searchedImagesList as ArrayList<String>
+                        )
+                        internetImageRecyclerView.adapter = internetImageAdapter
+                        internetImageAdapter.setOnItemClickListener(object :
+                            InternetImageAdapter.OnItemClickListener {
+                            override fun onItemClick(position: Int) {
+                                val selectedImage = searchedImagesList[position]
+
+                            }
+
+                            override fun onItemAttachClick(position: Int) {
+                                requireActivity().runOnUiThread {
+                                    loader.visibility = View.VISIBLE
+                                }
+
+                                val selectedImage = searchedImagesList[position]
+                                val bitmap:Bitmap? = ImageManager.getBitmapFromURL(requireActivity(),selectedImage)
+                                if (bitmap != null){
+                                    ImageManager.saveMediaToStorage(requireActivity(),bitmap,object:ResponseListener{
+                                        override fun onSuccess(result: String) {
+                                            if (loader.visibility == View.VISIBLE) {
+                                                loader.visibility = View.INVISIBLE
+                                            }
+
+                                            if (result.isNotEmpty()){
+                                                multiImagesList.add(
+                                                    ImageManager.getRealPathFromUri(requireActivity(),
+                                                        Uri.parse(result))!!
+                                                )
+                                                filePathView!!.text = multiImagesList.joinToString(",")
+                                                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                                                barcodeImageList.clear()
+                                                barcodeImageList.addAll(multiImagesList)
+                                                adapter.notifyDataSetChanged()
+                                                iAlert.dismiss()
+                                            }
+                                            else{
+                                                showAlert(requireActivity(),requireActivity().resources.getString(R.string.something_wrong_error))
+                                            }
+                                        }
+
+                                    })
+                                }
+                                else
+                                {
+                                   if (loader.visibility == View.VISIBLE) {
+                                                loader.visibility = View.INVISIBLE
+                                            }
+                                }
+                            }
+
+                        })
+
+
+                        searchBtnView.setOnClickListener {
+                            if (searchBoxView.text.toString().trim().isNotEmpty()) {
+                                BaseActivity.hideSoftKeyboard(requireActivity(),searchBtnView)
+                                //Constants.hideKeyboar(requireActivity())
+                                val query = searchBoxView.text.toString().trim()
+                                requireActivity().runOnUiThread {
+                                    loader.visibility = View.VISIBLE
+                                }
+
+                                BaseActivity.searchInternetImages(
+                                    requireActivity(),
+                                    query,
+                                    object : APICallback {
+                                        override fun onSuccess(response: JSONObject) {
+                                            if (loader.visibility == View.VISIBLE) {
+                                                loader.visibility = View.INVISIBLE
+                                            }
+
+                                            val items = response.getJSONArray("items")
+                                            if (items.length() > 0) {
+                                                searchedImagesList.clear()
+                                                for (i in 0 until items.length()) {
+                                                    val item = items.getJSONObject(i)
+                                                    if (item.has("link")) {
+                                                        searchedImagesList.add(item.getString("link"))
+                                                    }
+                                                }
+                                                internetImageAdapter.notifyItemRangeChanged(
+                                                    0,
+                                                    searchedImagesList.size
+                                                )
+                                            }
+                                        }
+
+                                        override fun onError(error: VolleyError) {
+                                            if (loader.visibility == View.VISIBLE) {
+                                                loader.visibility = View.INVISIBLE
+                                            }
+
+                                            showAlert(requireActivity(), error.localizedMessage!!)
+                                        }
+
+                                    })
+                            } else {
+                                if (loader.visibility == View.VISIBLE) {
+                                    loader.visibility = View.INVISIBLE
+                                }
+
+                                showAlert(
+                                    requireActivity(),
+                                    requireActivity().resources.getString(R.string.empty_text_error)
+                                )
+                            }
+                        }
+
+                    }
+
+
                     columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
                     Log.d("TEST1999", columns.toString())
                     for (i in columns.indices) {
@@ -1133,6 +1279,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     val imagesImageView =
                         scanResultLayout.findViewById<AppCompatImageView>(R.id.images_image_view)
 
+                    val internetImageView =
+                        scanResultLayout.findViewById<AppCompatImageView>(R.id.internet_image_view)
+
                     cameraImageView.setOnClickListener {
                         if (RuntimePermissionHelper.checkCameraPermission(
                                 requireActivity(),
@@ -1162,6 +1311,20 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             )
                         }
                     }
+
+                    internetImageView.setOnClickListener {
+
+                        val internetSearchLayout = LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.internet_image_search_dialog_layout, null)
+                        val builder = MaterialAlertDialogBuilder(requireActivity())
+                        builder.setCancelable(true)
+                        builder.setView(internetSearchLayout)
+                        val iAlert = builder.create()
+                        iAlert.show()
+
+                    }
+
+
                     columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
                     Log.d("TEST1999", columns.toString())
                     for (i in columns.indices) {
@@ -1739,7 +1902,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     var barcodeEditList = mutableListOf<Triple<AppCompatImageView, String, String>>()
     private var counter: Int = 0
     private fun displayBarcodeDetail(tableObject: TableObject) {
-
 
         if (barcodeDetailParentLayout.childCount > 0) {
             barcodeDetailParentLayout.removeAllViews()
