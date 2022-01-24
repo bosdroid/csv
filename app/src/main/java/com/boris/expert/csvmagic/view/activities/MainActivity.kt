@@ -88,7 +88,7 @@ import java.util.regex.Pattern
 
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener,
-        OnCompleteAction, ScannerInterface {
+    OnCompleteAction, ScannerInterface {
 
 
     private lateinit var eventListener: ValueEventListener
@@ -141,22 +141,23 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             ) {
 
                 SimpleTooltip.Builder(this)
-                        .anchorView(bottomNavigation)
-                        .text(getString(R.string.bottom_navigation_tip_text))
-                        .gravity(Gravity.TOP)
-                        .animated(true)
-                        .transparentOverlay(false)
-                        .onDismissListener { tooltip ->
-                            tooltip.dismiss()
-                            appSettings.putLong("tt1", System.currentTimeMillis())
-                            val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
-                            if (currentFragment != null && currentFragment.isVisible) {
-                                val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-                                fragment.showTableSelectTip()
-                            }
+                    .anchorView(bottomNavigation)
+                    .text(getString(R.string.bottom_navigation_tip_text))
+                    .gravity(Gravity.TOP)
+                    .animated(true)
+                    .transparentOverlay(false)
+                    .onDismissListener { tooltip ->
+                        tooltip.dismiss()
+                        appSettings.putLong("tt1", System.currentTimeMillis())
+                        val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                        if (currentFragment != null && currentFragment.isVisible) {
+                            val fragment =
+                                supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                            fragment.showTableSelectTip()
                         }
-                        .build()
-                        .show()
+                    }
+                    .build()
+                    .show()
             }
         }
     }
@@ -222,9 +223,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         if (intent != null && intent.hasExtra("KEY") && intent.getStringExtra("KEY") == "tables") {
             bottomNavigation.selectedItemId = R.id.bottom_tables
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, ScanFragment(), "tables")
-                    .addToBackStack("tables")
-                    .commit()
+                .replace(R.id.fragment_container, ScanFragment(), "tables")
+                .addToBackStack("tables")
+                .commit()
             //historyBtn.visibility = View.GONE
 //            nextStepTextView.visibility = View.VISIBLE
         } else {
@@ -235,8 +236,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 ScannerFragment(),
                 "scanner"
             )
-                    .addToBackStack("scanner")
-                    .commit()
+                .addToBackStack("scanner")
+                .commit()
         }
 
     }
@@ -299,12 +300,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //        scopes.add(DriveScopes.DRIVE_APPDATA)
 
         val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
 //            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-                .requestScopes(Scope(SheetsScopes.SPREADSHEETS))
+            .requestScopes(Scope(SheetsScopes.SPREADSHEETS))
 //            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-                .build()
+            .build()
         mGoogleSignInClient = GoogleSignIn.getClient(this, signInOptions)
 
         val acct: GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(context)
@@ -313,8 +314,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             credential = GoogleAccountCredential.usingOAuth2(
                 applicationContext, scopes
             )
-                    .setBackOff(ExponentialBackOff())
-                    .setSelectedAccount(acct.account)
+                .setBackOff(ExponentialBackOff())
+                .setSelectedAccount(acct.account)
 
             mService = Drive.Builder(
                 transport, jsonFactory, credential
@@ -323,8 +324,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 request!!.connectTimeout = 300 * 60000  // 300 minutes connect timeout
                 request.readTimeout = 300 * 60000  // 300 minutes read timeout
             }
-                    .setApplicationName(getString(R.string.app_name))
-                    .build()
+                .setApplicationName(getString(R.string.app_name))
+                .build()
 
             try {
                 sheetService = Sheets.Builder(
@@ -332,16 +333,15 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     jacksonFactory,
                     credential
                 )
-                        .setApplicationName(getString(R.string.app_name))
-                        .build()
+                    .setApplicationName(getString(R.string.app_name))
+                    .build()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
             DriveService.saveDriveInstance(mService!!)
             SheetService.saveGoogleSheetInstance(sheetService!!)
             saveUserUpdatedDetail(acct, "last")
-        }
-        else{
+        } else {
             checkUserLoginStatus()
         }
 
@@ -482,14 +482,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             override fun onSuccess() {
                                 startLoading(context)
                                 signOut()
-                                DatabaseHandler.importer(context,"logout")
+                                DatabaseHandler.importer(context, "logout")
                             }
 
                             override fun onFailure() {
 
                             }
 
-                        },"login")
+                        }, "login")
 
                     }
                     .create().show()
@@ -548,22 +548,24 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 dismiss()
 //                appSettings.clear()
                 appSettings.remove(Constants.dbImport)
+                appSettings.remove(Constants.dbExport)
                 appSettings.remove(Constants.isLogin)
                 appSettings.remove(Constants.user)
                 Toast.makeText(context, getString(R.string.logout_success_text), Toast.LENGTH_SHORT)
-                        .show()
+                    .show()
                 Constants.userData = null
                 Constants.sheetService = null
                 Constants.mService = null
                 val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
                 if (currentFragment != null && currentFragment.isVisible) {
-                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                    val scannerFragment =
+                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                     scannerFragment.restart()
-                }
-                else{
+                } else {
                     val scanFragment = supportFragmentManager.findFragmentByTag("tables")
                     if (scanFragment != null && scanFragment.isVisible) {
-                        val scannerFragment1 = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+                        val scannerFragment1 =
+                            supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
                         scannerFragment1.restart()
                     }
                 }
@@ -577,9 +579,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     // THIS GOOGLE LAUNCHER WILL HANDLE RESULT
     private var googleLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == Activity.RESULT_OK) {
 
 //                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
 //                try {
@@ -592,65 +594,65 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //                    Log.w("TAG", "Google sign in failed", e)
 //                }
 
-                    GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                            .addOnSuccessListener(object : OnSuccessListener<GoogleSignInAccount> {
-                                override fun onSuccess(googleSignInAccount: GoogleSignInAccount?) {
-                                    credential = GoogleAccountCredential.usingOAuth2(
-                                        context,
-                                        scopes
-                                    )
-                                        .setBackOff(ExponentialBackOff())
-                                        .setSelectedAccount(googleSignInAccount!!.account)
+                GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                    .addOnSuccessListener(object : OnSuccessListener<GoogleSignInAccount> {
+                        override fun onSuccess(googleSignInAccount: GoogleSignInAccount?) {
+                            credential = GoogleAccountCredential.usingOAuth2(
+                                context,
+                                scopes
+                            )
+                                .setBackOff(ExponentialBackOff())
+                                .setSelectedAccount(googleSignInAccount!!.account)
 //                            if (googleSignInAccount != null) {
 //                                credential.selectedAccount = googleSignInAccount.account
 //                            }
 
-                                    mService = Drive.Builder(
-                                        transport, jsonFactory, credential
-                                    ).setHttpRequestInitializer { request ->
-                                        credential!!.initialize(request)
-                                        request!!.connectTimeout =
-                                            300 * 60000  // 300 minutes connect timeout
-                                        request.readTimeout =
-                                            300 * 60000  // 300 minutes read timeout
-                                    }
-                                        .setApplicationName(getString(R.string.app_name))
-                                        .build()
-
-                                    try {
-                                        sheetService = Sheets.Builder(
-                                            httpTransport,
-                                            jacksonFactory,
-                                            credential
-                                        )
-                                            .setApplicationName(getString(R.string.app_name))
-                                            .build()
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
-                                    DriveService.saveDriveInstance(mService!!)
-                                    SheetService.saveGoogleSheetInstance(sheetService!!)
-                                    firebaseAuthWithGoogle(googleSignInAccount.idToken!!)
-                                    saveUserUpdatedDetail(googleSignInAccount, "new")
-                                }
-                            }).addOnFailureListener(object : OnFailureListener {
-                            override fun onFailure(p0: java.lang.Exception) {
-                                showAlert(context, p0.localizedMessage!!)
+                            mService = Drive.Builder(
+                                transport, jsonFactory, credential
+                            ).setHttpRequestInitializer { request ->
+                                credential!!.initialize(request)
+                                request!!.connectTimeout =
+                                    300 * 60000  // 300 minutes connect timeout
+                                request.readTimeout =
+                                    300 * 60000  // 300 minutes read timeout
                             }
+                                .setApplicationName(getString(R.string.app_name))
+                                .build()
 
-                        })
-                }
+                            try {
+                                sheetService = Sheets.Builder(
+                                    httpTransport,
+                                    jacksonFactory,
+                                    credential
+                                )
+                                    .setApplicationName(getString(R.string.app_name))
+                                    .build()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                            DriveService.saveDriveInstance(mService!!)
+                            SheetService.saveGoogleSheetInstance(sheetService!!)
+                            firebaseAuthWithGoogle(googleSignInAccount.idToken!!)
+                            saveUserUpdatedDetail(googleSignInAccount, "new")
+                        }
+                    }).addOnFailureListener(object : OnFailureListener {
+                        override fun onFailure(p0: java.lang.Exception) {
+                            showAlert(context, p0.localizedMessage!!)
+                        }
+
+                    })
             }
+        }
 
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
 
-                    }
                 }
+            }
     }
 
     private fun handleSignInResult(acct: GoogleSignInAccount) {
@@ -700,8 +702,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 ScannerFragment(),
                 "scanner"
             )
-                    .addToBackStack("scanner")
-                    .commit()
+                .addToBackStack("scanner")
+                .commit()
         }
     }
 
@@ -792,6 +794,16 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
 //            getCurrentSubscriptionDetail(context)
 
+            DatabaseHandler.exporter(context, object : BackupListener {
+                override fun onSuccess() {
+                }
+
+                override fun onFailure() {
+
+                }
+
+            }, "logout")
+
             Handler(Looper.myLooper()!!).postDelayed({
                 if (auth.currentUser != null) {
                     getUserCredits(context)
@@ -800,21 +812,16 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 }
 
                 add5MbFreeStorage()
-                DatabaseHandler.exporter(context, object : BackupListener {
-                    override fun onSuccess() {
-                        DatabaseHandler.importer(context,"login")
-                    }
-
-                    override fun onFailure() {
-
-                    }
-
-                },"logout")
+                val alreadyImported = appSettings.getString(Constants.dbImport)
+                if (alreadyImported != null && alreadyImported.isEmpty()) {
+                    DatabaseHandler.importer(context, "login")
+                }
 
             }, 2000)
 
 
         } else {
+
             mNavigation.menu.findItem(R.id.login).isVisible = true
             mNavigation.menu.findItem(R.id.logout).isVisible = false
             mNavigation.menu.findItem(R.id.profile).isVisible = false
@@ -824,6 +831,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tickets).isVisible = false
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
+
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
         }
 

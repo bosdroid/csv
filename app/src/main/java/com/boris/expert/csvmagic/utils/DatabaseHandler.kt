@@ -17,10 +17,19 @@ import java.io.OutputStream
 
 object DatabaseHandler {
 
-    fun exporter(context: Context, listener: BackupListener,type:String){
+    fun exporter(context: Context, listener: BackupListener, type: String) {
+        val auth = FirebaseAuth.getInstance()
+        var userId = if (auth.currentUser != null) {
+            auth.currentUser!!.uid
+        } else {
+            "123456"
+        }
+        if (type == "logout"){
+            userId = "123456"
+        }
         val appSettings = AppSettings(context)
         val alreadyExported = appSettings.getString(Constants.dbExport)
-        if (alreadyExported!= null && alreadyExported.isEmpty()) {
+        if (alreadyExported != null && alreadyExported.isEmpty()) {
             BaseActivity.startLoading(context)
             val tableGenerator = TableGenerator(context)
             Log.d("TEST1999", tableGenerator.getDbPath())
@@ -29,16 +38,16 @@ object DatabaseHandler {
                 //Existing DB Path
                 val DB_PATH = tableGenerator.getDbPath()
                 val folder =
-                    File(context.filesDir.toString() + File.separator + Constants.firebaseUserId)
+                    File(context.filesDir.toString() + File.separator + userId)
 
                 if (!folder.exists()) {
                     folder.mkdir()
                 }
 
                 val COPY_DB = if (type == "login") {
-                    "${folder.absolutePath}/${Constants.firebaseUserId}_backup.db"
+                    "${folder.absolutePath}/${userId}_backup.db"
                 } else {
-                    "${folder.absolutePath}/${Constants.firebaseUserId}_backup_logout.db"
+                    "${folder.absolutePath}/${userId}_backup_logout.db"
                 }
                 val COPY_DB_PATH = File(COPY_DB)
 
@@ -61,16 +70,22 @@ object DatabaseHandler {
             }
         }
 
+
     }
 
-    fun importer(context: Context,type:String){
+    fun importer(context: Context, type: String) {
         val appSettings = AppSettings(context)
         val auth = FirebaseAuth.getInstance()
-        if (auth.currentUser != null){
-            val userId = auth.currentUser!!.uid
-
-        val alreadyImported = appSettings.getString(Constants.dbImport)
-        if (alreadyImported!= null && alreadyImported.isEmpty()){
+        var userId = if (auth.currentUser != null) {
+            auth.currentUser!!.uid
+        } else {
+            "123456"
+        }
+        if (type == "logout"){
+            userId = "123456"
+        }
+//        val alreadyImported = appSettings.getString(Constants.dbImport)
+//        if (alreadyImported != null && alreadyImported.isEmpty()) {
 
             BaseActivity.startLoading(context)
             val tableGenerator = TableGenerator(context)
@@ -82,27 +97,37 @@ object DatabaseHandler {
                 val folder = File(context.filesDir.toString() + File.separator + userId)
                 if (folder.exists()) {
 
-                    val COPY_DB = if (type == "login"){"${folder.absolutePath}/${userId}_backup.db"}else{"${folder.absolutePath}/${userId}_backup_logout.db"}
+                    val COPY_DB = if (type == "login") {
+                        "${folder.absolutePath}/${userId}_backup.db"
+                    } else {
+                        "${folder.absolutePath}/${userId}_backup_logout.db"
+                    }
                     val COPY_DB_PATH = File(COPY_DB)
-                     if (COPY_DB_PATH.exists()) {
-                         tableGenerator.mergeDatabases("${userId}_backup",COPY_DB_PATH.absolutePath)
-                         appSettings.putString(Constants.dbImport, "yes")
-                     }
+                    if (COPY_DB_PATH.exists()) {
+                        val temp = if (type == "login") {
+                            "backup"
+                        } else {
+                            "backup_logout"
+                        }
+                        tableGenerator.mergeDatabases(
+                            "${userId}_$temp",
+                            COPY_DB_PATH.absolutePath
+                        )
+                        appSettings.putString(Constants.dbImport, "yes")
+                    }
                     BaseActivity.dismiss()
-                }
-                else{
+                } else {
                     BaseActivity.dismiss()
                 }
             } catch (excep: Exception) {
                 BaseActivity.dismiss()
-                BaseActivity.showAlert(context,"ERROR IN COPY $excep")
+                BaseActivity.showAlert(context, "ERROR IN COPY $excep")
                 Log.e("FILECOPYERROR>>>>", excep.toString())
                 excep.printStackTrace()
 
             }
-        }
+//        }
 
-        }
     }
 
 }
