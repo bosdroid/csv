@@ -17,7 +17,7 @@ import java.io.OutputStream
 
 object DatabaseHandler {
 
-    fun exporter(context: Context, listener: BackupListener){
+    fun exporter(context: Context, listener: BackupListener,type:String){
         BaseActivity.startLoading(context)
         val tableGenerator = TableGenerator(context)
         Log.d("TEST1999", tableGenerator.getDbPath())
@@ -31,7 +31,7 @@ object DatabaseHandler {
                 folder.mkdir()
             }
 
-                val COPY_DB = "${folder.absolutePath}/${Constants.firebaseUserId}_backup.db"
+                val COPY_DB = if (type == "login"){"${folder.absolutePath}/${Constants.firebaseUserId}_backup.db"}else{"${folder.absolutePath}/${Constants.firebaseUserId}_backup_logout.db"}
                 val COPY_DB_PATH = File(COPY_DB)
 
                 val srcChannel = FileInputStream(DB_PATH).channel
@@ -53,7 +53,7 @@ object DatabaseHandler {
 
     }
 
-    fun importer(context: Context){
+    fun importer(context: Context,type:String){
         val appSettings = AppSettings(context)
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null){
@@ -72,7 +72,7 @@ object DatabaseHandler {
                 val folder = File(context.filesDir.toString() + File.separator + userId)
                 if (folder.exists()) {
 
-                    val COPY_DB = "${folder.absolutePath}/${userId}_backup.db"
+                    val COPY_DB = if (type == "login"){"${folder.absolutePath}/${userId}_backup.db"}else{"${folder.absolutePath}/${userId}_backup_logout.db"}
                     val COPY_DB_PATH = File(COPY_DB)
                      if (COPY_DB_PATH.exists()) {
                          tableGenerator.mergeDatabases("${userId}_backup",COPY_DB_PATH.absolutePath)

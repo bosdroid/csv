@@ -14,7 +14,7 @@ class InternetImageAdapter(private val context: Context, private val imagesList:
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
-        fun onItemAttachClick(position: Int)
+        fun onItemAttachClick(btn:MaterialButton,position: Int)
     }
 
     private var mListener: OnItemClickListener? = null
@@ -36,7 +36,7 @@ class InternetImageAdapter(private val context: Context, private val imagesList:
             }
 
             attachBtn.setOnClickListener {
-                listener.onItemAttachClick(layoutPosition)
+                listener.onItemAttachClick(attachBtn,layoutPosition)
             }
         }
     }
@@ -50,10 +50,11 @@ class InternetImageAdapter(private val context: Context, private val imagesList:
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val image = imagesList[position]
+
         Glide.with(context)
                 .load(image)
-                .placeholder(R.drawable.placeholder)
-                .centerInside()
+                .thumbnail(Glide.with(context).load(R.drawable.loader))
+                .fitCenter()
                 .into(holder.imageView)
 
     }

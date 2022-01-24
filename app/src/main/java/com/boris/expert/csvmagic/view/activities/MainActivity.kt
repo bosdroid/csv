@@ -481,13 +481,14 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             override fun onSuccess() {
                                 startLoading(context)
                                 signOut()
+                                DatabaseHandler.importer(context,"logout")
                             }
 
                             override fun onFailure() {
 
                             }
 
-                        })
+                        },"login")
 
                     }
                     .create().show()
@@ -798,7 +799,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 }
 
                 add5MbFreeStorage()
-                DatabaseHandler.importer(context)
+                DatabaseHandler.exporter(context, object : BackupListener {
+                    override fun onSuccess() {
+                        startLoading(context)
+                        DatabaseHandler.importer(context,"login")
+                    }
+
+                    override fun onFailure() {
+
+                    }
+
+                },"logout")
+
             }, 2000)
 
 

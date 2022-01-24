@@ -42,6 +42,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.android.volley.Response
 import com.android.volley.RetryPolicy
 import com.android.volley.VolleyError
@@ -1072,6 +1073,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
         internetImageView.setOnClickListener {
             val searchedImagesList = mutableListOf<String>()
+            val tempImageList = mutableListOf<String>()
             val internetSearchLayout = LayoutInflater.from(context)
                 .inflate(R.layout.internet_image_search_dialog_layout, null)
             val loader =
@@ -1090,11 +1092,23 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             iAlert.show()
 
             closeBtn.setOnClickListener {
+                if (tempImageList.isNotEmpty()){
+                    multiImagesList.addAll(tempImageList)
+                    filePathView!!.text = multiImagesList.joinToString(",")
+                    getTotalImagesSize(
+                        filePathView!!.text.split(
+                            ","
+                        ).toMutableList()
+                    )
+                    barcodeImageList.clear()
+                    tempImageList.clear()
+                    barcodeImageList.addAll(multiImagesList)
+                    adapter.notifyDataSetChanged()
+                }
                 iAlert.dismiss()
             }
 
-            internetImageRecyclerView.layoutManager =
-                GridLayoutManager(context, 2)
+            internetImageRecyclerView.layoutManager = StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)//GridLayoutManager(context, 2)
             internetImageRecyclerView.hasFixedSize()
             val internetImageAdapter = InternetImageAdapter(
                 context,
@@ -1108,45 +1122,65 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
                 }
 
-                override fun onItemAttachClick(position: Int) {
-                    runOnUiThread {
-                        loader.visibility = View.VISIBLE
-                    }
+                override fun onItemAttachClick(btn:MaterialButton, position: Int) {
+                    if (btn.text.toString()
+                            .toLowerCase(Locale.ENGLISH) == "attach"
+                    ) {
 
-                    val selectedImage = searchedImagesList[position]
-                    val bitmap:Bitmap? = ImageManager.getBitmapFromURL(context,selectedImage)
-                    if (bitmap != null){
-                        ImageManager.saveMediaToStorage(context,bitmap,object:
-                            ResponseListener {
-                            override fun onSuccess(result: String) {
-                                if (loader.visibility == View.VISIBLE) {
-                                    loader.visibility = View.INVISIBLE
-                                }
 
-                                if (result.isNotEmpty()){
-                                    multiImagesList.add(
-                                        ImageManager.getRealPathFromUri(context,
-                                            Uri.parse(result))!!
-                                    )
-                                    filePathView!!.text = multiImagesList.joinToString(",")
-                                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
-                                    barcodeImageList.clear()
-                                    barcodeImageList.addAll(multiImagesList)
-                                    adapter.notifyDataSetChanged()
-                                    iAlert.dismiss()
-                                }
-                                else{
-                                    showAlert(context,getString(R.string.something_wrong_error))
-                                }
-                            }
+//                                    requireActivity().runOnUiThread {
+//                                        //loader.visibility = View.VISIBLE
+                        btn.text = "Please wait..."
+//                                    }
 
-                        })
-                    }
-                    else
-                    {
-                        if (loader.visibility == View.VISIBLE) {
-                            loader.visibility = View.INVISIBLE
+                        val selectedImage = searchedImagesList[position]
+                        val bitmap: Bitmap? = ImageManager.getBitmapFromURL(
+                            context,
+                            selectedImage
+                        )
+                        if (bitmap != null) {
+                            ImageManager.saveMediaToStorage(
+                                context,
+                                bitmap,
+                                object : ResponseListener {
+                                    override fun onSuccess(result: String) {
+                                        if (loader.visibility == View.VISIBLE) {
+                                            loader.visibility = View.INVISIBLE
+                                        }
+
+                                        if (result.isNotEmpty()) {
+                                            tempImageList.add(
+                                                ImageManager.getRealPathFromUri(
+                                                    context,
+                                                    Uri.parse(result)
+                                                )!!
+                                            )
+                                            btn.text = "Attached"
+                                            btn.setBackgroundColor(ContextCompat.getColor(context,R.color.dark_gray))
+                                        } else {
+                                            btn.text = "Attach"
+                                            showAlert(
+                                                context,
+                                                getString(R.string.something_wrong_error)
+                                            )
+                                        }
+                                    }
+
+                                })
+                        } else {
+//                                        if (loader.visibility == View.VISIBLE) {
+//                                            loader.visibility = View.INVISIBLE
+//                                        }
+                            btn.text = "Attach"
+                            showAlert(
+                                context,
+                                getString(R.string.something_wrong_error)
+                            )
                         }
+                    } else {
+                        btn.text = "Attach"
+                        btn.setBackgroundColor(ContextCompat.getColor(context,R.color.primary_positive_color))
+                        tempImageList.removeAt(position)
                     }
                 }
 
@@ -1235,8 +1269,10 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                     dialog.dismiss()
                     barcodeImageList.removeAt(position)
                     multiImagesList.removeAt(position)
-                    filePathView!!.text = multiImagesList.joinToString(",")
-                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                    if (multiImagesList.isNotEmpty()){
+                        filePathView!!.text = multiImagesList.joinToString(",")
+                        getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                    }
                     adapter.notifyItemRemoved(position)
                 }
                 val alert = builder.create()

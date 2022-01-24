@@ -36,9 +36,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.RetryPolicy
@@ -620,8 +620,10 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 dialog.dismiss()
                                 barcodeImageList.removeAt(position)
                                 multiImagesList.removeAt(position)
-                                filePathView!!.text = multiImagesList.joinToString(",")
-                                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                                if (multiImagesList.isNotEmpty()){
+                                    filePathView!!.text = multiImagesList.joinToString(",")
+                                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                                }
                                 adapter.notifyItemRemoved(position)
                             }
                             val alert = builder.create()
@@ -758,6 +760,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                     internetImageView.setOnClickListener {
                         val searchedImagesList = mutableListOf<String>()
+                        val tempImageList = mutableListOf<String>()
                         val internetSearchLayout = LayoutInflater.from(requireActivity())
                             .inflate(R.layout.internet_image_search_dialog_layout, null)
                         val loader =
@@ -768,7 +771,8 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
                         val internetImageRecyclerView =
                             internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
-                        val closeBtn = internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                        val closeBtn =
+                            internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                         val builder = MaterialAlertDialogBuilder(requireActivity())
                         builder.setCancelable(false)
                         builder.setView(internetSearchLayout)
@@ -776,11 +780,24 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         iAlert.show()
 
                         closeBtn.setOnClickListener {
+                            if (tempImageList.isNotEmpty()){
+                                multiImagesList.addAll(tempImageList)
+                                filePathView!!.text = multiImagesList.joinToString(",")
+                                getTotalImagesSize(
+                                    filePathView!!.text.split(
+                                        ","
+                                    ).toMutableList()
+                                )
+                                barcodeImageList.clear()
+                                tempImageList.clear()
+                                barcodeImageList.addAll(multiImagesList)
+                                adapter.notifyDataSetChanged()
+                            }
                             iAlert.dismiss()
                         }
 
                         internetImageRecyclerView.layoutManager =
-                            GridLayoutManager(requireActivity(), 2)
+                            StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)
                         internetImageRecyclerView.hasFixedSize()
                         val internetImageAdapter = InternetImageAdapter(
                             requireActivity(),
@@ -794,44 +811,68 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                             }
 
-                            override fun onItemAttachClick(position: Int) {
-                                requireActivity().runOnUiThread {
-                                    loader.visibility = View.VISIBLE
-                                }
+                            override fun onItemAttachClick(
+                                btn: MaterialButton,
+                                position: Int
+                            ) {
+                                if (btn.text.toString()
+                                        .toLowerCase(Locale.ENGLISH) == "attach"
+                                ) {
 
-                                val selectedImage = searchedImagesList[position]
-                                val bitmap:Bitmap? = ImageManager.getBitmapFromURL(requireActivity(),selectedImage)
-                                if (bitmap != null){
-                                    ImageManager.saveMediaToStorage(requireActivity(),bitmap,object:ResponseListener{
-                                        override fun onSuccess(result: String) {
-                                            if (loader.visibility == View.VISIBLE) {
-                                                loader.visibility = View.INVISIBLE
-                                            }
 
-                                            if (result.isNotEmpty()){
-                                                multiImagesList.add(
-                                                    ImageManager.getRealPathFromUri(requireActivity(),
-                                                        Uri.parse(result))!!
-                                                )
-                                                filePathView!!.text = multiImagesList.joinToString(",")
-                                                getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
-                                                barcodeImageList.clear()
-                                                barcodeImageList.addAll(multiImagesList)
-                                                adapter.notifyDataSetChanged()
-                                                iAlert.dismiss()
-                                            }
-                                            else{
-                                                showAlert(requireActivity(),requireActivity().resources.getString(R.string.something_wrong_error))
-                                            }
-                                        }
+                                    requireActivity().runOnUiThread {
+//                                        //loader.visibility = View.VISIBLE
+                                        btn.text = "Please wait..."
+                                    }
 
-                                    })
-                                }
-                                else
-                                {
-                                   if (loader.visibility == View.VISIBLE) {
-                                                loader.visibility = View.INVISIBLE
-                                            }
+                                    val selectedImage = searchedImagesList[position]
+                                    val bitmap: Bitmap? = ImageManager.getBitmapFromURL(
+                                        requireActivity(),
+                                        selectedImage
+                                    )
+                                    if (bitmap != null) {
+                                        ImageManager.saveMediaToStorage(
+                                            requireActivity(),
+                                            bitmap,
+                                            object : ResponseListener {
+                                                override fun onSuccess(result: String) {
+                                                    if (loader.visibility == View.VISIBLE) {
+                                                        loader.visibility = View.INVISIBLE
+                                                    }
+
+                                                    if (result.isNotEmpty()) {
+                                                        tempImageList.add(
+                                                            ImageManager.getRealPathFromUri(
+                                                                requireActivity(),
+                                                                Uri.parse(result)
+                                                            )!!
+                                                        )
+                                                        btn.text = "Attached"
+                                                        btn.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.dark_gray))
+                                                    } else {
+                                                        btn.text = "Attach"
+                                                        showAlert(
+                                                            requireActivity(),
+                                                            requireActivity().resources.getString(R.string.something_wrong_error)
+                                                        )
+                                                    }
+                                                }
+
+                                            })
+                                    } else {
+//                                        if (loader.visibility == View.VISIBLE) {
+//                                            loader.visibility = View.INVISIBLE
+//                                        }
+                                        btn.text = "Attach"
+                                        showAlert(
+                                            requireActivity(),
+                                            requireActivity().resources.getString(R.string.something_wrong_error)
+                                        )
+                                    }
+                                } else {
+                                    btn.text = "Attach"
+                                    btn.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.primary_positive_color))
+                                    tempImageList.removeAt(position)
                                 }
                             }
 
@@ -840,7 +881,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                         searchBtnView.setOnClickListener {
                             if (searchBoxView.text.toString().trim().isNotEmpty()) {
-                                BaseActivity.hideSoftKeyboard(requireActivity(),searchBtnView)
+                                BaseActivity.hideSoftKeyboard(requireActivity(), searchBtnView)
                                 //Constants.hideKeyboar(requireActivity())
                                 val query = searchBoxView.text.toString().trim()
                                 requireActivity().runOnUiThread {

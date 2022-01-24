@@ -17,17 +17,18 @@
         >
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/search_image_view"
             android:scaleType="fitXY"
-            android:src="@drawable/logo_image_placeholder"
+            android:src="@drawable/loader"
             />
 
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/search_image_attach_btn"
+            app:backgroundTint="@color/primary_positive_color"
             android:text="@string/attach_text"
             />
     </LinearLayout>
