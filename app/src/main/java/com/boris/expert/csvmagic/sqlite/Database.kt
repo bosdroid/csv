@@ -595,8 +595,15 @@ class Database(private val context: Context) : SQLiteOpenHelper(
     }
 
     fun removeItem(tableName: String, id: Int): Boolean {
+        var colName = ""
+        colName = if (tableName.contains("import")){
+            "_id"
+        }
+        else{
+            "id"
+        }
         val db = this.writableDatabase
-        return db.delete(tableName, "id=$id", null) > 0
+        return db.delete(tableName, "$colName=$id", null) > 0
     }
 
     fun deleteItem(tableName: String, code_data: String): Boolean {

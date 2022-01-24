@@ -43,6 +43,8 @@ import java.util.*
 class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener,
     View.OnClickListener {
 
+    private lateinit var itemDetail: TableObject
+    private lateinit var csvItemDetail: List<Pair<String, String>>
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
     private lateinit var tableGenerator: TableGenerator
@@ -95,8 +97,11 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         val columns = tableGenerator.getTableColumns(tableName)
 
         val tableHeaders = TableRow(context)
-        for (i in 0 until columns!!.size + 1) {
-
+        tableHeaders.weightSum = columns!!.size * 2F
+        for (i in 0 until columns.size + 1) {
+//             if (i == 0 && tableName.contains("import")){
+//                 continue
+//             }
             if (i == 0) {
                 val headerLayout =
                     LayoutInflater.from(context).inflate(R.layout.header_table_row_cell, null)
@@ -108,6 +113,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 )
                 val sortImageView =
                     headerLayout.findViewById<AppCompatImageView>(R.id.sort_image)
+                headerLayout.layoutParams = layoutParams
                 sortImageView.visibility = View.INVISIBLE
                 tableHeaders.addView(headerLayout)
             } else {
@@ -127,7 +133,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                         R.color.purple_dark
                     )
                 )
-
+                headerLayout.layoutParams = layoutParams
                 textView.text = columns[i - 1].toUpperCase(Locale.ENGLISH)
                 textView.setBackgroundResource(R.drawable.left_border)
                 headerLayout.id = i - 1
@@ -300,6 +306,18 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 tableRow.tag = "row"
                 tableRow.setOnClickListener(this)
 
+                val moreLayout =
+                        LayoutInflater.from(context).inflate(R.layout.table_more_option_layout, null)
+                moreLayout.layoutParams = TableRow.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
+                moreImage.id = j
+                moreImage.tag = "more"
+                moreImage.setOnClickListener(this)
+                tableRow.addView(moreLayout)
+
                 if (listPair.isNotEmpty()) {
                     for (i in 0 until listPair.size) {
 
@@ -309,12 +327,12 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                         cell.layoutParams = layoutParams
                         val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
 
-//                        if (item.second.length > 8){
-//                            textV.text = item.second.substring(0,9)
-//                        }
-//                        else{
-                        textV.text = item.second
-//                        }
+                        if (item.second.length > 8){
+                            textV.text = "${item.second.substring(0,9)}..."
+                        }
+                        else{
+                          textV.text = item.second.trim()
+                        }
                         tableRow.addView(cell)
                     }
                 }
@@ -368,18 +386,44 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             val triple = barcodeEditList[position]
             triple.first.setText("")
         } else if (view.tag == "more") {
+
             val position = view.id
-            val itemDetail = dataList[position]
+            if (tableName.contains("import")){
+                csvItemDetail = dataListCsv[position]
+            }
+            else{
+                itemDetail = dataList[position]
+            }
+
             val popup = PopupMenu(context, view)
             popup.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener {
                 override fun onMenuItemClick(item: MenuItem?): Boolean {
                     return when (item!!.itemId) {
                         R.id.pp_remove -> {
-                            removeItem(itemDetail.id, position)
+                            if (tableName.contains("import")){
+                                removeItem(csvItemDetail[0].second.toInt(), position)
+                            }
+                            else{
+                                removeItem(itemDetail.id, position)
+                            }
+
                             true
                         }
                         R.id.pp_copy -> {
-                            copyToClipBoard(itemDetail.toString())
+                            if (tableName.contains("import")){
+                                val stringBuilder = StringBuilder()
+                                for (i in 0 until csvItemDetail.size){
+                                    stringBuilder.append("${csvItemDetail[i].first}: ${csvItemDetail[i].second}")
+                                    if (i != csvItemDetail.size-1){
+                                        stringBuilder.append("\n")
+                                    }
+                                }
+                                copyToClipBoard(stringBuilder.toString())
+                            }
+                            else{
+                                copyToClipBoard(itemDetail.toString())
+                            }
+
                             true
                         }
                         else -> false
@@ -432,15 +476,16 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 dialog.dismiss()
                 val isSuccess = tableGenerator.removeItem(tableName, id)
                 if (isSuccess) {
-                    dataList.removeAt(position)
                     Toast.makeText(
                         context,
                         getString(R.string.remove_item_success_text),
                         Toast.LENGTH_SHORT
                     ).show()
                     if (tableName.contains("import")) {
+                        dataListCsv.removeAt(position)
                         getTableDataFromCsv(tableName, "", "")
                     } else {
+                        dataList.removeAt(position)
                         getTableData(tableName, "", "")
                     }
 
