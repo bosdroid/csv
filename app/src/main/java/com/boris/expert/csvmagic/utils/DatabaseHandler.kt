@@ -18,20 +18,28 @@ import java.io.OutputStream
 object DatabaseHandler {
 
     fun exporter(context: Context, listener: BackupListener,type:String){
-        BaseActivity.startLoading(context)
-        val tableGenerator = TableGenerator(context)
-        Log.d("TEST1999", tableGenerator.getDbPath())
+        val appSettings = AppSettings(context)
+        val alreadyExported = appSettings.getString(Constants.dbExport)
+        if (alreadyExported!= null && alreadyExported.isEmpty()) {
+            BaseActivity.startLoading(context)
+            val tableGenerator = TableGenerator(context)
+            Log.d("TEST1999", tableGenerator.getDbPath())
 
-        try {
-            //Existing DB Path
-            val DB_PATH = tableGenerator.getDbPath()
-            val folder = File(context.filesDir.toString() + File.separator + Constants.firebaseUserId)
+            try {
+                //Existing DB Path
+                val DB_PATH = tableGenerator.getDbPath()
+                val folder =
+                    File(context.filesDir.toString() + File.separator + Constants.firebaseUserId)
 
-            if (!folder.exists()) {
-                folder.mkdir()
-            }
+                if (!folder.exists()) {
+                    folder.mkdir()
+                }
 
-                val COPY_DB = if (type == "login"){"${folder.absolutePath}/${Constants.firebaseUserId}_backup.db"}else{"${folder.absolutePath}/${Constants.firebaseUserId}_backup_logout.db"}
+                val COPY_DB = if (type == "login") {
+                    "${folder.absolutePath}/${Constants.firebaseUserId}_backup.db"
+                } else {
+                    "${folder.absolutePath}/${Constants.firebaseUserId}_backup_logout.db"
+                }
                 val COPY_DB_PATH = File(COPY_DB)
 
                 val srcChannel = FileInputStream(DB_PATH).channel
@@ -42,13 +50,15 @@ object DatabaseHandler {
                 dstChannel.close()
                 tableGenerator.deleteDatabase()
                 BaseActivity.dismiss()
+                appSettings.putString(Constants.dbExport, "yes")
                 listener.onSuccess()
 
-        } catch (excep: Exception) {
-            BaseActivity.dismiss()
-            Toast.makeText(context, "ERROR IN COPY $excep", Toast.LENGTH_LONG).show()
-            Log.e("FILECOPYERROR>>>>", excep.toString())
-            excep.printStackTrace()
+            } catch (excep: Exception) {
+                BaseActivity.dismiss()
+                Toast.makeText(context, "ERROR IN COPY $excep", Toast.LENGTH_LONG).show()
+                Log.e("FILECOPYERROR>>>>", excep.toString())
+                excep.printStackTrace()
+            }
         }
 
     }

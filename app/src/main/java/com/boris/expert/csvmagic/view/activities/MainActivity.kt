@@ -477,6 +477,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                         dialog.dismiss()
                     }
                     .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                        appSettings.remove(Constants.dbExport)
                         DatabaseHandler.exporter(context, object : BackupListener {
                             override fun onSuccess() {
                                 startLoading(context)
@@ -801,7 +802,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 add5MbFreeStorage()
                 DatabaseHandler.exporter(context, object : BackupListener {
                     override fun onSuccess() {
-                        startLoading(context)
                         DatabaseHandler.importer(context,"login")
                     }
 

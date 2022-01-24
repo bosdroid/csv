@@ -67,6 +67,7 @@ class Constants {
         var finalQrImageUri: Uri? = null
         var isLogin: String = "is_login"
         var dbImport:String = "db_imp"
+        var dbExport:String = "db_exp"
         var user: String = "user"
         var email: String = "email"
         var duration: String = "duration"
