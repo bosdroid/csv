@@ -549,4 +549,20 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="@dimen/sixtyDpMargin"
+        android:src="@drawable/add_image_icon"
+        android:id="@+id/add_image_fab"
+        android:visibility="gone"
+        app:tint="@color/white"
+        app:fabSize="normal"
+        android:contentDescription="add_image_fab"
+        />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

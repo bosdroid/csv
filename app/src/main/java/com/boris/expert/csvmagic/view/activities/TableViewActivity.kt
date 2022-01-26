@@ -1,9 +1,7 @@
 package com.boris.expert.csvmagic.view.activities
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.app.AlertDialog
+import android.content.*
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -29,6 +27,7 @@ import com.boris.expert.csvmagic.utils.TableGenerator
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import java.io.BufferedWriter
@@ -347,7 +346,10 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
             dismiss()
         }
 
+
     }
+
+
 
     override fun onItemClick(position: Int) {
         val tableObject = dataList[position]

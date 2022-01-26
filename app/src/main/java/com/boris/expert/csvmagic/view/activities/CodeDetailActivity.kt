@@ -65,6 +65,7 @@ import com.boris.expert.csvmagic.viewmodel.CodeDetailViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
@@ -119,7 +120,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private lateinit var updateNotesBtn: AppCompatButton
     private lateinit var contentView: ConstraintLayout
     private lateinit var appSettings: AppSettings
-
+    private lateinit var addImageFabBtn: FloatingActionButton
     //    private lateinit var viewModel: DynamicQrViewModel
     private lateinit var barcodeDetailParentLayout: LinearLayout
     private lateinit var dialogSubHeading: MaterialTextView
@@ -134,6 +135,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     var barcodeEditList = mutableListOf<Triple<AppCompatImageView, String, String>>()
     private var counter: Int = 0
     private var csvTableObject:List<Pair<String,String>>?=null
+    private var isExternalStorageRequest = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -174,7 +176,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 csvTableObject = Constants.csvItemData
             }
         }
-
+        addImageFabBtn = findViewById(R.id.add_image_fab)
         topImageCodeType = findViewById(R.id.code_detail_top_image_type)
         typeTextHeading = findViewById(R.id.code_detail_type_text_heading)
         encodeDataTextView = findViewById(R.id.code_detail_encode_data)
@@ -282,6 +284,10 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             else{
                 if (csvTableObject != null){
                     codeDetailNotesWrapperLayout.visibility = View.GONE
+                    addImageFabBtn.setOnClickListener {
+                        showColumnNamesDialog()
+                    }
+                    addImageFabBtn.visibility = View.VISIBLE
                     displayBarcodeDetail()
                 }
             }
@@ -338,6 +344,28 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             }
         })
 
+    }
+
+    var columnsAlert: AlertDialog?=null
+    var selectedColumn = ""
+    var isCsvAttachImages = false
+    private fun showColumnNamesDialog(){
+        val columns = mutableListOf<String>()
+        columns.addAll(tableGenerator.getTableColumns(tableName)!!.asList())
+        columns.removeAt(0)
+        selectedColumn = columns[0]
+        val builder = MaterialAlertDialogBuilder(context)
+        builder.setTitle("Choose the Column where you want to attach the images")
+        builder.setSingleChoiceItems(columns.toTypedArray(),0
+        ) { dialog, which ->
+            selectedColumn = columns[which]
+            isCsvAttachImages = true
+            columnsAlert!!.dismiss()
+            openAddImageDialog()
+        }
+        columnsAlert = builder.create()
+        columnsAlert!!.setCanceledOnTouchOutside(false)
+        columnsAlert!!.show()
     }
 
     private fun exportCsv() {
@@ -1062,11 +1090,13 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         }
 
         imagesImageView.setOnClickListener {
-            if (RuntimePermissionHelper.checkCameraPermission(
+            isExternalStorageRequest = true
+            if (RuntimePermissionHelper.checkStoragePermission(
                     context,
                     Constants.READ_STORAGE_PERMISSION
                 )
             ) {
+                isExternalStorageRequest = false
                 pickImageFromGallery1()
             }
         }
@@ -1345,18 +1375,56 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                     } else {
                                         imageList.add(url)
                                     }
-                                    tableGenerator.updateBarcodeDetail(
-                                        tableName,
-                                        "image",
-                                        imageList.joinToString(" "),
-                                        tableObject!!.id
-                                    )
-                                    tableObject!!.image = url
-                                    adapter.notifyDataSetChanged()
+
+                                    if (isCsvAttachImages && selectedColumn.isNotEmpty()){
+                                        var pair:Pair<String,String>?= null
+                                        for (i in 0 until csvTableObject!!.size){
+                                            if (i != 0){
+                                                val tempPair = csvTableObject!![i]
+                                                if (tempPair.first == selectedColumn){
+                                                    pair = tempPair
+                                                    break
+                                                }
+                                            }
+                                        }
+                                        if (pair == null){
+                                            showAlert(context,"Sorry, Selected Column name not existing in table!")
+                                        }
+                                        else{
+                                            var tempText = pair.second
+                                            tempText = "$tempText,${imageList.joinToString(",")}"
+                                            val isUpdated = tableGenerator.updateBarcodeDetail(
+                                                tableName,
+                                                selectedColumn,
+                                                tempText,
+                                                csvTableObject!![0].second.toInt()
+                                            )
+                                            if (isUpdated){
+                                                selectedColumn = ""
+                                                isCsvAttachImages = false
+                                                csvTableObject = tableGenerator.getUpdateBarcodeDetail1(tableName, csvTableObject!![0].second.toInt())
+                                            }
+                                            filePathView!!.text = ""
+                                            barcodeImageList.clear()
+                                            adapter.notifyDataSetChanged()
+                                        }
+                                    }
+                                    else{
+                                        tableGenerator.updateBarcodeDetail(
+                                            tableName,
+                                            "image",
+                                            imageList.joinToString(" "),
+                                            tableObject!!.id
+                                        )
+                                        tableObject!!.image = url
+                                        adapter.notifyDataSetChanged()
+                                    }
+
+
                                     Handler(Looper.myLooper()!!).postDelayed({
                                         dismiss()
                                         displayBarcodeDetail()
-                                    }, 2000)
+                                    }, 1000)
                                 }
                             }
                         })
@@ -1403,7 +1471,6 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             Response.Listener {
                 val response = JSONObject(it)
                 if (response.getInt("status") == 200) {
-                    dismiss()
                     if (response.has("package") && !response.isNull("package")) {
                         val packageDetail: JSONObject? = response.getJSONObject("package")
 
@@ -1442,6 +1509,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                                 userId,
                                                 object : UploadImageCallback {
                                                     override fun onSuccess(imageUrl: String) {
+                                                        dismiss()
                                                         url = imageUrl
                                                         listener.onSuccess("")
                                                     }
@@ -1450,9 +1518,11 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                         }
                                     }
                                 } else {
+                                    dismiss()
                                     showAlert(context, "Your subscription has expired!")
                                 }
                             } else {
+                                dismiss()
                                 showAlert(
                                     context,
                                     "Insufficient storage for saving Images!"
@@ -1794,7 +1864,12 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         when (requestCode) {
             Constants.READ_STORAGE_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (isShareAfterCreated) {
+                    if (isExternalStorageRequest){
+                        isExternalStorageRequest = false
+                        hideSoftKeyboard(context, contentView)
+                        pickImageFromGallery1()
+                    }
+                    else if (isShareAfterCreated) {
                         createPdf(true)
                         isShareAfterCreated = false
                     } else {
@@ -1813,9 +1888,10 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
             Constants.CAMERA_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     hideSoftKeyboard(context, contentView)
-                    pickImageFromCamera()
+                    pickImageFromCamera1()
                 }
             }
+
             else -> {
 
             }
