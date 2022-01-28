@@ -152,4 +152,8 @@ class TableGenerator(context: Context) {
         return database.getTableOriginalColumns(tableName)
     }
 
+    fun deleteTable(tableName: String){
+        database.deleteTable(tableName)
+    }
+
 }

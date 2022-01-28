@@ -378,8 +378,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 if (callback != null) {
                     callback!!.onSuccess()
                 } else {
-//                    val scannerFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-//                    scannerFragment.restart()
+//                    val scanFragment = supportFragmentManager.findFragmentByTag("tables")
+//                    if (scanFragment != null && scanFragment.isVisible) {
+//                        val scannerFragment1 =
+//                            supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+//                        scannerFragment1.restart()
+//                    }
                 }
                 if (isLastSignUser == "new") {
                     appSettings.putBoolean(Constants.isLogin, true)
@@ -388,7 +392,15 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                         getString(R.string.user_signin_success_text),
                         Toast.LENGTH_SHORT
                     ).show()
+
+                    val scanFragment = supportFragmentManager.findFragmentByTag("tables")
+                    if (scanFragment != null && scanFragment.isVisible) {
+                        val tableFragment =
+                            supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+                        tableFragment.restart()
+                    }
                 }
+
                 checkUserLoginStatus()
                 if (requestLogin!!.isNotEmpty() && requestLogin == "login") {
                     startActivity(Intent(context, TablesActivity::class.java))
@@ -477,6 +489,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                         dialog.dismiss()
                     }
                     .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                        dialog.dismiss()
                         appSettings.remove(Constants.dbExport)
                         DatabaseHandler.exporter(context, object : BackupListener {
                             override fun onSuccess() {
@@ -556,19 +569,21 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 Constants.userData = null
                 Constants.sheetService = null
                 Constants.mService = null
+
                 val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
                 if (currentFragment != null && currentFragment.isVisible) {
                     val scannerFragment =
                         supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                     scannerFragment.restart()
-                } else {
-                    val scanFragment = supportFragmentManager.findFragmentByTag("tables")
-                    if (scanFragment != null && scanFragment.isVisible) {
-                        val scannerFragment1 =
-                            supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
-                        scannerFragment1.restart()
-                    }
                 }
+
+                val scanFragment = supportFragmentManager.findFragmentByTag("tables")
+                if (scanFragment != null && scanFragment.isVisible) {
+                    val tableFragment =
+                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+                    tableFragment.restart()
+                }
+
 
                 checkUserLoginStatus()
             }

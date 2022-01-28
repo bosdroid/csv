@@ -259,7 +259,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                 values.put(data[i].first, data[i].second)
             }
         }
-            val res = db.insert(tableName, null, values)
+        val res = db.insert(tableName, null, values)
         db.close()
     }
 
@@ -351,6 +351,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
     fun getAllDatabaseTables(): List<String> {
         val db = this.readableDatabase
         val list = mutableListOf<String>()
+
         val c: Cursor = db.rawQuery(
             "SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN('sqlite_sequence','android_metadata','codes_history','dynamic_qr_codes','list_fields','list','list_metadata','export_data_columns')",
             null
@@ -445,7 +446,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         //db.close()
     }
 
-    fun insertExportColumns(tableName: String,columns:String): Long {
+    fun insertExportColumns(tableName: String, columns: String): Long {
         val db = this.writableDatabase
         val values = ContentValues()
         values.put("table_name", tableName)
@@ -496,7 +497,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         return listOptions
     }
 
-    fun getTableOriginalColumns(tableName: String):String{
+    fun getTableOriginalColumns(tableName: String): String {
         val db = this.readableDatabase
         var columns = ""
         val selectQuery = "SELECT  * FROM $EXPORT_TABLE_COLUMNS WHERE table_name='$tableName'"
@@ -529,9 +530,9 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put(column, value)
-        return if (tableName.contains("import")){
+        return if (tableName.contains("import")) {
             db.update(tableName, contentValues, "_id=$id", null) > 0
-        } else{
+        } else {
             db.update(tableName, contentValues, "id=$id", null) > 0
         }
 
@@ -568,38 +569,37 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         return tableObject
     }
 
-    fun getUpdateBarcodeDetail1(tableName: String, id: Int): List<Pair<String,String>> {
+    fun getUpdateBarcodeDetail1(tableName: String, id: Int): List<Pair<String, String>> {
         val db = this.readableDatabase
         val columns = getTableColumns(tableName)
         //val tableObjectList = mutableListOf<Pair<String, String>?>()
-            val selectQuery = "SELECT  * FROM $tableName WHERE _id=$id"
+        val selectQuery = "SELECT  * FROM $tableName WHERE _id=$id"
 
-            val list = mutableListOf<Pair<String, String>>()
+        val list = mutableListOf<Pair<String, String>>()
 
-            val cursor: Cursor = db.rawQuery(selectQuery, null)
-            if (cursor.moveToFirst()) {
-                do {
-                    for (i in columns!!.indices) {
-                        val col = columns[i]
-                        var pair: Pair<String, String>? = null
-                        pair = Pair(col, cursor.getString(i))
+        val cursor: Cursor = db.rawQuery(selectQuery, null)
+        if (cursor.moveToFirst()) {
+            do {
+                for (i in columns!!.indices) {
+                    val col = columns[i]
+                    var pair: Pair<String, String>? = null
+                    pair = Pair(col, cursor.getString(i))
 
-                        list.add(pair)
-                    }
-                    //tableObjectList.addAll(list)
-                    //list = mutableListOf()
+                    list.add(pair)
+                }
+                //tableObjectList.addAll(list)
+                //list = mutableListOf()
 
-                } while (cursor.moveToNext())
-            }
+            } while (cursor.moveToNext())
+        }
         return list
     }
 
     fun removeItem(tableName: String, id: Int): Boolean {
         var colName = ""
-        colName = if (tableName.contains("import")){
+        colName = if (tableName.contains("import")) {
             "_id"
-        }
-        else{
+        } else {
             "id"
         }
         val db = this.writableDatabase
@@ -710,10 +710,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val db = this.writableDatabase
         val db1 = this.readableDatabase
 
-
+        //db.execSQL("DROP TABLE IF EXISTS default_table")
         val dbPath = db.path
 
-        val query = "ATTACH DATABASE '" + backupDbPath + "' AS $databaseName"
+        val query = "ATTACH DATABASE '$backupDbPath' AS $databaseName"
         if (checkDb(dbPath)) {
             db.execSQL(query)
 
@@ -749,6 +749,8 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                     )
                 } FROM $databaseName.default_table;"
             db.execSQL(insertQuery)
+
+
         }
 //        else {
 //
@@ -784,5 +786,18 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             foundImages = cursor.getString(cursor.getColumnIndex("image"))
         }
         return foundImages
+    }
+
+    fun deleteTable(tableName: String) {
+        val db = this.writableDatabase
+
+//        val query = "ATTACH DATABASE '$path' AS $databaseName"
+//        if (checkDb(path)) {
+//            db.execSQL(query)
+//
+        db.delete(tableName, null, null)
+//        }
+
+
     }
 }

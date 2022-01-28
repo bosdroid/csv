@@ -109,6 +109,15 @@ object DatabaseHandler {
                         } else {
                             "backup_logout"
                         }
+                           if (type == "login"){
+                               val srcChannel = FileInputStream(COPY_DB).channel
+
+                               val dstChannel = FileOutputStream(DB_PATH).channel
+                               srcChannel.transferTo(0, srcChannel.size(), dstChannel)
+                               srcChannel.close()
+                               dstChannel.close()
+                               tableGenerator.deleteTable("default_table")
+                           }
                         tableGenerator.mergeDatabases(
                             "${userId}_$temp",
                             COPY_DB_PATH.absolutePath

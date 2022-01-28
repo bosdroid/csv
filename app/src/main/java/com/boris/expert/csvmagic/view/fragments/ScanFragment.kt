@@ -61,7 +61,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
 
         initViews(v)
 //        getDisplayScanHistory()
-        displayTableList()
+        //displayTableList()
         return v
     }
 
@@ -91,7 +91,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                         listener!!.login(object : LoginCallback {
                             override fun onSuccess() {
                                 Log.d("TEST199", "success")
-                                onResume()
+                                displayTableList()
                             }
 
                         })
@@ -123,8 +123,14 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
         openFilePicker()
     }
 
-    public fun restart(){
+    fun restart() {
         onResume()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        displayTableList()
+
     }
 
 
@@ -199,16 +205,16 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
 //                                }
 //                            }
 //                            else{
-                                for (i in row.indices) {
-                                    columnsList.add(
-                                        row[i]!!.trim().replace(
-                                            "[-+.^:,?'()]".toRegex(),
-                                            ""
-                                        ).replace(" ", "_").toLowerCase(
-                                            Locale.ENGLISH
-                                        )
+                            for (i in row.indices) {
+                                columnsList.add(
+                                    row[i]!!.trim().replace(
+                                        "[-+.^:,?'()]".toRegex(),
+                                        ""
+                                    ).replace(" ", "_").toLowerCase(
+                                        Locale.ENGLISH
                                     )
-                                }
+                                )
+                            }
 //                            }
 
 
@@ -216,7 +222,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                                 val row1 = listContents[j]
                                 for (k in row1.indices) {
                                     var data = row1[k]!!
-                                    if (data.contains("|")){
+                                    if (data.contains("|")) {
                                         data = data.replace("|", ",")
                                     }
                                     tableData.add(Pair(columnsList[k], data.trim()))
@@ -430,13 +436,16 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
         }
 
     private fun displayTableList() {
-        val list = tableGenerator.getAllDatabaseTables()
-        if (list.isNotEmpty()) {
-            tableList.clear()
-        }
-        tableList.addAll(list)
-        adapter.notifyDataSetChanged()
-        adapter.setOnItemClickListener(this)
+
+            val list = tableGenerator.getAllDatabaseTables()
+            if (list.isNotEmpty()) {
+                tableList.clear()
+            }
+            tableList.addAll(list)
+            adapter.notifyItemRangeChanged(0, tableList.size)
+            adapter.setOnItemClickListener(this)
+
+
     }
 
 //    private fun getDisplayScanHistory(){
