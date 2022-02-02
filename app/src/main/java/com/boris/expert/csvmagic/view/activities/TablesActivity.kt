@@ -78,7 +78,13 @@ class TablesActivity : BaseActivity(), TablesAdapter.OnItemClickListener, View.O
         if (list.isNotEmpty()) {
             tableList.clear()
         }
-        tableList.addAll(list)
+        if (Constants.unlimitedTablesFeatureStatus == 0){
+            tableList.add(list[0])
+        }
+        else{
+            tableList.addAll(list)
+        }
+
         adapter.notifyDataSetChanged()
         adapter.setOnItemClickListener(this)
     }
@@ -101,8 +107,14 @@ class TablesActivity : BaseActivity(), TablesAdapter.OnItemClickListener, View.O
     }
 
     override fun onAddItemClick(position: Int) {
+          if (Constants.unlimitedTablesFeatureStatus == 0){
+              showAlert(context,"You can't create more unlimited tables due to feature subscription has been expired!")
+          }
+        else{
+              addTableDialog()
+        }
 //          if (Constants.userData != null){
-        addTableDialog()
+
 //         }
 //        else{
 //            //showAlert(context,"You can not create dynamic table without account login!")

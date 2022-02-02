@@ -306,12 +306,52 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                 appSettings.putString(requireActivity().getString(R.string.key_mode), "$i")
             }
         }
+        if (Constants.userData != null) {
+            BaseActivity.getUserFeaturesDetails(
+                requireActivity(),
+                Constants.firebaseUserId,
+                object : APICallback {
+                    override fun onSuccess(response: JSONObject) {
+                        if (response.getInt("status") == 200) {
+                            val features = response.getJSONArray("features")
+                            if (features.length() > 0) {
+                                for (i in 0 until features.length()) {
+                                    val feature = features.getJSONObject(i)
+                                    if (feature.getString("feature")
+                                            .toLowerCase(Locale.ENGLISH) == "modes_switcher"
+                                    ) {
+                                        val status = feature.getInt("status")
+                                        modesSpinner.isEnabled = status != 0
+                                        break
+                                    } else {
+                                        modesSpinner.isEnabled = false
+                                    }
+                                }
+                            }
+                        }
+                    }
 
+                    override fun onError(error: VolleyError) {
+
+                    }
+
+                })
+        }
+        else{
+            modesSpinner.isEnabled = Constants.modesSwitcherFeatureStatus != 0
+        }
     }
 
     private fun getTableList() {
+
         val tablesList = mutableListOf<String>()
-        tablesList.addAll(tableGenerator.getAllDatabaseTables())
+        if (Constants.unlimitedTablesFeatureStatus == 0){
+            tablesList.add(tableGenerator.getAllDatabaseTables()[0])
+        }
+        else{
+            tablesList.addAll(tableGenerator.getAllDatabaseTables())
+        }
+
         if (tablesList.isNotEmpty()) {
             tableName = tablesList[0]
             val adapter = ArrayAdapter(
@@ -620,9 +660,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                 dialog.dismiss()
                                 barcodeImageList.removeAt(position)
                                 multiImagesList.removeAt(position)
-                                if (multiImagesList.isNotEmpty()){
+                                if (multiImagesList.isNotEmpty()) {
                                     filePathView!!.text = multiImagesList.joinToString(",")
-                                    getTotalImagesSize(filePathView!!.text.split(",").toMutableList())
+                                    getTotalImagesSize(
+                                        filePathView!!.text.split(",").toMutableList()
+                                    )
                                 }
                                 adapter.notifyItemRemoved(position)
                             }
@@ -780,7 +822,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         iAlert.show()
 
                         closeBtn.setOnClickListener {
-                            if (tempImageList.isNotEmpty()){
+                            if (tempImageList.isNotEmpty()) {
                                 multiImagesList.addAll(tempImageList)
                                 filePathView!!.text = multiImagesList.joinToString(",")
                                 getTotalImagesSize(
@@ -848,7 +890,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                             )!!
                                                         )
                                                         btn.text = "Attached"
-                                                        btn.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.dark_gray))
+                                                        btn.setBackgroundColor(
+                                                            ContextCompat.getColor(
+                                                                requireActivity(),
+                                                                R.color.dark_gray
+                                                            )
+                                                        )
                                                     } else {
                                                         btn.text = "Attach"
                                                         showAlert(
@@ -871,7 +918,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                     }
                                 } else {
                                     btn.text = "Attach"
-                                    btn.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.primary_positive_color))
+                                    btn.setBackgroundColor(
+                                        ContextCompat.getColor(
+                                            requireActivity(),
+                                            R.color.primary_positive_color
+                                        )
+                                    )
                                     tempImageList.removeAt(position)
                                 }
                             }
@@ -1056,6 +1108,9 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                     scanResultCancelBtn.setOnClickListener {
                         alert.dismiss()
                         columns.clear()
+                        filePathView!!.setText("")
+                        barcodeImageList.clear()
+                        adapter.notifyDataSetChanged()
                         isScanResultDialogShowing = false
                         codeScanner!!.startPreview()
                     }
@@ -2519,10 +2574,16 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         for (i in 0 until uploadedUrlList.size) {
             Handler(Looper.myLooper()!!).postDelayed({
                 lifecycleScope.launch {
-                    val compressedImageFile =
-                        Compressor.compress(requireActivity(), File(uploadedUrlList[i]))
-                    totalImageSize += ImageManager.getFileSize(compressedImageFile.absolutePath)
+                    totalImageSize += if (Constants.compressorFeatureStatus == 0) {
+                        //val compressedImageFile = Compressor.compress(requireActivity(), File(uploadedUrlList[i]))
+                        ImageManager.getFileSize(File(uploadedUrlList[i]).absolutePath)
+                    } else {
+                        val compressedImageFile =
+                            Compressor.compress(requireActivity(), File(uploadedUrlList[i]))
+                        ImageManager.getFileSize(compressedImageFile.absolutePath)
+                    }
                     Log.d("TEST199TOTALSIZE", "$totalImageSize")
+
                 }
             }, (1000 * i + 1).toLong())
         }

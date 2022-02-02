@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     tools:context=".view.activities.UserScreenActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -200,53 +205,305 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/eightDpMargin"
         android:orientation="vertical"
-        android:id="@+id/coupon_code_wrapper_layout"
+        android:id="@+id/other_features_wrapper_layout"
         android:gravity="center"
         android:padding="@dimen/small"
-        android:background="@drawable/dotted"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/user_screen_subscription_detail_layout"
-
         >
 
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/coupon_code_dialog_heading_text"
-            android:textSize="@dimen/mediumText"
-            android:textColor="@color/black"
-            />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/eightDpMargin"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:background="@drawable/bottom_border"
             >
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/coupon_code_input_field"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/input_text_field_design"
-                android:singleLine="true"
-                android:padding="5dp" />
-
+                android:layout_marginEnd="@dimen/eightDpMargin"
+                android:orientation="vertical"
+                >
+             <com.google.android.material.textview.MaterialTextView
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text="@string/compressor_feature_text"
+                 android:textSize="@dimen/largeText"
+                 android:textColor="@color/primary_positive_color"
+                 />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/compressor_feature_credit_price_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/secondary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/seven_days_trial_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/black"
+                    />
+            </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/sixtyDpMargin"
-                android:text="@string/apply_code_text"
-                app:backgroundTint="@android:color/holo_green_dark"
-                android:id="@+id/apply_coupon_code_btn"
+                android:minHeight="0dp"
+                android:id="@+id/compressor_feature_btn"
+                android:minWidth="0dp"
+                android:text="@string/start"
                 />
-
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bottom_border"
+            >
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/eightDpMargin"
+                android:orientation="vertical"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/switcher_modes_feature_text"
+                    android:textSize="@dimen/largeText"
+                    android:textColor="@color/primary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/switcher_modes_feature_credit_price_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/secondary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/seven_days_trial_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/black"
+                    />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:id="@+id/modes_switcher_feature_btn"
+                android:text="@string/start"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bottom_border"
+            >
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/eightDpMargin"
+                android:orientation="vertical"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/premium_support_feature_text"
+                    android:textSize="@dimen/largeText"
+                    android:textColor="@color/primary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/premium_support_feature_credit_price_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/secondary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/seven_days_trial_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/black"
+                    />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:id="@+id/premium_support_feature_btn"
+                android:minWidth="0dp"
+                android:text="@string/start"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bottom_border"
+            >
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/eightDpMargin"
+                android:orientation="vertical"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unlimited_tables_feature_text"
+                    android:textSize="@dimen/largeText"
+                    android:textColor="@color/primary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unlimited_tables_feature_credit_price_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/secondary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/seven_days_trial_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/black"
+                    />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:id="@+id/unlimited_tables_feature_btn"
+                android:minWidth="0dp"
+                android:text="@string/start"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bottom_border"
+            >
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/eightDpMargin"
+                android:orientation="vertical"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/images_search_feature_text"
+                    android:textSize="@dimen/largeText"
+                    android:textColor="@color/primary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/images_search_feature_credit_price_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/secondary_positive_color"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/seven_days_trial_text"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/black"
+                    />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:id="@+id/images_search_feature_btn"
+                android:minWidth="0dp"
+                android:text="@string/start"
+                />
         </LinearLayout>
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/eightDpMargin"
+            android:orientation="vertical"
+            android:id="@+id/coupon_code_wrapper_layout"
+            android:gravity="center"
+            android:padding="@dimen/small"
+            android:background="@drawable/dotted"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/other_features_wrapper_layout"
+            >
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/coupon_code_dialog_heading_text"
+                android:textSize="@dimen/mediumText"
+                android:textColor="@color/black"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                >
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/coupon_code_input_field"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_text_field_design"
+                    android:singleLine="true"
+                    android:padding="5dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/sixtyDpMargin"
+                    android:text="@string/apply_code_text"
+                    app:backgroundTint="@android:color/holo_green_dark"
+                    android:id="@+id/apply_coupon_code_btn"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

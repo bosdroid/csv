@@ -443,6 +443,26 @@
     <string name="search_hint_text">Search...</string>
     <string name="search_text">Search</string>
     <string name="attach_text">Attach</string>
+    <string name="start">Start</string>
+    <string name="compressor_feature_text">Compressor Feature</string>
+    <string name="compressor_feature_credit_price_text">5 credits per month</string>
+    <string name="seven_days_trial_text">(First 7 days of trial is free)</string>
+    <string name="switcher_modes_feature_text">Scan Mode Switcher Feature</string>
+    <string name="switcher_modes_feature_credit_price_text">5 credits per month</string>
+    <string name="premium_support_feature_text">Premium Support Feature</string>
+    <string name="premium_support_feature_credit_price_text">7 credits per month</string>
+    <string name="unlimited_tables_feature_text">Unlimited Tables Feature</string>
+    <string name="unlimited_tables_feature_credit_price_text">10 credits per month</string>
+    <string name="images_search_feature_text">Images Search Feature</string>
+    <string name="images_search_feature_credit_price_text">1 credit for 100 images</string>
+
+    <string-array name="features_keys">
+        <item>compressor_feature</item>
+        <item>modes_switcher</item>
+        <item>premium_support</item>
+        <item>unlimited_tables</item>
+        <item>images_search</item>
+    </string-array>
 
     <string-array name="mode_list">
         <item>Inventory</item>

@@ -170,6 +170,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         firebaseDatabase = FirebaseDatabase.getInstance().reference
         scannerFragment = ScannerFragment()
         auth = Firebase.auth
+        if (auth.currentUser != null){
+            val uid = auth.currentUser!!.uid
+            Constants.firebaseUserId = uid
+            getUserFeaturesDetails1(context, Constants.firebaseUserId)
+        }
         viewModel = ViewModelProviders.of(
             this,
             ViewModelFactory(MainActivityViewModel()).createFor()
@@ -386,12 +391,23 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //                    }
                 }
                 if (isLastSignUser == "new") {
+                    if (auth.currentUser != null){
+                        Constants.firebaseUserId = auth.currentUser!!.uid
+                        getUserFeaturesDetails1(context, Constants.firebaseUserId)
+                    }
                     appSettings.putBoolean(Constants.isLogin, true)
                     Toast.makeText(
                         context,
                         getString(R.string.user_signin_success_text),
                         Toast.LENGTH_SHORT
                     ).show()
+
+                    val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                    if (currentFragment != null && currentFragment.isVisible) {
+                        val scannerFragment =
+                            supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                        scannerFragment.restart()
+                    }
 
                     val scanFragment = supportFragmentManager.findFragmentByTag("tables")
                     if (scanFragment != null && scanFragment.isVisible) {
@@ -564,6 +580,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 appSettings.remove(Constants.dbExport)
                 appSettings.remove(Constants.isLogin)
                 appSettings.remove(Constants.user)
+                Constants.compressorFeatureStatus = 0
+                Constants.modesSwitcherFeatureStatus = 0
+                Constants.premiumSupportFeatureStatus = 0
+                Constants.unlimitedTablesFeatureStatus = 0
+                Constants.imagesSearchFeatureStatus = 0
                 Toast.makeText(context, getString(R.string.logout_success_text), Toast.LENGTH_SHORT)
                     .show()
                 Constants.userData = null
@@ -645,6 +666,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
+
                             DriveService.saveDriveInstance(mService!!)
                             SheetService.saveGoogleSheetInstance(sheetService!!)
                             firebaseAuthWithGoogle(googleSignInAccount.idToken!!)
@@ -805,6 +827,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tickets).isVisible = true
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
+            getSearchImageDetail()
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
 
 //            getCurrentSubscriptionDetail(context)

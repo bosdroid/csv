@@ -820,9 +820,13 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         for (i in 0 until uploadedUrlList.size) {
             Handler(Looper.myLooper()!!).postDelayed({
                 lifecycleScope.launch {
-                    val compressedImageFile =
-                        Compressor.compress(context, File(uploadedUrlList[i]))
-                    totalImageSize += ImageManager.getFileSize(compressedImageFile.absolutePath)
+                    totalImageSize += if (Constants.compressorFeatureStatus == 0){
+                        //val compressedImageFile = Compressor.compress(context, File(uploadedUrlList[i]))
+                        ImageManager.getFileSize(File(uploadedUrlList[i]).absolutePath)
+                    } else{
+                        val compressedImageFile = Compressor.compress(context, File(uploadedUrlList[i]))
+                        ImageManager.getFileSize(compressedImageFile.absolutePath)
+                    }
                     Log.d("TEST199TOTALSIZE", "$totalImageSize")
                 }
             }, (1000 * i + 1).toLong())

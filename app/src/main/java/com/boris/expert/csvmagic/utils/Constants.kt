@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
@@ -95,6 +96,14 @@ class Constants {
         const val megaByte: Long = 1024L * 1024L
         var isDefaultTableFieldAdded:Boolean = false
         var userServerAvailableStorageSize:String = ""
+        var searchImageCreditPrice = 0
+        var searchImagesLimit = 0
+        var compressorFeatureStatus = 0
+        var modesSwitcherFeatureStatus = 0
+        var premiumSupportFeatureStatus = 0
+        var unlimitedTablesFeatureStatus = 0
+        var imagesSearchFeatureStatus = 0
+
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
@@ -145,6 +154,13 @@ class Constants {
 
         fun getDateFromDays(days: Int):String{
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            val c = Calendar.getInstance()
+            c.add(Calendar.DATE, days)
+            return sdf.format(c.time)
+        }
+
+        fun getDateFromDays1(days: Int):String{
+            val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
             val c = Calendar.getInstance()
             c.add(Calendar.DATE, days)
             return sdf.format(c.time)

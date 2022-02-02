@@ -18,12 +18,14 @@ import com.android.billingclient.api.*
 import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.APICallback
+import com.boris.expert.csvmagic.interfaces.BackupListener
 import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.CouponCode
 import com.boris.expert.csvmagic.model.Feature
 import com.boris.expert.csvmagic.model.PurchaseDetail
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.utils.DatabaseHandler
 import com.boris.expert.csvmagic.utils.Security
 import com.boris.expert.csvmagic.viewmodel.UserScreenActivityViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
@@ -66,6 +68,11 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private var isCouponCodeApplied = false
     private lateinit var couponCodeInputBox: TextInputEditText
     private lateinit var applyCouponCodeBtn: MaterialButton
+    private lateinit var compressorFeatureBtn: MaterialButton
+    private lateinit var modesSwitcherFeatureBtn: MaterialButton
+    private lateinit var premiumSupportFeatureBtn: MaterialButton
+    private lateinit var unlimitedTablesFeatureBtn: MaterialButton
+    private lateinit var imagesSearchFeatureBtn: MaterialButton
 
     //    private lateinit var usExpiredAtView:MaterialTextView
     private var billingClient: BillingClient? = null
@@ -74,6 +81,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private var creditsValue: Float = 0F
     private var userId: String = ""
     private lateinit var viewModel: UserScreenActivityViewModel
+    private var featuresKeys = mutableListOf<String>()
+    private var featureCreditPrice = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +118,17 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         couponCodeInputBox = findViewById(R.id.coupon_code_input_field)
         applyCouponCodeBtn = findViewById(R.id.apply_coupon_code_btn)
         applyCouponCodeBtn.setOnClickListener(this)
+        compressorFeatureBtn = findViewById(R.id.compressor_feature_btn)
+        compressorFeatureBtn.setOnClickListener(this)
+        modesSwitcherFeatureBtn = findViewById(R.id.modes_switcher_feature_btn)
+        modesSwitcherFeatureBtn.setOnClickListener(this)
+        premiumSupportFeatureBtn = findViewById(R.id.premium_support_feature_btn)
+        premiumSupportFeatureBtn.setOnClickListener(this)
+        unlimitedTablesFeatureBtn = findViewById(R.id.unlimited_tables_feature_btn)
+        unlimitedTablesFeatureBtn.setOnClickListener(this)
+        imagesSearchFeatureBtn = findViewById(R.id.images_search_feature_btn)
+        imagesSearchFeatureBtn.setOnClickListener(this)
+        featuresKeys.addAll(resources.getStringArray(R.array.features_keys))
 //        usExpiredAtView = findViewById(R.id.us_expired_at_view)
     }
 
@@ -136,6 +156,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         super.onResume()
         getUserCredit()
         getUserSubscriptionDetails()
+
     }
 
     private fun getUserCredit() {
@@ -180,6 +201,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             viewModel.callUserPackageDetail(context, userId)
             viewModel.getUserPackageResponse().observe(this, { response ->
                 dismiss()
+                startLoading(context)
+                getUserFeatureDetails()
                 if (response != null) {
                     if (response.has("package") && !response.isNull("package")) {
 
@@ -227,6 +250,195 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         }
     }
 
+    private fun getUserFeatureDetails() {
+        getUserFeaturesDetails(context, Constants.firebaseUserId, object : APICallback {
+            override fun onSuccess(response: JSONObject) {
+                dismiss()
+                if (response.getInt("status") == 200) {
+                    val features = response.getJSONArray("features")
+                    if (features.length() > 0) {
+                        for (i in 0 until features.length()) {
+                            val feature = features.getJSONObject(i)
+                            if (feature.getString("feature") == featuresKeys[0] && feature.getInt("status") == 1) {
+                                val id = feature.getInt("id")
+                                val startDate = feature.getString("start_date")
+                                val endDate = feature.getString("end_date")
+                                val type = feature.getString("type")
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
+                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
+                                if (type == "trial") {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        compressorFeatureBtn.id = id
+                                        compressorFeatureBtn.text = "Trial Active"
+                                        compressorFeatureBtn.isEnabled = false
+                                    } else {
+                                        compressorFeatureBtn.id = id
+                                        compressorFeatureBtn.text = "Trial Expired"
+                                        compressorFeatureBtn.isEnabled = true
+                                    }
+                                } else {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        compressorFeatureBtn.id = id
+                                        compressorFeatureBtn.text = "Premium Active"
+                                        compressorFeatureBtn.isEnabled = false
+                                    } else {
+                                        compressorFeatureBtn.id = id
+                                        compressorFeatureBtn.text = "Premium Expired"
+                                        compressorFeatureBtn.isEnabled = true
+                                    }
+                                }
+                            } else if (feature.getString("feature") == featuresKeys[1] && feature.getInt(
+                                    "status"
+                                ) == 1
+                            ) {
+                                val id = feature.getInt("id")
+                                val startDate = feature.getString("start_date")
+                                val endDate = feature.getString("end_date")
+                                val type = feature.getString("type")
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
+                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
+                                if (type == "trial") {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        modesSwitcherFeatureBtn.id = id
+                                        modesSwitcherFeatureBtn.text = "Trial Active"
+                                        modesSwitcherFeatureBtn.isEnabled = false
+                                    } else {
+                                        modesSwitcherFeatureBtn.id = id
+                                        modesSwitcherFeatureBtn.text = "Trial Expired"
+                                        modesSwitcherFeatureBtn.isEnabled = true
+                                    }
+                                } else {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        modesSwitcherFeatureBtn.id = id
+                                        modesSwitcherFeatureBtn.text = "Premium Active"
+                                        modesSwitcherFeatureBtn.isEnabled = false
+                                    } else {
+                                        modesSwitcherFeatureBtn.id = id
+                                        modesSwitcherFeatureBtn.text = "Premium Expired"
+                                        modesSwitcherFeatureBtn.isEnabled = true
+                                    }
+                                }
+                            } else if (feature.getString("feature") == featuresKeys[2] && feature.getInt(
+                                    "status"
+                                ) == 1
+                            ) {
+                                val id = feature.getInt("id")
+                                val startDate = feature.getString("start_date")
+                                val endDate = feature.getString("end_date")
+                                val type = feature.getString("type")
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
+                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
+                                if (type == "trial") {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        premiumSupportFeatureBtn.id = id
+                                        premiumSupportFeatureBtn.text = "Trial Active"
+                                        premiumSupportFeatureBtn.isEnabled = false
+                                    } else {
+                                        premiumSupportFeatureBtn.id = id
+                                        premiumSupportFeatureBtn.text = "Trial Expired"
+                                        premiumSupportFeatureBtn.isEnabled = true
+                                    }
+                                } else {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        premiumSupportFeatureBtn.id = id
+                                        premiumSupportFeatureBtn.text = "Premium Active"
+                                        premiumSupportFeatureBtn.isEnabled = false
+                                    } else {
+                                        premiumSupportFeatureBtn.id = id
+                                        premiumSupportFeatureBtn.text = "Premium Expired"
+                                        premiumSupportFeatureBtn.isEnabled = true
+                                    }
+                                }
+                            } else if (feature.getString("feature") == featuresKeys[3] && feature.getInt(
+                                    "status"
+                                ) == 1
+                            ) {
+                                val id = feature.getInt("id")
+                                val startDate = feature.getString("start_date")
+                                val endDate = feature.getString("end_date")
+                                val type = feature.getString("type")
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
+                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
+                                if (type == "trial") {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        unlimitedTablesFeatureBtn.id = id
+                                        unlimitedTablesFeatureBtn.text = "Trial Active"
+                                        unlimitedTablesFeatureBtn.isEnabled = false
+                                    } else {
+                                        unlimitedTablesFeatureBtn.id = id
+                                        unlimitedTablesFeatureBtn.text = "Trial Expired"
+                                        unlimitedTablesFeatureBtn.isEnabled = true
+                                    }
+                                } else {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        unlimitedTablesFeatureBtn.id = id
+                                        unlimitedTablesFeatureBtn.text = "Premium Active"
+                                        unlimitedTablesFeatureBtn.isEnabled = false
+                                    } else {
+                                        unlimitedTablesFeatureBtn.id = id
+                                        unlimitedTablesFeatureBtn.text = "Premium Expired"
+                                        unlimitedTablesFeatureBtn.isEnabled = true
+                                    }
+                                }
+                            } else if (feature.getString("feature") == featuresKeys[4] && feature.getInt(
+                                    "status"
+                                ) == 1
+                            ) {
+                                val id = feature.getInt("id")
+                                val startDate = feature.getString("start_date")
+                                val endDate = feature.getString("end_date")
+                                val type = feature.getString("type")
+                                val currentMiliSeconds = System.currentTimeMillis()
+                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
+                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
+                                if (type == "trial") {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        imagesSearchFeatureBtn.id = id
+                                        imagesSearchFeatureBtn.text = "Trial Active"
+                                        imagesSearchFeatureBtn.isEnabled = false
+                                    } else {
+                                        imagesSearchFeatureBtn.id = id
+                                        imagesSearchFeatureBtn.text = "Trial Expired"
+                                        imagesSearchFeatureBtn.isEnabled = true
+                                    }
+                                } else {
+                                    if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds
+                                    ) {
+                                        imagesSearchFeatureBtn.id = id
+                                        imagesSearchFeatureBtn.text = "Premium Active"
+                                        imagesSearchFeatureBtn.isEnabled = false
+                                    } else {
+                                        imagesSearchFeatureBtn.id = id
+                                        imagesSearchFeatureBtn.text = "Premium Expired"
+                                        imagesSearchFeatureBtn.isEnabled = false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onError(error: VolleyError) {
+                dismiss()
+            }
+
+        })
+    }
+
     private fun calculateDays(createdAt: Long, expiredAtx: Long): Int {
         val diff: Long = expiredAtx - createdAt
         val totalDays = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS).toInt()
@@ -243,7 +455,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                    if (isCouponCodeApplied) {
 //                        showAlert(context, getString(R.string.already_applied_coupon_error))
 //                    } else {
-                        getCouponsAndApply(code)
+                    getCouponsAndApply(code)
 //                    }
 
                 } else {
@@ -259,10 +471,135 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             R.id.extend_usage_btn -> {
                 extendUsage()
             }
+            R.id.compressor_feature_btn -> {
+                featureCreditPrice = 5
+                showConfirmAlert(featuresKeys[0], compressorFeatureBtn)
+            }
+            R.id.modes_switcher_feature_btn -> {
+                featureCreditPrice = 5
+                showConfirmAlert(featuresKeys[1], modesSwitcherFeatureBtn)
+            }
+            R.id.premium_support_feature_btn -> {
+                featureCreditPrice = 7
+                showConfirmAlert(featuresKeys[2], premiumSupportFeatureBtn)
+            }
+            R.id.unlimited_tables_feature_btn -> {
+                featureCreditPrice = 10
+                showConfirmAlert(featuresKeys[3], unlimitedTablesFeatureBtn)
+            }
+            R.id.images_search_feature_btn -> {
+                featureCreditPrice = Constants.searchImageCreditPrice
+                showConfirmAlert(featuresKeys[4], imagesSearchFeatureBtn)
+            }
             else -> {
 
             }
         }
+    }
+
+    private fun showConfirmAlert(featureName: String, btn: MaterialButton) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(featureName)
+            .setMessage("Are you sure you want to start this ${featureName.toUpperCase(Locale.ENGLISH)} package?")
+            .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(getString(R.string.start)) { dialog, which ->
+                dialog.dismiss()
+                updateUserFeatureDetails(featureName, btn)
+            }
+            .create().show()
+    }
+
+    private fun updateUserFeatureDetails(featureName: String, btn: MaterialButton) {
+        startLoading(context)
+        getUserFeaturesDetails(context, Constants.firebaseUserId, object : APICallback {
+            override fun onSuccess(response: JSONObject) {
+                dismiss()
+                if (response.getInt("status") == 200) {
+                    val features = response.getJSONArray("features")
+                    var tempObject = JSONObject()
+                    var isFound = false
+                    if (features.length() > 0) {
+                        for (i in 0 until features.length()) {
+                            val feature = features.getJSONObject(i)
+                            if (feature.getString("feature")
+                                    .toLowerCase(Locale.ENGLISH) == featureName
+                            ) {
+                                isFound = true
+                                tempObject = feature
+                                break
+                            } else {
+                                isFound = false
+                            }
+                        }
+                        if (isFound) {
+                            val id = tempObject.getInt("id")
+                            val type = tempObject.getString("type")
+                            val start_date = getDateFromTimeStamp1(System.currentTimeMillis())
+                            var end_date = ""
+                            if (type == "trial"){
+                                end_date = Constants.getDateFromDays1(30)
+                            }else if (type == "premium"){
+                                end_date = Constants.getDateFromDays1(30)
+                            }
+                            startLoading(context)
+                            updateUserFeature(context, Constants.firebaseUserId,start_date,end_date, featureName,id,"update","premium",object : APICallback{
+                                override fun onSuccess(response: JSONObject) {
+                                    dismiss()
+                                    getUserFeatureDetails()
+                                    getUserFeaturesDetails1(context,Constants.firebaseUserId)
+                                }
+
+                                override fun onError(error: VolleyError) {
+                                    dismiss()
+                                }
+
+                            })
+                        } else {
+                            startLoading(context)
+                            val start_date = getDateFromTimeStamp1(System.currentTimeMillis())
+                            val end_date = Constants.getDateFromDays1(7)
+                            updateUserFeature(context, Constants.firebaseUserId,start_date,end_date, featureName,0,"new","trial",object : APICallback{
+                                override fun onSuccess(response: JSONObject) {
+                                    dismiss()
+                                    getUserFeatureDetails()
+                                    getUserFeaturesDetails1(context,Constants.firebaseUserId)
+                                }
+
+                                override fun onError(error: VolleyError) {
+                                   dismiss()
+                                }
+
+                            })
+                        }
+                    }
+                    else{
+                       startLoading(context)
+                            val start_date = getDateFromTimeStamp1(System.currentTimeMillis())
+                            val end_date = Constants.getDateFromDays1(7)
+                            updateUserFeature(context, Constants.firebaseUserId,start_date,end_date, featureName,0,"new","trial",object : APICallback{
+                                override fun onSuccess(response: JSONObject) {
+                                    dismiss()
+                                    getUserFeatureDetails()
+                                    getUserFeaturesDetails1(context,Constants.firebaseUserId)
+                                }
+
+                                override fun onError(error: VolleyError) {
+                                   dismiss()
+                                }
+
+                            })
+                    }
+                }
+
+            }
+
+            override fun onError(error: VolleyError) {
+                dismiss()
+            }
+
+        })
     }
 
     private fun getCredits() {
@@ -376,7 +713,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 if (dataSnapshot.exists()) {
                                     list.clear()
                                     for (postSnapshot in dataSnapshot.children) {
-                                        val item = postSnapshot.getValue(CouponCode::class.java) as CouponCode
+                                        val item =
+                                            postSnapshot.getValue(CouponCode::class.java) as CouponCode
                                         list.add(item)
                                     }
                                     dismiss()
@@ -393,14 +731,16 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                         }
 
                                         if (isFound) {
-                                            val df = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                            val df =
+                                                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                                             if (df.parse(tempObject!!.expired)!!.time > System.currentTimeMillis()) {
                                                 couponCodeCredits = tempObject!!.credits
                                                 isCouponCodeApplied = true
 
                                                 val hashMap = HashMap<String, String>()
                                                 userCurrentCreditsValue += couponCodeCredits
-                                                hashMap["credits"] = userCurrentCreditsValue.toString()
+                                                hashMap["credits"] =
+                                                    userCurrentCreditsValue.toString()
 
                                                 firebaseDatabase.child(Constants.firebaseUserCredits)
                                                     .child(Constants.firebaseUserId)
@@ -411,7 +751,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                                             getString(R.string.user_credits_update_success_text),
                                                             Toast.LENGTH_SHORT
                                                         ).show()
-                                                        updateCouponsHistory(code,tempObject!!)
+                                                        updateCouponsHistory(code, tempObject!!)
                                                         couponCodeInputBox.setText("")
                                                         getUserCredit()
                                                     }
@@ -455,10 +795,11 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         })
     }
 
-    private fun updateCouponsHistory(code: String,tempObject: CouponCode) {
+    private fun updateCouponsHistory(code: String, tempObject: CouponCode) {
         tempObject.isUsed = 1
         tempObject.user_id = Constants.firebaseUserId
-        firebaseDatabase.child(Constants.firebaseUsedCoupons).child(code.toLowerCase(Locale.ENGLISH))
+        firebaseDatabase.child(Constants.firebaseUsedCoupons)
+            .child(code.toLowerCase(Locale.ENGLISH))
             .setValue(tempObject)
     }
 
@@ -481,7 +822,11 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                         if (list.isNotEmpty()) {
                             for (i in 0 until list.size) {
                                 val codeDetail = list[i]
-                                if (codeDetail.code.equals(code, ignoreCase = true) && codeDetail.user_id == Constants.firebaseUserId) {
+                                if (codeDetail.code.equals(
+                                        code,
+                                        ignoreCase = true
+                                    ) && codeDetail.user_id == Constants.firebaseUserId
+                                ) {
                                     //tempObject = codeDetail
                                     isFound = true
                                     break

@@ -56,7 +56,6 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 //        val modelManager = RemoteModelManager.getInstance()
 //        // Download the RUSSIAN model.
 //        val ruModel = TranslateRemoteModel.Builder(TranslateLanguage.RUSSIAN).build()
@@ -114,6 +113,12 @@ open class BaseActivity : AppCompatActivity() {
             val c = Date(timeStamp)
             val df = SimpleDateFormat("yyyy-MM-dd kk:mm a", Locale.getDefault())
             return df.format(c).toUpperCase(Locale.ENGLISH)
+        }
+
+        fun getTimeStampFromStringDate(date:String):Long{
+            val sdf = SimpleDateFormat("dd-MM-yyyy",Locale.ENGLISH)
+            val parseDate = sdf.parse(date)
+            return parseDate!!.time
         }
 
         // THIS FUNCTION WILL SET THE FONT FAMILY
@@ -470,11 +475,18 @@ open class BaseActivity : AppCompatActivity() {
             return df.format(c).toUpperCase(Locale.ENGLISH)
         }
 
+        fun getDateFromTimeStamp1(timeStamp: Long): String {
+            val c: Date = Date(timeStamp)
+            val df = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            return df.format(c).toUpperCase(Locale.ENGLISH)
+        }
+
         fun getDateFormateFromTimeStamp(timeStamp: Long): String {
             val c: Date = Date(timeStamp)
             val df = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
             return df.format(c).toUpperCase(Locale.ENGLISH)
         }
+
 
         fun getFormattedDate(context: Context?, smsTimeInMilis: Long): String {
             val smsTime = Calendar.getInstance()
@@ -613,6 +625,21 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
+        fun getSearchImageDetail(){
+            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+            firebaseDatabase.child("SearchImagesLimit").addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    Constants.searchImageCreditPrice = snapshot.child("credits").getValue(Int::class.java) as Int
+                    Constants.searchImagesLimit = snapshot.child("images").getValue(Int::class.java) as Int
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
+        }
+
         fun getCurrentSubscriptionDetail(context: Context) {
             val appSettings = AppSettings(context)
             val auth = FirebaseAuth.getInstance()
@@ -653,6 +680,157 @@ open class BaseActivity : AppCompatActivity() {
                     })
             }
 
+        }
+
+        fun updateUserFeature(
+            context: Context,
+            user_id: String,
+            start_date:String,
+            end_date:String,
+            featureName:String,
+            featureId:Int,
+            op:String,
+            type:String,
+            listener: APICallback
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagic.app/api/update_user_feature.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                }, Response.ErrorListener {
+                    listener.onError(it)
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = user_id
+                    params["start_date"] = start_date
+                    params["end_date"] = end_date
+                    params["feature_name"] = featureName
+                    params["feature_id"] = "$featureId"
+                    params["type"] = type
+                    params["op"] = op
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+        fun getUserFeaturesDetails(
+            context: Context,
+            user_id: String,
+            listener: APICallback
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagic.app/api/get_user_features_details.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                }, Response.ErrorListener {
+                    listener.onError(it)
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = user_id
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+        fun getUserFeaturesDetails1(
+            context: Context,
+            user_id: String
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagic.app/api/get_user_features_details.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    if (response.getInt("status") == 200) {
+                        val features = response.getJSONArray("features")
+
+                        if (features.length() > 0) {
+                            for (i in 0 until features.length()) {
+                                val feature = features.getJSONObject(i)
+                                val status = feature.getInt("status")
+                                when(feature.getString("feature")){
+                                    "compressor_feature"->{
+                                        Constants.compressorFeatureStatus = status
+                                    }
+                                    "modes_switcher"->{
+                                        Constants.modesSwitcherFeatureStatus = status
+                                    }
+                                    "premium_support"->{
+                                        Constants.premiumSupportFeatureStatus = status
+                                    }
+                                    "unlimited_tables"->{
+                                        Constants.unlimitedTablesFeatureStatus = status
+                                    }
+                                    "images_search"->{
+                                        Constants.imagesSearchFeatureStatus = status
+                                    }
+                                    else->{
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }, Response.ErrorListener {
+
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = user_id
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
         }
 
         fun contactSupport(context: AppCompatActivity) {
