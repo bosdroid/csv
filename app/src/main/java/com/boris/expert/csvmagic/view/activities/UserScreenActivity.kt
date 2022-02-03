@@ -73,6 +73,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private lateinit var premiumSupportFeatureBtn: MaterialButton
     private lateinit var unlimitedTablesFeatureBtn: MaterialButton
     private lateinit var imagesSearchFeatureBtn: MaterialButton
+    private lateinit var imagesSeachDetailView:MaterialTextView
 
     //    private lateinit var usExpiredAtView:MaterialTextView
     private var billingClient: BillingClient? = null
@@ -129,6 +130,8 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         imagesSearchFeatureBtn = findViewById(R.id.images_search_feature_btn)
         imagesSearchFeatureBtn.setOnClickListener(this)
         featuresKeys.addAll(resources.getStringArray(R.array.features_keys))
+        imagesSeachDetailView = findViewById(R.id.images_seach_detail_view)
+        imagesSeachDetailView.text = "${Constants.searchImageCreditPrice} credits for ${Constants.searchImagesLimit} images"
 //        usExpiredAtView = findViewById(R.id.us_expired_at_view)
     }
 
@@ -412,7 +415,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                     } else {
                                         imagesSearchFeatureBtn.id = id
                                         imagesSearchFeatureBtn.text = "Trial Expired"
-                                        imagesSearchFeatureBtn.isEnabled = true
+                                        imagesSearchFeatureBtn.isEnabled = false
                                     }
                                 } else {
                                     if (startMiliSeconds <= currentMiliSeconds && currentMiliSeconds <= endMiliSeconds

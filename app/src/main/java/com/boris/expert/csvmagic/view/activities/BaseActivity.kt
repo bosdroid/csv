@@ -575,52 +575,52 @@ open class BaseActivity : AppCompatActivity() {
                         }
 
                     })
-                firebaseDatabase.child(Constants.firebaseUserCredits)
-                    .child(userId).addChildEventListener(object : ChildEventListener {
-                        override fun onChildAdded(
-                            snapshot: DataSnapshot,
-                            previousChildName: String?
-                        ) {
-
-                        }
-
-                        override fun onChildChanged(
-                            snapshot: DataSnapshot,
-                            previousChildName: String?
-                        ) {
-                        }
-
-                        override fun onChildRemoved(snapshot: DataSnapshot) {
-                            userCurrentCreditsValue =
-                                if (snapshot.hasChildren() && snapshot.hasChild(
-                                        "credits"
-                                    )
-                                ) {
-                                    val previousCredits =
-                                        snapshot.child("credits").getValue(String::class.java)
-                                    previousCredits!!.toFloat()
-                                } else {
-                                    0F
-                                }
-                            appSettings.putString(
-                                Constants.userCreditsValue,
-                                "$userCurrentCreditsValue"
-                            )
-                            Log.d("TEST199", "$userCurrentCreditsValue")
-                        }
-
-                        override fun onChildMoved(
-                            snapshot: DataSnapshot,
-                            previousChildName: String?
-                        ) {
-
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-
-                        }
-
-                    })
+//                firebaseDatabase.child(Constants.firebaseUserCredits)
+//                    .child(userId).addChildEventListener(object : ChildEventListener {
+//                        override fun onChildAdded(
+//                            snapshot: DataSnapshot,
+//                            previousChildName: String?
+//                        ) {
+//
+//                        }
+//
+//                        override fun onChildChanged(
+//                            snapshot: DataSnapshot,
+//                            previousChildName: String?
+//                        ) {
+//                        }
+//
+//                        override fun onChildRemoved(snapshot: DataSnapshot) {
+//                            userCurrentCreditsValue =
+//                                if (snapshot.hasChildren() && snapshot.hasChild(
+//                                        "credits"
+//                                    )
+//                                ) {
+//                                    val previousCredits =
+//                                        snapshot.child("credits").getValue(String::class.java)
+//                                    previousCredits!!.toFloat()
+//                                } else {
+//                                    0F
+//                                }
+//                            appSettings.putString(
+//                                Constants.userCreditsValue,
+//                                "$userCurrentCreditsValue"
+//                            )
+//                            Log.d("TEST199", "$userCurrentCreditsValue")
+//                        }
+//
+//                        override fun onChildMoved(
+//                            snapshot: DataSnapshot,
+//                            previousChildName: String?
+//                        ) {
+//
+//                        }
+//
+//                        override fun onCancelled(error: DatabaseError) {
+//
+//                        }
+//
+//                    })
 
             }
         }

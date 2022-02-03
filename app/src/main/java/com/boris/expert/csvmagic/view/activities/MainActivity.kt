@@ -170,11 +170,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         firebaseDatabase = FirebaseDatabase.getInstance().reference
         scannerFragment = ScannerFragment()
         auth = Firebase.auth
-        if (auth.currentUser != null){
-            val uid = auth.currentUser!!.uid
-            Constants.firebaseUserId = uid
-            getUserFeaturesDetails1(context, Constants.firebaseUserId)
-        }
         viewModel = ViewModelProviders.of(
             this,
             ViewModelFactory(MainActivityViewModel()).createFor()
@@ -459,6 +454,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
             }
             R.id.user_screen -> {
+                getSearchImageDetail()
                 startActivity(Intent(context, UserScreenActivity::class.java))
             }
             R.id.credit -> {
@@ -815,6 +811,56 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     }
 
+    private fun getUserCurrentFeatures(){
+        if (auth.currentUser != null) {
+            val uid = auth.currentUser!!.uid
+            Constants.firebaseUserId = uid
+            getUserFeaturesDetails(context, uid, object : APICallback {
+                override fun onSuccess(response: JSONObject) {
+                    if (response.getInt("status") == 200) {
+                        val features = response.getJSONArray("features")
+
+                        if (features.length() > 0) {
+                            for (i in 0 until features.length()) {
+                                val feature = features.getJSONObject(i)
+                                val status = feature.getInt("status")
+                                when (feature.getString("feature")) {
+                                    "compressor_feature" -> {
+                                        Constants.compressorFeatureStatus = status
+                                    }
+                                    "modes_switcher" -> {
+                                        Constants.modesSwitcherFeatureStatus = status
+                                    }
+                                    "premium_support" -> {
+                                        mNavigation.menu.findItem(R.id.tickets).isVisible = status == 1
+                                        Constants.premiumSupportFeatureStatus = status
+                                    }
+                                    "unlimited_tables" -> {
+                                        Constants.unlimitedTablesFeatureStatus = status
+                                    }
+                                    "images_search" -> {
+                                        Constants.imagesSearchFeatureStatus = status
+                                    }
+                                    else -> {
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                override fun onError(error: VolleyError) {
+
+                }
+            })
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getUserCurrentFeatures()
+    }
 
     private fun checkUserLoginStatus() {
         if (appSettings.getBoolean(Constants.isLogin)) {
@@ -824,7 +870,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tables).isVisible = true
             mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.user_screen).isVisible = true
-            mNavigation.menu.findItem(R.id.tickets).isVisible = true
+            mNavigation.menu.findItem(R.id.tickets).isVisible = Constants.premiumSupportFeatureStatus == 1
+
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
             getSearchImageDetail()

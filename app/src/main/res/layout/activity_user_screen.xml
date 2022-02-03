@@ -429,6 +429,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/images_search_feature_credit_price_text"
                     android:textSize="@dimen/mediumText"
+                    android:id="@+id/images_seach_detail_view"
                     android:layout_marginTop="@dimen/defaultDpMargin"
                     android:textColor="@color/secondary_positive_color"
                     />
