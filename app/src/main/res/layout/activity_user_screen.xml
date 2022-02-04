@@ -252,6 +252,14 @@
                     android:layout_marginTop="@dimen/defaultDpMargin"
                     android:textColor="@color/black"
                     />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/cf_expired_text_view"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/red"
+                    />
             </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
@@ -259,7 +267,8 @@
                 android:minHeight="0dp"
                 android:id="@+id/compressor_feature_btn"
                 android:minWidth="0dp"
-                android:text="@string/start"
+                android:text="@string/extend_usage_text"
+                app:backgroundTint="@color/secondary_positive_color"
                 />
         </LinearLayout>
         <LinearLayout
@@ -299,6 +308,14 @@
                     android:layout_marginTop="@dimen/defaultDpMargin"
                     android:textColor="@color/black"
                     />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/smsf_expired_text_view"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/red"
+                    />
             </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
@@ -306,7 +323,8 @@
                 android:minHeight="0dp"
                 android:minWidth="0dp"
                 android:id="@+id/modes_switcher_feature_btn"
-                android:text="@string/start"
+                android:text="@string/extend_usage_text"
+                app:backgroundTint="@color/secondary_positive_color"
                 />
         </LinearLayout>
         <LinearLayout
@@ -346,6 +364,14 @@
                     android:layout_marginTop="@dimen/defaultDpMargin"
                     android:textColor="@color/black"
                     />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/psf_expired_text_view"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/red"
+                    />
             </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
@@ -353,7 +379,8 @@
                 android:minHeight="0dp"
                 android:id="@+id/premium_support_feature_btn"
                 android:minWidth="0dp"
-                android:text="@string/start"
+                android:text="@string/extend_usage_text"
+                app:backgroundTint="@color/secondary_positive_color"
                 />
         </LinearLayout>
         <LinearLayout
@@ -393,6 +420,16 @@
                     android:layout_marginTop="@dimen/defaultDpMargin"
                     android:textColor="@color/black"
                     />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/utf_expired_text_view"
+                    android:textSize="@dimen/mediumText"
+                    android:layout_marginTop="@dimen/defaultDpMargin"
+                    android:textColor="@color/red"
+                    />
+
             </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
@@ -400,7 +437,8 @@
                 android:minHeight="0dp"
                 android:id="@+id/unlimited_tables_feature_btn"
                 android:minWidth="0dp"
-                android:text="@string/start"
+                android:text="@string/extend_usage_text"
+                app:backgroundTint="@color/secondary_positive_color"
                 />
         </LinearLayout>
         <LinearLayout
@@ -411,9 +449,8 @@
             android:background="@drawable/bottom_border"
             >
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginEnd="@dimen/eightDpMargin"
                 android:orientation="vertical"
                 >
@@ -433,23 +470,31 @@
                     android:layout_marginTop="@dimen/defaultDpMargin"
                     android:textColor="@color/secondary_positive_color"
                     />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/seven_days_trial_text"
-                    android:textSize="@dimen/mediumText"
-                    android:layout_marginTop="@dimen/defaultDpMargin"
-                    android:textColor="@color/black"
-                    />
+<!--                <com.google.android.material.textview.MaterialTextView-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="@string/seven_days_trial_text"-->
+<!--                    android:textSize="@dimen/mediumText"-->
+<!--                    android:layout_marginTop="@dimen/defaultDpMargin"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    />-->
+<!--                <com.google.android.material.textview.MaterialTextView-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:id="@+id/imgsf_expired_text_view"-->
+<!--                    android:textSize="@dimen/mediumText"-->
+<!--                    android:layout_marginTop="@dimen/defaultDpMargin"-->
+<!--                    android:textColor="@color/red"-->
+<!--                    />-->
             </LinearLayout>
-            <com.google.android.material.button.MaterialButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minHeight="0dp"
-                android:id="@+id/images_search_feature_btn"
-                android:minWidth="0dp"
-                android:text="@string/start"
-                />
+<!--            <com.google.android.material.button.MaterialButton-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:minHeight="0dp"-->
+<!--                android:id="@+id/images_search_feature_btn"-->
+<!--                android:minWidth="0dp"-->
+<!--                android:text="@string/start"-->
+<!--                />-->
         </LinearLayout>
 
     </LinearLayout>

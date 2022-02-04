@@ -330,11 +330,14 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                     }
                                 }
                             }
+                            else{
+                                modesSpinner.isEnabled = false
+                            }
                         }
                     }
 
                     override fun onError(error: VolleyError) {
-
+                        modesSpinner.isEnabled = false
                     }
 
                 })
@@ -946,11 +949,11 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                             val images = snapshot.child("images")
                                                 .getValue(Int::class.java) as Int
                                             creditChargePrice = creditPrice.toFloat() / images
-                                            if (Constants.imagesSearchFeatureStatus == 0) {
+
                                                 userCurrentCredits =
                                                     appSettings.getString(Constants.userCreditsValue) as String
-
-                                                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+                                                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice)
+                                                {
                                                     BaseActivity.hideSoftKeyboard(
                                                         requireActivity(),
                                                         searchBtnView
@@ -1025,71 +1028,22 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                             }
 
                                                         })
-                                                } else {
-                                                    BaseActivity.hideSoftKeyboard(
-                                                        requireActivity(),
-                                                        searchBtnView
-                                                    )
-                                                    //Constants.hideKeyboar(requireActivity())
-                                                    val query = searchBoxView.text.toString().trim()
-                                                    requireActivity().runOnUiThread {
-                                                        loader.visibility = View.VISIBLE
-                                                    }
-
-                                                    BaseActivity.searchInternetImages(
-                                                        requireActivity(),
-                                                        query,
-                                                        object : APICallback {
-                                                            override fun onSuccess(response: JSONObject) {
-                                                                if (loader.visibility == View.VISIBLE) {
-                                                                    loader.visibility =
-                                                                        View.INVISIBLE
-                                                                }
-
-                                                                val items =
-                                                                    response.getJSONArray("items")
-                                                                if (items.length() > 0) {
-                                                                    searchedImagesList.clear()
-                                                                    for (i in 0 until items.length()) {
-                                                                        val item =
-                                                                            items.getJSONObject(i)
-                                                                        if (item.has("link")) {
-                                                                            searchedImagesList.add(
-                                                                                item.getString(
-                                                                                    "link"
-                                                                                )
-                                                                            )
-                                                                        }
-                                                                    }
-                                                                    internetImageAdapter.notifyItemRangeChanged(
-                                                                        0,
-                                                                        searchedImagesList.size
-                                                                    )
-
-                                                                }
-                                                            }
-
-                                                            override fun onError(error: VolleyError) {
-                                                                if (loader.visibility == View.VISIBLE) {
-                                                                    loader.visibility =
-                                                                        View.INVISIBLE
-                                                                }
-
-                                                                showAlert(
-                                                                    requireActivity(),
-                                                                    error.localizedMessage!!
-                                                                )
-                                                            }
-
-                                                        })
+                                                }
+                                                else
+                                                {
+                                                    MaterialAlertDialogBuilder(requireActivity())
+                                                        .setMessage("You have no more credits or less to use that feature please buy more credits")
+                                                        .setCancelable(false)
+                                                        .setNegativeButton(requireActivity().resources.getString(R.string.no_text)){dialog,which->
+                                                            dialog.dismiss()
+                                                        }
+                                                        .setPositiveButton(requireActivity().resources.getString(R.string.buy_credits)){dialog,which ->
+                                                            dialog.dismiss()
+                                                            requireActivity().startActivity(Intent(requireContext(),UserScreenActivity::class.java))
+                                                        }
+                                                        .create().show()
                                                 }
 
-                                            } else {
-                                                showAlert(
-                                                    requireActivity(),
-                                                    "You have no more credits or less to use that feature please buy more"
-                                                )
-                                            }
                                         }
 
                                         override fun onCancelled(error: DatabaseError) {

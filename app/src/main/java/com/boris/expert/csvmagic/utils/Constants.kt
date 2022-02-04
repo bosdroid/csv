@@ -102,7 +102,7 @@ class Constants {
         var modesSwitcherFeatureStatus = 0
         var premiumSupportFeatureStatus = 0
         var unlimitedTablesFeatureStatus = 0
-        var imagesSearchFeatureStatus = 0
+
 
 
         private fun getBackgroundImageFolderFile(context: Context): File {

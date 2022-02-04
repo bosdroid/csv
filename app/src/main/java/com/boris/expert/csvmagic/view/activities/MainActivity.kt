@@ -580,7 +580,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 Constants.modesSwitcherFeatureStatus = 0
                 Constants.premiumSupportFeatureStatus = 0
                 Constants.unlimitedTablesFeatureStatus = 0
-                Constants.imagesSearchFeatureStatus = 0
                 Toast.makeText(context, getString(R.string.logout_success_text), Toast.LENGTH_SHORT)
                     .show()
                 Constants.userData = null
@@ -838,14 +837,17 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                                     "unlimited_tables" -> {
                                         Constants.unlimitedTablesFeatureStatus = status
                                     }
-                                    "images_search" -> {
-                                        Constants.imagesSearchFeatureStatus = status
-                                    }
                                     else -> {
 
                                     }
                                 }
                             }
+                        }
+                        else{
+                            Constants.compressorFeatureStatus = 0
+                            Constants.modesSwitcherFeatureStatus = 0
+                            Constants.premiumSupportFeatureStatus = 0
+                            Constants.unlimitedTablesFeatureStatus = 0
                         }
                     }
                 }
@@ -859,7 +861,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     override fun onResume() {
         super.onResume()
-        getUserCurrentFeatures()
+        //getUserCurrentFeatures()
     }
 
     private fun checkUserLoginStatus() {
@@ -871,10 +873,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.user_screen).isVisible = true
             mNavigation.menu.findItem(R.id.tickets).isVisible = Constants.premiumSupportFeatureStatus == 1
-
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
             getSearchImageDetail()
+            checkAndStartTrialPeriod()
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
 
 //            getCurrentSubscriptionDetail(context)
@@ -922,8 +924,27 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     }
 
+    private fun checkAndStartTrialPeriod() {
+        if (auth.currentUser != null) {
+            val id = auth.uid as String
+            Constants.firebaseUserId = id
+            startLoading(context)
+            activeTrialFeatures(context, Constants.firebaseUserId, object : APICallback {
+                override fun onSuccess(response: JSONObject) {
+                    dismiss()
+                    getUserCurrentFeatures()
+                }
+
+                override fun onError(error: VolleyError) {
+                    dismiss()
+                }
+
+            })
+        }
+    }
+
     private fun add5MbFreeStorage() {
-        val auth = FirebaseAuth.getInstance()
+
         if (auth.currentUser != null) {
             val id = auth.uid as String
             Constants.firebaseUserId = id

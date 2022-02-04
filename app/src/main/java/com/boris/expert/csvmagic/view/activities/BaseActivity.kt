@@ -688,7 +688,6 @@ open class BaseActivity : AppCompatActivity() {
             start_date:String,
             end_date:String,
             featureName:String,
-            featureId:Int,
             op:String,
             type:String,
             listener: APICallback
@@ -707,9 +706,45 @@ open class BaseActivity : AppCompatActivity() {
                     params["start_date"] = start_date
                     params["end_date"] = end_date
                     params["feature_name"] = featureName
-                    params["feature_id"] = "$featureId"
                     params["type"] = type
                     params["op"] = op
+                    return params
+                }
+            }
+
+            stringRequest.retryPolicy = object : RetryPolicy {
+                override fun getCurrentTimeout(): Int {
+                    return 50000
+                }
+
+                override fun getCurrentRetryCount(): Int {
+                    return 50000
+                }
+
+                @Throws(VolleyError::class)
+                override fun retry(error: VolleyError) {
+                }
+            }
+
+            VolleySingleton(context).addToRequestQueue(stringRequest)
+        }
+
+        fun activeTrialFeatures(
+            context: Context,
+            user_id: String,
+            listener: APICallback
+        ) {
+            val stringRequest = object : StringRequest(
+                Method.POST, "https://itmagic.app/api/active_trial_features.php",
+                Response.Listener {
+                    val response = JSONObject(it)
+                    listener.onSuccess(response)
+                }, Response.ErrorListener {
+                    listener.onError(it)
+                }) {
+                override fun getParams(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = user_id
                     return params
                 }
             }
@@ -794,9 +829,6 @@ open class BaseActivity : AppCompatActivity() {
                                     }
                                     "unlimited_tables"->{
                                         Constants.unlimitedTablesFeatureStatus = status
-                                    }
-                                    "images_search"->{
-                                        Constants.imagesSearchFeatureStatus = status
                                     }
                                     else->{
 

@@ -69,6 +69,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import id.zelory.compressor.Compressor
@@ -136,6 +140,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     private var counter: Int = 0
     private var csvTableObject:List<Pair<String,String>>?=null
     private var isExternalStorageRequest = false
+    private var userCurrentCredits = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1222,48 +1227,122 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
 
             searchBtnView.setOnClickListener {
+                var creditChargePrice: Float = 0F
                 if (searchBoxView.text.toString().trim().isNotEmpty()) {
-                    hideSoftKeyboard(context,searchBtnView)
-                    //Constants.hideKeyboar(requireActivity())
-                    val query = searchBoxView.text.toString().trim()
-                    runOnUiThread {
-                        loader.visibility = View.VISIBLE
-                    }
 
-                    searchInternetImages(
-                        context,
-                        query,
-                        object : APICallback {
-                            override fun onSuccess(response: JSONObject) {
-                                if (loader.visibility == View.VISIBLE) {
-                                    loader.visibility = View.INVISIBLE
-                                }
 
-                                val items = response.getJSONArray("items")
-                                if (items.length() > 0) {
-                                    searchedImagesList.clear()
-                                    for (i in 0 until items.length()) {
-                                        val item = items.getJSONObject(i)
-                                        if (item.has("link")) {
-                                            searchedImagesList.add(item.getString("link"))
+                    val firebaseDatabase = FirebaseDatabase.getInstance().reference
+                    firebaseDatabase.child("SearchImagesLimit")
+                        .addListenerForSingleValueEvent(object :
+                            ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val creditPrice = snapshot.child("credits")
+                                    .getValue(Int::class.java) as Int
+                                val images = snapshot.child("images")
+                                    .getValue(Int::class.java) as Int
+                                creditChargePrice = creditPrice.toFloat() / images
+
+                                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+                                    if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice)
+                                    {
+                                        hideSoftKeyboard(
+                                            context,
+                                            searchBtnView
+                                        )
+                                        //Constants.hideKeyboar(requireActivity())
+                                        val query = searchBoxView.text.toString().trim()
+                                        runOnUiThread {
+                                            loader.visibility = View.VISIBLE
                                         }
+
+                                        searchInternetImages(
+                                            context,
+                                            query,
+                                            object : APICallback {
+                                                override fun onSuccess(response: JSONObject) {
+                                                    if (loader.visibility == View.VISIBLE) {
+                                                        loader.visibility =
+                                                            View.INVISIBLE
+                                                    }
+
+                                                    val items =
+                                                        response.getJSONArray("items")
+                                                    if (items.length() > 0) {
+                                                        searchedImagesList.clear()
+                                                        for (i in 0 until items.length()) {
+                                                            val item =
+                                                                items.getJSONObject(i)
+                                                            if (item.has("link")) {
+                                                                searchedImagesList.add(
+                                                                    item.getString(
+                                                                        "link"
+                                                                    )
+                                                                )
+                                                            }
+                                                        }
+                                                        internetImageAdapter.notifyItemRangeChanged(
+                                                            0,
+                                                            searchedImagesList.size
+                                                        )
+
+                                                    }
+                                                    //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                                                    val hashMap = HashMap<String, Any>()
+                                                    val remaining =
+                                                        userCurrentCredits.toFloat() - creditChargePrice
+                                                    Log.d("TEST199", "$remaining")
+                                                    hashMap["credits"] =
+                                                        remaining.toString()
+                                                    firebaseDatabase.child(Constants.firebaseUserCredits)
+                                                        .child(Constants.firebaseUserId)
+                                                        .updateChildren(hashMap)
+                                                        .addOnSuccessListener {
+                                                            getUserCredits(
+                                                               context
+                                                            )
+                                                        }
+                                                        .addOnFailureListener {
+
+                                                        }
+                                                }
+
+                                                override fun onError(error: VolleyError) {
+                                                    if (loader.visibility == View.VISIBLE) {
+                                                        loader.visibility =
+                                                            View.INVISIBLE
+                                                    }
+
+                                                    showAlert(
+                                                        context,
+                                                        error.localizedMessage!!
+                                                    )
+                                                }
+
+                                            })
+                                    } else
+                                    {
+                                        MaterialAlertDialogBuilder(context)
+                                            .setMessage("You have no more credits or less to use that feature please buy more credits")
+                                            .setCancelable(false)
+                                            .setNegativeButton(getString(R.string.no_text)){dialog,which->
+                                                dialog.dismiss()
+                                            }
+                                            .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+                                                dialog.dismiss()
+                                                startActivity(Intent(context,UserScreenActivity::class.java))
+                                            }
+                                            .create().show()
                                     }
-                                    internetImageAdapter.notifyItemRangeChanged(
-                                        0,
-                                        searchedImagesList.size
-                                    )
-                                }
                             }
 
-                            override fun onError(error: VolleyError) {
-                                if (loader.visibility == View.VISIBLE) {
-                                    loader.visibility = View.INVISIBLE
-                                }
+                            override fun onCancelled(error: DatabaseError) {
 
-                                showAlert(context, error.localizedMessage!!)
                             }
 
                         })
+
+
                 } else {
                     if (loader.visibility == View.VISIBLE) {
                         loader.visibility = View.INVISIBLE
