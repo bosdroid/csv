@@ -306,10 +306,10 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 tableRow.setOnClickListener(this)
 
                 val moreLayout =
-                        LayoutInflater.from(context).inflate(R.layout.table_more_option_layout, null)
+                    LayoutInflater.from(context).inflate(R.layout.table_more_option_layout, null)
                 moreLayout.layoutParams = TableRow.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
                 moreImage.id = j
@@ -326,11 +326,10 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                         cell.layoutParams = layoutParams
                         val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
 
-                        if (item.second.length > 8){
-                            textV.text = "${item.second.substring(0,9)}..."
-                        }
-                        else{
-                          textV.text = item.second.trim()
+                        if (item.second.length > 8) {
+                            textV.text = "${item.second.substring(0, 9)}..."
+                        } else {
+                            textV.text = item.second.trim()
                         }
                         tableRow.addView(cell)
                     }
@@ -348,7 +347,6 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
 
 
     }
-
 
 
     override fun onItemClick(position: Int) {
@@ -390,10 +388,9 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
         } else if (view.tag == "more") {
 
             val position = view.id
-            if (tableName.contains("import")){
+            if (tableName.contains("import")) {
                 csvItemDetail = dataListCsv[position]
-            }
-            else{
+            } else {
                 itemDetail = dataList[position]
             }
 
@@ -402,27 +399,25 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 override fun onMenuItemClick(item: MenuItem?): Boolean {
                     return when (item!!.itemId) {
                         R.id.pp_remove -> {
-                            if (tableName.contains("import")){
+                            if (tableName.contains("import")) {
                                 removeItem(csvItemDetail[0].second.toInt(), position)
-                            }
-                            else{
+                            } else {
                                 removeItem(itemDetail.id, position)
                             }
 
                             true
                         }
                         R.id.pp_copy -> {
-                            if (tableName.contains("import")){
+                            if (tableName.contains("import")) {
                                 val stringBuilder = StringBuilder()
-                                for (i in 0 until csvItemDetail.size){
+                                for (i in 0 until csvItemDetail.size) {
                                     stringBuilder.append("${csvItemDetail[i].first}: ${csvItemDetail[i].second}")
-                                    if (i != csvItemDetail.size-1){
+                                    if (i != csvItemDetail.size - 1) {
                                         stringBuilder.append("\n")
                                     }
                                 }
                                 copyToClipBoard(stringBuilder.toString())
-                            }
-                            else{
+                            } else {
                                 copyToClipBoard(itemDetail.toString())
                             }
 
@@ -992,26 +987,18 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
     private fun exportCsv1(tableName: String) {
         if (dataListCsv.isNotEmpty()) {
             startLoading(context)
-//            val columns = mutableListOf<String>()
-//            columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
-////            if (columns[0].toLowerCase(Locale.ENGLISH) == "_id"){
-////                columns.removeAt(0)
-////            }
-//            val builder = StringBuilder()
-//            builder.append(Constants.transLit(columns.joinToString(",")))
-
+            val columns = mutableListOf<String>()
+            columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
             val builder = StringBuilder()
-//            var tempColumns = ""
-//            val originalColumns = tableGenerator.getTableOriginalColumns(tableName)
-//            tempColumns = if (originalColumns.isNotEmpty()) {
-//                originalColumns
-//            } else {
-                val columns = tableGenerator.getTableColumns(tableName)
-                columns!!.joinToString(",")
-//            }
+            if(columns.isNotEmpty()) {
+                if (columns[0].toLowerCase(Locale.ENGLISH) == "_id") {
+                    columns.removeAt(0)
+                }
 
-            builder.append(columns)
+                val columnString = columns.joinToString(",")
 
+                builder.append(columnString)
+            }
             for (j in 0 until dataListCsv.size) {
 
                 val data = dataListCsv[j]
@@ -1036,18 +1023,15 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
                 }
             }
             try {
-                //val file = File(filesDir, "$tableName.csv")
+
                 val dir = File(context.filesDir, "ExportedCsv")
                 dir.mkdirs()
                 val file = File(dir, "$tableName.csv")
 
-//                val out = openFileOutput("$tableName.csv", Context.MODE_WORLD_WRITABLE)
-//                out.write((builder.toString()).toByteArray())
-//                out.close()
                 val fw = FileWriter(file.absolutePath)
                 fw.append(builder.toString())
-//                fw.write(builder.toString())
                 fw.close()
+
                 val path =
                     FileProvider.getUriForFile(
                         context,

@@ -998,7 +998,23 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 })
                 barcodeDetailParentLayout.addView(barcodeImageRecyclerView)
             } else {
-                val emptyTextView = MaterialTextView(context)
+//                val emptyTextView = MaterialTextView(context)
+//                emptyTextView.layoutParams = params
+//                emptyTextView.text = getString(R.string.add_image_text)
+//                emptyTextView.setTextColor(
+//                    ContextCompat.getColor(
+//                        context,
+//                        R.color.primary_positive_color
+//                    )
+//                )
+//                emptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18F)
+//                barcodeDetailParentLayout.addView(emptyTextView)
+//                emptyTextView.setOnClickListener {
+//                    openAddImageDialog()
+//                }
+            }
+//
+            val emptyTextView = MaterialTextView(context)
                 emptyTextView.layoutParams = params
                 emptyTextView.text = getString(R.string.add_image_text)
                 emptyTextView.setTextColor(
@@ -1012,8 +1028,6 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 emptyTextView.setOnClickListener {
                     openAddImageDialog()
                 }
-            }
-//
 
             for (i in 0 until tableObject!!.dynamicColumns.size) {
                 val item = tableObject!!.dynamicColumns[i]
