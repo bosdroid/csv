@@ -111,7 +111,7 @@ open class BaseActivity : AppCompatActivity() {
         // THIS FUNCTION WILL RETURN THE DATE TIME STRING FROM TIMESTAMP
         fun getDateTimeFromTimeStamp(timeStamp: Long): String {
             val c = Date(timeStamp)
-            val df = SimpleDateFormat("yyyy-MM-dd kk:mm a", Locale.getDefault())
+            val df = SimpleDateFormat("yyyy-MM-dd kk:mm:ss", Locale.getDefault())
             return df.format(c).toUpperCase(Locale.ENGLISH)
         }
 

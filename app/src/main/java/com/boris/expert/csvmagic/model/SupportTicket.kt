@@ -9,9 +9,11 @@ data class SupportTicket(
     val title:String,
     val message:String,
     val timeStamp:Long,
-    val status:String
+    val status:String,
+    val lastReply:Long,
+    val lastReplyBy:String
 ):Serializable{
 
-    constructor():this("","","","","",0,"")
+    constructor():this("","","","","",0,"",0,"")
 
 }

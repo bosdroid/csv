@@ -40,14 +40,60 @@
                 android:layout_marginTop="@dimen/eightDpMargin"
                 />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/largeText"
-                android:id="@+id/ticket_item_status_view"
-                android:textColor="@color/black"
-                android:layout_gravity="end"
-                />
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:background="@drawable/top_border"
+                android:gravity="center_vertical"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/ticket_last_reply_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/mediumText" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/ticket_last_reply_by_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/mediumText" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ticket_status_heading_view"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/mediumText" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/ticket_item_status_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/smallText"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -842,6 +842,20 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                                     }
                                 }
                             }
+
+                            val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                            if (currentFragment != null && currentFragment.isVisible) {
+                                val scannerFragment =
+                                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                                scannerFragment.restart()
+                            }
+
+                            val scanFragment = supportFragmentManager.findFragmentByTag("tables")
+                            if (scanFragment != null && scanFragment.isVisible) {
+                                val tableFragment =
+                                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+                                tableFragment.restart()
+                            }
                         }
                         else{
                             Constants.compressorFeatureStatus = 0

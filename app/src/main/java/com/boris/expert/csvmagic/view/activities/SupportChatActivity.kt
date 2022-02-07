@@ -15,6 +15,7 @@ import com.boris.expert.csvmagic.adapters.ChatAdapter
 import com.boris.expert.csvmagic.model.Message
 import com.boris.expert.csvmagic.model.SupportTicket
 import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -32,6 +33,7 @@ class SupportChatActivity : BaseActivity(), View.OnClickListener {
     private lateinit var sendMessageBtn: ImageButton
     private var chatList = mutableListOf<Message>()
     private lateinit var adapter: ChatAdapter
+    private var name = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,10 +57,16 @@ class SupportChatActivity : BaseActivity(), View.OnClickListener {
             supportTicket = intent.getSerializableExtra("S_TICKET") as SupportTicket
         }
 
-        chatMessageRecyclerView.layoutManager = LinearLayoutManager(context)
+        val wrapContentLinearLayoutManager = WrapContentLinearLayoutManager(context,RecyclerView.VERTICAL,false)
+        wrapContentLinearLayoutManager.stackFromEnd = true
+        chatMessageRecyclerView.layoutManager = wrapContentLinearLayoutManager
         chatMessageRecyclerView.hasFixedSize()
         adapter = ChatAdapter(context, chatList as ArrayList<Message>)
         chatMessageRecyclerView.adapter = adapter
+
+        if (auth.currentUser != null){
+            name = auth.currentUser!!.displayName as String
+        }
     }
 
     // THIS FUNCTION WILL RENDER THE ACTION BAR/TOOLBAR
@@ -131,14 +139,18 @@ class SupportChatActivity : BaseActivity(), View.OnClickListener {
         val message = chatBoxTextInputField.text.toString().trim()
         if (message.isNotEmpty()) {
             val id = databaseReference.push().key.toString()
+            val timeStamp = System.currentTimeMillis()
             val messageItem =
-                Message(id, Constants.firebaseUserId, message, System.currentTimeMillis())
+                Message(id, Constants.firebaseUserId, message, timeStamp)
             databaseReference.child(Constants.supportChat).child(supportTicket!!.id).child(id)
                 .setValue(messageItem).addOnSuccessListener {
                     chatBoxTextInputField.setText("")
-                    //getAllSupportMessages()
-                    //chatList.add(messageItem)
-                    //chatMessageRecyclerView.scrollToPosition(chatList.size)
+                    chatMessageRecyclerView.scrollToPosition(chatList.size-1)
+                    val hashMap = HashMap<String,Any>()
+                    hashMap["lastReply"] = timeStamp
+                    hashMap["lastReplyBy"] = name
+                    databaseReference.child(Constants.ticketsReference).child(supportTicket!!.id)
+                        .updateChildren(hashMap)
                 }.addOnFailureListener {
 
                 }

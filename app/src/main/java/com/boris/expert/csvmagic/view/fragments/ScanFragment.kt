@@ -149,7 +149,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                     val file = FileUtil.from(requireActivity(), filePath!!)
                     val ext = file.name.substring(file.name.lastIndexOf(".") + 1)
                     var fileName = file.name.substring(0, file.name.lastIndexOf("."))
-                    fileName = fileName.replace("[-+.^:,]".toRegex(), " ").replace(" ", "_").trim()
+                    fileName = fileName.replace("[-+.^:,]".toRegex(), " ").replace(" ", "_").replace("[","").replace("]","").trim()
                     if (ext != "csv") {
                         BaseActivity.showAlert(
                             requireActivity(),

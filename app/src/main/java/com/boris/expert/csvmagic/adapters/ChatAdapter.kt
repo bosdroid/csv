@@ -9,6 +9,7 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Message
 import com.boris.expert.csvmagic.model.SupportTicket
 import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.google.android.material.textview.MaterialTextView
 import java.util.*
 import kotlin.collections.ArrayList
@@ -20,18 +21,22 @@ class ChatAdapter(val context: Context, val chatList: ArrayList<Message>) :
     class ItemViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         var messageBody: MaterialTextView
+        var messageTime: MaterialTextView
 
         init {
             messageBody = itemView.findViewById(R.id.message_body)
+            messageTime = itemView.findViewById(R.id.message_time)
         }
     }
 
     class ItemViewHolder1(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         var messageBody: MaterialTextView
+        var messageTime: MaterialTextView
 
         init {
             messageBody = itemView.findViewById(R.id.message_body)
+            messageTime = itemView.findViewById(R.id.message_time)
         }
     }
 
@@ -61,10 +66,12 @@ class ChatAdapter(val context: Context, val chatList: ArrayList<Message>) :
             0 -> {
                 val senderHolder = holder as ItemViewHolder
                 senderHolder.messageBody.text = item.message
+                senderHolder.messageTime.text = BaseActivity.getDateTimeFromTimeStamp(item.timeStamp)
             }
             1 -> {
                 val receiverHolder = holder as ItemViewHolder1
                 receiverHolder.messageBody.text = item.message
+                receiverHolder.messageTime.text = BaseActivity.getDateTimeFromTimeStamp(item.timeStamp)
             }
             else -> {
 

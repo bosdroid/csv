@@ -162,7 +162,7 @@ class SupportTicketsActivity : BaseActivity(), View.OnClickListener,
                             auth.currentUser!!.displayName.toString()
                         } else {
                             ""
-                        }, title, message, System.currentTimeMillis(), "pending"
+                        }, title, message, System.currentTimeMillis(), "open",0,""
                     )
                     startLoading(context)
                     databaseReference.child(Constants.ticketsReference)

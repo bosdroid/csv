@@ -226,6 +226,6 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.14.3'
 
     implementation 'com.borjabravo:readmoretextview:2.1.0'
-
+    implementation 'com.github.albfernandez:juniversalchardet:2.4.0'
 
 }
