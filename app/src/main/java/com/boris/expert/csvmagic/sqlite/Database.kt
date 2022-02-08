@@ -93,7 +93,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
     }
 
     fun createTableFromCsv(tableName: String, fieldsList: ArrayList<String>) {
-        val db = this.writableDatabase
+        var db = this.writableDatabase
         val queryBuilder = StringBuilder()
         queryBuilder.append("CREATE TABLE IF NOT EXISTS $tableName(_id INTEGER PRIMARY KEY AUTOINCREMENT,")
         for (i in 0 until fieldsList.size) {
@@ -109,6 +109,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         }
         queryBuilder.append(")")
         db.execSQL(queryBuilder.toString())
+
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -363,6 +364,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                 c.moveToNext()
             }
         }
+        db.close()
         return list
     }
 
@@ -772,7 +774,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         val file = File(path)
         var checkDB: SQLiteDatabase? = null
         if (file.exists()) {
-            checkDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE);
+            checkDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE)
         }
 
         return checkDB != null

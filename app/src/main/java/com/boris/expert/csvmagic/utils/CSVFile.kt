@@ -21,7 +21,7 @@ object CSVFile {
             detector.handleData(buf, 0, nread)
         }
         detector.dataEnd()
-        val encoding: String = detector.getDetectedCharset()
+        val encoding: String = detector.detectedCharset
         var chartsetName: String? = null
         if (encoding.equals("WINDOWS-1252", ignoreCase = true)) {
             chartsetName = "ISO-8859-1"
@@ -32,6 +32,9 @@ object CSVFile {
         if (encoding.equals("UTF-16LE", ignoreCase = true)) {
             chartsetName = "UTF-16LE"
         }
+        if (encoding.equals("UTF-16BE", ignoreCase = true)) {
+            chartsetName = "UTF-16BE"
+        }
         if (encoding.equals("UTF-8", ignoreCase = true)) {
             chartsetName = "UTF-8"
         }
@@ -40,22 +43,21 @@ object CSVFile {
             chartsetName = "US-ASCII"
         }
 
-        val reader1: BufferedReader
-        try {
-            val inputStreamReader = InputStreamReader(
-                selectedFile.inputStream(),
-                chartsetName
-            )
-            val br = BufferedReader(inputStreamReader)
-            var line = br.readLine()
-            while (line != null) {
-                text.append(line)
-                line = br.readLine()
-            }
-            br.close()
-        } catch (e: IOException) {
-            //You'll need to add proper error handling here
-        }
+        //        try {
+//            val inputStreamReader = InputStreamReader(
+//                selectedFile.inputStream(),
+//                chartsetName
+//            )
+//            val br = BufferedReader(inputStreamReader)
+//            var line = br.readLine()
+//            while (line != null) {
+//                text.append(line)
+//                line = br.readLine()
+//            }
+//            br.close()
+//        } catch (e: IOException) {
+//            //You'll need to add proper error handling here
+//        }
 
 
 //        if (!isPureAscii(text.toString())) {
@@ -92,7 +94,7 @@ object CSVFile {
 //                )
 //            )
 //        } else {
-            reader1 = BufferedReader(
+        val reader1 = BufferedReader(
                 InputStreamReader(
                     selectedFile.inputStream(),chartsetName
                 )

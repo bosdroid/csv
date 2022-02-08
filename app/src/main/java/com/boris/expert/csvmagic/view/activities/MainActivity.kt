@@ -37,10 +37,7 @@ import com.boris.expert.csvmagic.model.Feature
 import com.boris.expert.csvmagic.model.User
 import com.boris.expert.csvmagic.singleton.DriveService
 import com.boris.expert.csvmagic.singleton.SheetService
-import com.boris.expert.csvmagic.utils.AppSettings
-import com.boris.expert.csvmagic.utils.AppWebViewClients
-import com.boris.expert.csvmagic.utils.Constants
-import com.boris.expert.csvmagic.utils.DatabaseHandler
+import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.fragments.ScanFragment
 import com.boris.expert.csvmagic.view.fragments.ScannerFragment
 import com.boris.expert.csvmagic.viewmodel.MainActivityViewModel
@@ -119,6 +116,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         lateinit var context: Context
         lateinit var historyBtn: MaterialButton
         var credential: GoogleAccountCredential? = null
+
     }
 
 
