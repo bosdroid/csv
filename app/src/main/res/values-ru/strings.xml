@@ -444,6 +444,8 @@
 	<string name="images_search_feature_credit_price_text">1 credit for 100 images</string>
     <string name="buy_credits">Buy Credits</string>
     <string name="ticket_status_heading_view">Ticket Status</string>
+    <string name="insales">InSales Customers</string>
+    <string name="insales_customers">inSalesCustomers</string>
 
 
     <string-array name="mode_list">

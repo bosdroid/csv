@@ -461,6 +461,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             R.id.purchase_feature -> {
                 startActivity(Intent(context, PurchaseFeatureActivity::class.java))
             }
+            R.id.insales -> {
+                startActivity(Intent(context, SalesCustomersActivity::class.java))
+            }
             R.id.tickets -> {
                 startActivity(Intent(context, SupportTicketsActivity::class.java))
             }
@@ -887,6 +890,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tickets).isVisible = Constants.premiumSupportFeatureStatus == 1
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
+            mNavigation.menu.findItem(R.id.insales).isVisible = true
             getSearchImageDetail()
             checkAndStartTrialPeriod()
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
@@ -930,7 +934,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tickets).isVisible = false
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = false
-
+            mNavigation.menu.findItem(R.id.insales).isVisible = false
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = false
         }
 

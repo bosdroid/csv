@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="com.android.vending.BILLING" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -42,7 +43,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.SupportChatActivity"></activity>
+        <activity android:name=".view.activities.SalesCustomersActivity"></activity>
+        <activity android:name=".view.activities.SupportChatActivity" />
         <activity android:name=".view.activities.SupportTicketsActivity" />
         <activity
             android:name=".view.activities.VideoFullScreenActivity"
