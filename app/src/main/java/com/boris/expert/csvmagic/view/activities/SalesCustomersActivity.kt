@@ -6,14 +6,26 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.android.volley.Response
 import com.android.volley.RetryPolicy
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
+import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.common.Priority
+import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.VolleySingleton
+import com.boris.expert.csvmagic.viewmodel.CodeDetailViewModel
+import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
+import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import org.json.JSONObject
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -22,6 +34,7 @@ class SalesCustomersActivity : BaseActivity() {
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
     private lateinit var appSettings: AppSettings
+    private lateinit var viewModel:SalesCustomersViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +47,10 @@ class SalesCustomersActivity : BaseActivity() {
 
     private fun initViews() {
         context = this
+        viewModel = ViewModelProviders.of(
+            this,
+            ViewModelFactory(SalesCustomersViewModel()).createFor()
+        )[SalesCustomersViewModel::class.java]
         appSettings = AppSettings(context)
         toolbar = findViewById(R.id.toolbar)
     }
@@ -57,47 +74,70 @@ class SalesCustomersActivity : BaseActivity() {
 
     private fun inSalesLogin(){
 
-        val url = "https://asatarpk@gmail.com:Sattar_786@myshop-bsq158.myinsales.ru/admin/account.json"
         startLoading(context)
-        val stringRequest = object : StringRequest(
-            Method.GET, url,
-            Response.Listener {
-                dismiss()
-                val response = JSONObject(it)
-                Log.d("TEST199SALES", response.toString())
-            }, Response.ErrorListener {
-                dismiss()
-                //Log.d("TEST199", it.localizedMessage!!)
-            }){
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
+        viewModel.callSalesAccount(context,"myshop-bsq158","asatarpk@gmail.com","Sattar_786")
+        viewModel.getSalesAccountResponse().observe(this, Observer { response->
+            dismiss()
+            if (response != null){
+                Log.d("TEST199",response.toString())
+            }
+        })
+//        AndroidNetworking.get("https://${URLEncoder.encode("asatarpk@gmail.com", "UTF-8")}:Sattar_786@myshop-bsq158.myinsales.ru/admin/account.json")
+//                .setPriority(Priority.LOW)
+//                .build().getAsJSONObject(object : JSONObjectRequestListener{
+//                    override fun onResponse(response: JSONObject?) {
+//                        dismiss()
+//                        Log.d("TEST1999",response.toString())
+//                    }
+//
+//                    override fun onError(anError: ANError?) {
+//                        dismiss()
+//                        Log.d("TEST1999",anError!!.localizedMessage!!)
+//                    }
+//
+//                })
+
+//        val url = "https://asatarpk@gmail.com:Sattar_786@myshop-bsq158.myinsales.ru/admin/account.json"
+//        startLoading(context)
+//        val stringRequest = object : StringRequest(
+//            Method.GET, url,
+//            Response.Listener {
+//                dismiss()
+//                val response = JSONObject(it)
+//                Log.d("TEST199SALES", response.toString())
+//            }, Response.ErrorListener {
+//                dismiss()
+//                //Log.d("TEST199", it.localizedMessage!!)
+//            }){
+//            override fun getHeaders(): MutableMap<String, String> {
+//                val headers = HashMap<String, String>()
+////                headers.put(
+////                    "Authorization",
+////                    "Basic ZGlnaXRhbC1nb29kczpjNTFjOTA3MDdhMTNjZTNmZmYyMTNhZmJiNWNkMTI3MA=="
+////                )
 //                headers.put(
-//                    "Authorization",
-//                    "Basic ZGlnaXRhbC1nb29kczpjNTFjOTA3MDdhMTNjZTNmZmYyMTNhZmJiNWNkMTI3MA=="
+//                    "Content-Type",
+//                    "application/json; charset=utf-8"
 //                )
-                headers.put(
-                    "Content-Type",
-                    "application/json; charset=utf-8"
-                )
-                return headers
-            }
-        }
-
-        stringRequest.retryPolicy = object : RetryPolicy {
-            override fun getCurrentTimeout(): Int {
-                return 50000
-            }
-
-            override fun getCurrentRetryCount(): Int {
-                return 50000
-            }
-
-            @Throws(VolleyError::class)
-            override fun retry(error: VolleyError) {
-            }
-        }
-
-        VolleySingleton(context).addToRequestQueue(stringRequest)
+//                return headers
+//            }
+//        }
+//
+//        stringRequest.retryPolicy = object : RetryPolicy {
+//            override fun getCurrentTimeout(): Int {
+//                return 50000
+//            }
+//
+//            override fun getCurrentRetryCount(): Int {
+//                return 50000
+//            }
+//
+//            @Throws(VolleyError::class)
+//            override fun retry(error: VolleyError) {
+//            }
+//        }
+//
+//        VolleySingleton(context).addToRequestQueue(stringRequest)
     }
 
     override fun onResume() {

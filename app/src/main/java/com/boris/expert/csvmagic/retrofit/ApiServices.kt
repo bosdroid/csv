@@ -3,10 +3,7 @@ package com.boris.expert.csvmagic.retrofit
 import com.boris.expert.csvmagic.model.FeedbackResponse
 import com.google.gson.JsonObject
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ApiServices {
 
@@ -37,9 +34,13 @@ interface ApiServices {
 
     @GET("service/purchase/verify/{packageName}/{productId}/{token}")
     fun purchase(
-        @Path("packageName") packageName: String,
-        @Path("productId") productId: String,
-        @Path("token") token: String
+            @Path("packageName") packageName: String,
+            @Path("productId") productId: String,
+            @Path("token") token: String
     ): Call<JsonObject>
+
+
+    @GET
+    fun salesAccount(@Url url:String): Call<JsonObject>
 
 }
