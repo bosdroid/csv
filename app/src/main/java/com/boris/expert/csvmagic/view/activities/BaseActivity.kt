@@ -41,6 +41,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.common.model.RemoteModelManager
 import com.google.mlkit.nl.translate.TranslateLanguage
@@ -111,8 +112,33 @@ open class BaseActivity : AppCompatActivity() {
         // THIS FUNCTION WILL RETURN THE DATE TIME STRING FROM TIMESTAMP
         fun getDateTimeFromTimeStamp(timeStamp: Long): String {
             val c = Date(timeStamp)
-            val df = SimpleDateFormat("yyyy-MM-dd kk:mm:ss", Locale.getDefault())
+            val df = SimpleDateFormat("yyyy-MM-dd kk:mm:ss a", Locale.getDefault())
             return df.format(c).toUpperCase(Locale.ENGLISH)
+        }
+
+        fun uploadImageOnFirebaseStorage(referenceName:String,imagePath:String,listener: UploadImageCallback){
+            val storageReference = FirebaseStorage.getInstance().reference
+            if (FirebaseAuth.getInstance().currentUser != null) {
+
+                val file = Uri.fromFile(File(imagePath))
+
+                val fileRef = storageReference.child("$referenceName/${System.currentTimeMillis()}.jpg")
+                val uploadTask = fileRef.putFile(file)
+
+                uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
+                        }
+                    }
+                    fileRef.downloadUrl
+                }.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadUri = task.result
+                        listener.onSuccess(downloadUri.toString())
+                    }
+                }
+            }
         }
 
         fun getTimeStampFromStringDate(date:String):Long{

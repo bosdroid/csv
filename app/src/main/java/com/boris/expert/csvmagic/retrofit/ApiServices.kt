@@ -40,7 +40,8 @@ interface ApiServices {
     ): Call<JsonObject>
 
 
-    @GET
-    fun salesAccount(@Url url:String): Call<JsonObject>
+    @FormUrlEncoded
+    @POST("insales/login.php")
+    fun salesLoginAccount(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
 
 }

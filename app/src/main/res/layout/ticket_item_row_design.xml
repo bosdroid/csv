@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
-    app:cardElevation="8dp"
     android:layout_margin="@dimen/defaultDpMargin"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/white"
+    app:cardElevation="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -24,21 +24,28 @@
 
 
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/ticket_item_title_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/largeText"
-                android:id="@+id/ticket_item_title_view"
                 android:textColor="@color/black"
-                />
+                android:textSize="@dimen/largeText" />
 
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/ticket_item_message_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/mediumText"
-                android:id="@+id/ticket_item_message_view"
-                android:textColor="@color/black"
                 android:layout_marginTop="@dimen/eightDpMargin"
-                />
+                android:textColor="@color/black"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/ticket_item_date_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:textColor="@color/black"
+                android:layout_gravity="end"
+                android:textSize="@dimen/mediumText" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -84,16 +91,32 @@
                         android:textColor="@color/black"
                         android:textSize="@dimen/mediumText" />
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/ticket_item_status_view"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:textSize="@dimen/smallText"
-                        android:textStyle="bold" />
+                        android:orientation="vertical"
+                        android:background="@drawable/full_border"
+                        >
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/ticket_item_status_spinner"
+                            android:entries="@array/ticket_status"
+                            />
+                    </LinearLayout>
+
+                    <!--                    <com.google.android.material.textview.MaterialTextView-->
+                    <!--                        android:id="@+id/ticket_item_status_view"-->
+                    <!--                        android:layout_width="wrap_content"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:textColor="@color/black"-->
+                    <!--                        android:textSize="@dimen/smallText"-->
+                    <!--                        android:textStyle="bold" />-->
                 </LinearLayout>
 
             </LinearLayout>
+
+
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

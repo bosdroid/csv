@@ -99,8 +99,7 @@ class SupportTicketsActivity : BaseActivity(), View.OnClickListener,
 
     private fun getAllTickets() {
         startLoading(context)
-        databaseReference.child(Constants.ticketsReference).orderByChild("status")
-            .equalTo("pending").addListenerForSingleValueEvent(object : ValueEventListener {
+        databaseReference.child(Constants.ticketsReference).child(Constants.firebaseUserId).addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     dismiss()
                     if (snapshot.hasChildren()) {
@@ -162,11 +161,13 @@ class SupportTicketsActivity : BaseActivity(), View.OnClickListener,
                             auth.currentUser!!.displayName.toString()
                         } else {
                             ""
-                        }, title, message, System.currentTimeMillis(), "open",0,""
+                        },
+                        Constants.firebaseUserId,
+                        title, message, System.currentTimeMillis(), "open",0,""
                     )
                     startLoading(context)
                     databaseReference.child(Constants.ticketsReference)
-                        .child(id).setValue(ticket).addOnSuccessListener {
+                        .child(Constants.firebaseUserId).child(id).setValue(ticket).addOnSuccessListener {
                             dismiss()
                             titleBox.setText("")
                             messageBox.setText("")
@@ -186,5 +187,15 @@ class SupportTicketsActivity : BaseActivity(), View.OnClickListener,
         startActivity(Intent(context,SupportChatActivity::class.java).apply {
             putExtra("S_TICKET",item)
         })
+    }
+
+    override fun onItemStatusDropDown(position: Int, status: String) {
+        val item = ticketList[position]
+        item.status = status
+        adapter.notifyItemChanged(position)
+        val hashMap = HashMap<String, Any>()
+        hashMap["status"] = status
+        databaseReference.child(Constants.ticketsReference).child(item.userId).child(item.id)
+            .updateChildren(hashMap)
     }
 }

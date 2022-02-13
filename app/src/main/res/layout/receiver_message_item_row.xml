@@ -1,54 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="10dp"
     android:paddingStart="15dp"
     android:paddingEnd="60dp"
-    android:clipToPadding="false">
+    android:orientation="horizontal"
+    android:clipToPadding="false"
+    android:paddingLeft="15dp"
+    android:paddingRight="60dp">
+
 
     <View
         android:id="@+id/avatar"
-        android:layout_alignParentStart="true"
         android:scaleType="centerInside"
         android:background="@drawable/circle"
         android:layout_width="34dp"
-        android:layout_height="34dp" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/name"
-        android:layout_marginStart="15dp"
-        android:layout_toEndOf="@+id/avatar"
-        android:layout_alignTop="@+id/avatar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="4dp"
-        android:text="Agent"/>
-
-    <com.google.android.material.textview.MaterialTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/message_body"
-        android:textColor="@color/black"
-        android:layout_below="@+id/name"
-        android:layout_alignStart="@+id/name"
-        android:background="@drawable/receiver_design"
-        android:paddingVertical="12dp"
-        android:paddingHorizontal="16dp"
-        android:elevation="2dp"
-        android:textSize="@dimen/mediumText"
-        android:text="How are you doing? This is a long message that should probably wrap."
+        android:layout_height="34dp"
         />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/message_time"
-        android:layout_below="@id/message_body"
-        android:layout_margin="4dp"
-        android:textColor="#ccc"
-        android:elevation="2dp"
-        android:textSize="@dimen/smallText"
-        android:layout_alignLeft="@+id/name"
-        />
-</RelativeLayout>
+        android:layout_weight="1"
+        android:orientation="vertical"
+        >
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/name"
+            android:layout_marginStart="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="4dp"
+            android:text="Agent"
+            android:layout_marginLeft="15dp"
+            />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:id="@+id/message_image_view"
+            android:layout_marginStart="15dp"
+            android:visibility="gone"
+            android:layout_marginLeft="15dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/message_body"
+            android:textColor="@color/black"
+            android:background="@drawable/receiver_design"
+            android:paddingVertical="12dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:paddingHorizontal="16dp"
+            android:elevation="2dp"
+            android:textSize="@dimen/mediumText"
+            android:text="How are you doing? This is a long message that should probably wrap."
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/message_time"
+            android:textColor="#ccc"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:elevation="2dp"
+            android:textSize="@dimen/smallText"
+            />
+    </LinearLayout>
+
+
+</LinearLayout>

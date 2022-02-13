@@ -19,7 +19,7 @@ import java.net.URLEncoder
 
 class ApiRepository {
 
-    var apiInterface: ApiServices = RetrofitClientApi.getInstance().create(ApiServices::class.java)
+    var apiInterface: ApiServices = RetrofitClientApi.createService(ApiServices::class.java)
 
     companion object {
         lateinit var context: Context
@@ -217,8 +217,8 @@ class ApiRepository {
 
     fun salesAccount(shopName:String,email:String,password:String):MutableLiveData<JsonObject?>{
         val res = MutableLiveData<JsonObject?>()
-        val url = "https://$email:$password@$shopName.myinsales.kz/admin/account.json"
-        apiInterface.salesAccount(url).enqueue(object:Callback<JsonObject>{
+
+        apiInterface.salesLoginAccount(email,password,shopName).enqueue(object:Callback<JsonObject>{
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 res.postValue(response.body())
             }

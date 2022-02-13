@@ -4,12 +4,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Message
 import com.boris.expert.csvmagic.model.SupportTicket
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.view.activities.BaseActivity
+import com.bumptech.glide.Glide
 import com.google.android.material.textview.MaterialTextView
 import java.util.*
 import kotlin.collections.ArrayList
@@ -22,10 +24,12 @@ class ChatAdapter(val context: Context, val chatList: ArrayList<Message>) :
         RecyclerView.ViewHolder(itemView) {
         var messageBody: MaterialTextView
         var messageTime: MaterialTextView
+        var imageView: AppCompatImageView
 
         init {
             messageBody = itemView.findViewById(R.id.message_body)
             messageTime = itemView.findViewById(R.id.message_time)
+            imageView = itemView.findViewById(R.id.message_image_view)
         }
     }
 
@@ -33,10 +37,12 @@ class ChatAdapter(val context: Context, val chatList: ArrayList<Message>) :
         RecyclerView.ViewHolder(itemView) {
         var messageBody: MaterialTextView
         var messageTime: MaterialTextView
+        var imageView: AppCompatImageView
 
         init {
             messageBody = itemView.findViewById(R.id.message_body)
             messageTime = itemView.findViewById(R.id.message_time)
+            imageView = itemView.findViewById(R.id.message_image_view)
         }
     }
 
@@ -65,12 +71,41 @@ class ChatAdapter(val context: Context, val chatList: ArrayList<Message>) :
         when (holder.itemViewType) {
             0 -> {
                 val senderHolder = holder as ItemViewHolder
-                senderHolder.messageBody.text = item.message
+                if (item.type == "text" || item.type.isEmpty()){
+                    senderHolder.messageBody.text = item.message
+                    senderHolder.messageBody.visibility = View.VISIBLE
+                    senderHolder.imageView.visibility = View.GONE
+                }
+                else{
+                    Glide
+                        .with(context)
+                        .load(item.message)
+                        .centerCrop()
+                        .placeholder(R.drawable.placeholder)
+                        .into(senderHolder.imageView)
+                    senderHolder.messageBody.visibility = View.GONE
+                    senderHolder.imageView.visibility = View.VISIBLE
+                }
+
                 senderHolder.messageTime.text = BaseActivity.getDateTimeFromTimeStamp(item.timeStamp)
             }
             1 -> {
                 val receiverHolder = holder as ItemViewHolder1
-                receiverHolder.messageBody.text = item.message
+                if (item.type == "text" || item.type.isEmpty()){
+                    receiverHolder.messageBody.text = item.message
+                    receiverHolder.messageBody.visibility = View.VISIBLE
+                    receiverHolder.imageView.visibility = View.GONE
+                }
+                else{
+                    Glide
+                        .with(context)
+                        .load(item.message)
+                        .centerCrop()
+                        .placeholder(R.drawable.placeholder)
+                        .into(receiverHolder.imageView)
+                    receiverHolder.messageBody.visibility = View.GONE
+                    receiverHolder.imageView.visibility = View.VISIBLE
+                }
                 receiverHolder.messageTime.text = BaseActivity.getDateTimeFromTimeStamp(item.timeStamp)
             }
             else -> {

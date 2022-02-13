@@ -58,7 +58,7 @@ class Constants {
         const val CAMERA_PERMISSION = "android.permission.CAMERA"
         private const val BACKGROUND_IMAGE_PATH = "BackgroundImages"
         private const val LOGO_IMAGE_PATH = "LogoImages"
-        const val BASE_URL = "https://pages.qrmagicapp.com/"
+        const val BASE_URL = "https://itmagic.app/api/"
         const val googleAppScriptUrl =
             "https://script.google.com/macros/s/AKfycbxguIf9uc5DxTAHvxs4zDwsZfb81isrQpguLGQUk9h929K1LajgjoTe47SL2zwf5VIJ/exec"
         const val licenseKey =

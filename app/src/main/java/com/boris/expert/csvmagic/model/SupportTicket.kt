@@ -6,14 +6,15 @@ data class SupportTicket(
     val id:String,
     val appName:String,
     val userName:String,
+    val userId:String,
     val title:String,
     val message:String,
     val timeStamp:Long,
-    val status:String,
+    var status:String,
     val lastReply:Long,
     val lastReplyBy:String
 ):Serializable{
 
-    constructor():this("","","","","",0,"",0,"")
+    constructor():this("","","","","","",0,"",0,"")
 
 }

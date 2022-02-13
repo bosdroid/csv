@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="10dp"
     android:paddingEnd="15dp"
     android:paddingStart="60dp"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    android:paddingRight="15dp"
+    android:gravity="end"
+    android:orientation="vertical"
+    android:paddingLeft="60dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:id="@+id/message_image_view"
+        android:visibility="gone"
+        />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
@@ -16,19 +27,16 @@
         android:padding="10dp"
         android:elevation="2dp"
         android:textSize="@dimen/mediumText"
-        android:layout_alignParentEnd="true"
         />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/message_time"
-        android:layout_below="@id/message_body"
         android:layout_margin="4dp"
         android:textColor="#ccc"
         android:elevation="2dp"
         android:textSize="@dimen/smallText"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true" />
+        />
 
-</RelativeLayout>
+</LinearLayout>

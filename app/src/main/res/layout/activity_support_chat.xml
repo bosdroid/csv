@@ -47,6 +47,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         >
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:id="@+id/image_send_btn"
+            android:scaleType="fitCenter"
+            android:background="@drawable/ic_add_image"/>
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"

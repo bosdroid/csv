@@ -467,6 +467,12 @@
         <item>unlimited_tables</item>
     </string-array>
 
+    <string-array name="ticket_status">
+        <item>open</item>
+        <item>pending</item>
+        <item>closed</item>
+    </string-array>
+
     <string-array name="mode_list">
         <item>Inventory</item>
         <item>Seller</item>
