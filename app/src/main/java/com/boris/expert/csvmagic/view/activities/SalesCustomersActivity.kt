@@ -4,37 +4,35 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.widget.Toolbar
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.android.volley.Response
-import com.android.volley.RetryPolicy
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
-import com.androidnetworking.AndroidNetworking
-import com.androidnetworking.common.Priority
-import com.androidnetworking.error.ANError
-import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.utils.AppSettings
-import com.boris.expert.csvmagic.utils.VolleySingleton
-import com.boris.expert.csvmagic.viewmodel.CodeDetailViewModel
+import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
-import org.json.JSONObject
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import java.util.regex.Pattern
 
-class SalesCustomersActivity : BaseActivity() {
+class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
     private lateinit var appSettings: AppSettings
-    private lateinit var viewModel:SalesCustomersViewModel
+    private lateinit var viewModel: SalesCustomersViewModel
+    private lateinit var insalesLoginWrapperLayout: CardView
+    private lateinit var insalesDataWrapperLayout:LinearLayout
+    private lateinit var insalesShopNameBox: TextInputEditText
+    private lateinit var insalesEmailBox: TextInputEditText
+    private lateinit var insalesPasswordBox: TextInputEditText
+    private lateinit var insalesLoginBtn: MaterialButton
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,11 +46,19 @@ class SalesCustomersActivity : BaseActivity() {
     private fun initViews() {
         context = this
         viewModel = ViewModelProviders.of(
-            this,
-            ViewModelFactory(SalesCustomersViewModel()).createFor()
+                this,
+                ViewModelFactory(SalesCustomersViewModel()).createFor()
         )[SalesCustomersViewModel::class.java]
         appSettings = AppSettings(context)
         toolbar = findViewById(R.id.toolbar)
+
+        insalesLoginWrapperLayout = findViewById(R.id.insales_login_wrapper_layout)
+        insalesDataWrapperLayout = findViewById(R.id.insales_data_wrapper_layout)
+        insalesShopNameBox = findViewById(R.id.insales_login_shop_name_box)
+        insalesEmailBox = findViewById(R.id.insales_login_email_box)
+        insalesPasswordBox = findViewById(R.id.insales_login_password_box)
+        insalesLoginBtn = findViewById(R.id.insales_login_btn)
+        insalesLoginBtn.setOnClickListener(this)
     }
 
     private fun setUpToolbar() {
@@ -72,99 +78,79 @@ class SalesCustomersActivity : BaseActivity() {
         }
     }
 
-    private fun inSalesLogin(){
+    private fun inSalesLogin(shopName: String, email: String, password: String) {
 
         startLoading(context)
-        viewModel.callSalesAccount(context,"myshop-bsq158","asatarpk@gmail.com","Sattar_786")
-        viewModel.getSalesAccountResponse().observe(this, Observer { response->
+        viewModel.callSalesAccount(context, shopName, email, password)
+        viewModel.getSalesAccountResponse().observe(this, Observer { response ->
             dismiss()
-            if (response != null){
-                Log.d("TEST199",response.toString())
+            if (response != null) {
+                if (response.get("status").asString == "200"){
+                    appSettings.putString("INSALES_STATUS","logged")
+                    appSettings.putString("INSALES_SHOP_NAME",shopName)
+                    appSettings.putString("INSALES_EMAIL",email)
+                    appSettings.putString("INSALES_PASSWORD",password)
+
+                    insalesLoginWrapperLayout.visibility = View.GONE
+                    insalesDataWrapperLayout.visibility = View.VISIBLE
+                    showAlert(context,response.toString())
+                }
+                else{
+                    showAlert(context,response.get("message").asString)
+                }
             }
         })
-//        AndroidNetworking.get("https://${URLEncoder.encode("asatarpk@gmail.com", "UTF-8")}:Sattar_786@myshop-bsq158.myinsales.ru/admin/account.json")
-//                .setPriority(Priority.LOW)
-//                .build().getAsJSONObject(object : JSONObjectRequestListener{
-//                    override fun onResponse(response: JSONObject?) {
-//                        dismiss()
-//                        Log.d("TEST1999",response.toString())
-//                    }
-//
-//                    override fun onError(anError: ANError?) {
-//                        dismiss()
-//                        Log.d("TEST1999",anError!!.localizedMessage!!)
-//                    }
-//
-//                })
-
-//        val url = "https://asatarpk@gmail.com:Sattar_786@myshop-bsq158.myinsales.ru/admin/account.json"
-//        startLoading(context)
-//        val stringRequest = object : StringRequest(
-//            Method.GET, url,
-//            Response.Listener {
-//                dismiss()
-//                val response = JSONObject(it)
-//                Log.d("TEST199SALES", response.toString())
-//            }, Response.ErrorListener {
-//                dismiss()
-//                //Log.d("TEST199", it.localizedMessage!!)
-//            }){
-//            override fun getHeaders(): MutableMap<String, String> {
-//                val headers = HashMap<String, String>()
-////                headers.put(
-////                    "Authorization",
-////                    "Basic ZGlnaXRhbC1nb29kczpjNTFjOTA3MDdhMTNjZTNmZmYyMTNhZmJiNWNkMTI3MA=="
-////                )
-//                headers.put(
-//                    "Content-Type",
-//                    "application/json; charset=utf-8"
-//                )
-//                return headers
-//            }
-//        }
-//
-//        stringRequest.retryPolicy = object : RetryPolicy {
-//            override fun getCurrentTimeout(): Int {
-//                return 50000
-//            }
-//
-//            override fun getCurrentRetryCount(): Int {
-//                return 50000
-//            }
-//
-//            @Throws(VolleyError::class)
-//            override fun retry(error: VolleyError) {
-//            }
-//        }
-//
-//        VolleySingleton(context).addToRequestQueue(stringRequest)
     }
 
     override fun onResume() {
         super.onResume()
-        inSalesLogin()
+
+        val insalesStatus = appSettings.getString("INSALES_STATUS")
+
+        if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged"){
+            insalesLoginWrapperLayout.visibility = View.GONE
+            insalesDataWrapperLayout.visibility = View.VISIBLE
+        }
+        else{
+            insalesDataWrapperLayout.visibility = View.GONE
+            insalesLoginWrapperLayout.visibility = View.VISIBLE
+        }
     }
 
-    fun md5(s: String): String {
-        val MD5 = "MD5"
-        try {
-            // Create MD5 Hash
-            val digest: MessageDigest = MessageDigest
-                .getInstance(MD5)
-            digest.update(s.toByteArray())
-            val messageDigest: ByteArray = digest.digest()
 
-            // Create Hex String
-            val hexString = StringBuilder()
-            for (aMessageDigest in messageDigest) {
-                var h = Integer.toHexString(0xFF and aMessageDigest.toInt())
-                while (h.length < 2) h = "0$h"
-                hexString.append(h)
+    override fun onClick(v: View?) {
+        when (v!!.id) {
+            R.id.insales_login_btn -> {
+                if (validation()) {
+                    val shopName = insalesShopNameBox.text.toString().trim()
+                    val email = insalesEmailBox.text.toString().trim()
+                    val password = insalesPasswordBox.text.toString().trim()
+                    inSalesLogin(shopName, email, password)
+                }
             }
-            return hexString.toString()
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
+            else -> {
+
+            }
         }
-        return ""
+    }
+
+    private fun validation(): Boolean {
+        if (insalesShopNameBox.text.toString().trim().isEmpty()){
+            showAlert(context,getString(R.string.empty_text_error))
+            return false
+        }else if (insalesEmailBox.text.toString().trim().isEmpty()){
+            showAlert(context,getString(R.string.empty_text_error))
+            return false
+        }
+        else if (!Pattern.compile(Constants.emailPattern).matcher(insalesEmailBox.text.toString().trim())
+                .matches()){
+            showAlert(context,getString(R.string.email_valid_error))
+            return false
+        }
+        else if (insalesPasswordBox.text.toString().trim().isEmpty()){
+            showAlert(context,getString(R.string.empty_text_error))
+            return false
+        }
+        return true
     }
 }

@@ -91,6 +91,7 @@ class Constants {
                     "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
                     ")+"
         )
+        const val emailPattern = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
         val RECEIVER_INTENT = "RECEIVER_INTENT"
         val RECEIVER_MESSAGE = "RECEIVER_MESSAGE"
         const val megaByte: Long = 1024L * 1024L

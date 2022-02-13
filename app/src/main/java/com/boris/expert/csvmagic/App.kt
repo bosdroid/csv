@@ -1,7 +1,6 @@
 package com.boris.expert.csvmagic
 
 import android.app.Application
-import com.androidnetworking.AndroidNetworking
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 
@@ -15,7 +14,6 @@ class App : Application() {
         appSettings = AppSettings(applicationContext)
         getUserDetail()
 
-        AndroidNetworking.initialize(applicationContext)
     }
 
 
