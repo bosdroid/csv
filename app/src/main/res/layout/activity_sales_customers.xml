@@ -36,16 +36,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
         android:id="@+id/insales_data_wrapper_layout"
-        android:visibility="gone"
         >
 
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textSize="@dimen/xxlargeText"
-            android:text="Insales Products display soon"
-            android:textColor="@color/primary_positive_color"
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/defaultDpMargin"
+            android:background="@color/light_gray"
+            android:id="@+id/insales_products_recyclerview"
+            tools:listitem="@layout/insales_products_item_row_design"
             />
 
     </LinearLayout>

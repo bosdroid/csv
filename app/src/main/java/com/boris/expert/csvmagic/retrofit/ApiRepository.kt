@@ -230,4 +230,71 @@ class ApiRepository {
 
         return res
     }
+
+    fun salesProducts(shopName:String,email:String,password:String):MutableLiveData<JsonObject?>{
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.salesProducts(email,password,shopName).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
+    fun updateProductImage(shopName:String,email:String,password:String,image:String,pId:Int,position:Int,imageId:Int,fileName:String):MutableLiveData<JsonObject?>
+    {
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.updateProductImage(email,password,shopName,image,pId,position,imageId,fileName).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
+    fun updateProductImage(url:String,body: JSONObject):MutableLiveData<JsonObject?>
+    {
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.updateProductImage(url,body).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
+    fun addProductImage(shopName:String,email:String,password:String,image:String,pId:Int,fileName:String,src:String):MutableLiveData<JsonObject?>
+    {
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.addProductImage(email,password,shopName,image,pId,fileName,src).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
 }

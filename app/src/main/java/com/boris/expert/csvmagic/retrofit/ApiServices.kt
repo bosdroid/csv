@@ -2,6 +2,7 @@ package com.boris.expert.csvmagic.retrofit
 
 import com.boris.expert.csvmagic.model.FeedbackResponse
 import com.google.gson.JsonObject
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -43,5 +44,21 @@ interface ApiServices {
     @FormUrlEncoded
     @POST("insales/login.php")
     fun salesLoginAccount(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
+
+    @FormUrlEncoded
+    @POST("insales/products.php")
+    fun salesProducts(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
+
+    @FormUrlEncoded
+    @POST("insales/update_image.php")
+    fun updateProductImage(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("image") image:String, @Field("p_id") pId:Int, @Field("image_position") position:Int, @Field("image_id") imageId:Int, @Field("file_name") fileName:String): Call<JsonObject>
+
+    @FormUrlEncoded
+    @POST("insales/add_image.php")
+    fun addProductImage(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String,@Field("image") image:String,@Field("p_id") pId:Int,@Field("file_name") fileName:String,@Field("src") src:String): Call<JsonObject>
+
+
+    @POST("")
+    fun updateProductImage(@Url url:String,@Body body: JSONObject): Call<JsonObject>
 
 }

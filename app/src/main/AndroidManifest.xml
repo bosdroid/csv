@@ -43,7 +43,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.SalesCustomersActivity"></activity>
+        <activity
+            android:launchMode="singleTask"
+            android:name=".view.activities.SalesCustomersActivity"/>
         <activity android:name=".view.activities.SupportChatActivity" />
         <activity android:name=".view.activities.SupportTicketsActivity" />
         <activity
