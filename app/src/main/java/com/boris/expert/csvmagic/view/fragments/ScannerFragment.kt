@@ -866,7 +866,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                                     requireActivity().runOnUiThread {
 //                                        //loader.visibility = View.VISIBLE
-                                        btn.text = "Please wait..."
+                                        btn.text = requireActivity().resources.getString(R.string.please_wait)
                                     }
 
                                     val selectedImage = searchedImagesList[position]
@@ -891,7 +891,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                                 Uri.parse(result)
                                                             )!!
                                                         )
-                                                        btn.text = "Attached"
+                                                        btn.text = requireActivity().resources.getString(R.string.attached_text)
                                                         btn.setBackgroundColor(
                                                             ContextCompat.getColor(
                                                                 requireActivity(),
@@ -899,7 +899,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                             )
                                                         )
                                                     } else {
-                                                        btn.text = "Attach"
+                                                        btn.text = requireActivity().resources.getString(R.string.attach_text)
                                                         showAlert(
                                                             requireActivity(),
                                                             requireActivity().resources.getString(R.string.something_wrong_error)
@@ -912,14 +912,14 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 //                                        if (loader.visibility == View.VISIBLE) {
 //                                            loader.visibility = View.INVISIBLE
 //                                        }
-                                        btn.text = "Attach"
+                                        btn.text = requireActivity().resources.getString(R.string.attach_text)
                                         showAlert(
                                             requireActivity(),
                                             requireActivity().resources.getString(R.string.something_wrong_error)
                                         )
                                     }
                                 } else {
-                                    btn.text = "Attach"
+                                    btn.text = requireActivity().resources.getString(R.string.attach_text)
                                     btn.setBackgroundColor(
                                         ContextCompat.getColor(
                                             requireActivity(),
@@ -1031,7 +1031,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                 else
                                                 {
                                                     MaterialAlertDialogBuilder(requireActivity())
-                                                        .setMessage("You have no more credits or less to use that feature please buy more credits")
+                                                        .setMessage(requireActivity().resources.getString(R.string.low_credites_error_message))
                                                         .setCancelable(false)
                                                         .setNegativeButton(requireActivity().resources.getString(R.string.no_text)){dialog,which->
                                                             dialog.dismiss()
@@ -2571,12 +2571,12 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                         }
                                     }
                                 } else {
-                                    showAlert(requireActivity(), "Your subscription has expired!")
+                                    showAlert(requireActivity(), requireActivity().resources.getString(R.string.subscription_expired_text))
                                 }
                             } else {
                                 showAlert(
                                     requireActivity(),
-                                    "Insufficient storage for saving Images!"
+                                    requireActivity().resources.getString(R.string.insufficient_storage_error_message)
                                 )
                             }
                         }
@@ -3508,7 +3508,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         } else {
             Toast.makeText(
                 requireActivity(),
-                "Set the input box focus before click on More Button",
+                requireActivity().resources.getString(R.string.input_box_focused_error_text),
                 Toast.LENGTH_SHORT
             ).show()
         }

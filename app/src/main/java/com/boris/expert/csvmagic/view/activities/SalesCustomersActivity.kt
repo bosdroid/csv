@@ -281,7 +281,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         }
 
                         override fun onItemAttachClick(btn: MaterialButton, position: Int) {
-                            btn.text = "Please wait..."
+                            btn.text = getString(R.string.please_wait)
 
                             val selectedImage = searchedImagesList[position]
                             val bitmap: Bitmap? = ImageManager.getBitmapFromURL(
@@ -426,7 +426,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                 })
                                         } else {
                                             MaterialAlertDialogBuilder(context)
-                                                .setMessage("You have no more credits or less to use that feature please buy more credits")
+                                                .setMessage(getString(R.string.low_credites_error_message))
                                                 .setCancelable(false)
                                                 .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
                                                     dialog.dismiss()
@@ -726,7 +726,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                 })
                                         } else {
                                             MaterialAlertDialogBuilder(context)
-                                                .setMessage("You have no more credits or less to use that feature please buy more credits")
+                                                .setMessage(getString(R.string.low_credites_error_message))
                                                 .setCancelable(false)
                                                 .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
                                                     dialog.dismiss()

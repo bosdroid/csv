@@ -887,7 +887,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.tables).isVisible = true
             mNavigation.menu.findItem(R.id.credit).isVisible = false
             mNavigation.menu.findItem(R.id.user_screen).isVisible = true
-            mNavigation.menu.findItem(R.id.tickets).isVisible = Constants.premiumSupportFeatureStatus == 1
+//            mNavigation.menu.findItem(R.id.tickets).isVisible = Constants.premiumSupportFeatureStatus == 1
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
             mNavigation.menu.findItem(R.id.insales).isVisible = true

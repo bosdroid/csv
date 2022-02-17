@@ -139,7 +139,7 @@
     <string name="create_ticket_title_hint_text">Title</string>
     <string name="create_ticket_heading_text">Create the support ticket</string>
     <string name="type_message_hint_text">Type a message</string>
-    <string name="search_hint_text">Search...</string>
+    <string name="search_hint_text">Search…</string>
     <string name="search_text">Search</string>
     <string name="attach_text">Attach</string>
     <string name="start">Start</string>
@@ -163,7 +163,47 @@
     <string name="email_valid_error">Please enter the valid email address</string>
     <string name="edit_text">Edit</string>
     <string name="please_wait_login_message">Please wait while Insales Login....</string>
-    <string name="please_wait_products_message">Please wait while products is fetching...</string>
+    <string name="please_wait_products_message">Please wait while products is fetching…</string>
     <string name="logout_insales_warning_text">Are you sure you want to logout from Insales Account?</string>
     <string name="image_remove_warning_message">Are you sure you want to remove this image?</string>
+    <string name="low_credites_error_message">You have no more credits or less to use that feature please buy more credits</string>
+    <string name="attached_text">Attached</string>
+    <string name="insufficient_storage_error_message">Insufficient storage for saving Images!</string>
+    <string name="input_box_focused_error_text">Set the input box focus before click on More Button</string>
+    <string name="csv_correct_error_message">Note: Please use the correct CSV file</string>
+    <string name="credits_for_text">credits for</string>
+    <string name="images_per_api_request_text">images/API request</string>
+    <string name="extend_usage_warning_text">Are you sure you want to extend the usage of this feature?</string>
+    <string name="purchase_feature_warning_text">Are you sure you want to purchase this feature?</string>
+    <string name="purchase_feature_already_active_text">You can\'t purchase this feature because currently do not have any active subscription.</string>
+    <string name="low_credites_error_message1">You can\'t purchase this feature due to zero or less credits!</string>
+    <string name="purchase_success_message">Congratulation on purchasing the subscription!</string>
+    <string name="choose_column_attach_image_text">Choose the Column where you want to attach the images</string>
+    <string name="see_more_text">See More</string>
+    <string name="see_less_text">See Less</string>
+    <string name="selected_column_name_error_text">Sorry, Selected Column name not existing in table!</string>
+    <string name="subscription_expired_text1">Your subscription has expired!</string>
+    <string name="http_protocol_text">http://</string>
+    <string name="https_protocol_text">https://</string>
+    <string name="na_text">N/A</string>
+
+    <string-array name="features_keys">
+        <item>compressor_feature</item>
+        <item>modes_switcher</item>
+        <item>premium_support</item>
+        <item>unlimited_tables</item>
+    </string-array>
+
+    <string-array name="ticket_status">
+        <item>open</item>
+        <item>pending</item>
+        <item>closed</item>
+    </string-array>
+
+    <string-array name="mode_list">
+        <item>Inventory</item>
+        <item>Seller</item>
+        <item>Search</item>
+    </string-array>
+
 </resources>

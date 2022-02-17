@@ -169,7 +169,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
         super.onResume()
         getUserCredit()
         getUserSubscriptionDetails()
-        imagesSearchDetailView.text = "${Constants.searchImageCreditPrice} credits for ${Constants.searchImagesLimit} images/API request"
+        imagesSearchDetailView.text = "${Constants.searchImageCreditPrice} ${getString(R.string.credits_for_text)} ${Constants.searchImagesLimit} ${getString(R.string.images_per_api_request_text)}"
     }
 
     private fun getUserCredit() {
@@ -298,7 +298,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                                val currentMiliSeconds = System.currentTimeMillis()
 //                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
 //                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
-                                cfExpiredView.text = "Expired at $endDate"
+                                cfExpiredView.text = "${getString(R.string.expired_at_text)} $endDate"
 
                             } else if (feature.getString("feature") == featuresKeys[1] && feature.getInt(
                                     "status"
@@ -311,7 +311,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                                val currentMiliSeconds = System.currentTimeMillis()
 //                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
 //                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
-                                smsfExpiredView.text = "Expired at $endDate"
+                                smsfExpiredView.text = "${getString(R.string.expired_at_text)} $endDate"
 
                             } else if (feature.getString("feature") == featuresKeys[2] && feature.getInt(
                                     "status"
@@ -324,7 +324,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                                val currentMiliSeconds = System.currentTimeMillis()
 //                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
 //                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
-                                psfExpiredView.text = "Expired at $endDate"
+                                psfExpiredView.text = "${getString(R.string.expired_at_text)} $endDate"
 
                             } else if (feature.getString("feature") == featuresKeys[3] && feature.getInt(
                                     "status"
@@ -337,7 +337,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 //                                val currentMiliSeconds = System.currentTimeMillis()
 //                                val startMiliSeconds = getTimeStampFromStringDate(startDate)
 //                                val endMiliSeconds = getTimeStampFromStringDate(endDate)
-                                utfExpiredView.text = "Expired at $endDate"
+                                utfExpiredView.text = "${getString(R.string.expired_at_text)} $endDate"
                             }
 
                         }
@@ -391,7 +391,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                     showConfirmAlert(featuresKeys[0], compressorFeatureBtn,cfExpiredView.text.toString().split(" ")[2])
                 }
                 else{
-                    showAlert(context,"You have no more credits or less to use that feature please buy more credits")
+                    showAlert(context,getString(R.string.low_credites_error_message))
                 }
             }
             R.id.modes_switcher_feature_btn -> {
@@ -402,7 +402,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                     showConfirmAlert(featuresKeys[1], modesSwitcherFeatureBtn,smsfExpiredView.text.toString().split(" ")[2])
                 }
                 else{
-                    showAlert(context,"You have no more credits or less to use that feature please buy more credits")
+                    showAlert(context,getString(R.string.low_credites_error_message))
                 }
             }
             R.id.premium_support_feature_btn -> {
@@ -413,7 +413,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                     showConfirmAlert(featuresKeys[2], premiumSupportFeatureBtn,psfExpiredView.text.toString().split(" ")[2])
                 }
                 else{
-                    showAlert(context,"You have no more credits or less to use that feature please buy more credits")
+                    showAlert(context,getString(R.string.low_credites_error_message))
                 }
             }
             R.id.unlimited_tables_feature_btn -> {
@@ -424,7 +424,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                     showConfirmAlert(featuresKeys[3], unlimitedTablesFeatureBtn,utfExpiredView.text.toString().split(" ")[2])
                 }
                 else{
-                    showAlert(context,"You have no more credits or less to use that feature please buy more credits")
+                    showAlert(context,getString(R.string.low_credites_error_message))
                 }
             }
 //            R.id.images_search_feature_btn -> {
@@ -440,7 +440,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
     private fun showConfirmAlert(featureName: String, btn: MaterialButton,expiredAt:String) {
         MaterialAlertDialogBuilder(context)
             .setTitle(featureName.toUpperCase(Locale.ENGLISH).replace("_", " "))
-            .setMessage("Are you sure you want to extend the usage of this feature?")
+            .setMessage(getString(R.string.extend_usage_warning_text))
             .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
                 dialog.dismiss()
             }
@@ -866,7 +866,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
             if (response != null) {
 
                 MaterialAlertDialogBuilder(context)
-                    .setMessage("Are you sure you want to purchase this feature?")
+                    .setMessage(getString(R.string.purchase_feature_warning_text))
                     .setCancelable(false)
                     .setNegativeButton("No") { dialog, which ->
                         dialog.dismiss()
@@ -879,7 +879,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                             if (feature.packageId == 3 || feature.packageId == 4) {
                                 showAlert(
                                     context,
-                                    "You can't purchase this feature because currently do not have any active subscription."
+                                    getString(R.string.purchase_feature_already_active_text)
                                 )
                             } else {
                                 purchaseFeature(feature)
@@ -959,7 +959,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 } else {
                     showAlert(
                         context,
-                        "You can't purchase this feature due to zero or less credits!"
+                        getString(R.string.low_credites_error_message1)
                     )
                 }
             } else {
@@ -1000,7 +1000,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 } else {
                                     showAlert(
                                         context,
-                                        "You can't purchase this feature due to zero or less credits!"
+                                        getString(R.string.low_credites_error_message1)
                                     )
                                 }
                             }
@@ -1053,7 +1053,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 } else {
                     showAlert(
                         context,
-                        "You can't purchase this feature due to zero or less credits!"
+                        getString(R.string.low_credites_error_message1)
                     )
                 }
             } else {
@@ -1094,7 +1094,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 } else {
                                     showAlert(
                                         context,
-                                        "You can't purchase this feature due to zero or less credits!"
+                                        getString(R.string.low_credites_error_message1)
                                     )
                                 }
                             }
@@ -1121,7 +1121,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 } else {
                     showAlert(
                         context,
-                        "You can't purchase this feature due to zero or less credits!"
+                        getString(R.string.low_credites_error_message1)
                     )
                 }
             } else {
@@ -1155,7 +1155,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 } else {
                                     showAlert(
                                         context,
-                                        "You can't purchase this feature due to zero or less credits!"
+                                        getString(R.string.low_credites_error_message1)
                                     )
                                 }
                             }
@@ -1183,7 +1183,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 } else {
                     showAlert(
                         context,
-                        "You can't purchase this feature due to zero or less credits!"
+                        getString(R.string.low_credites_error_message1)
                     )
                 }
             } else {
@@ -1217,7 +1217,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                                 } else {
                                     showAlert(
                                         context,
-                                        "You can't purchase this feature due to zero or less credits!"
+                                        getString(R.string.low_credites_error_message1)
                                     )
                                 }
                             }
@@ -1597,7 +1597,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
 
                                     }
 
-                                showAlert(context, "Congratulation on purchasing the subscription!")
+                                showAlert(context, getString(R.string.purchase_success_message))
                             } else {
                                 val message = response.getString("message")
                                 showAlert(context, message)
@@ -1612,7 +1612,7 @@ class UserScreenActivity : BaseActivity(), View.OnClickListener, PurchasesUpdate
                 }
             } else {
                 dismiss()
-                showAlert(context, "You can't purchase this feature due to zero or less credits!")
+                showAlert(context, getString(R.string.low_credites_error_message1))
             }
         }
 

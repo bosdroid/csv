@@ -360,7 +360,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
         columns.removeAt(0)
         selectedColumn = columns[0]
         val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle("Choose the Column where you want to attach the images")
+        builder.setTitle(getString(R.string.choose_column_attach_image_text))
         builder.setSingleChoiceItems(columns.toTypedArray(),0
         ) { dialog, which ->
             selectedColumn = columns[which]
@@ -1037,8 +1037,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 val columnValue = layout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
                 val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
                 val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
-                columnValue.setTrimCollapsedText("See More")
-                columnValue.setTrimExpandedText("See Less")
+                columnValue.setTrimCollapsedText(getString(R.string.see_more_text))
+                columnValue.setTrimExpandedText(getString(R.string.see_less_text))
                 counter += 1
                 columnEditView.id = counter
                 barcodeEditList.add(Triple(columnEditView, item.second, item.first))
@@ -1066,8 +1066,8 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 val columnValue = layout.findViewById<com.borjabravo.readmoretextview.ReadMoreTextView>(R.id.bcd_table_column_value)
                 val columnName = layout.findViewById<MaterialTextView>(R.id.bcd_table_column_name)
                 val columnEditView = layout.findViewById<AppCompatImageView>(R.id.bcd_edit_view)
-                columnValue.setTrimCollapsedText("See More")
-                columnValue.setTrimExpandedText("See Less")
+                columnValue.setTrimCollapsedText(getString(R.string.see_more_text))
+                columnValue.setTrimExpandedText(getString(R.string.see_less_text))
                 columnEditView.id = counter
                 barcodeEditList.add(Triple(columnEditView, item.second, item.first))
                 columnEditView.setOnClickListener(this)
@@ -1183,7 +1183,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 
 //                                    requireActivity().runOnUiThread {
 //                                        //loader.visibility = View.VISIBLE
-                        btn.text = "Please wait..."
+                        btn.text = getString(R.string.please_wait)
 //                                    }
 
                         val selectedImage = searchedImagesList[position]
@@ -1208,10 +1208,10 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                                     Uri.parse(result)
                                                 )!!
                                             )
-                                            btn.text = "Attached"
+                                            btn.text = getString(R.string.attached_text)
                                             btn.setBackgroundColor(ContextCompat.getColor(context,R.color.dark_gray))
                                         } else {
-                                            btn.text = "Attach"
+                                            btn.text = getString(R.string.attach_text)
                                             showAlert(
                                                 context,
                                                 getString(R.string.something_wrong_error)
@@ -1224,14 +1224,14 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
 //                                        if (loader.visibility == View.VISIBLE) {
 //                                            loader.visibility = View.INVISIBLE
 //                                        }
-                            btn.text = "Attach"
+                            btn.text = getString(R.string.attach_text)
                             showAlert(
                                 context,
                                 getString(R.string.something_wrong_error)
                             )
                         }
                     } else {
-                        btn.text = "Attach"
+                        btn.text = getString(R.string.attach_text)
                         btn.setBackgroundColor(ContextCompat.getColor(context,R.color.primary_positive_color))
                         tempImageList.removeAt(position)
                     }
@@ -1337,7 +1337,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                     } else
                                     {
                                         MaterialAlertDialogBuilder(context)
-                                            .setMessage("You have no more credits or less to use that feature please buy more credits")
+                                            .setMessage(getString(R.string.low_credites_error_message))
                                             .setCancelable(false)
                                             .setNegativeButton(getString(R.string.no_text)){dialog,which->
                                                 dialog.dismiss()
@@ -1485,7 +1485,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                             }
                                         }
                                         if (pair == null){
-                                            showAlert(context,"Sorry, Selected Column name not existing in table!")
+                                            showAlert(context,getString(R.string.selected_column_name_error_text))
                                         }
                                         else{
                                             var tempText = pair.second
@@ -1616,13 +1616,13 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                     }
                                 } else {
                                     dismiss()
-                                    showAlert(context, "Your subscription has expired!")
+                                    showAlert(context, getString(R.string.subscription_expired_text1))
                                 }
                             } else {
                                 dismiss()
                                 showAlert(
                                     context,
-                                    "Insufficient storage for saving Images!"
+                                    getString(R.string.insufficient_storage_error_message)
                                 )
                             }
                         }

@@ -306,7 +306,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener {
                             BaseActivity.dismiss()
                             BaseActivity.showAlert(
                                 requireActivity(),
-                                "${getString(R.string.table_csv_import_error_message)}\n${e.localizedMessage}\nNote: Please use the correct CSV file"
+                                "${getString(R.string.table_csv_import_error_message)}\n${e.localizedMessage}\n${getString(R.string.csv_correct_error_message)}"
                             )
                             e.printStackTrace()
                         }
