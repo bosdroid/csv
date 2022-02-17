@@ -44,7 +44,7 @@
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
         <activity
-            android:launchMode="singleTask"
+            android:launchMode="singleInstance"
             android:name=".view.activities.SalesCustomersActivity"/>
         <activity android:name=".view.activities.SupportChatActivity" />
         <activity android:name=".view.activities.SupportTicketsActivity" />

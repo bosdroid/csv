@@ -7,6 +7,7 @@
         android:id="@+id/help"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_help"
+        android:visible="false"
         />
 
 <!--    <item-->

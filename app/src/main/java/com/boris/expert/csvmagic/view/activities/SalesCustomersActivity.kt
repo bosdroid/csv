@@ -14,6 +14,7 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
@@ -34,13 +35,11 @@ import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.adapters.ProductImagesAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
+import com.boris.expert.csvmagic.interfaces.BackupListener
 import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.model.Product
-import com.boris.expert.csvmagic.utils.AppSettings
-import com.boris.expert.csvmagic.utils.Constants
-import com.boris.expert.csvmagic.utils.ImageManager
-import com.boris.expert.csvmagic.utils.RuntimePermissionHelper
+import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.bumptech.glide.Glide
@@ -81,6 +80,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private var intentType = 0
     private var selectedInternetImage = ""
     private var userCurrentCredits = ""
+    private var menu:Menu?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,14 +122,34 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         return if (item.itemId == android.R.id.home) {
             onBackPressed()
             true
-        } else {
+        }
+        else if(item.itemId == R.id.insales_logout){
+            MaterialAlertDialogBuilder(context)
+                .setTitle(getString(R.string.logout))
+                .setMessage(getString(R.string.logout_insales_warning_text))
+                .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                    dialog.dismiss()
+                }
+                .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                    dialog.dismiss()
+                    appSettings.remove("INSALES_STATUS")
+                    appSettings.remove("INSALES_SHOP_NAME")
+                    appSettings.remove("INSALES_EMAIL")
+                    appSettings.remove("INSALES_PASSWORD")
+                    startActivity(Intent(context,SalesCustomersActivity::class.java))
+
+                }
+                .create().show()
+            true
+        }
+        else {
             super.onOptionsItemSelected(item)
         }
     }
 
     private fun inSalesLogin(shopName: String, email: String, password: String) {
 
-        startLoading(context)
+        startLoading(context,getString(R.string.please_wait_login_message))
         viewModel.callSalesAccount(context, shopName, email, password)
         viewModel.getSalesAccountResponse().observe(this, Observer { response ->
             dismiss()
@@ -145,6 +165,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                     insalesLoginWrapperLayout.visibility = View.GONE
                     insalesDataWrapperLayout.visibility = View.VISIBLE
+                    menu!!.findItem(R.id.insales_logout).isVisible = true
                     showProducts()
                 } else {
                     showAlert(context, response.get("message").asString)
@@ -806,14 +827,62 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
             }
 
+            override fun onItemRemoveClick(position: Int,imagePosition:Int) {
+                val imageItem = productsList[position].productImages!![imagePosition]
+
+
+                MaterialAlertDialogBuilder(context)
+                    .setTitle(getString(R.string.remove_text))
+                    .setMessage(getString(R.string.image_remove_warning_message))
+                    .setCancelable(false)
+                    .setNegativeButton(getString(R.string.cancel_text)){dialog,which->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(getString(R.string.remove_text)){dialog,which->
+                        dialog.dismiss()
+                        startLoading(context)
+                        viewModel.callRemoveProductImage(
+                            context,
+                            shopName,
+                            email,
+                            password,
+                            imageItem.productId,
+                            imageItem.id
+                        )
+                        viewModel.getRemoveProductImageResponse()
+                            .observe(this@SalesCustomersActivity, Observer { response ->
+
+                                if (response != null) {
+                                    if (response.get("status").asString == "200") {
+                                        Handler(Looper.myLooper()!!).postDelayed({
+                                            dismiss()
+                                            showProducts()
+                                        }, 3000)
+                                    } else {
+                                        dismiss()
+                                        showAlert(context, response.get("message").asString)
+                                    }
+                                } else {
+                                    dismiss()
+                                    showProducts()
+                                }
+                            })
+
+                    }.create().show()
+
+            }
+
         })
-        startLoading(context)
+        startLoading(context,getString(R.string.please_wait_products_message))
 
         viewModel.callProducts(context, shopName, email, password)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
 
             if (response != null) {
                 if (response.get("status").asString == "200") {
+                    if (menu != null){
+                        menu!!.findItem(R.id.insales_logout).isVisible = true
+                    }
                     val products = response.getAsJsonArray("products")
                     if (products.size() > 0) {
                         productsList.clear()
@@ -913,11 +982,19 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     override fun onResume() {
         super.onResume()
 
+        checkInsalesAccount()
+    }
+
+    private fun checkInsalesAccount(){
         val insalesStatus = appSettings.getString("INSALES_STATUS")
 
         if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged") {
             insalesLoginWrapperLayout.visibility = View.GONE
             insalesDataWrapperLayout.visibility = View.VISIBLE
+            if (menu != null){
+                menu!!.findItem(R.id.insales_logout).isVisible = true
+            }
+
 
             shopName = appSettings.getString("INSALES_SHOP_NAME") as String
             email = appSettings.getString("INSALES_EMAIL") as String
@@ -930,7 +1007,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         } else {
             insalesDataWrapperLayout.visibility = View.GONE
             insalesLoginWrapperLayout.visibility = View.VISIBLE
+            if (menu != null){
+                menu!!.findItem(R.id.insales_logout).isVisible = false
+            }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.insales_main_menu,menu)
+        this.menu = menu
+        return true
     }
 
 

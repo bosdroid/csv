@@ -16,6 +16,7 @@ class ProductImagesAdapter(private val context: Context, private val productImag
     interface OnItemClickListener {
         fun onItemClick(position: Int)
         fun onItemEditClick(btn: MaterialButton, position: Int)
+        fun onItemRemoveClick(position: Int)
     }
 
     private var mListener: OnItemClickListener? = null
@@ -27,10 +28,12 @@ class ProductImagesAdapter(private val context: Context, private val productImag
     open class ItemViewHolder(itemView: View, listener: OnItemClickListener) : RecyclerView.ViewHolder(itemView) {
         val imageView: AppCompatImageView
         val editBtn: MaterialButton
+        val removeBtn: AppCompatImageView
 
         init {
             imageView = itemView.findViewById(R.id.insales_product_image_view)
             editBtn = itemView.findViewById(R.id.insales_product_image_edit_btn)
+            removeBtn = itemView.findViewById(R.id.insales_product_remove_view)
 
             imageView.setOnClickListener {
                 listener.onItemClick(layoutPosition)
@@ -38,6 +41,10 @@ class ProductImagesAdapter(private val context: Context, private val productImag
 
             editBtn.setOnClickListener {
                 listener.onItemEditClick(editBtn,layoutPosition)
+            }
+
+            removeBtn.setOnClickListener {
+                listener.onItemRemoveClick(layoutPosition)
             }
         }
     }

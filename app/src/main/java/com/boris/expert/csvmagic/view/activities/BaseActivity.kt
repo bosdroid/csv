@@ -480,6 +480,19 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
+        fun startLoading(context: Context,message: String) {
+            if (alert == null) {
+                val builder = MaterialAlertDialogBuilder(context)
+                val layout = LayoutInflater.from(context).inflate(R.layout.custom_loading, null)
+                val textView = layout.findViewById<MaterialTextView>(R.id.textView)
+                textView.text = message
+                builder.setView(layout)
+                builder.setCancelable(false)
+                alert = builder.create()
+                alert!!.show()
+            }
+        }
+
         fun dismiss() {
             if (alert != null) {
                 alert!!.dismiss()

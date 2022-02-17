@@ -832,7 +832,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                                         Constants.modesSwitcherFeatureStatus = status
                                     }
                                     "premium_support" -> {
-                                        mNavigation.menu.findItem(R.id.tickets).isVisible = status == 1
+//                                        mNavigation.menu.findItem(R.id.tickets).isVisible = status == 1
                                         Constants.premiumSupportFeatureStatus = status
                                     }
                                     "unlimited_tables" -> {

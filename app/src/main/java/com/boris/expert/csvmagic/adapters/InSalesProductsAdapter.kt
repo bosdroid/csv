@@ -21,6 +21,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         fun onItemClick(position: Int)
         fun onItemEditClick(position: Int,imagePosition:Int)
         fun onItemAddImageClick(position: Int)
+        fun onItemRemoveClick(position: Int,imagePosition:Int)
     }
 
     private var mListener: OnItemClickListener? = null
@@ -77,6 +78,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
             override fun onItemEditClick(btn: MaterialButton, imagePosition: Int) {
                mListener!!.onItemEditClick(position,imagePosition)
+            }
+
+            override fun onItemRemoveClick(imagePosition: Int) {
+                mListener!!.onItemRemoveClick(position,imagePosition)
             }
 
         })

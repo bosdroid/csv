@@ -297,4 +297,22 @@ class ApiRepository {
 
         return res
     }
+
+    fun removeProductImage(shopName:String,email:String,password:String,pId:Int,imageId:Int):MutableLiveData<JsonObject?>
+    {
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.removeProductImage(email,password,shopName,pId,imageId).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
 }
