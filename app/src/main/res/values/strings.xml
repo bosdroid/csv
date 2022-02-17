@@ -460,7 +460,7 @@
     <string name="insales">InSales Customers</string>
     <string name="insales_customers">inSalesCustomers</string>
     <string name="insales_login_text">InSales Login</string>
-    <string name="shop_name_hint_text">Shop Name (For example, myshop.es)</string>
+    <string name="shop_name_hint_text">Shop Name (For example, myshop-bsa80)</string>
     <string name="email_valid_error">Please enter the valid email address</string>
     <string name="edit_text">Edit</string>
     <string name="please_wait_login_message">Please wait while Insales Login....</string>
