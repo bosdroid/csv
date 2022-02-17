@@ -131,6 +131,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.mlkit:translate:16.1.2'
+    implementation 'com.google.firebase:firebase-ml-vision'
+    implementation 'com.google.firebase:firebase-core'
+    implementation 'com.google.android.gms:play-services-vision:20.1.1'
+    implementation 'com.google.android.gms:play-services-vision-common:19.1.1'
 
     // RETROFIT NETWORK LIBRARY
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
