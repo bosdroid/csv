@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:fillViewport="true"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
 
 
 
@@ -11,33 +19,127 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:textColor="@color/black"
         android:layout_margin="@dimen/sixtyDpMargin"
         android:textSize="@dimen/largeText"
-        android:text="@string/product_title_text"
+        android:text="@string/update_product_detail_text"
         android:id="@+id/dialog_heading"
         />
 
 
-    <com.google.android.material.textfield.TextInputEditText
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:id="@+id/insales_product_field_input_field"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_heading"
-        android:background="@drawable/input_text_field_design"
-        android:padding="5dp"
-        android:inputType="text"
-        android:imeOptions="actionDone"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:hint="@string/text_hint_text"
-        android:gravity="start"
-        />
+        android:orientation="vertical"
+        android:id="@+id/wrapper_layout"
+        >
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:text="@string/product_title_text"
+            android:textSize="@dimen/largeText"
+            />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/insales_product_title_input_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_heading"
+            android:background="@drawable/input_text_field_design"
+            android:padding="5dp"
+            android:inputType="text"
+            android:imeOptions="actionNext"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/text_hint_text"
+            android:gravity="start"
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            android:text="@string/product_short_description_text"
+            android:textSize="@dimen/largeText"
+            />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:id="@+id/insales_product_short_desc_input_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/insales_product_title_input_field"
+            android:background="@drawable/input_text_field_design"
+            android:padding="5dp"
+            android:inputType="text"
+            android:imeOptions="actionNext"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/text_hint_text"
+            android:gravity="start"
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            android:text="@string/product_full_description_text"
+            android:textSize="@dimen/largeText"
+            />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:id="@+id/insales_product_full_desc_input_field"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/insales_product_title_input_field"
+            android:background="@drawable/input_text_field_design"
+            android:padding="5dp"
+            android:inputType="text"
+            android:imeOptions="actionNext"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/text_hint_text"
+            android:gravity="start"
+            />
+
+    </LinearLayout>
+
+
 
 
     <com.google.android.material.button.MaterialButton
@@ -46,7 +148,7 @@
         android:text="@string/cancel_text"
         android:id="@+id/insales_product_detail_dialog_cancel_btn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/insales_product_field_input_field"
+        app:layout_constraintTop_toBottomOf="@id/wrapper_layout"
         app:layout_constraintEnd_toStartOf="@id/insales_product_detail_dialog_update_btn"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
@@ -58,10 +160,10 @@
         android:text="@string/update_text"
         android:id="@+id/insales_product_detail_dialog_update_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/insales_product_field_input_field"
+        app:layout_constraintTop_toBottomOf="@id/wrapper_layout"
         app:layout_constraintStart_toEndOf="@id/insales_product_detail_dialog_cancel_btn"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

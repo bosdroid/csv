@@ -26,8 +26,8 @@ class SalesCustomersViewModel : ViewModel() {
         return accountResponse
     }
 
-    fun callProducts(context: Context,shopName:String,email:String,password:String){
-        productsResponse = ApiRepository.getInstance(context).salesProducts(shopName,email,password)
+    fun callProducts(context: Context,shopName:String,email:String,password:String,page:Int){
+        productsResponse = ApiRepository.getInstance(context).salesProducts(shopName,email,password,page)
     }
 
     fun getSalesProductsResponse():LiveData<JsonObject?>{
@@ -63,8 +63,8 @@ class SalesCustomersViewModel : ViewModel() {
         return removeImageResponse
     }
 
-    fun callUpdateProductDetail(context: Context,shopName:String,email:String,password:String,pId:Int,title:String){
-        updateProductResponse = ApiRepository.getInstance(context).updateProductDetail(shopName,email,password,pId,title)
+    fun callUpdateProductDetail(context: Context,shopName:String,email:String,password:String,pId:Int,title:String,shortDesc:String,fullDesc:String){
+        updateProductResponse = ApiRepository.getInstance(context).updateProductDetail(shopName,email,password,pId,title,shortDesc,fullDesc)
     }
 
     fun getUpdateProductDetailResponse():LiveData<JsonObject?>{

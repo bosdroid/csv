@@ -2,7 +2,6 @@ package com.boris.expert.csvmagic.view.activities
 
 import android.Manifest
 import android.app.Activity
-import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -13,6 +12,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -33,12 +34,10 @@ import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
-import com.boris.expert.csvmagic.adapters.ProductImagesAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
-import com.boris.expert.csvmagic.interfaces.BackupListener
 import com.boris.expert.csvmagic.interfaces.ResponseListener
-import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.model.Product
+import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
@@ -51,12 +50,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.gson.JsonObject
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.Comparator
-import kotlin.collections.ArrayList
 
 class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
@@ -88,6 +84,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private lateinit var searchResetBtn:MaterialTextView
     private lateinit var searchBox:TextInputEditText
     private lateinit var searchImageBtn:ImageButton
+    private var currentPage = 1
+    private var currentTotalProducts = 0
+    private lateinit var linearLayoutManager: WrapContentLinearLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,6 +122,22 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         searchImageBtn.setOnClickListener(this)
 
 
+        searchBox.addTextChangedListener(object :TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString()
+                search(query)
+            }
+
+        })
+
     }
 
     private fun setUpToolbar() {
@@ -150,6 +165,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     appSettings.remove("INSALES_SHOP_NAME")
                     appSettings.remove("INSALES_EMAIL")
                     appSettings.remove("INSALES_PASSWORD")
+                    originalProductsList.clear()
+                    productsList.clear()
                     startActivity(Intent(context, SalesCustomersActivity::class.java))
 
                 }
@@ -210,7 +227,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
     lateinit var selectedImageView: AppCompatImageView
     private fun showProducts() {
-        productsRecyclerView.layoutManager = WrapContentLinearLayoutManager(context,RecyclerView.VERTICAL,false)
+        linearLayoutManager = WrapContentLinearLayoutManager(
+            context,
+            RecyclerView.VERTICAL,
+            false
+        )
+        productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
         adapter = InSalesProductsAdapter(
             context,
@@ -919,8 +941,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
                 val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
                 val productTitleBox =
-                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_field_input_field)
+                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
+                val productShortDescriptionBox =
+                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
+                val productFullDescriptionBox =
+                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_full_desc_input_field)
+
                 productTitleBox.setText(pItem.title)
+                productShortDescriptionBox.setText(pItem.shortDesc)
+                productFullDescriptionBox.setText(pItem.fullDesc)
                 val dialogCancelBtn =
                     dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
                 val dialogUpdateBtn =
@@ -940,8 +969,11 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
 
                 dialogUpdateBtn.setOnClickListener {
-                    val updatedText = productTitleBox.text.toString().trim()
-                    if (updatedText.isNotEmpty()) {
+                    val titleText = productTitleBox.text.toString().trim()
+                    val shortDesc = productShortDescriptionBox.text.toString().trim()
+                    val fullDesc = productFullDescriptionBox.text.toString().trim()
+
+                    if (titleText.isNotEmpty()) {
                         Constants.hideKeyboar(context)
                         alert.dismiss()
                         startLoading(
@@ -954,7 +986,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             email,
                             password,
                             pItem.id,
-                            updatedText
+                            titleText,
+                            shortDesc,
+                            fullDesc
                         )
                         viewModel.getUpdateProductDetailResponse()
                             .observe(this@SalesCustomersActivity, Observer { response ->
@@ -977,9 +1011,39 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             }
 
         })
-        startLoading(context, getString(R.string.please_wait_products_message))
 
-        viewModel.callProducts(context, shopName, email, password)
+        var pastVisiblesItems: Int
+        var visibleItemCount: Int
+        var totalItemCount: Int
+
+        productsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0) { //check for scroll down
+                    visibleItemCount = linearLayoutManager.childCount
+                    totalItemCount = linearLayoutManager.itemCount
+                    pastVisiblesItems = linearLayoutManager.findFirstVisibleItemPosition()
+
+                        if (visibleItemCount + pastVisiblesItems >= totalItemCount) {
+                             if (currentTotalProducts == 250){
+                                 currentPage +=1
+                                 fetchProducts(currentPage)
+                             }
+//                            else{
+//                                Toast.makeText(context,getString(R.string.fetch_all_products),Toast.LENGTH_SHORT).show()
+//                            }
+                        }
+
+                }
+            }
+        })
+
+        fetchProducts(currentPage)
+    }
+
+
+    private fun fetchProducts(page: Int){
+        startLoading(context, getString(R.string.please_wait_products_message))
+        viewModel.callProducts(context, shopName, email, password, page)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
 
             if (response != null) {
@@ -989,7 +1053,6 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     }
                     val products = response.getAsJsonArray("products")
                     if (products.size() > 0) {
-                        originalProductsList.clear()
                         productsList.clear()
                         for (i in 0 until products.size()) {
                             val product = products.get(i).asJsonObject
@@ -1011,10 +1074,14 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             originalProductsList.add(
                                 Product(
                                     product.get("id").asInt,
+                                    product.get("category_id").asInt,
                                     product.get("title").asString,
+                                    if (product.get("short_description").isJsonNull){""}else{product.get("short_description").asString},
+                                    if (product.get("description").isJsonNull){""}else{product.get("description").asString},
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )
+                            currentTotalProducts = originalProductsList.size
                         }
                         dismiss()
                         if (originalProductsList.size > 0) {
@@ -1098,8 +1165,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             insalesLoginWrapperLayout.visibility = View.GONE
             insalesSearchWrapperLayout.visibility = View.VISIBLE
             insalesDataWrapperLayout.visibility = View.VISIBLE
+
             if (menu != null) {
                 menu!!.findItem(R.id.insales_logout).isVisible = true
+                menu!!.findItem(R.id.insales_data_filter).isVisible = true
             }
 
 
@@ -1118,6 +1187,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
             if (menu != null) {
                 menu!!.findItem(R.id.insales_logout).isVisible = false
+                menu!!.findItem(R.id.insales_data_filter).isVisible = false
             }
         }
     }
@@ -1139,26 +1209,25 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     inSalesLogin(shopName, email, password)
                 }
             }
-            R.id.insales_products_search_reset_btn->{
-                 hideSoftKeyboard(context,searchBox)
-                if (searchBox.text.toString().trim().isNotEmpty()){
+            R.id.insales_products_search_reset_btn -> {
+                hideSoftKeyboard(context, searchBox)
+                if (searchBox.text.toString().trim().isNotEmpty()) {
                     searchBox.setText("")
                 }
-                if (productsList.isNotEmpty()){
+                if (productsList.isNotEmpty()) {
                     productsList.clear()
                 }
                 productsList.addAll(originalProductsList)
-                adapter.notifyItemRangeChanged(0,productsList.size)
+                adapter.notifyItemRangeChanged(0, productsList.size)
 
             }
-            R.id.insales_products_search_btn->{
+            R.id.insales_products_search_btn -> {
                 val query = searchBox.text.toString().trim()
-                if (query.isNotEmpty()){
-                   Constants.hideKeyboar(context)
-                   search(query)
-                }
-                else{
-                    showAlert(context,getString(R.string.empty_text_error))
+                if (query.isNotEmpty()) {
+                    Constants.hideKeyboar(context)
+                    search(query)
+                } else {
+                    showAlert(context, getString(R.string.empty_text_error))
                 }
             }
             else -> {
@@ -1178,12 +1247,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             }
 
             if (matchedProducts.isEmpty()) {
-                Toast.makeText(context, getString(R.string.no_match_found_error), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    getString(R.string.no_match_found_error),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             else{
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                adapter.notifyItemRangeChanged(0,productsList.size)
+                adapter.notifyItemRangeChanged(0, productsList.size)
             }
         }
     }

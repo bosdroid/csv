@@ -47,7 +47,7 @@ interface ApiServices {
 
     @FormUrlEncoded
     @POST("insales/products.php")
-    fun salesProducts(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
+    fun salesProducts(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String,@Field("page") page:Int): Call<JsonObject>
 
     @FormUrlEncoded
     @POST("insales/update_image.php")
@@ -67,7 +67,7 @@ interface ApiServices {
 
     @FormUrlEncoded
     @POST("insales/update_product.php")
-    fun updateProductDetail(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("title") title:String): Call<JsonObject>
+    fun updateProductDetail(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("title") title:String, @Field("short_desc") shortDesc:String, @Field("full_desc") fullDesc:String): Call<JsonObject>
 
 
 }

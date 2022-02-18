@@ -481,8 +481,12 @@
     <string name="empty_list_error_message">Data List is Empty</string>
     <string name="reset_text">Reset</string>
     <string name="no_match_found_error">No match found!</string>
+    <string name="fetch_all_products">There is no more products</string>
+    <string name="update_product_detail_text">Update Product Details</string>
+	<string name="product_short_description_text">Product short description</string>
+	<string name="product_full_description_text">Product full description</string>
 
-    <string-array name="features_keys">
+	<string-array name="features_keys">
 		<item>compressor_feature</item>
 		<item>modes_switcher</item>
 		<item>premium_support</item>

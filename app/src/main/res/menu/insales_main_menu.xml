@@ -9,6 +9,7 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_filter"
         app:iconTint="@color/primary_positive_color"
+        android:visible="false"
         />
 
     <item

@@ -231,10 +231,10 @@ class ApiRepository {
         return res
     }
 
-    fun salesProducts(shopName:String,email:String,password:String):MutableLiveData<JsonObject?>{
+    fun salesProducts(shopName:String,email:String,password:String,page:Int):MutableLiveData<JsonObject?>{
         val res = MutableLiveData<JsonObject?>()
 
-        apiInterface.salesProducts(email,password,shopName).enqueue(object:Callback<JsonObject>{
+        apiInterface.salesProducts(email,password,shopName,page).enqueue(object:Callback<JsonObject>{
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 res.postValue(response.body())
             }
@@ -315,11 +315,11 @@ class ApiRepository {
         return res
     }
 
-    fun updateProductDetail(shopName:String,email:String,password:String,pId:Int,title:String):MutableLiveData<JsonObject?>
+    fun updateProductDetail(shopName:String,email:String,password:String,pId:Int,title:String,shortDesc:String,fullDesc:String):MutableLiveData<JsonObject?>
     {
         val res = MutableLiveData<JsonObject?>()
 
-        apiInterface.updateProductDetail(email,password,shopName,pId,title).enqueue(object:Callback<JsonObject>{
+        apiInterface.updateProductDetail(email,password,shopName,pId,title,shortDesc,fullDesc).enqueue(object:Callback<JsonObject>{
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 res.postValue(response.body())
             }
