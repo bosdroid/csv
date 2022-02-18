@@ -217,6 +217,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     insalesLoginWrapperLayout.visibility = View.GONE
                     insalesDataWrapperLayout.visibility = View.VISIBLE
                     menu!!.findItem(R.id.insales_logout).isVisible = true
+                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
                     showProducts()
                 } else {
                     showAlert(context, response.get("message").asString)
@@ -1050,6 +1051,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 if (response.get("status").asString == "200") {
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
+                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
                     }
                     val products = response.getAsJsonArray("products")
                     if (products.size() > 0) {
