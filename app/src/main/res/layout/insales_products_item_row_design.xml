@@ -43,6 +43,15 @@
                 <androidx.appcompat.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:src="@drawable/ic_edit"
+                    android:id="@+id/insales_p_item_edit_image"
+                    app:tint="@color/primary_positive_color"
+                    android:layout_marginEnd="@dimen/sixtyDpMargin"
+                    />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:src="@drawable/ic_add_image"
                     android:id="@+id/insales_p_item_add_image"
                     app:tint="@color/primary_positive_color"

@@ -65,5 +65,9 @@ interface ApiServices {
     @POST("insales/remove_image.php")
     fun removeProductImage(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("image_id") imageId:Int): Call<JsonObject>
 
+    @FormUrlEncoded
+    @POST("insales/update_product.php")
+    fun updateProductDetail(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("title") title:String): Call<JsonObject>
+
 
 }

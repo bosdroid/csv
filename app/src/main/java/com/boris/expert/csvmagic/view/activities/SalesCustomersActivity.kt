@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -17,8 +18,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.ProgressBar
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
@@ -46,6 +46,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -54,6 +55,7 @@ import com.google.gson.JsonObject
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.Comparator
 import kotlin.collections.ArrayList
 
 class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
@@ -64,11 +66,13 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private lateinit var viewModel: SalesCustomersViewModel
     private lateinit var insalesLoginWrapperLayout: CardView
     private lateinit var insalesDataWrapperLayout: LinearLayout
+    private lateinit var insalesSearchWrapperLayout: LinearLayout
     private lateinit var insalesShopNameBox: TextInputEditText
     private lateinit var insalesEmailBox: TextInputEditText
     private lateinit var insalesPasswordBox: TextInputEditText
     private lateinit var insalesLoginBtn: MaterialButton
     private var productsList = mutableListOf<Product>()
+    private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
     private lateinit var adapter: InSalesProductsAdapter
     private var galleryIntentType = 0
@@ -80,7 +84,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private var intentType = 0
     private var selectedInternetImage = ""
     private var userCurrentCredits = ""
-    private var menu:Menu?=null
+    private var menu: Menu? = null
+    private lateinit var searchResetBtn:MaterialTextView
+    private lateinit var searchBox:TextInputEditText
+    private lateinit var searchImageBtn:ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,12 +109,20 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
         insalesLoginWrapperLayout = findViewById(R.id.insales_login_wrapper_layout)
         insalesDataWrapperLayout = findViewById(R.id.insales_data_wrapper_layout)
+        insalesSearchWrapperLayout = findViewById(R.id.insales_search_products_layout)
         insalesShopNameBox = findViewById(R.id.insales_login_shop_name_box)
         insalesEmailBox = findViewById(R.id.insales_login_email_box)
         insalesPasswordBox = findViewById(R.id.insales_login_password_box)
         insalesLoginBtn = findViewById(R.id.insales_login_btn)
         insalesLoginBtn.setOnClickListener(this)
         productsRecyclerView = findViewById(R.id.insales_products_recyclerview)
+        searchResetBtn = findViewById(R.id.insales_products_search_reset_btn)
+        searchResetBtn.setOnClickListener(this)
+        searchBox = findViewById(R.id.insales_products_search_box)
+        searchImageBtn = findViewById(R.id.insales_products_search_btn)
+        searchImageBtn.setOnClickListener(this)
+
+
     }
 
     private fun setUpToolbar() {
@@ -122,8 +137,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         return if (item.itemId == android.R.id.home) {
             onBackPressed()
             true
-        }
-        else if(item.itemId == R.id.insales_logout){
+        } else if (item.itemId == R.id.insales_logout) {
             MaterialAlertDialogBuilder(context)
                 .setTitle(getString(R.string.logout))
                 .setMessage(getString(R.string.logout_insales_warning_text))
@@ -136,20 +150,40 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     appSettings.remove("INSALES_SHOP_NAME")
                     appSettings.remove("INSALES_EMAIL")
                     appSettings.remove("INSALES_PASSWORD")
-                    startActivity(Intent(context,SalesCustomersActivity::class.java))
+                    startActivity(Intent(context, SalesCustomersActivity::class.java))
 
                 }
                 .create().show()
             true
-        }
-        else {
+        } else if (item.itemId == R.id.insales_data_filter) {
+
+            val builder = MaterialAlertDialogBuilder(context)
+            builder.setCancelable(false)
+            builder.setTitle(getString(R.string.sorting_heading_text))
+            builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                dialog.dismiss()
+            }
+
+            val arrayAdapter =
+                ArrayAdapter(context, android.R.layout.select_dialog_singlechoice, getSortingList())
+            builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    dialog!!.dismiss()
+                    sorting(which)
+                }
+
+            })
+            val alert = builder.create()
+            alert.show()
+            true
+        } else {
             super.onOptionsItemSelected(item)
         }
     }
 
     private fun inSalesLogin(shopName: String, email: String, password: String) {
 
-        startLoading(context,getString(R.string.please_wait_login_message))
+        startLoading(context, getString(R.string.please_wait_login_message))
         viewModel.callSalesAccount(context, shopName, email, password)
         viewModel.getSalesAccountResponse().observe(this, Observer { response ->
             dismiss()
@@ -176,7 +210,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
     lateinit var selectedImageView: AppCompatImageView
     private fun showProducts() {
-        productsRecyclerView.layoutManager = LinearLayoutManager(context)
+        productsRecyclerView.layoutManager = WrapContentLinearLayoutManager(context,RecyclerView.VERTICAL,false)
         productsRecyclerView.hasFixedSize()
         adapter = InSalesProductsAdapter(
             context,
@@ -299,14 +333,21 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                             }
 
                                             if (result.isNotEmpty()) {
-                                                currentPhotoPath = ImageManager.getRealPathFromUri(context, Uri.parse(result))!!
+                                                currentPhotoPath = ImageManager.getRealPathFromUri(
+                                                    context,
+                                                    Uri.parse(result)
+                                                )!!
                                                 Glide.with(context)
                                                     .load(currentPhotoPath)
                                                     .placeholder(R.drawable.placeholder)
                                                     .centerInside()
                                                     .into(selectedImageView)
-                                                selectedImageBase64String = ImageManager.convertImageToBase64(context, currentPhotoPath!!)
-                                            iAlert.dismiss()
+                                                selectedImageBase64String =
+                                                    ImageManager.convertImageToBase64(
+                                                        context,
+                                                        currentPhotoPath!!
+                                                    )
+                                                iAlert.dismiss()
                                             } else {
                                                 showAlert(
                                                     context,
@@ -827,7 +868,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
             }
 
-            override fun onItemRemoveClick(position: Int,imagePosition:Int) {
+            override fun onItemRemoveClick(position: Int, imagePosition: Int) {
                 val imageItem = productsList[position].productImages!![imagePosition]
 
 
@@ -835,10 +876,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     .setTitle(getString(R.string.remove_text))
                     .setMessage(getString(R.string.image_remove_warning_message))
                     .setCancelable(false)
-                    .setNegativeButton(getString(R.string.cancel_text)){dialog,which->
+                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
                         dialog.dismiss()
                     }
-                    .setPositiveButton(getString(R.string.remove_text)){dialog,which->
+                    .setPositiveButton(getString(R.string.remove_text)) { dialog, which ->
                         dialog.dismiss()
                         startLoading(context)
                         viewModel.callRemoveProductImage(
@@ -872,19 +913,83 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
             }
 
+            override fun onItemEditImageClick(position: Int) {
+                val pItem = productsList[position]
+                val dialogLayout = LayoutInflater.from(context)
+                    .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
+                val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
+                val productTitleBox =
+                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_field_input_field)
+                productTitleBox.setText(pItem.title)
+                val dialogCancelBtn =
+                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
+                val dialogUpdateBtn =
+                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_update_btn)
+
+                val builder = MaterialAlertDialogBuilder(context)
+                    .setView(dialogLayout)
+                    .setCancelable(false)
+                val alert = builder.create()
+                alert.show()
+                productTitleBox.setSelection(pItem.title.length)
+                productTitleBox.requestFocus()
+                Constants.openKeyboar(context)
+                dialogCancelBtn.setOnClickListener {
+                    Constants.hideKeyboar(context)
+                    alert.dismiss()
+                }
+
+                dialogUpdateBtn.setOnClickListener {
+                    val updatedText = productTitleBox.text.toString().trim()
+                    if (updatedText.isNotEmpty()) {
+                        Constants.hideKeyboar(context)
+                        alert.dismiss()
+                        startLoading(
+                            context,
+                            getString(R.string.please_wait_product_update_message)
+                        )
+                        viewModel.callUpdateProductDetail(
+                            context,
+                            shopName,
+                            email,
+                            password,
+                            pItem.id,
+                            updatedText
+                        )
+                        viewModel.getUpdateProductDetailResponse()
+                            .observe(this@SalesCustomersActivity, Observer { response ->
+                                if (response != null) {
+                                    if (response.get("status").asString == "200") {
+                                        dismiss()
+                                        showProducts()
+                                    } else {
+                                        dismiss()
+                                        showAlert(context, response.get("message").asString)
+                                    }
+                                } else {
+                                    dismiss()
+                                }
+                            })
+                    } else {
+                        showAlert(context, getString(R.string.empty_text_error))
+                    }
+                }
+            }
+
         })
-        startLoading(context,getString(R.string.please_wait_products_message))
+        startLoading(context, getString(R.string.please_wait_products_message))
 
         viewModel.callProducts(context, shopName, email, password)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
 
             if (response != null) {
                 if (response.get("status").asString == "200") {
-                    if (menu != null){
+                    if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
                     }
                     val products = response.getAsJsonArray("products")
                     if (products.size() > 0) {
+                        originalProductsList.clear()
                         productsList.clear()
                         for (i in 0 until products.size()) {
                             val product = products.get(i).asJsonObject
@@ -903,7 +1008,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                     )
                                 }
                             }
-                            productsList.add(
+                            originalProductsList.add(
                                 Product(
                                     product.get("id").asInt,
                                     product.get("title").asString,
@@ -912,7 +1017,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             )
                         }
                         dismiss()
-                        if (productsList.size > 0) {
+                        if (originalProductsList.size > 0) {
+                            productsList.addAll(originalProductsList)
                             adapter.notifyItemRangeChanged(0, productsList.size)
                         }
                     } else {
@@ -985,13 +1091,14 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         checkInsalesAccount()
     }
 
-    private fun checkInsalesAccount(){
+    private fun checkInsalesAccount() {
         val insalesStatus = appSettings.getString("INSALES_STATUS")
 
         if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged") {
             insalesLoginWrapperLayout.visibility = View.GONE
+            insalesSearchWrapperLayout.visibility = View.VISIBLE
             insalesDataWrapperLayout.visibility = View.VISIBLE
-            if (menu != null){
+            if (menu != null) {
                 menu!!.findItem(R.id.insales_logout).isVisible = true
             }
 
@@ -1006,15 +1113,17 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
         } else {
             insalesDataWrapperLayout.visibility = View.GONE
+            insalesSearchWrapperLayout.visibility = View.GONE
             insalesLoginWrapperLayout.visibility = View.VISIBLE
-            if (menu != null){
+
+            if (menu != null) {
                 menu!!.findItem(R.id.insales_logout).isVisible = false
             }
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.insales_main_menu,menu)
+        menuInflater.inflate(R.menu.insales_main_menu, menu)
         this.menu = menu
         return true
     }
@@ -1030,9 +1139,72 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     inSalesLogin(shopName, email, password)
                 }
             }
+            R.id.insales_products_search_reset_btn->{
+                 hideSoftKeyboard(context,searchBox)
+                if (searchBox.text.toString().trim().isNotEmpty()){
+                    searchBox.setText("")
+                }
+                if (productsList.isNotEmpty()){
+                    productsList.clear()
+                }
+                productsList.addAll(originalProductsList)
+                adapter.notifyItemRangeChanged(0,productsList.size)
+
+            }
+            R.id.insales_products_search_btn->{
+                val query = searchBox.text.toString().trim()
+                if (query.isNotEmpty()){
+                   Constants.hideKeyboar(context)
+                   search(query)
+                }
+                else{
+                    showAlert(context,getString(R.string.empty_text_error))
+                }
+            }
             else -> {
 
             }
+        }
+    }
+
+    private fun search(text: String?) {
+        val matchedProducts = mutableListOf<Product>()
+
+        text?.let {
+            productsList.forEach { item ->
+                if (item.title.contains(text, true)) {
+                    matchedProducts.add(item)
+                }
+            }
+
+            if (matchedProducts.isEmpty()) {
+                Toast.makeText(context, getString(R.string.no_match_found_error), Toast.LENGTH_SHORT).show()
+            }
+            else{
+                productsList.clear()
+                productsList.addAll(matchedProducts)
+                adapter.notifyItemRangeChanged(0,productsList.size)
+            }
+        }
+    }
+
+    private fun sorting(type: Int) {
+        if (productsList.size > 0) {
+            Collections.sort(productsList, object : Comparator<Product> {
+                override fun compare(o1: Product?, o2: Product?): Int {
+                    return if (type == 0) { // A-Z
+                        o1!!.title.compareTo(o2!!.title, true)
+                    } else if (type == 1) { // Z-A
+                        o2!!.title.compareTo(o1!!.title, true)
+                    } else {
+                        -1
+                    }
+                }
+
+            })
+            adapter.notifyDataSetChanged()
+        } else {
+            showAlert(context, getString(R.string.empty_list_error_message))
         }
     }
 

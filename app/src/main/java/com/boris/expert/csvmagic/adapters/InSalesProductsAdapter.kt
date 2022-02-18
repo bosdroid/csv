@@ -22,6 +22,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         fun onItemEditClick(position: Int,imagePosition:Int)
         fun onItemAddImageClick(position: Int)
         fun onItemRemoveClick(position: Int,imagePosition:Int)
+        fun onItemEditImageClick(position: Int)
     }
 
     private var mListener: OnItemClickListener? = null
@@ -35,11 +36,13 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val productTitle: MaterialTextView
         val imagesRecyclerView: RecyclerView
         val addImageView:AppCompatImageView
+        val editImageView:AppCompatImageView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
             imagesRecyclerView = itemView.findViewById(R.id.products_images_recyclerview)
             addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
+            editImageView = itemView.findViewById(R.id.insales_p_item_edit_image)
 
             productTitle.setOnClickListener {
                 Listener.onItemClick(layoutPosition)
@@ -47,6 +50,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
             addImageView.setOnClickListener {
                 Listener.onItemAddImageClick(layoutPosition)
+            }
+
+            editImageView.setOnClickListener {
+                Listener.onItemEditImageClick(layoutPosition)
             }
         }
     }

@@ -50,6 +50,7 @@ import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
@@ -107,6 +108,13 @@ open class BaseActivity : AppCompatActivity() {
                 }
             }
             return false
+        }
+
+        fun getSortingList():MutableList<String>{
+            val list = mutableListOf<String>()
+            list.add("A-Z")
+            list.add("Z-A")
+            return list
         }
 
         // THIS FUNCTION WILL RETURN THE DATE TIME STRING FROM TIMESTAMP

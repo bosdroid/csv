@@ -315,4 +315,21 @@ class ApiRepository {
         return res
     }
 
+    fun updateProductDetail(shopName:String,email:String,password:String,pId:Int,title:String):MutableLiveData<JsonObject?>
+    {
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.updateProductDetail(email,password,shopName,pId,title).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
 }
