@@ -995,8 +995,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             .observe(this@SalesCustomersActivity, Observer { response ->
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
-                                        dismiss()
-                                        showProducts()
+                                        Handler(Looper.myLooper()!!).postDelayed({
+                                            dismiss()
+                                            showProducts()
+                                        }, 3000)
                                     } else {
                                         dismiss()
                                         showAlert(context, response.get("message").asString)
