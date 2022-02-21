@@ -36,6 +36,7 @@ import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.ResponseListener
+import com.boris.expert.csvmagic.model.Category
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.*
@@ -50,9 +51,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import io.paperdb.Paper
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.collections.ArrayList
 
 class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
@@ -81,12 +84,14 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private var selectedInternetImage = ""
     private var userCurrentCredits = ""
     private var menu: Menu? = null
-    private lateinit var searchResetBtn:MaterialTextView
-    private lateinit var searchBox:TextInputEditText
-    private lateinit var searchImageBtn:ImageButton
+    private lateinit var searchResetBtn: MaterialTextView
+    private lateinit var searchBox: TextInputEditText
+    private lateinit var searchImageBtn: ImageButton
     private var currentPage = 1
     private var currentTotalProducts = 0
     private lateinit var linearLayoutManager: WrapContentLinearLayoutManager
+    private var dialogStatus = 0
+    private var categoriesList = mutableListOf<Category>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,7 +127,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         searchImageBtn.setOnClickListener(this)
 
 
-        searchBox.addTextChangedListener(object :TextWatcher{
+        searchBox.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -167,13 +172,35 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     appSettings.remove("INSALES_PASSWORD")
                     originalProductsList.clear()
                     productsList.clear()
+                    Paper.book().delete(Constants.cacheProducts)
                     startActivity(Intent(context, SalesCustomersActivity::class.java))
 
                 }
                 .create().show()
             true
         } else if (item.itemId == R.id.insales_data_filter) {
-
+            if (categoriesList.size == 0) {
+                viewModel.callCategories(context, shopName, email, password)
+                viewModel.getCategoriesResponse().observe(this, Observer { response ->
+                    if (response != null) {
+                        if (response.get("status").asString == "200") {
+                            val categories = response.get("categories").asJsonArray
+                            if (categories.size() > 0) {
+                                for (i in 0 until categories.size()) {
+                                    val category = categories[i].asJsonObject
+                                    categoriesList.add(
+                                        Category(
+                                            category.get("title").asString,
+                                            category.get("id").asInt
+                                        )
+                                    )
+                                }
+                                //categoriesList.add(Category("Test Category",2767276))
+                            }
+                        }
+                    }
+                })
+            }
             val builder = MaterialAlertDialogBuilder(context)
             builder.setCancelable(false)
             builder.setTitle(getString(R.string.sorting_heading_text))
@@ -182,20 +209,56 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             }
 
             val arrayAdapter =
-                ArrayAdapter(context, android.R.layout.select_dialog_singlechoice, getSortingList())
+                ArrayAdapter(
+                    context,
+                    android.R.layout.select_dialog_singlechoice,
+                    getSortingList(context)
+                )
             builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     dialog!!.dismiss()
-                    sorting(which)
+                    if (which == 2) {
+                        displayCategoryFilterDialog(categoriesList)
+                    } else {
+                        sorting(which)
+                    }
+
                 }
 
             })
             val alert = builder.create()
             alert.show()
             true
+        } else if (item.itemId == R.id.insales_data_sync) {
+            currentPage = 1
+            dialogStatus = 1
+            fetchProducts(currentPage)
+            true
         } else {
             super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun displayCategoryFilterDialog(categoriesList: MutableList<Category>) {
+        val builder = MaterialAlertDialogBuilder(context)
+        builder.setCancelable(false)
+        builder.setTitle(getString(R.string.filter_category_heading_text))
+        builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+            dialog.dismiss()
+        }
+
+        val arrayAdapter =
+            ArrayAdapter(context, android.R.layout.select_dialog_singlechoice, categoriesList)
+        builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                dialog!!.dismiss()
+                val id = categoriesList[which].id
+                searchByCategory(id)
+            }
+
+        })
+        val alert = builder.create()
+        alert.show()
     }
 
     private fun inSalesLogin(shopName: String, email: String, password: String) {
@@ -218,6 +281,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     insalesDataWrapperLayout.visibility = View.VISIBLE
                     menu!!.findItem(R.id.insales_logout).isVisible = true
                     menu!!.findItem(R.id.insales_data_filter).isVisible = true
+                    menu!!.findItem(R.id.insales_data_sync).isVisible = true
                     showProducts()
                 } else {
                     showAlert(context, response.get("message").asString)
@@ -977,10 +1041,17 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     if (titleText.isNotEmpty()) {
                         Constants.hideKeyboar(context)
                         alert.dismiss()
-                        startLoading(
-                            context,
-                            getString(R.string.please_wait_product_update_message)
-                        )
+//                        startLoading(
+//                            context,
+//                            getString(R.string.please_wait_product_update_message)
+//                        )
+                        pItem.title = titleText
+                        pItem.shortDesc = shortDesc
+                        pItem.fullDesc = fullDesc
+                        Paper.book().delete(Constants.cacheProducts)
+                        Paper.book().write(Constants.cacheProducts, originalProductsList)
+                        adapter.notifyItemChanged(position)
+
                         viewModel.callUpdateProductDetail(
                             context,
                             shopName,
@@ -995,10 +1066,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             .observe(this@SalesCustomersActivity, Observer { response ->
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
-                                        Handler(Looper.myLooper()!!).postDelayed({
-                                            dismiss()
-                                            showProducts()
-                                        }, 3000)
+//                                        Handler(Looper.myLooper()!!).postDelayed({
+                                        dismiss()
+//                                            //showProducts()
+//                                        }, 3000)
+                                        Toast.makeText(
+                                            context,
+                                            getString(R.string.product_updated_successfully),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } else {
                                         dismiss()
                                         showAlert(context, response.get("message").asString)
@@ -1026,38 +1102,60 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     totalItemCount = linearLayoutManager.itemCount
                     pastVisiblesItems = linearLayoutManager.findFirstVisibleItemPosition()
 
-                        if (visibleItemCount + pastVisiblesItems >= totalItemCount) {
-                             if (currentTotalProducts == 250){
-                                 currentPage +=1
-                                 fetchProducts(currentPage)
-                             }
+                    if (visibleItemCount + pastVisiblesItems >= totalItemCount) {
+//                             if (currentTotalProducts == 250){
+//                                 currentPage +=1
+//                                 fetchProducts(currentPage)
+//                             }
 //                            else{
 //                                Toast.makeText(context,getString(R.string.fetch_all_products),Toast.LENGTH_SHORT).show()
 //                            }
-                        }
+                    }
 
                 }
             }
         })
+        val cacheList: ArrayList<Product>? = Paper.book().read(Constants.cacheProducts)
 
-        fetchProducts(currentPage)
+        if (cacheList != null && cacheList.size > 0) {
+            originalProductsList.addAll(cacheList)
+            productsList.addAll(originalProductsList)
+            adapter.notifyItemRangeChanged(0, productsList.size)
+            Handler(Looper.myLooper()!!).postDelayed({
+                if (menu != null) {
+                    menu!!.findItem(R.id.insales_logout).isVisible = true
+                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
+                    menu!!.findItem(R.id.insales_data_sync).isVisible = true
+                }
+            }, 3000)
+        } else {
+            dialogStatus = 1
+            fetchProducts(currentPage)
+        }
+
     }
 
 
-    private fun fetchProducts(page: Int){
-        startLoading(context, getString(R.string.please_wait_products_message))
+    private fun fetchProducts(page: Int) {
+        if (dialogStatus == 1) {
+            startLoading(context, getString(R.string.please_wait_products_message))
+        }
         viewModel.callProducts(context, shopName, email, password, page)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
 
             if (response != null) {
                 if (response.get("status").asString == "200") {
+                    dialogStatus = 0
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
                         menu!!.findItem(R.id.insales_data_filter).isVisible = true
+                        menu!!.findItem(R.id.insales_data_sync).isVisible = true
                     }
                     val products = response.getAsJsonArray("products")
                     if (products.size() > 0) {
                         productsList.clear()
+                        originalProductsList.clear()
+                        Paper.book().delete(Constants.cacheProducts)
                         for (i in 0 until products.size()) {
                             val product = products.get(i).asJsonObject
                             val imagesArray = product.getAsJsonArray("images")
@@ -1080,17 +1178,39 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                     product.get("id").asInt,
                                     product.get("category_id").asInt,
                                     product.get("title").asString,
-                                    if (product.get("short_description").isJsonNull){""}else{product.get("short_description").asString},
-                                    if (product.get("description").isJsonNull){""}else{product.get("description").asString},
+                                    if (product.get("short_description").isJsonNull) {
+                                        ""
+                                    } else {
+                                        product.get("short_description").asString
+                                    },
+                                    if (product.get("description").isJsonNull) {
+                                        ""
+                                    } else {
+                                        product.get("description").asString
+                                    },
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )
+
+                            Paper.book().write(Constants.cacheProducts, originalProductsList)
                             currentTotalProducts = originalProductsList.size
                         }
                         dismiss()
-                        if (originalProductsList.size > 0) {
+                        val cacheList: ArrayList<Product>? =
+                            Paper.book().read(Constants.cacheProducts)
+                        if (cacheList != null && cacheList.size > 0) {
+                            originalProductsList.clear()
+                            originalProductsList.addAll(cacheList)
                             productsList.addAll(originalProductsList)
                             adapter.notifyItemRangeChanged(0, productsList.size)
+                        }
+//                            if (originalProductsList.size > 0) {
+//                                productsList.addAll(originalProductsList)
+//                                adapter.notifyItemRangeChanged(0, productsList.size)
+//                            }
+                        if (currentTotalProducts == 250) {
+                            currentPage += 1
+                            fetchProducts(currentPage)
                         }
                     } else {
                         dismiss()
@@ -1170,19 +1290,24 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             insalesSearchWrapperLayout.visibility = View.VISIBLE
             insalesDataWrapperLayout.visibility = View.VISIBLE
 
-            if (menu != null) {
-                menu!!.findItem(R.id.insales_logout).isVisible = true
-                menu!!.findItem(R.id.insales_data_filter).isVisible = true
-            }
-
 
             shopName = appSettings.getString("INSALES_SHOP_NAME") as String
             email = appSettings.getString("INSALES_EMAIL") as String
             password = appSettings.getString("INSALES_PASSWORD") as String
 
-            if (productsList.size == 0) {
-                showProducts()
-            }
+//            if (originalProductsList.size == 0) {
+            showProducts()
+//            }
+//            else{
+//                Handler(Looper.myLooper()!!).postDelayed({
+//                    if (menu != null) {
+//                        menu!!.findItem(R.id.insales_logout).isVisible = true
+//                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
+//                        menu!!.findItem(R.id.insales_data_sync).isVisible = true
+//                    }
+//                },2000)
+//
+//            }
 
         } else {
             insalesDataWrapperLayout.visibility = View.GONE
@@ -1192,6 +1317,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             if (menu != null) {
                 menu!!.findItem(R.id.insales_logout).isVisible = false
                 menu!!.findItem(R.id.insales_data_filter).isVisible = false
+                menu!!.findItem(R.id.insales_data_sync).isVisible = false
             }
         }
     }
@@ -1240,6 +1366,30 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    private fun searchByCategory(id: Int?) {
+        val matchedProducts = mutableListOf<Product>()
+
+        id?.let {
+            productsList.forEach { item ->
+                if (item.categoryId == id) {
+                    matchedProducts.add(item)
+                }
+            }
+
+            if (matchedProducts.isEmpty()) {
+                Toast.makeText(
+                    context,
+                    getString(R.string.category_products_not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                productsList.clear()
+                productsList.addAll(matchedProducts)
+                adapter.notifyItemRangeChanged(0, productsList.size)
+            }
+        }
+    }
+
     private fun search(text: String?) {
         val matchedProducts = mutableListOf<Product>()
 
@@ -1256,8 +1406,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     getString(R.string.no_match_found_error),
                     Toast.LENGTH_SHORT
                 ).show()
-            }
-            else{
+            } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
                 adapter.notifyItemRangeChanged(0, productsList.size)

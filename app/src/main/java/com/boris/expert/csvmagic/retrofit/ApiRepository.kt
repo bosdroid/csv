@@ -332,4 +332,20 @@ class ApiRepository {
         return res
     }
 
+    fun categories(shopName:String,email:String,password:String):MutableLiveData<JsonObject?>{
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.categories(email,password,shopName).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
 }

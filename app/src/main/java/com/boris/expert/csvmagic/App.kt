@@ -3,6 +3,7 @@ package com.boris.expert.csvmagic
 import android.app.Application
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
+import io.paperdb.Paper
 
 
 class App : Application() {
@@ -11,6 +12,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         //FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        Paper.init(applicationContext)
         appSettings = AppSettings(applicationContext)
         getUserDetail()
 

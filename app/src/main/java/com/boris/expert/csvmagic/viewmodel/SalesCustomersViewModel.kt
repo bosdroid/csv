@@ -16,6 +16,7 @@ class SalesCustomersViewModel : ViewModel() {
     var updateImageResponse = MutableLiveData<JsonObject?>()
     var removeImageResponse = MutableLiveData<JsonObject?>()
     var updateProductResponse = MutableLiveData<JsonObject?>()
+    var categoriesResponse = MutableLiveData<JsonObject?>()
 
 
     fun callSalesAccount(context: Context,shopName:String,email:String,password:String){
@@ -69,6 +70,14 @@ class SalesCustomersViewModel : ViewModel() {
 
     fun getUpdateProductDetailResponse():LiveData<JsonObject?>{
         return updateProductResponse
+    }
+
+    fun callCategories(context: Context,shopName:String,email:String,password:String){
+        categoriesResponse = ApiRepository.getInstance(context).categories(shopName,email,password)
+    }
+
+    fun getCategoriesResponse():LiveData<JsonObject?>{
+        return categoriesResponse
     }
 
 

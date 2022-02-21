@@ -232,5 +232,5 @@ dependencies {
     implementation 'com.borjabravo:readmoretextview:2.1.0'
     implementation 'com.github.albfernandez:juniversalchardet:2.4.0'
 
-
+    implementation 'io.paperdb:paperdb:2.6'
 }

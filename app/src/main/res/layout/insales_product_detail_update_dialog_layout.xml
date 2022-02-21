@@ -127,7 +127,7 @@
             android:background="@drawable/input_text_field_design"
             android:padding="5dp"
             android:inputType="text"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginRight="16dp"

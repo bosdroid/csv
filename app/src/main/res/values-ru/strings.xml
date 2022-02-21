@@ -485,6 +485,14 @@
     <string name="update_product_detail_text">Update Product Details</string>
 	<string name="product_short_description_text">Product short description</string>
 	<string name="product_full_description_text">Product full description</string>
+    <string name="a_to_z">A-Z</string>
+	<string name="z_to_a">Z-A</string>
+	<string name="category_ascending">Category Ascending</string>
+	<string name="category_descending">Category Descending</string>
+    <string name="sync_text">Sync</string>
+    <string name="product_updated_successfully">Product updated successfully!</string>
+    <string name="category_products_not_found">Selected category products does not have!</string>
+	<string name="filter_category_heading_text">Filter by Category</string>
 
 	<string-array name="features_keys">
 		<item>compressor_feature</item>

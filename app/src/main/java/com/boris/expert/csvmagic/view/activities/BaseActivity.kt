@@ -110,10 +110,11 @@ open class BaseActivity : AppCompatActivity() {
             return false
         }
 
-        fun getSortingList():MutableList<String>{
+        fun getSortingList(context: Context):MutableList<String>{
             val list = mutableListOf<String>()
-            list.add("A-Z")
-            list.add("Z-A")
+            list.add(context.getString(R.string.a_to_z))
+            list.add(context.getString(R.string.z_to_a))
+            list.add(context.getString(R.string.filter_category_heading_text))
             return list
         }
 

@@ -69,5 +69,9 @@ interface ApiServices {
     @POST("insales/update_product.php")
     fun updateProductDetail(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("title") title:String, @Field("short_desc") shortDesc:String, @Field("full_desc") fullDesc:String): Call<JsonObject>
 
+    @FormUrlEncoded
+    @POST("insales/categories.php")
+    fun categories(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
+
 
 }
