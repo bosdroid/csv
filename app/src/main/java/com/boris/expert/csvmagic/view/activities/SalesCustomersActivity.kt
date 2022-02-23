@@ -92,6 +92,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private lateinit var linearLayoutManager: WrapContentLinearLayoutManager
     private var dialogStatus = 0
     private var categoriesList = mutableListOf<Category>()
+    private lateinit var fullDescriptionBox:TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1009,12 +1010,13 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
                 val productShortDescriptionBox =
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
-                val productFullDescriptionBox =
-                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_full_desc_input_field)
+                fullDescriptionBox =
+                    dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
+                val getDescriptionView = dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
 
                 productTitleBox.setText(pItem.title)
                 productShortDescriptionBox.setText(pItem.shortDesc)
-                productFullDescriptionBox.setText(pItem.fullDesc)
+                fullDescriptionBox.setText(pItem.fullDesc)
                 val dialogCancelBtn =
                     dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
                 val dialogUpdateBtn =
@@ -1033,10 +1035,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     alert.dismiss()
                 }
 
+                getDescriptionView.setOnClickListener {
+                    Constants.hideKeyboar(context)
+                    //startActivity(Intent(context,RainForestApiActivity::class.java))
+                    launchActivity.launch(Intent(context,RainForestApiActivity::class.java))
+                }
+
                 dialogUpdateBtn.setOnClickListener {
                     val titleText = productTitleBox.text.toString().trim()
                     val shortDesc = productShortDescriptionBox.text.toString().trim()
-                    val fullDesc = productFullDescriptionBox.text.toString().trim()
+                    val fullDesc = fullDescriptionBox.text.toString().trim()
 
                     if (titleText.isNotEmpty()) {
                         Constants.hideKeyboar(context)
@@ -1133,6 +1141,17 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             fetchProducts(currentPage)
         }
 
+    }
+
+    var launchActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            if (data != null && data.hasExtra("DESCRIPTION")){
+                fullDescriptionBox.setText(data.getStringExtra("DESCRIPTION") as String)
+                fullDescriptionBox.setSelection(fullDescriptionBox.length())
+                fullDescriptionBox.requestFocus()
+            }
+        }
     }
 
 

@@ -43,9 +43,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
+        <activity android:name=".view.activities.RainForestApiActivity"/>
         <activity
-            android:launchMode="singleInstance"
-            android:name=".view.activities.SalesCustomersActivity"/>
+            android:name=".view.activities.SalesCustomersActivity"
+            android:launchMode="singleTask" />
         <activity android:name=".view.activities.SupportChatActivity" />
         <activity android:name=".view.activities.SupportTicketsActivity" />
         <activity

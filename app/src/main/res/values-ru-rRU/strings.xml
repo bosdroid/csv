@@ -186,7 +186,7 @@
     <string name="http_protocol_text">http://</string>
     <string name="https_protocol_text">https://</string>
     <string name="na_text">N/A</string>
-    <string name="product_title_text">Product Title</string>
+    <string name="product_title_text">Title</string>
     <string name="please_wait_product_update_message">Please wait while product detail is updating...</string>
     <string name="filter_text">Filter</string>
     <string name="sorting_heading_text">Sort by</string>
@@ -195,8 +195,8 @@
     <string name="no_match_found_error">No match found!</string>
     <string name="fetch_all_products">There is no more products</string>
     <string name="update_product_detail_text">Update Product Details</string>
-    <string name="product_short_description_text">Product short description</string>
-    <string name="product_full_description_text">Product full description</string>
+    <string name="product_short_description_text">Short description</string>
+    <string name="product_full_description_text">Full description</string>
     <string name="a_to_z">A-Z</string>
     <string name="z_to_a">Z-A</string>
     <string name="category_ascending">Category Ascending</string>
@@ -205,6 +205,8 @@
     <string name="product_updated_successfully">Product updated successfully!</string>
     <string name="category_products_not_found">Selected category products does not have!</string>
     <string name="filter_category_heading_text">Filter by Category</string>
+    <string name="get_description_text">GET DESCRIPTION</string>
+    <string name="apply_text">Apply</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>
