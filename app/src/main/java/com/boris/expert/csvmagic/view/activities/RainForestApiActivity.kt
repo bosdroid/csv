@@ -17,8 +17,10 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.RainForestApiAdapter
+import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.boris.expert.csvmagic.model.RainForestApiObject
 import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.utils.LanguageTranslator
 import com.boris.expert.csvmagic.utils.VolleySingleton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -94,7 +96,20 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 val query = searchBox.text.toString().trim()
                 if (query.isNotEmpty()) {
                     Constants.hideKeyboar(context)
-                    getProducts(query)
+
+                    LanguageTranslator.translateText(query,"ru",object :TranslationCallback{
+                        override fun onTextTranslation(translatedText: String) {
+                             if (translatedText.isNotEmpty()){
+                                 //showAlert(context,translatedText)
+                                 getProducts(translatedText)
+                             }
+                            else{
+                               showAlert(context,"Something wrong with translator, please try later!")
+                            }
+
+                        }
+
+                    })
                 } else {
                     showAlert(context, getString(R.string.empty_text_error))
                 }
@@ -177,10 +192,22 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     }
                     builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
                         dialog.dismiss()
-                        setResult(RESULT_OK,Intent().apply {
-                            putExtra("DESCRIPTION",description)
+                        LanguageTranslator.translateText(description,"en",object :TranslationCallback{
+                            override fun onTextTranslation(translatedText: String) {
+                                if (translatedText.isNotEmpty()){
+                                    setResult(RESULT_OK,Intent().apply {
+                                        putExtra("DESCRIPTION",translatedText)
+                                    })
+                                    finish()
+                                }
+                                else{
+                                    showAlert(context,"Something wrong with translator, please try later!")
+                                }
+
+                            }
+
                         })
-                        finish()
+
                     }
 
                     val alert = builder.create()

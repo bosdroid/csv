@@ -40,7 +40,10 @@ import com.downloader.request.DownloadRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.common.model.RemoteModelManager
@@ -50,7 +53,6 @@ import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
@@ -58,21 +60,21 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        val modelManager = RemoteModelManager.getInstance()
-//        // Download the RUSSIAN model.
-//        val ruModel = TranslateRemoteModel.Builder(TranslateLanguage.RUSSIAN).build()
-//        val conditions = DownloadConditions.Builder()
-//            .requireWifi()
-//            .build()
-//        modelManager.download(ruModel, conditions)
-//            .addOnSuccessListener {
-//                // Model downloaded.
-//                Log.d("TEST199", "test")
-//            }
-//            .addOnFailureListener {
-//                // Error.
-//                Log.d("TEST199",it.localizedMessage!!.toString())
-//            }
+        val modelManager = RemoteModelManager.getInstance()
+        // Download the RUSSIAN model.
+        val ruModel = TranslateRemoteModel.Builder(TranslateLanguage.RUSSIAN).build()
+        val conditions = DownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        modelManager.download(ruModel, conditions)
+            .addOnSuccessListener {
+                // Model downloaded.
+                Log.d("TEST199", "test")
+            }
+            .addOnFailureListener {
+                // Error.
+                Log.d("TEST199",it.localizedMessage!!.toString())
+            }
 
     }
 
