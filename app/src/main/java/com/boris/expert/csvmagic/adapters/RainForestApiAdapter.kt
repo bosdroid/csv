@@ -1,17 +1,23 @@
 package com.boris.expert.csvmagic.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.boris.expert.csvmagic.model.HelpObject
 import com.boris.expert.csvmagic.model.RainForestApiObject
+import com.boris.expert.csvmagic.utils.LanguageTranslator
+import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
 import java.util.*
 
@@ -67,8 +73,20 @@ class RainForestApiAdapter(
 
     override fun onBindViewHolder(holder: VideoItemViewHolder, position: Int) {
         val item = rainForestApiList[position]
-        holder.title.text = item.title
+
         Glide.with(context).load(item.image).into(holder.image)
+        LanguageTranslator.translateText(item.title,"en",object : TranslationCallback {
+            override fun onTextTranslation(translatedText: String) {
+                BaseActivity.dismiss()
+                if (translatedText.isNotEmpty()){
+                    holder.title.text = translatedText
+                }
+                else{
+                    holder.title.text = item.title
+                }
+
+            }
+        })
 
     }
 

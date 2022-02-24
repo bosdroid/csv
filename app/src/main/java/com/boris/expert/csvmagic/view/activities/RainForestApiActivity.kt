@@ -184,34 +184,34 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 if (response.has("product")) {
                     val productResults = response.getJSONObject("product")
                     val description = productResults.getString("description")
-                    val builder = MaterialAlertDialogBuilder(context)
-                    builder.setMessage(description)
-                    builder.setCancelable(false)
-                    builder.setNegativeButton(getString(R.string.cancel_text)){dialog,which->
-                        dialog.dismiss()
-                    }
-                    builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
-                        dialog.dismiss()
-                        LanguageTranslator.translateText(description,"en",object :TranslationCallback{
-                            override fun onTextTranslation(translatedText: String) {
-                                if (translatedText.isNotEmpty()){
+                    startLoading(context)
+                    LanguageTranslator.translateText(description,"en",object :TranslationCallback{
+                        override fun onTextTranslation(translatedText: String) {
+                            dismiss()
+                            if (translatedText.isNotEmpty()){
+                                val builder = MaterialAlertDialogBuilder(context)
+                                builder.setMessage(translatedText)
+                                builder.setCancelable(false)
+                                builder.setNegativeButton(getString(R.string.cancel_text)){dialog,which->
+                                    dialog.dismiss()
+                                }
+                                builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
+                                    dialog.dismiss()
                                     setResult(RESULT_OK,Intent().apply {
                                         putExtra("DESCRIPTION",translatedText)
                                     })
                                     finish()
                                 }
-                                else{
-                                    showAlert(context,"Something wrong with translator, please try later!")
-                                }
 
+                                val alert = builder.create()
+                                alert.show()
+                            }
+                            else{
+                                showAlert(context,"Something wrong with translator, please try later!")
                             }
 
-                        })
-
-                    }
-
-                    val alert = builder.create()
-                    alert.show()
+                        }
+                    })
                 }
             },
             {
