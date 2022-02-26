@@ -495,6 +495,9 @@
 	<string name="filter_category_heading_text">Filter by Category</string>
 	<string name="get_description_text">GET DESCRIPTION</string>
     <string name="apply_text">Apply</string>
+    <string name="title_text">Title</string>
+	<string name="plus_add_text">+add</string>
+    <string name="description_text">Description</string>
 
     <string-array name="features_keys">
 		<item>compressor_feature</item>

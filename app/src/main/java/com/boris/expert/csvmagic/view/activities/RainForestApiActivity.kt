@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageButton
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -24,6 +26,7 @@ import com.boris.expert.csvmagic.utils.LanguageTranslator
 import com.boris.expert.csvmagic.utils.VolleySingleton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textview.MaterialTextView
 import org.json.JSONObject
 import java.util.ArrayList
 
@@ -184,34 +187,92 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 if (response.has("product")) {
                     val productResults = response.getJSONObject("product")
                     val description = productResults.getString("description")
-                    startLoading(context)
-                    LanguageTranslator.translateText(description,"en",object :TranslationCallback{
-                        override fun onTextTranslation(translatedText: String) {
-                            dismiss()
-                            if (translatedText.isNotEmpty()){
-                                val builder = MaterialAlertDialogBuilder(context)
-                                builder.setMessage(translatedText)
-                                builder.setCancelable(false)
-                                builder.setNegativeButton(getString(R.string.cancel_text)){dialog,which->
-                                    dialog.dismiss()
+                    val title = productResults.getString("title")
+
+                    val layoutBuilder = MaterialAlertDialogBuilder(context)
+                    val dialogLayout = LayoutInflater.from(context).inflate(R.layout.rain_forest_title_description_layout,null)
+                    val dialogCloseBtn = dialogLayout.findViewById<AppCompatImageView>(R.id.dialog_close_btn)
+                    val titleTextView = dialogLayout.findViewById<MaterialTextView>(R.id.title_text_view)
+                    val descriptionTextView = dialogLayout.findViewById<MaterialTextView>(R.id.description_text_view)
+                    val titleAddBtn = dialogLayout.findViewById<MaterialTextView>(R.id.add_title_button)
+                    val descriptionAddBtn = dialogLayout.findViewById<MaterialTextView>(R.id.add_description_button)
+
+                    titleTextView.text = title
+                    descriptionTextView.text = description
+
+                    layoutBuilder.setView(dialogLayout)
+                    layoutBuilder.setCancelable(false)
+                    val alert = layoutBuilder.create()
+                    alert.show()
+                    dialogCloseBtn.setOnClickListener {
+                        alert.dismiss()
+                    }
+
+                    titleAddBtn.setOnClickListener {
+                        alert.dismiss()
+                        startLoading(context)
+                        LanguageTranslator.translateText(title,"en",object :TranslationCallback{
+                            override fun onTextTranslation(translatedText: String) {
+                                dismiss()
+                                if (translatedText.isNotEmpty()){
+                                    val builder = MaterialAlertDialogBuilder(context)
+                                    builder.setMessage(translatedText)
+                                    builder.setCancelable(false)
+                                    builder.setNegativeButton(getString(R.string.cancel_text)){dialog,which->
+                                        dialog.dismiss()
+                                    }
+                                    builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
+                                        dialog.dismiss()
+                                        setResult(RESULT_OK,Intent().apply {
+                                            putExtra("TITLE",translatedText)
+                                        })
+                                        finish()
+                                    }
+
+                                    val alert1 = builder.create()
+                                    alert1.show()
                                 }
-                                builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
-                                    dialog.dismiss()
-                                    setResult(RESULT_OK,Intent().apply {
-                                        putExtra("DESCRIPTION",translatedText)
-                                    })
-                                    finish()
+                                else{
+                                    showAlert(context,"Something wrong with translator, please try later!")
                                 }
 
-                                val alert = builder.create()
-                                alert.show()
                             }
-                            else{
-                                showAlert(context,"Something wrong with translator, please try later!")
-                            }
+                        })
+                    }
 
-                        }
-                    })
+                    descriptionAddBtn.setOnClickListener {
+                        alert.dismiss()
+                        startLoading(context)
+                        LanguageTranslator.translateText(description,"en",object :TranslationCallback{
+                            override fun onTextTranslation(translatedText: String) {
+                                dismiss()
+                                if (translatedText.isNotEmpty()){
+                                    val builder = MaterialAlertDialogBuilder(context)
+                                    builder.setMessage(translatedText)
+                                    builder.setCancelable(false)
+                                    builder.setNegativeButton(getString(R.string.cancel_text)){dialog,which->
+                                        dialog.dismiss()
+                                    }
+                                    builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
+                                        dialog.dismiss()
+                                        setResult(RESULT_OK,Intent().apply {
+                                            putExtra("TITLE",translatedText)
+                                        })
+                                        finish()
+                                    }
+
+                                    val alert1 = builder.create()
+                                    alert1.show()
+                                }
+                                else{
+                                    showAlert(context,"Something wrong with translator, please try later!")
+                                }
+
+                            }
+                        })
+                    }
+
+
                 }
             },
             {

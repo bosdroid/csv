@@ -86,6 +86,12 @@
                     android:title="@string/settings" />
 
                 <item
+                    android:icon="@drawable/ic_login"
+                    android:id="@+id/insales_login"
+                    android:title="@string/insales_login_text"
+                    android:visible="false" />
+
+                <item
                     android:title="@string/tables_data"
                     android:id="@+id/tables_data"
                     android:icon="@drawable/ic_table_view"

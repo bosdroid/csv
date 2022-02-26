@@ -93,6 +93,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private var dialogStatus = 0
     private var categoriesList = mutableListOf<Category>()
     private lateinit var fullDescriptionBox:TextInputEditText
+    private lateinit var titleBox:TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1006,7 +1007,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 val dialogLayout = LayoutInflater.from(context)
                     .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
                 val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
-                val productTitleBox =
+               titleBox =
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
                 val productShortDescriptionBox =
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
@@ -1014,7 +1015,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
                 val getDescriptionView = dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
 
-                productTitleBox.setText(pItem.title)
+                titleBox.setText(pItem.title)
                 productShortDescriptionBox.setText(pItem.shortDesc)
                 fullDescriptionBox.setText(pItem.fullDesc)
                 val dialogCancelBtn =
@@ -1027,8 +1028,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     .setCancelable(false)
                 val alert = builder.create()
                 alert.show()
-                productTitleBox.setSelection(pItem.title.length)
-                productTitleBox.requestFocus()
+                titleBox.setSelection(pItem.title.length)
+                titleBox.requestFocus()
                 Constants.openKeyboar(context)
                 dialogCancelBtn.setOnClickListener {
                     Constants.hideKeyboar(context)
@@ -1042,7 +1043,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
 
                 dialogUpdateBtn.setOnClickListener {
-                    val titleText = productTitleBox.text.toString().trim()
+                    val titleText = titleBox.text.toString().trim()
                     val shortDesc = productShortDescriptionBox.text.toString().trim()
                     val fullDesc = fullDescriptionBox.text.toString().trim()
 
@@ -1150,6 +1151,11 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 fullDescriptionBox.setText(data.getStringExtra("DESCRIPTION") as String)
                 fullDescriptionBox.setSelection(fullDescriptionBox.length())
                 fullDescriptionBox.requestFocus()
+            }
+            if (data != null && data.hasExtra("TITLE")){
+                titleBox.setText(data.getStringExtra("TITLE") as String)
+                titleBox.setSelection(titleBox.length())
+                titleBox.requestFocus()
             }
         }
     }
