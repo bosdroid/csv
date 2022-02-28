@@ -91,6 +91,16 @@
                 android:layout_marginTop="@dimen/defaultDpMargin"
                 android:textColor="@color/black"
                 android:textSize="@dimen/mediumText" />
+
+           <com.google.android.material.button.MaterialButton
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="@dimen/eightDpMargin"
+               android:text="@string/done_text"
+               android:textSize="@dimen/largeText"
+               android:id="@+id/rfa_item_done_btn"
+               />
+
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

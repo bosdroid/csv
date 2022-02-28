@@ -22,8 +22,10 @@ import com.boris.expert.csvmagic.adapters.RainForestApiAdapter
 import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.boris.expert.csvmagic.model.RainForestApiObject
 import com.boris.expert.csvmagic.utils.Constants
+import com.boris.expert.csvmagic.utils.GcpTranslator
 import com.boris.expert.csvmagic.utils.LanguageTranslator
 import com.boris.expert.csvmagic.utils.VolleySingleton
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
@@ -100,19 +102,32 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 if (query.isNotEmpty()) {
                     Constants.hideKeyboar(context)
 
-                    LanguageTranslator.translateText(query,"ru",object :TranslationCallback{
+                    GcpTranslator.translateFromRusToEng(context,query,object : TranslationCallback{
                         override fun onTextTranslation(translatedText: String) {
-                             if (translatedText.isNotEmpty()){
-                                 //showAlert(context,translatedText)
-                                 getProducts(translatedText)
-                             }
-                            else{
-                               showAlert(context,"Something wrong with translator, please try later!")
+                            if (translatedText.isNotEmpty()){
+                                //showAlert(context,translatedText)
+                                getProducts(translatedText)
                             }
-
+                            else{
+                                showAlert(context,"Something wrong with translator, please try later!")
+                            }
                         }
 
                     })
+
+//                    LanguageTranslator.translateText(query,"ru",object :TranslationCallback{
+//                        override fun onTextTranslation(translatedText: String) {
+//                             if (translatedText.isNotEmpty()){
+//                                 //showAlert(context,translatedText)
+//                                 getProducts(translatedText)
+//                             }
+//                            else{
+//                               showAlert(context,"Something wrong with translator, please try later!")
+//                            }
+//
+//                        }
+//
+//                    })
                 } else {
                     showAlert(context, getString(R.string.empty_text_error))
                 }
@@ -186,7 +201,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 val response = JSONObject(it)
                 if (response.has("product")) {
                     val productResults = response.getJSONObject("product")
-                    val description = productResults.getString("description")
+                    val description = if (productResults.getString("description").isNotEmpty()){productResults.getString("description")}else{""}
                     val title = productResults.getString("title")
 
                     val layoutBuilder = MaterialAlertDialogBuilder(context)
@@ -196,7 +211,10 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     val descriptionTextView = dialogLayout.findViewById<MaterialTextView>(R.id.description_text_view)
                     val titleAddBtn = dialogLayout.findViewById<MaterialTextView>(R.id.add_title_button)
                     val descriptionAddBtn = dialogLayout.findViewById<MaterialTextView>(R.id.add_description_button)
+                    val doneBtn = dialogLayout.findViewById<MaterialButton>(R.id.rfa_item_done_btn)
 
+                    titleAddBtn.isEnabled = true
+                    descriptionAddBtn.isEnabled = true
 
                     layoutBuilder.setView(dialogLayout)
                     layoutBuilder.setCancelable(false)
@@ -205,21 +223,31 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     dialogCloseBtn.setOnClickListener {
                         alert.dismiss()
                     }
-                    LanguageTranslator.translateText(title,"en",object :TranslationCallback{
+
+                    doneBtn.setOnClickListener {
+                        alert.dismiss()
+                        val finalTitleText = if (titleAddBtn.isEnabled){""}else{titleTextView.text.toString()}
+                        val finalDescriptionText = if (descriptionAddBtn.isEnabled){""}else{descriptionTextView.text.toString()}
+                        setResult(RESULT_OK,Intent().apply {
+                            putExtra("TITLE",finalTitleText)
+                            putExtra("DESCRIPTION",finalDescriptionText)
+                        })
+                        finish()
+                    }
+
+                    GcpTranslator.translateFromEngToRus(context,title,object : TranslationCallback{
                         override fun onTextTranslation(translatedText: String) {
-                            dismiss()
                             if (translatedText.isNotEmpty()){
                                 titleTextView.text = translatedText
                             }
                             else{
-                                //showAlert(context,"Something wrong with translator, please try later!")
                                 titleTextView.text = ""
                             }
-
                         }
+
                     })
+
                     titleAddBtn.setOnClickListener {
-                        alert.dismiss()
                         val builder = MaterialAlertDialogBuilder(context)
                         builder.setMessage(getString(R.string.apply_warning_message))
                         builder.setCancelable(false)
@@ -228,10 +256,8 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         }
                         builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
                             dialog.dismiss()
-                            setResult(RESULT_OK,Intent().apply {
-                                putExtra("TITLE",titleTextView.text.toString())
-                            })
-                            finish()
+                            titleAddBtn.text = getString(R.string.added_text)
+                            titleAddBtn.isEnabled = false
                         }
 
                         val alert1 = builder.create()
@@ -239,38 +265,37 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
                     }
 
-                    LanguageTranslator.translateText(description,"en",object :TranslationCallback{
+                    if (description.isNotEmpty()){
+                    GcpTranslator.translateFromEngToRus(context,description,object : TranslationCallback{
                         override fun onTextTranslation(translatedText: String) {
-                            dismiss()
                             if (translatedText.isNotEmpty()){
                                 descriptionTextView.text = translatedText
                             }
                             else{
-//                                showAlert(context,"Something wrong with translator, please try later!")
                                 descriptionTextView.text = ""
                             }
-
                         }
+
                     })
+                    }
 
                     descriptionAddBtn.setOnClickListener {
-                        alert.dismiss()
-                        val builder = MaterialAlertDialogBuilder(context)
-                        builder.setMessage(getString(R.string.apply_warning_message))
-                        builder.setCancelable(false)
-                        builder.setNegativeButton(getString(R.string.cancel_text)){dialog,which->
-                            dialog.dismiss()
-                        }
-                        builder.setPositiveButton(getString(R.string.apply_text)){dialog,which->
-                            dialog.dismiss()
-                            setResult(RESULT_OK,Intent().apply {
-                                putExtra("TITLE",descriptionTextView.text.toString())
-                            })
-                            finish()
-                        }
+                        if (description.isNotEmpty()) {
+                            val builder = MaterialAlertDialogBuilder(context)
+                            builder.setMessage(getString(R.string.apply_warning_message))
+                            builder.setCancelable(false)
+                            builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            builder.setPositiveButton(getString(R.string.apply_text)) { dialog, which ->
+                                dialog.dismiss()
+                                descriptionAddBtn.text = getString(R.string.added_text)
+                                descriptionAddBtn.isEnabled = false
+                            }
 
-                        val alert1 = builder.create()
-                        alert1.show()
+                            val alert1 = builder.create()
+                            alert1.show()
+                        }
                     }
 
                 }

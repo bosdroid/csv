@@ -1147,15 +1147,23 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     var launchActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
-            if (data != null && data.hasExtra("DESCRIPTION")){
-                fullDescriptionBox.setText(data.getStringExtra("DESCRIPTION") as String)
-                fullDescriptionBox.setSelection(fullDescriptionBox.length())
-                fullDescriptionBox.requestFocus()
-            }
+
             if (data != null && data.hasExtra("TITLE")){
-                titleBox.setText(data.getStringExtra("TITLE") as String)
-                titleBox.setSelection(titleBox.length())
-                titleBox.requestFocus()
+                val title = data.getStringExtra("TITLE") as String
+                if (title.isNotEmpty()) {
+                    titleBox.setText(title)
+                    titleBox.setSelection(titleBox.length())
+                    //titleBox.requestFocus()
+                }
+            }
+
+            if (data != null && data.hasExtra("DESCRIPTION")){
+                val description = data.getStringExtra("DESCRIPTION") as String
+                if (description.isNotEmpty()) {
+                    fullDescriptionBox.setText(description)
+                    fullDescriptionBox.setSelection(fullDescriptionBox.length())
+                    fullDescriptionBox.requestFocus()
+                }
             }
         }
     }

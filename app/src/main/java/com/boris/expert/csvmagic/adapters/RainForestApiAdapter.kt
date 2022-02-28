@@ -13,6 +13,7 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.boris.expert.csvmagic.model.HelpObject
 import com.boris.expert.csvmagic.model.RainForestApiObject
+import com.boris.expert.csvmagic.utils.GcpTranslator
 import com.boris.expert.csvmagic.utils.LanguageTranslator
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.bumptech.glide.Glide
@@ -75,18 +76,18 @@ class RainForestApiAdapter(
         val item = rainForestApiList[position]
 
         Glide.with(context).load(item.image).into(holder.image)
-        LanguageTranslator.translateText(item.title,"en",object : TranslationCallback {
-            override fun onTextTranslation(translatedText: String) {
-                BaseActivity.dismiss()
-                if (translatedText.isNotEmpty()){
-                    holder.title.text = translatedText
-                }
-                else{
+//        GcpTranslator.translateFromEngToRus(context,item.title,object : TranslationCallback {
+//            override fun onTextTranslation(translatedText: String) {
+//                BaseActivity.dismiss()
+//                if (translatedText.isNotEmpty()){
+//                    holder.title.text = translatedText
+//                }
+//                else{
                     holder.title.text = item.title
-                }
-
-            }
-        })
+//                }
+//
+//            }
+//        })
 
     }
 
