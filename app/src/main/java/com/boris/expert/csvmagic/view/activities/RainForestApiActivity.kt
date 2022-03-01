@@ -29,6 +29,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.ArrayList
 
@@ -165,6 +168,21 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         if (rainForestList.size > 0){
                             adapter.notifyItemRangeChanged(0,rainForestList.size)
                         }
+
+                        CoroutineScope(Dispatchers.IO).launch {
+                            for (i in 0 until rainForestList.size){
+                                val text = rainForestList[i].title
+                                GcpTranslator.translateFromEngToRus(context,text,object :TranslationCallback{
+                                    override fun onTextTranslation(translatedText: String) {
+                                        rainForestList[i].title = translatedText
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            adapter.notifyItemChanged(i)
+                                        }
+                                    }
+
+                                })
+                            }
+                        }
                     }
                 }
             },
@@ -201,7 +219,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 val response = JSONObject(it)
                 if (response.has("product")) {
                     val productResults = response.getJSONObject("product")
-                    val description = if (productResults.getString("description").isNotEmpty()){productResults.getString("description")}else{""}
+                    val description = if (productResults.isNull("description")){""}else{productResults.getString("description")}
                     val title = productResults.getString("title")
 
                     val layoutBuilder = MaterialAlertDialogBuilder(context)

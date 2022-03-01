@@ -85,11 +85,11 @@
                     android:icon="@drawable/ic_settings"
                     android:title="@string/settings" />
 
-                <item
-                    android:icon="@drawable/ic_login"
-                    android:id="@+id/insales_login"
-                    android:title="@string/insales_login_text"
-                    android:visible="false" />
+<!--                <item-->
+<!--                    android:icon="@drawable/ic_login"-->
+<!--                    android:id="@+id/insales_login"-->
+<!--                    android:title="@string/insales_login_text"-->
+<!--                    android:visible="false" />-->
 
                 <item
                     android:title="@string/tables_data"
