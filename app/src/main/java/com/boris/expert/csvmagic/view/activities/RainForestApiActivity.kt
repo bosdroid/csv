@@ -149,7 +149,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
             Request.Method.GET,
             url,
             {
-                dismiss()
+
                 val response = JSONObject(it)
                 if (response.has("search_results")) {
                     val searchResults = response.getJSONArray("search_results")
@@ -165,9 +165,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                 )
                             )
                         }
-                        if (rainForestList.size > 0){
-                            adapter.notifyItemRangeChanged(0,rainForestList.size)
-                        }
+
 
                         CoroutineScope(Dispatchers.IO).launch {
                             for (i in 0 until rainForestList.size){
@@ -175,14 +173,21 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                 GcpTranslator.translateFromEngToRus(context,text,object :TranslationCallback{
                                     override fun onTextTranslation(translatedText: String) {
                                         rainForestList[i].title = translatedText
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            adapter.notifyItemChanged(i)
-                                        }
                                     }
 
                                 })
                             }
+                            CoroutineScope(Dispatchers.Main).launch {
+                                dismiss()
+                                if (rainForestList.size > 0){
+                                    adapter.notifyItemRangeChanged(0,rainForestList.size)
+                                }
+                            }
                         }
+                    }
+                    else
+                    {
+                        dismiss()
                     }
                 }
             },
