@@ -15,8 +15,8 @@ android {
         applicationId "com.boris.expert.csvmagic"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 109
-        versionName "multi images been added"
+        versionCode 202
+        versionName "insales description been added"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

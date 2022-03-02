@@ -42,69 +42,100 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
+        android:exported="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.RainForestApiActivity"/>
+        <activity android:name=".view.activities.RainForestApiActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.SalesCustomersActivity"
-            android:launchMode="singleTask" />
-        <activity android:name=".view.activities.SupportChatActivity" />
-        <activity android:name=".view.activities.SupportTicketsActivity" />
+            android:launchMode="singleTask"
+            android:exported="true"/>
+        <activity android:name=".view.activities.SupportChatActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.SupportTicketsActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.VideoFullScreenActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.HelpActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
-        <activity android:name=".view.activities.BarcodeImageListActivity" />
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="true"/>
+        <activity android:name=".view.activities.BarcodeImageListActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.ScanDataActivity"
             android:configChanges="orientation|screenSize|screenLayout"
-            android:windowSoftInputMode="stateAlwaysVisible" />
-        <activity android:name=".view.activities.UserScreenActivity" />
-        <activity android:name=".view.activities.PurchaseFeatureActivity" />
-        <activity android:name=".view.activities.OcrActivity" />
-        <activity android:name=".view.activities.CreditActivity" />
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:exported="true"/>
+        <activity android:name=".view.activities.UserScreenActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.PurchaseFeatureActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.OcrActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.CreditActivity"
+            android:exported="true"/>
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:name=".view.activities.PostSheetDataActivity" />
-        <activity android:name=".view.activities.SocialNetworksQrActivity" />
-        <activity android:name=".view.activities.FieldListValuesActivity" />
-        <activity android:name=".view.activities.SheetsActivity" />
-        <activity android:name=".view.activities.FieldListsActivity" />
-        <activity android:name=".view.activities.TableViewActivity" />
+        <activity android:name=".view.activities.PostSheetDataActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.SocialNetworksQrActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.FieldListValuesActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.SheetsActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.FieldListsActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.TableViewActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity android:name=".view.activities.TablesDataActivity" />
-        <activity android:name=".view.activities.CreateTableActivity" />
-        <activity android:name=".view.activities.TablesActivity" />
-        <activity android:name=".view.activities.ProfileActivity" />
+            android:label="@string/title_activity_settings"
+            android:exported="true"/>
+        <activity android:name=".view.activities.TablesDataActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.CreateTableActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.TablesActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.ProfileActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.CodeDetailActivity"
-            android:windowSoftInputMode="stateAlwaysVisible" />
-        <activity android:name=".view.activities.FeedbackQrActivity" />
-        <activity android:name=".view.activities.ShareActivity" />
-        <activity android:name=".view.activities.DesignActivity" />
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:exported="true"/>
+        <activity android:name=".view.activities.FeedbackQrActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.ShareActivity"
+            android:exported="true"/>
+        <activity android:name=".view.activities.DesignActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.activities.CouponQrActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
         <activity
             android:name=".view.activities.DynamicQrActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
-        <activity android:name=".view.activities.BarcodeHistoryActivity">
+        <activity android:name=".view.activities.BarcodeHistoryActivity"
+            android:exported="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
@@ -112,7 +143,8 @@
         <activity
             android:name=".view.activities.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout"
-            android:windowSoftInputMode="stateAlwaysVisible">
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -122,7 +154,7 @@
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
+            android:exported="true"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
@@ -135,7 +167,8 @@
 
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat" />
+            android:theme="@style/Base.Theme.AppCompat"
+            android:exported="true"/>
     </application>
 
 </manifest>
