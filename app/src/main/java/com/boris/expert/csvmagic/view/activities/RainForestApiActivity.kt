@@ -132,7 +132,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 val totalCreditPrice = unitCharacterPrice * query.length
                 val total = totalCreditPrice+pListPrice
                 howMuchChargeCredits = total
-                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= total) {
+//                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= total) {
                     if (query.isNotEmpty()) {
                         Constants.hideKeyboar(context)
 
@@ -156,20 +156,20 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     } else {
                         showAlert(context, getString(R.string.empty_text_error))
                     }
-                }
-                else{
-                    MaterialAlertDialogBuilder(context)
-                        .setMessage(getString(R.string.low_credites_error_message))
-                        .setCancelable(false)
-                        .setNegativeButton(getString(R.string.no_text)){dialog,which->
-                            dialog.dismiss()
-                        }
-                        .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
-                            dialog.dismiss()
-                            startActivity(Intent(context,UserScreenActivity::class.java))
-                        }
-                        .create().show()
-                }
+//                }
+//                else{
+//                    MaterialAlertDialogBuilder(context)
+//                        .setMessage(getString(R.string.low_credites_error_message))
+//                        .setCancelable(false)
+//                        .setNegativeButton(getString(R.string.no_text)){dialog,which->
+//                            dialog.dismiss()
+//                        }
+//                        .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+//                            dialog.dismiss()
+//                            startActivity(Intent(context,UserScreenActivity::class.java))
+//                        }
+//                        .create().show()
+//                }
             }
             else -> {
 
@@ -208,7 +208,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         howMuchChargeCredits = totalCreditPrice
                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 //                        userCurrentCredits = "0"
-                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
+//                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
 
                             CoroutineScope(Dispatchers.IO).launch {
 
@@ -232,23 +232,23 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                 }
                                 chargeCreditsPrice()
                             }
-                        }
-                        else{
-                            if (rainForestList.size > 0) {
-                                adapter.notifyItemRangeChanged(0, rainForestList.size)
-                            }
-                            MaterialAlertDialogBuilder(context)
-                                .setMessage(getString(R.string.low_credites_error_message))
-                                .setCancelable(false)
-                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
-                                    dialog.dismiss()
-                                }
-                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
-                                    dialog.dismiss()
-                                    startActivity(Intent(context,UserScreenActivity::class.java))
-                                }
-                                .create().show()
-                        }
+//                        }
+//                        else{
+//                            if (rainForestList.size > 0) {
+//                                adapter.notifyItemRangeChanged(0, rainForestList.size)
+//                            }
+//                            MaterialAlertDialogBuilder(context)
+//                                .setMessage(getString(R.string.low_credites_error_message))
+//                                .setCancelable(false)
+//                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
+//                                    dialog.dismiss()
+//                                }
+//                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+//                                    dialog.dismiss()
+//                                    startActivity(Intent(context,UserScreenActivity::class.java))
+//                                }
+//                                .create().show()
+//                        }
                     }
                     else
                     {
@@ -347,7 +347,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     howMuchChargeCredits = totalCreditPrice
                     //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 //                    userCurrentCredits = "0"
-                    if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
+//                    if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
 
                         GcpTranslator.translateFromEngToRus(context, title, object : TranslationCallback {
                             override fun onTextTranslation(translatedText: String) {
@@ -365,6 +365,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                 override fun onTextTranslation(translatedText: String) {
                                     if (translatedText.isNotEmpty()) {
                                         descriptionTextView.text = translatedText
+
                                     } else {
                                         descriptionTextView.text = ""
                                     }
@@ -372,23 +373,23 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
                             })
                         }
-                        chargeCreditsPrice()
-                    }
-                    else{
-                        titleTextView.text = title
-                        descriptionTextView.text = description
-                        MaterialAlertDialogBuilder(context)
-                                .setMessage(getString(R.string.low_credites_error_message))
-                                .setCancelable(false)
-                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
-                                    dialog.dismiss()
-                                }
-                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
-                                    dialog.dismiss()
-                                    startActivity(Intent(context,UserScreenActivity::class.java))
-                                }
-                                .create().show()
-                    }
+                    chargeCreditsPrice()
+//                    }
+//                    else{
+//                        titleTextView.text = title
+//                        descriptionTextView.text = description
+//                        MaterialAlertDialogBuilder(context)
+//                                .setMessage(getString(R.string.low_credites_error_message))
+//                                .setCancelable(false)
+//                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
+//                                    dialog.dismiss()
+//                                }
+//                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+//                                    dialog.dismiss()
+//                                    startActivity(Intent(context,UserScreenActivity::class.java))
+//                                }
+//                                .create().show()
+//                    }
 
                     titleAddBtn.setOnClickListener {
                         val builder = MaterialAlertDialogBuilder(context)

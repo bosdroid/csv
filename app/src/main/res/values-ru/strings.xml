@@ -501,8 +501,9 @@
     <string name="apply_warning_message">Are you sure you want to apply this text?</string>
     <string name="done_text">Done</string>
 	<string name="added_text">added</string>
+    <string name="low_credites_error_message2">You have less then 1 credits please add more</string>
 
-	<string-array name="features_keys">
+    <string-array name="features_keys">
 		<item>compressor_feature</item>
 		<item>modes_switcher</item>
 		<item>premium_support</item>

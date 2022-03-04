@@ -92,8 +92,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private lateinit var linearLayoutManager: WrapContentLinearLayoutManager
     private var dialogStatus = 0
     private var categoriesList = mutableListOf<Category>()
-    private lateinit var fullDescriptionBox:TextInputEditText
-    private lateinit var titleBox:TextInputEditText
+    private lateinit var fullDescriptionBox: TextInputEditText
+    private lateinit var titleBox: TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1007,13 +1007,14 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 val dialogLayout = LayoutInflater.from(context)
                     .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
                 val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
-               titleBox =
+                titleBox =
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
                 val productShortDescriptionBox =
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
                 fullDescriptionBox =
                     dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
-                val getDescriptionView = dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
+                val getDescriptionView =
+                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
 
                 titleBox.setText(pItem.title)
                 productShortDescriptionBox.setText(pItem.shortDesc)
@@ -1038,8 +1039,25 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                 getDescriptionView.setOnClickListener {
                     Constants.hideKeyboar(context)
+                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+                    if (userCurrentCredits.toFloat() >= 1.0) {
+                        launchActivity.launch(Intent(context, RainForestApiActivity::class.java))
+                    } else {
+                        MaterialAlertDialogBuilder(context)
+                            .setMessage(getString(R.string.low_credites_error_message2))
+                            .setCancelable(false)
+                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                                dialog.dismiss()
+                                startActivity(Intent(context, UserScreenActivity::class.java))
+                            }
+                            .create().show()
+                    }
                     //startActivity(Intent(context,RainForestApiActivity::class.java))
-                    launchActivity.launch(Intent(context,RainForestApiActivity::class.java))
+
                 }
 
                 dialogUpdateBtn.setOnClickListener {
@@ -1144,29 +1162,30 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
     }
 
-    var launchActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
+    var launchActivity =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
 
-            if (data != null && data.hasExtra("TITLE")){
-                val title = data.getStringExtra("TITLE") as String
-                if (title.isNotEmpty()) {
-                    titleBox.setText(title)
-                    titleBox.setSelection(titleBox.length())
-                    //titleBox.requestFocus()
+                if (data != null && data.hasExtra("TITLE")) {
+                    val title = data.getStringExtra("TITLE") as String
+                    if (title.isNotEmpty()) {
+                        titleBox.setText(title)
+                        titleBox.setSelection(titleBox.length())
+                        //titleBox.requestFocus()
+                    }
                 }
-            }
 
-            if (data != null && data.hasExtra("DESCRIPTION")){
-                val description = data.getStringExtra("DESCRIPTION") as String
-                if (description.isNotEmpty()) {
-                    fullDescriptionBox.setText(description)
-                    fullDescriptionBox.setSelection(fullDescriptionBox.length())
-                    fullDescriptionBox.requestFocus()
+                if (data != null && data.hasExtra("DESCRIPTION")) {
+                    val description = data.getStringExtra("DESCRIPTION") as String
+                    if (description.isNotEmpty()) {
+                        fullDescriptionBox.setText(description)
+                        fullDescriptionBox.setSelection(fullDescriptionBox.length())
+                        fullDescriptionBox.requestFocus()
+                    }
                 }
             }
         }
-    }
 
 
     private fun fetchProducts(page: Int) {

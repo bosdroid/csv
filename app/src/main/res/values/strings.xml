@@ -515,6 +515,7 @@
     <string name="translation_api_key" translatable="false">AIzaSyC0angfA5upfo8rjrc6rFy39HS8hqoidZE</string>
     <string name="done_text">Done</string>
     <string name="added_text">added</string>
+    <string name="low_credites_error_message2">You have less then 1 credits please add more</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>
