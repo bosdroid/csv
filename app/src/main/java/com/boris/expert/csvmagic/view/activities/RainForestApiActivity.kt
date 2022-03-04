@@ -21,19 +21,18 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.RainForestApiAdapter
 import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.boris.expert.csvmagic.model.RainForestApiObject
-import com.boris.expert.csvmagic.utils.Constants
-import com.boris.expert.csvmagic.utils.GcpTranslator
-import com.boris.expert.csvmagic.utils.LanguageTranslator
-import com.boris.expert.csvmagic.utils.VolleySingleton
+import com.boris.expert.csvmagic.utils.*
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.ArrayList
+import java.util.HashMap
 
 class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickListener,
     View.OnClickListener {
@@ -45,6 +44,14 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
     private var rainForestList = mutableListOf<RainForestApiObject>()
     private lateinit var searchBox: TextInputEditText
     private lateinit var searchImageBtn: ImageButton
+    private lateinit var appSettings: AppSettings
+    private var pDetailsPrice = 0F
+    private var pListPrice = 0F
+    private var characters = 0
+    private var translatorPrice = 0F
+    private var unitCharacterPrice = 0F
+    private var userCurrentCredits = ""
+    private var howMuchChargeCredits = 0F
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,12 +65,12 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
     private fun initViews() {
         context = this
+        appSettings = AppSettings(context)
         toolbar = findViewById(R.id.toolbar)
         rainForestRecyclerView = findViewById(R.id.rainforest_result_recyclerview)
         searchBox = findViewById(R.id.rainforest_products_search_box)
         searchImageBtn = findViewById(R.id.rainforest_products_search_btn)
         searchImageBtn.setOnClickListener(this)
-
 
         rainForestRecyclerView.layoutManager = GridLayoutManager(context, 2)
         rainForestRecyclerView.hasFixedSize()
@@ -71,6 +78,12 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         rainForestRecyclerView.adapter = adapter
         adapter.setOnItemClickListener(this)
 
+        pDetailsPrice = appSettings.getString("P_DETAILS_PRICE")!!.toFloat()
+        pListPrice = appSettings.getString("P_LIST_PRICE")!!.toFloat()
+        characters = appSettings.getInt("TRANSLATOR_CHARACTERS_LIMIT")
+        translatorPrice = appSettings.getString("TRANSLATOR_CHARACTERS_PRICE")!!.toFloat()
+        unitCharacterPrice = translatorPrice/characters
+        userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
     }
 
     private fun setUpToolbar() {
@@ -91,48 +104,71 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
     override fun onItemClick(position: Int) {
         val item = rainForestList[position]
-//        setResult(RESULT_OK,Intent().apply {
-//            putExtra("DESCRIPTION","TEST description")
-//        })
-//        finish()
-        getProductDescription(item.asin)
+//        userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= pDetailsPrice) {
+
+            getProductDescription(item.asin)
+//        }
+//        else{
+//            MaterialAlertDialogBuilder(context)
+//                .setMessage(getString(R.string.low_credites_error_message))
+//                .setCancelable(false)
+//                .setNegativeButton(getString(R.string.no_text)){dialog,which->
+//                    dialog.dismiss()
+//                }
+//                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+//                    dialog.dismiss()
+//                    startActivity(Intent(context,UserScreenActivity::class.java))
+//                }
+//                .create().show()
+//        }
     }
 
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.rainforest_products_search_btn -> {
+//                userCurrentCredits = "0"
                 val query = searchBox.text.toString().trim()
-                if (query.isNotEmpty()) {
-                    Constants.hideKeyboar(context)
+                val totalCreditPrice = unitCharacterPrice * query.length
+                val total = totalCreditPrice+pListPrice
+                howMuchChargeCredits = total
+                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= total) {
+                    if (query.isNotEmpty()) {
+                        Constants.hideKeyboar(context)
 
-                    GcpTranslator.translateFromRusToEng(context,query,object : TranslationCallback{
-                        override fun onTextTranslation(translatedText: String) {
-                            if (translatedText.isNotEmpty()){
-                                //showAlert(context,translatedText)
-                                getProducts(translatedText)
-                            }
-                            else{
-                                showAlert(context,"Something wrong with translator, please try later!")
-                            }
+                        GcpTranslator.translateFromRusToEng(
+                            context,
+                            query,
+                            object : TranslationCallback {
+                                override fun onTextTranslation(translatedText: String) {
+                                    if (translatedText.isNotEmpty()) {
+                                        //showAlert(context,translatedText)
+                                        getProducts(translatedText)
+                                    } else {
+                                        showAlert(
+                                            context,
+                                            "Something wrong with translator, please try later!"
+                                        )
+                                    }
+                                }
+
+                            })
+                    } else {
+                        showAlert(context, getString(R.string.empty_text_error))
+                    }
+                }
+                else{
+                    MaterialAlertDialogBuilder(context)
+                        .setMessage(getString(R.string.low_credites_error_message))
+                        .setCancelable(false)
+                        .setNegativeButton(getString(R.string.no_text)){dialog,which->
+                            dialog.dismiss()
                         }
-
-                    })
-
-//                    LanguageTranslator.translateText(query,"ru",object :TranslationCallback{
-//                        override fun onTextTranslation(translatedText: String) {
-//                             if (translatedText.isNotEmpty()){
-//                                 //showAlert(context,translatedText)
-//                                 getProducts(translatedText)
-//                             }
-//                            else{
-//                               showAlert(context,"Something wrong with translator, please try later!")
-//                            }
-//
-//                        }
-//
-//                    })
-                } else {
-                    showAlert(context, getString(R.string.empty_text_error))
+                        .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+                            dialog.dismiss()
+                            startActivity(Intent(context,UserScreenActivity::class.java))
+                        }
+                        .create().show()
                 }
             }
             else -> {
@@ -152,9 +188,11 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
                 val response = JSONObject(it)
                 if (response.has("search_results")) {
+                    chargeCreditsPrice()
                     val searchResults = response.getJSONArray("search_results")
                     if (searchResults.length() > 0) {
                         rainForestList.clear()
+                        var totalCharacters = 0
                         for (i in 0 until searchResults.length()) {
                             val item = searchResults.getJSONObject(i)
                             rainForestList.add(
@@ -164,25 +202,52 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                     item.getString("title")
                                 )
                             )
+                            totalCharacters +=item.getString("title").length
                         }
+                        val totalCreditPrice = unitCharacterPrice * totalCharacters
+                        howMuchChargeCredits = totalCreditPrice
+                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//                        userCurrentCredits = "0"
+                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
 
+                            CoroutineScope(Dispatchers.IO).launch {
 
-                        CoroutineScope(Dispatchers.IO).launch {
-                            for (i in 0 until rainForestList.size){
-                                val text = rainForestList[i].title
-                                GcpTranslator.translateFromEngToRus(context,text,object :TranslationCallback{
-                                    override fun onTextTranslation(translatedText: String) {
-                                        rainForestList[i].title = translatedText
-                                    }
+                                for (i in 0 until rainForestList.size) {
+                                    val text = rainForestList[i].title
+                                    GcpTranslator.translateFromEngToRus(
+                                        context,
+                                        text,
+                                        object : TranslationCallback {
+                                            override fun onTextTranslation(translatedText: String) {
+                                                rainForestList[i].title = translatedText
+                                            }
 
-                                })
-                            }
-                            CoroutineScope(Dispatchers.Main).launch {
-                                dismiss()
-                                if (rainForestList.size > 0){
-                                    adapter.notifyItemRangeChanged(0,rainForestList.size)
+                                        })
                                 }
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    dismiss()
+                                    if (rainForestList.size > 0) {
+                                        adapter.notifyItemRangeChanged(0, rainForestList.size)
+                                    }
+                                }
+                                chargeCreditsPrice()
                             }
+                        }
+                        else{
+                            if (rainForestList.size > 0) {
+                                adapter.notifyItemRangeChanged(0, rainForestList.size)
+                            }
+                            MaterialAlertDialogBuilder(context)
+                                .setMessage(getString(R.string.low_credites_error_message))
+                                .setCancelable(false)
+                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
+                                    dialog.dismiss()
+                                }
+                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+                                    dialog.dismiss()
+                                    startActivity(Intent(context,UserScreenActivity::class.java))
+                                }
+                                .create().show()
                         }
                     }
                     else
@@ -210,6 +275,26 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         }
 
         VolleySingleton(context).addToRequestQueue(stringRequest)
+    }
+
+    private fun chargeCreditsPrice(){
+        val firebaseDatabase = FirebaseDatabase.getInstance().reference
+        val hashMap = HashMap<String, Any>()
+        val remaining = userCurrentCredits.toFloat() - howMuchChargeCredits
+        userCurrentCredits = remaining.toString()
+        hashMap["credits"] = userCurrentCredits
+        firebaseDatabase.child(Constants.firebaseUserCredits)
+                .child(Constants.firebaseUserId)
+                .updateChildren(hashMap)
+                .addOnSuccessListener {
+                    howMuchChargeCredits = 0F
+                    getUserCredits(
+                            context
+                    )
+                }
+                .addOnFailureListener {
+
+                }
     }
 
     private fun getProductDescription(asin: String) {
@@ -257,18 +342,53 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         })
                         finish()
                     }
+                    val totalCharacters = title.length + description.length
+                    val totalCreditPrice = unitCharacterPrice * totalCharacters
+                    howMuchChargeCredits = totalCreditPrice
+                    //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//                    userCurrentCredits = "0"
+                    if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
 
-                    GcpTranslator.translateFromEngToRus(context,title,object : TranslationCallback{
-                        override fun onTextTranslation(translatedText: String) {
-                            if (translatedText.isNotEmpty()){
-                                titleTextView.text = translatedText
+                        GcpTranslator.translateFromEngToRus(context, title, object : TranslationCallback {
+                            override fun onTextTranslation(translatedText: String) {
+                                if (translatedText.isNotEmpty()) {
+                                    titleTextView.text = translatedText
+                                } else {
+                                    titleTextView.text = ""
+                                }
                             }
-                            else{
-                                titleTextView.text = ""
-                            }
+
+                        })
+
+                        if (description.isNotEmpty()) {
+                            GcpTranslator.translateFromEngToRus(context, description, object : TranslationCallback {
+                                override fun onTextTranslation(translatedText: String) {
+                                    if (translatedText.isNotEmpty()) {
+                                        descriptionTextView.text = translatedText
+                                    } else {
+                                        descriptionTextView.text = ""
+                                    }
+                                }
+
+                            })
                         }
-
-                    })
+                        chargeCreditsPrice()
+                    }
+                    else{
+                        titleTextView.text = title
+                        descriptionTextView.text = description
+                        MaterialAlertDialogBuilder(context)
+                                .setMessage(getString(R.string.low_credites_error_message))
+                                .setCancelable(false)
+                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
+                                    dialog.dismiss()
+                                }
+                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+                                    dialog.dismiss()
+                                    startActivity(Intent(context,UserScreenActivity::class.java))
+                                }
+                                .create().show()
+                    }
 
                     titleAddBtn.setOnClickListener {
                         val builder = MaterialAlertDialogBuilder(context)
@@ -286,20 +406,6 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         val alert1 = builder.create()
                         alert1.show()
 
-                    }
-
-                    if (description.isNotEmpty()){
-                    GcpTranslator.translateFromEngToRus(context,description,object : TranslationCallback{
-                        override fun onTextTranslation(translatedText: String) {
-                            if (translatedText.isNotEmpty()){
-                                descriptionTextView.text = translatedText
-                            }
-                            else{
-                                descriptionTextView.text = ""
-                            }
-                        }
-
-                    })
                     }
 
                     descriptionAddBtn.setOnClickListener {

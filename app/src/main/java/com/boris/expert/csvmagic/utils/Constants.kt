@@ -52,6 +52,7 @@ class Constants {
         const val firebaseStorageSizes = "StorageSizes"
         const val firebaseBarcodeImages = "BarcodeImages"
         const val firebaseDatabaseBackup = "DatabaseBackup"
+        const val firebasePrices = "Prices"
         const val READ_STORAGE_REQUEST_CODE = 100
         const val CAMERA_REQUEST_CODE = 101
         const val READ_STORAGE_PERMISSION = "android.permission.READ_EXTERNAL_STORAGE"

@@ -903,6 +903,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mNavigation.menu.findItem(R.id.insales).isVisible = true
             getSearchImageDetail()
             checkAndStartTrialPeriod()
+            getPrices()
 //            mNavigation.menu.findItem(R.id.dynamic_links).isVisible = true
 
 //            getCurrentSubscriptionDetail(context)
@@ -956,6 +957,27 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //            mNavigation.menu.findItem(R.id.insales_login).isVisible = true
 //        }
 
+    }
+
+    private fun getPrices(){
+        firebaseDatabase.child(Constants.firebasePrices).addListenerForSingleValueEvent(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val pDetailsPrice:String = snapshot.child("rainforest").child("p_details_price").getValue(Float::class.java).toString()
+                val pListPrice:String = snapshot.child("rainforest").child("p_list_price").getValue(Float::class.java).toString()
+                val characters = snapshot.child("translator").child("characters").getValue(Int::class.java)
+                val translatorPrice:String = snapshot.child("translator").child("price").getValue(Float::class.java).toString()
+
+                appSettings.putString("P_DETAILS_PRICE", pDetailsPrice)
+                appSettings.putString("P_LIST_PRICE", pListPrice)
+                appSettings.putInt("TRANSLATOR_CHARACTERS_LIMIT",characters!!)
+                appSettings.putString("TRANSLATOR_CHARACTERS_PRICE", translatorPrice)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
     }
 
 
