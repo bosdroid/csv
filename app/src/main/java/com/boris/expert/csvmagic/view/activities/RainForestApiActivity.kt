@@ -446,7 +446,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
                                             val textList = translatedText.split(" ")
 
-
+                                            titleTextViewList.clear()
                                             for (i in 0 until textList.size) {
                                                 val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
                                                         FlowLayout.LayoutParams.WRAP_CONTENT)
@@ -486,7 +486,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
                                                 val textList = translatedText.split(" ")
 
-
+                                                descriptionTextViewList.clear()
                                                 for (i in 0 until textList.size) {
                                                     val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
                                                             FlowLayout.LayoutParams.WRAP_CONTENT)

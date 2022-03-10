@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:f="http://schemas.android.com/tools"
     android:fillViewport="true"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -16,13 +17,24 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/layout_swap"
         android:textColor="@color/black"
         android:layout_margin="@dimen/sixtyDpMargin"
         android:textSize="@dimen/largeText"
         android:text="@string/update_product_detail_text"
         android:id="@+id/dialog_heading"
         />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_swap"
+            android:id="@+id/layout_swap"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/dialog_heading"
+            android:layout_margin="@dimen/sixtyDpMargin"
+            />
 
 
     <LinearLayout
@@ -35,123 +47,215 @@
         android:id="@+id/wrapper_layout"
         >
 
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/black"
-            android:text="@string/product_title_text"
-            android:textSize="@dimen/largeText"
-            />
-
-        <com.google.android.material.textfield.TextInputEditText
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/insales_product_title_input_field"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dialog_heading"
-            android:background="@drawable/input_text_field_design"
-            android:padding="5dp"
-            android:inputType="text"
-            android:imeOptions="actionNext"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:hint="@string/text_hint_text"
-            android:gravity="start"
-            />
+            android:orientation="vertical"
+            android:id="@+id/first_linear_layout"
+            android:visibility="gone"
+            >
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/black"
+                android:text="@string/product_title_text"
+                android:textSize="@dimen/largeText"
+                />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/black"
-            android:text="@string/product_short_description_text"
-            android:textSize="@dimen/largeText"
-            />
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/insales_product_title_input_field"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dialog_heading"
+                android:background="@drawable/input_text_field_design"
+                android:padding="5dp"
+                android:inputType="text"
+                android:imeOptions="actionNext"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:hint="@string/text_hint_text"
+                android:gravity="start"
+                />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:id="@+id/insales_product_short_desc_input_field"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/insales_product_title_input_field"
-            android:background="@drawable/input_text_field_design"
-            android:padding="5dp"
-            android:inputType="textMultiLine"
-            android:imeOptions="actionNext"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:hint="@string/text_hint_text"
-            android:gravity="start"
-            />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/black"
+                android:text="@string/product_short_description_text"
+                android:textSize="@dimen/largeText"
+                />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:id="@+id/insales_product_short_desc_input_field"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/insales_product_title_input_field"
+                android:background="@drawable/input_text_field_design"
+                android:padding="5dp"
+                android:inputType="textMultiLine"
+                android:imeOptions="actionNext"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:hint="@string/text_hint_text"
+                android:gravity="start"
+                />
 
 
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"
+                    android:text="@string/product_full_description_text"
+                    android:textSize="@dimen/largeText"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/get_description_text_view"
+                    android:textColor="@color/primary_positive_color"
+                    android:text="@string/get_description_text"
+                    android:textSize="@dimen/mediumText"
+                    />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:id="@+id/insales_product_full_desc_input_field"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/insales_product_title_input_field"
+                android:background="@drawable/input_text_field_design"
+                android:padding="5dp"
+                android:inputType="textMultiLine"
+                android:imeOptions="actionDone"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:hint="@string/text_hint_text"
+                android:gravity="start"
+                />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:id="@+id/second_linear_layout"
+            android:visibility="gone"
             >
             <com.google.android.material.textview.MaterialTextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
                 android:textColor="@color/black"
-                android:text="@string/product_full_description_text"
+                android:text="@string/product_title_text"
                 android:textSize="@dimen/largeText"
                 />
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="0dp"
+
+            <org.apmem.tools.layouts.FlowLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:id="@+id/get_description_text_view"
-                android:textColor="@color/primary_positive_color"
-                android:text="@string/get_description_text"
-                android:textSize="@dimen/mediumText"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:layout_marginBottom="@dimen/eightDpMargin"
+                android:id="@+id/dynamic_insales_title_textview_wrapper"
+                f:layoutDirection="rtl"
+                />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/black"
+                android:text="@string/product_short_description_text"
+                android:textSize="@dimen/largeText"
+                />
+
+            <org.apmem.tools.layouts.FlowLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:layout_marginBottom="@dimen/eightDpMargin"
+                android:id="@+id/dynamic_insales_short_description_textview_wrapper"
+                f:layoutDirection="rtl"
+                />
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"
+                    android:text="@string/product_full_description_text"
+                    android:textSize="@dimen/largeText"
+                    />
+            </LinearLayout>
+
+            <org.apmem.tools.layouts.FlowLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:layout_marginBottom="@dimen/eightDpMargin"
+                android:id="@+id/dynamic_insales_full_description_textview_wrapper"
+                f:layoutDirection="rtl"
                 />
         </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:id="@+id/insales_product_full_desc_input_field"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/insales_product_title_input_field"
-            android:background="@drawable/input_text_field_design"
-            android:padding="5dp"
-            android:inputType="textMultiLine"
-            android:imeOptions="actionDone"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:hint="@string/text_hint_text"
-            android:gravity="start"
-            />
 
     </LinearLayout>
 
