@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/layout_swap"
+        app:layout_constraintEnd_toEndOf="parent"
         android:textColor="@color/black"
         android:layout_margin="@dimen/sixtyDpMargin"
         android:textSize="@dimen/largeText"
@@ -34,6 +34,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toRightOf="@id/dialog_heading"
             android:layout_margin="@dimen/sixtyDpMargin"
+            android:visibility="gone"
             />
 
 
@@ -140,16 +141,7 @@
                     android:text="@string/product_full_description_text"
                     android:textSize="@dimen/largeText"
                     />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:id="@+id/get_description_text_view"
-                    android:textColor="@color/primary_positive_color"
-                    android:text="@string/get_description_text"
-                    android:textSize="@dimen/mediumText"
-                    />
+
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputEditText
@@ -178,7 +170,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/second_linear_layout"
-            android:visibility="gone"
             >
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
@@ -243,6 +234,17 @@
                     android:textColor="@color/black"
                     android:text="@string/product_full_description_text"
                     android:textSize="@dimen/largeText"
+                    />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/get_description_text_view"
+                    android:textColor="@color/primary_positive_color"
+                    android:text="@string/get_description_text"
+                    android:textSize="@dimen/mediumText"
                     />
             </LinearLayout>
 
