@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:f="http://schemas.android.com/tools"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -58,8 +59,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/defaultDpMargin"
+                android:visibility="gone"
                 android:textColor="@color/black"
                 android:textSize="@dimen/mediumText" />
+
+
+            <org.apmem.tools.layouts.FlowLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:layout_marginBottom="@dimen/eightDpMargin"
+                android:id="@+id/dynamic_textview_wrapper"
+                f:layoutDirection="rtl"
+                />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -90,7 +102,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/defaultDpMargin"
                 android:textColor="@color/black"
+                android:visibility="gone"
                 android:textSize="@dimen/mediumText" />
+
+            <org.apmem.tools.layouts.FlowLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:layout_marginBottom="@dimen/eightDpMargin"
+                android:id="@+id/dynamic_description_textview_wrapper"
+                f:layoutDirection="rtl"
+                />
 
            <com.google.android.material.button.MaterialButton
                android:layout_width="match_parent"

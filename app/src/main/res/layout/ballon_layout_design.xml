@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="8dp"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+
+           <com.google.android.material.textfield.TextInputEditText
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:id="@+id/balloon_edit_text"
+               android:layout_margin="@dimen/sixtyDpMargin"
+               android:background="@android:color/transparent"
+               android:gravity="center_horizontal"
+               />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
+              android:layout_marginTop="@dimen/eightDpMargin"
+              >
+             <androidx.appcompat.widget.AppCompatButton
+                 android:layout_width="0dp"
+                 android:layout_height="45dp"
+                 android:layout_weight="1"
+                 android:background="@color/primary_positive_color"
+                 android:text="@string/close_text"
+                 android:textSize="@dimen/largeText"
+                 android:textColor="@color/white"
+                 android:id="@+id/balloon_close_btn"
+                 />
+              <androidx.appcompat.widget.AppCompatButton
+                  android:layout_width="0dp"
+                  android:layout_height="45dp"
+                  android:layout_weight="1"
+                  android:background="@color/secondary_positive_color"
+                  android:text="@string/apply_text"
+                  android:textColor="@color/white"
+                  android:textSize="@dimen/largeText"
+                  android:id="@+id/balloon_apply_btn"
+                  />
+          </LinearLayout>
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
