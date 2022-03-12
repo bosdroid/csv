@@ -152,6 +152,17 @@
                     android:textSize="@dimen/largeText"
                     />
 
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/get_description_text_view1"
+                    android:textColor="@color/primary_positive_color"
+                    android:text="@string/get_description_text"
+                    android:textSize="@dimen/mediumText"
+                    />
+
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputEditText

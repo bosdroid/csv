@@ -1038,6 +1038,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
                 val getDescriptionView =
                     dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
+                val getDescriptionView1 =
+                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
 
                 titleBox.setText(pItem.title)
                 productShortDescriptionBox.setText(pItem.shortDesc)
@@ -1226,7 +1228,28 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             }
                             .create().show()
                     }
-                    //startActivity(Intent(context,RainForestApiActivity::class.java))
+
+                }
+
+                getDescriptionView1.setOnClickListener {
+                    Constants.hideKeyboar(context)
+                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+                    if (userCurrentCredits.toFloat() >= 1.0) {
+                        launchActivity.launch(Intent(context, RainForestApiActivity::class.java))
+                    } else {
+                        MaterialAlertDialogBuilder(context)
+                            .setMessage(getString(R.string.low_credites_error_message2))
+                            .setCancelable(false)
+                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                                dialog.dismiss()
+                                startActivity(Intent(context, UserScreenActivity::class.java))
+                            }
+                            .create().show()
+                    }
 
                 }
 
