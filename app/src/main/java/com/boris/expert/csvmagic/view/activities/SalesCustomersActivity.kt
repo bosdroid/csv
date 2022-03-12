@@ -46,6 +46,7 @@ import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
@@ -1020,7 +1021,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 val dialogLayout = LayoutInflater.from(context)
                     .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
                 val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
-                val swapLayoutBtn = dialogLayout.findViewById<AppCompatImageView>(R.id.layout_swap)
+                val swapLayoutBtn = dialogLayout.findViewById<MaterialCheckBox>(R.id.layout_swap)
                 val firstLinearLayout = dialogLayout.findViewById<LinearLayout>(R.id.first_linear_layout)
                 val secondLinearLayout = dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
                 dynamicTitleTextViewWrapper = dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
@@ -1028,7 +1029,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 dynamicFullDescTextViewWrapper = dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
 
 
-                //firstLinearLayout.visibility = View.VISIBLE
+                secondLinearLayout.visibility = View.VISIBLE
                 titleBox =
                     dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
                 val productShortDescriptionBox =
@@ -1038,9 +1039,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 val getDescriptionView =
                     dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
 
-//                titleBox.setText(pItem.title)
-//                productShortDescriptionBox.setText(pItem.shortDesc)
-//                fullDescriptionBox.setText(pItem.fullDesc)
+                titleBox.setText(pItem.title)
+                productShortDescriptionBox.setText(pItem.shortDesc)
+                fullDescriptionBox.setText(pItem.fullDesc)
                 val dialogCancelBtn =
                     dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
                 val dialogUpdateBtn =
@@ -1106,6 +1107,75 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
 
 
+                swapLayoutBtn.setOnCheckedChangeListener { buttonView, isChecked ->
+                   if (isChecked) {
+                       secondLinearLayout.visibility = View.GONE
+                       firstLinearLayout.visibility = View.VISIBLE
+                       defaultLayout = 1
+
+                       titleBox.setSelection(pItem.title.length)
+                       titleBox.requestFocus()
+                       Constants.openKeyboar(context)
+                    } else {
+                       Constants.hideKeyboar(context)
+                       startLoading(context)
+                       firstLinearLayout.visibility = View.GONE
+                       secondLinearLayout.visibility = View.VISIBLE
+                       defaultLayout = 0
+                       val titleTextList = titleBox.text.toString().trim().split(" ")
+                       val shortDescTextList = productShortDescriptionBox.text.toString().trim().split(" ")
+                       val fullDescTextList = fullDescriptionBox.text.toString().trim().split(" ")
+
+                       for (i in 0 until titleTextList.size) {
+                           val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
+                               FlowLayout.LayoutParams.WRAP_CONTENT)
+                           params.setMargins(5, 5, 5, 5)
+                           val textView = MaterialTextView(context)
+                           textView.layoutParams = params
+                           textView.text = titleTextList[i].trim()
+                           textView.tag = "title"
+                           textView.id = i
+                           textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                           textView.setTextColor(ContextCompat.getColor(context,R.color.black))
+                           titleTextViewList.add(textView)
+                           textView.setOnClickListener(this@SalesCustomersActivity)
+                           dynamicTitleTextViewWrapper.addView(textView)
+                       }
+
+                       for (i in 0 until shortDescTextList.size) {
+                           val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
+                               FlowLayout.LayoutParams.WRAP_CONTENT)
+                           params.setMargins(5, 5, 5, 5)
+                           val textView = MaterialTextView(context)
+                           textView.layoutParams = params
+                           textView.text = shortDescTextList[i].trim()
+                           textView.tag = "title"
+                           textView.id = i
+                           textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                           textView.setTextColor(ContextCompat.getColor(context,R.color.black))
+                           shortDescTextViewList.add(textView)
+                           textView.setOnClickListener(this@SalesCustomersActivity)
+                           dynamicShortDescTextViewWrapper.addView(textView)
+                       }
+
+                       for (i in 0 until fullDescTextList.size) {
+                           val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
+                               FlowLayout.LayoutParams.WRAP_CONTENT)
+                           params.setMargins(5, 5, 5, 5)
+                           val textView = MaterialTextView(context)
+                           textView.layoutParams = params
+                           textView.text = fullDescTextList[i].trim()
+                           textView.tag = "title"
+                           textView.id = i
+                           textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                           textView.setTextColor(ContextCompat.getColor(context,R.color.black))
+                           fullDescTextViewList.add(textView)
+                           textView.setOnClickListener(this@SalesCustomersActivity)
+                           dynamicFullDescTextViewWrapper.addView(textView)
+                       }
+                       dismiss()
+                    }
+                }
 
 //                swapLayoutBtn.setOnClickListener {
 //                    titleTextViewList.clear()
@@ -1117,72 +1187,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 //
 //
 //                    if (defaultLayout == 0){
-//                        Constants.hideKeyboar(context)
-//                        startLoading(context)
-//                        firstLinearLayout.visibility = View.GONE
-//                        secondLinearLayout.visibility = View.VISIBLE
-//                        defaultLayout = 1
 //
-//                        val titleTextList = titleBox.text.toString().trim().split(" ")
-//                        val shortDescTextList = productShortDescriptionBox.text.toString().trim().split(" ")
-//                        val fullDescTextList = fullDescriptionBox.text.toString().trim().split(" ")
-//
-//                        for (i in 0 until titleTextList.size) {
-//                            val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                FlowLayout.LayoutParams.WRAP_CONTENT)
-//                            params.setMargins(5, 5, 5, 5)
-//                            val textView = MaterialTextView(context)
-//                            textView.layoutParams = params
-//                            textView.text = titleTextList[i].trim()
-//                            textView.tag = "title"
-//                            textView.id = i
-//                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                            textView.setTextColor(ContextCompat.getColor(context,R.color.black))
-//                            titleTextViewList.add(textView)
-//                            textView.setOnClickListener(this@SalesCustomersActivity)
-//                            dynamicTitleTextViewWrapper.addView(textView)
-//                        }
-//
-//                        for (i in 0 until shortDescTextList.size) {
-//                            val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                FlowLayout.LayoutParams.WRAP_CONTENT)
-//                            params.setMargins(5, 5, 5, 5)
-//                            val textView = MaterialTextView(context)
-//                            textView.layoutParams = params
-//                            textView.text = shortDescTextList[i].trim()
-//                            textView.tag = "title"
-//                            textView.id = i
-//                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                            textView.setTextColor(ContextCompat.getColor(context,R.color.black))
-//                            shortDescTextViewList.add(textView)
-//                            textView.setOnClickListener(this@SalesCustomersActivity)
-//                            dynamicShortDescTextViewWrapper.addView(textView)
-//                        }
-//
-//                        for (i in 0 until fullDescTextList.size) {
-//                            val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                FlowLayout.LayoutParams.WRAP_CONTENT)
-//                            params.setMargins(5, 5, 5, 5)
-//                            val textView = MaterialTextView(context)
-//                            textView.layoutParams = params
-//                            textView.text = fullDescTextList[i].trim()
-//                            textView.tag = "title"
-//                            textView.id = i
-//                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                            textView.setTextColor(ContextCompat.getColor(context,R.color.black))
-//                            fullDescTextViewList.add(textView)
-//                            textView.setOnClickListener(this@SalesCustomersActivity)
-//                            dynamicFullDescTextViewWrapper.addView(textView)
-//                        }
-//                        dismiss()
 //                    }
 //                    else{
-//                        secondLinearLayout.visibility = View.GONE
-//                        firstLinearLayout.visibility = View.VISIBLE
-//                        defaultLayout = 0
-//                        titleBox.setSelection(pItem.title.length)
-//                        titleBox.requestFocus()
-//                        Constants.openKeyboar(context)
+//
 //                    }
 //                }
 
@@ -1223,11 +1231,11 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
 
                 dialogUpdateBtn.setOnClickListener {
-//                    val titleText = titleBox.text.toString().trim()
-//                    val shortDesc = productShortDescriptionBox.text.toString().trim()
-//                    val fullDesc = fullDescriptionBox.text.toString().trim()
+                    val titleText = titleBox.text.toString().trim()
+                    val shortDesc = productShortDescriptionBox.text.toString().trim()
+                    val fullDesc = fullDescriptionBox.text.toString().trim()
 //
-//                    if (defaultLayout == 1){
+                    if (defaultLayout == 1){
                       var stringBuilder = StringBuilder()
                                 for (i in 0 until titleTextViewList.size){
                                     val item = titleTextViewList[i]
@@ -1251,20 +1259,20 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                 stringBuilder.append(" ")
                             }
                             pItem.fullDesc = stringBuilder.toString().trim()
-//                    }
-//                    else{
-//                        Constants.hideKeyboar(context)
-//                        pItem.title = titleText
-//                        pItem.shortDesc = shortDesc
-//                        pItem.fullDesc = fullDesc
-//                    }
-//                      defaultLayout = 0
-//                    if (titleText.isNotEmpty()) {
+                  }
+                    else{
+                        Constants.hideKeyboar(context)
+                        pItem.title = titleText
+                        pItem.shortDesc = shortDesc
+                       pItem.fullDesc = fullDesc
+                    }
+                      defaultLayout = 0
+                    if (titleText.isNotEmpty()) {
                         alert.dismiss()
-//                        startLoading(
-//                            context,
-//                            getString(R.string.please_wait_product_update_message)
-//                        )
+                       startLoading(
+                           context,
+                            getString(R.string.please_wait_product_update_message)
+                        )
 
                         Paper.book().delete(Constants.cacheProducts)
                         Paper.book().write(Constants.cacheProducts, originalProductsList)
@@ -1301,9 +1309,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                     dismiss()
                                 }
                             })
-//                    } else {
-//                        showAlert(context, getString(R.string.empty_text_error))
-//                    }
+                    } else {
+                        showAlert(context, getString(R.string.empty_text_error))
+                    }
                 }
             }
 
@@ -1357,62 +1365,97 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
-
-                if (data != null && data.hasExtra("TITLE")) {
-                    val title = data.getStringExtra("TITLE") as String
-                    if (title.isNotEmpty()) {
-                        titleTextViewList.clear()
-                        dynamicTitleTextViewWrapper.removeAllViews()
-                        val titleTextList = title.trim().split(" ")
-
-                        for (i in 0 until titleTextList.size) {
-                            val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
-                                FlowLayout.LayoutParams.WRAP_CONTENT)
-                            params.setMargins(5, 5, 5, 5)
-                            val textView = MaterialTextView(context)
-                            textView.layoutParams = params
-                            textView.text = titleTextList[i].trim()
-                            textView.tag = "title"
-                            textView.id = i
-                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                            textView.setTextColor(ContextCompat.getColor(context,R.color.black))
-                            titleTextViewList.add(textView)
-                            textView.setOnClickListener(this@SalesCustomersActivity)
-                            dynamicTitleTextViewWrapper.addView(textView)
+                if (defaultLayout == 1){
+                    if (data != null && data.hasExtra("TITLE")) {
+                        val title = data.getStringExtra("TITLE") as String
+                        if (title.isNotEmpty()) {
+                            titleBox.setText(title)
+                            titleBox.setSelection(titleBox.length())
+                            //titleBox.requestFocus()
                         }
+                    }
 
-                        //titleBox.setText(title)
-                        //titleBox.setSelection(titleBox.length())
-                        //titleBox.requestFocus()
+                    if (data != null && data.hasExtra("DESCRIPTION")) {
+                        val description = data.getStringExtra("DESCRIPTION") as String
+                        if (description.isNotEmpty()) {
+                            fullDescriptionBox.setText(description)
+                            fullDescriptionBox.setSelection(fullDescriptionBox.length())
+                            fullDescriptionBox.requestFocus()
+                        }
                     }
                 }
+                else {
 
-                if (data != null && data.hasExtra("DESCRIPTION")) {
-                    val description = data.getStringExtra("DESCRIPTION") as String
-                    if (description.isNotEmpty()) {
-                        fullDescTextViewList.clear()
-                        dynamicFullDescTextViewWrapper.removeAllViews()
-                        val fullDescTextList = description.trim().split(" ")
+                    if (data != null && data.hasExtra("TITLE")) {
+                        val title = data.getStringExtra("TITLE") as String
+                        if (title.isNotEmpty()) {
+                            titleTextViewList.clear()
+                            dynamicTitleTextViewWrapper.removeAllViews()
+                            val titleTextList = title.trim().split(" ")
 
-                        for (i in 0 until fullDescTextList.size) {
-                            val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
-                                FlowLayout.LayoutParams.WRAP_CONTENT)
-                            params.setMargins(5, 5, 5, 5)
-                            val textView = MaterialTextView(context)
-                            textView.layoutParams = params
-                            textView.text = fullDescTextList[i].trim()
-                            textView.tag = "title"
-                            textView.id = i
-                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                            textView.setTextColor(ContextCompat.getColor(context,R.color.black))
-                            fullDescTextViewList.add(textView)
-                            textView.setOnClickListener(this@SalesCustomersActivity)
-                            dynamicFullDescTextViewWrapper.addView(textView)
+                            for (i in 0 until titleTextList.size) {
+                                val params = FlowLayout.LayoutParams(
+                                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                                    FlowLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                params.setMargins(5, 5, 5, 5)
+                                val textView = MaterialTextView(context)
+                                textView.layoutParams = params
+                                textView.text = titleTextList[i].trim()
+                                textView.tag = "title"
+                                textView.id = i
+                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                textView.setTextColor(
+                                    ContextCompat.getColor(
+                                        context,
+                                        R.color.black
+                                    )
+                                )
+                                titleTextViewList.add(textView)
+                                textView.setOnClickListener(this@SalesCustomersActivity)
+                                dynamicTitleTextViewWrapper.addView(textView)
+                            }
+
+                            //titleBox.setText(title)
+                            //titleBox.setSelection(titleBox.length())
+                            //titleBox.requestFocus()
                         }
+                    }
 
-                        //fullDescriptionBox.setText(description)
+                    if (data != null && data.hasExtra("DESCRIPTION")) {
+                        val description = data.getStringExtra("DESCRIPTION") as String
+                        if (description.isNotEmpty()) {
+                            fullDescTextViewList.clear()
+                            dynamicFullDescTextViewWrapper.removeAllViews()
+                            val fullDescTextList = description.trim().split(" ")
+
+                            for (i in 0 until fullDescTextList.size) {
+                                val params = FlowLayout.LayoutParams(
+                                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                                    FlowLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                params.setMargins(5, 5, 5, 5)
+                                val textView = MaterialTextView(context)
+                                textView.layoutParams = params
+                                textView.text = fullDescTextList[i].trim()
+                                textView.tag = "title"
+                                textView.id = i
+                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                textView.setTextColor(
+                                    ContextCompat.getColor(
+                                        context,
+                                        R.color.black
+                                    )
+                                )
+                                fullDescTextViewList.add(textView)
+                                textView.setOnClickListener(this@SalesCustomersActivity)
+                                dynamicFullDescTextViewWrapper.addView(textView)
+                            }
+
+                            //fullDescriptionBox.setText(description)
 //                        fullDescriptionBox.setSelection(fullDescriptionBox.length())
 //                        fullDescriptionBox.requestFocus()
+                        }
                     }
                 }
             }

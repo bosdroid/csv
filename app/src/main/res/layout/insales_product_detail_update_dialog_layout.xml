@@ -17,7 +17,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:textColor="@color/black"
         android:layout_margin="@dimen/sixtyDpMargin"
         android:textSize="@dimen/largeText"
@@ -25,7 +24,19 @@
         android:id="@+id/dialog_heading"
         />
 
-        <androidx.appcompat.widget.AppCompatImageView
+<!--        <androidx.appcompat.widget.AppCompatImageView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/ic_swap"-->
+<!--            android:id="@+id/layout_swap"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintLeft_toRightOf="@id/dialog_heading"-->
+<!--            android:layout_margin="@dimen/sixtyDpMargin"-->
+<!--            android:visibility="gone"-->
+<!--            />-->
+
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_swap"
@@ -33,8 +44,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toRightOf="@id/dialog_heading"
-            android:layout_margin="@dimen/sixtyDpMargin"
-            android:visibility="gone"
+            android:layout_margin="@dimen/eightDpMargin"
             />
 
 
@@ -170,6 +180,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/second_linear_layout"
+            android:visibility="gone"
             >
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
