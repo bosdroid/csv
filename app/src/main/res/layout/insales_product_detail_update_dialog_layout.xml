@@ -45,6 +45,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toRightOf="@id/dialog_heading"
             android:layout_margin="@dimen/eightDpMargin"
+            android:text="@string/edit_text"
             />
 
 
