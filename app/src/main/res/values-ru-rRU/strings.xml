@@ -214,6 +214,8 @@
     <string name="done_text">Done</string>
     <string name="added_text">added</string>
     <string name="low_credites_error_message2">You have less then 1 credits please add more</string>
+    <string name="add_title_text">+title</string>
+    <string name="add_description_text">+description</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>
