@@ -43,7 +43,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.RainForestApiActivity"/>
+        <activity android:name=".view.activities.StartAppActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".view.activities.RainForestApiActivity" />
         <activity
             android:name=".view.activities.SalesCustomersActivity"
             android:launchMode="singleTask" />
@@ -112,13 +119,10 @@
         <activity
             android:name=".view.activities.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout"
-            android:windowSoftInputMode="stateAlwaysVisible">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:windowSoftInputMode="stateAlwaysVisible"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity> <!-- File Provider -->
+
+        <!-- File Provider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

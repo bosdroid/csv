@@ -19,11 +19,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.http.HttpTransport
+import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.ExponentialBackOff
@@ -46,7 +46,7 @@ class SheetsActivity : BaseActivity(), SheetAdapter.OnItemClickListener {
     var client: GoogleSignInClient? = null
     var mService: Drive? = null
     private val scopes = mutableListOf<String>()
-    private val transport: HttpTransport? = AndroidHttp.newCompatibleTransport()
+    private val transport: HttpTransport? = NetHttpTransport()
     private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
     private lateinit var adapter: SheetAdapter
 

@@ -492,8 +492,7 @@ class TableViewActivity : BaseActivity(), TableDetailAdapter.OnItemClickListener
     }
 
 
-    private var barcodeEditList =
-        mutableListOf<Triple<TextInputEditText, AppCompatImageView, String>>()
+    private var barcodeEditList = mutableListOf<Triple<TextInputEditText, AppCompatImageView, String>>()
     private var counter: Int = 0
     private var detailList = mutableListOf<Pair<String, String>>()
     private var imageList = mutableListOf<String>()

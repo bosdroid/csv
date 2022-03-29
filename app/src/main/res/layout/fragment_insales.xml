@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".view.fragments.InsalesFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/insales_search_products_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/defaultDpMargin"
+        android:padding="@dimen/small"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/light_gray"
+        android:visibility="gone"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/text_input_field"
+            android:id="@+id/insales_products_search_box"
+            android:hint="@string/search_hint_text"
+            android:inputType="text"
+            />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_search"
+            android:padding="@dimen/small"
+            android:background="@drawable/search_btn_background_design"
+            android:id="@+id/insales_products_search_btn"
+            android:layout_marginEnd="@dimen/defaultDpMargin"
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset_text"
+            android:textSize="@dimen/largeText"
+            android:id="@+id/insales_products_search_reset_btn"
+            android:padding="8dp"
+            android:textColor="@color/primary_positive_color"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/insales_search_products_layout"
+        android:id="@+id/insales_data_wrapper_layout"
+        >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/defaultDpMargin"
+            android:background="@color/light_gray"
+            android:id="@+id/insales_products_recyclerview"
+            tools:listitem="@layout/insales_products_item_row_design"
+            />
+
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/sixtyDpMargin"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        android:id="@+id/insales_login_wrapper_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/sixtyDpMargin"
+            android:orientation="vertical"
+            android:padding="@dimen/small"
+            >
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/insales_login_text"
+                android:textColor="@color/black"
+                android:textSize="@dimen/xxlargeText" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:text="@string/shop_name_hint_text"
+                android:textColor="@color/dark_gray"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/insales_login_shop_name_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:background="@drawable/radius_text_input_field"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:text="@string/email_text"
+                android:textColor="@color/dark_gray"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/insales_login_email_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/radius_text_input_field"
+                android:inputType="textEmailAddress"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:text="@string/password"
+                android:textColor="@color/dark_gray"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/insales_login_password_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/radius_text_input_field"
+                android:inputType="textPassword"
+                android:textSize="@dimen/mediumText" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/sixtyDpMargin"
+                android:text="@string/login"
+                android:id="@+id/insales_login_btn"
+                android:textSize="@dimen/largeText"
+                app:backgroundTint="@color/secondary_positive_color" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

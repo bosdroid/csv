@@ -518,6 +518,11 @@
     <string name="low_credites_error_message2">You have less then 1 credits please add more</string>
     <string name="add_title_text">+title</string>
     <string name="add_description_text">+description</string>
+    <string name="csv_text">CSV</string>
+    <string name="insales_text">Insales</string>
+    <string name="choose_option">Choose option</string>
+    <string name="manual_text">Manual</string>
+    <string name="import_file">Import File</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

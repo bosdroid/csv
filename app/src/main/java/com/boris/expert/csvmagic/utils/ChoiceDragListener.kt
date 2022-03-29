@@ -32,7 +32,7 @@ class ChoiceDragListener : View.OnDragListener {
                 return true
             }
             DragEvent.ACTION_DROP -> {
-
+//                v!!.invalidate()
                 val dragged = event.localState as MaterialTextView
                 val targetView = v as MaterialTextView
 
@@ -41,8 +41,12 @@ class ChoiceDragListener : View.OnDragListener {
 
                 val draggedPosition = oldOwner.indexOfChild(dragged)
                 val targetPosition = oldOwner.indexOfChild(dragged)
+
+
+
                 dragged.setTextColor(ContextCompat.getColor(dragged.context,R.color.white))
                 dragged.setBackgroundColor(ContextCompat.getColor(dragged.context,R.color.secondary_positive_color))
+
                 oldOwner.removeView(dragged)
                 newOwner.addView(dragged,targetPosition)
 

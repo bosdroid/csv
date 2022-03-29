@@ -10,6 +10,35 @@
         android:visible="false"
         />
 
+    <item
+        android:title="@string/sync_text"
+        android:id="@+id/insales_data_sync"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_sync"
+        app:iconTint="@color/primary_positive_color"
+        android:visible="false"
+        />
+
+    <item
+        android:title="@string/filter_text"
+        android:id="@+id/insales_data_filter"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_filter"
+        app:iconTint="@color/primary_positive_color"
+        android:visible="false"
+        />
+
+    <item
+        android:title="@string/logout"
+        android:id="@+id/insales_logout"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_logout"
+        app:iconTint="@color/primary_positive_color"
+        android:visible="false"
+        />
+
+
+
 <!--    <item-->
 <!--        android:title="Dynamic QR"-->
 <!--        android:id="@+id/dynamic_qr"-->

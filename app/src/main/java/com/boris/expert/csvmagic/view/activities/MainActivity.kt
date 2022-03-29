@@ -14,19 +14,19 @@ import android.os.StrictMode
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebSettings
-import android.webkit.WebView
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.android.volley.VolleyError
@@ -38,10 +38,14 @@ import com.boris.expert.csvmagic.model.User
 import com.boris.expert.csvmagic.singleton.DriveService
 import com.boris.expert.csvmagic.singleton.SheetService
 import com.boris.expert.csvmagic.utils.*
+import com.boris.expert.csvmagic.view.fragments.CsvFragment
+import com.boris.expert.csvmagic.view.fragments.InsalesFragment
 import com.boris.expert.csvmagic.view.fragments.ScanFragment
 import com.boris.expert.csvmagic.view.fragments.ScannerFragment
 import com.boris.expert.csvmagic.viewmodel.MainActivityViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
+import com.google.ads.googleads.lib.GoogleAdsClient
+import com.google.ads.googleads.v10.errors.GoogleAdsException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -55,7 +59,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textview.MaterialTextView
-import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -74,18 +77,15 @@ import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
 import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import org.json.JSONObject
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import java.io.FileNotFoundException
 import java.io.IOException
-import java.net.URLEncoder
+import java.lang.Long.parseLong
 import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener,
-    OnCompleteAction, ScannerInterface {
+    OnCompleteAction, ScannerInterface, View.OnClickListener,ScanFragment.FragmentChangeListener {
 
 
     private lateinit var eventListener: ValueEventListener
@@ -102,7 +102,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     var sheetService: Sheets? = null
     private lateinit var auth: FirebaseAuth
     private val scopes = mutableListOf<String>()
-    private val transport: HttpTransport? = AndroidHttp.newCompatibleTransport()
+    private val transport: HttpTransport? = NetHttpTransport()
     private val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
     private val httpTransport = NetHttpTransport()
     private val jacksonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
@@ -111,6 +111,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private var scannerFragment: ScannerFragment? = null
     private var callback: LoginCallback? = null
     private lateinit var firebaseDatabase: DatabaseReference
+    var googleAdsClient: GoogleAdsClient? = null
+    private lateinit var homeCsvButton: AppCompatButton
+    private lateinit var homeInsalesButton: AppCompatButton
+    private var menu: Menu? = null
 
     companion object {
         lateinit var context: Context
@@ -175,6 +179,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         toolbar = findViewById(R.id.toolbar)
         mDrawer = findViewById(R.id.drawer)
         historyBtn = findViewById(R.id.history_btn)
+        homeCsvButton = findViewById(R.id.home_csv_btn)
+        homeInsalesButton = findViewById(R.id.home_insales_btn)
+        homeCsvButton.setOnClickListener(this)
+        homeInsalesButton.setOnClickListener(this)
+
+
         historyBtn.setOnClickListener {
             startActivity(Intent(context, BarcodeHistoryActivity::class.java))
         }
@@ -192,52 +202,107 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         mNavigation = findViewById(R.id.navigation)
 //        nextStepTextView = findViewById(R.id.next_step_btn)
         bottomNavigation = findViewById(R.id.bottom_navigation)
-        bottomNavigation.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.bottom_scanner -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, ScannerFragment(), "scanner")
-                        .addToBackStack("scanner")
-                        .commit()
-//                    nextStepTextView.visibility = View.GONE
-//                    historyBtn.visibility = View.VISIBLE
-                }
-                R.id.bottom_tables -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, ScanFragment(), "tables")
-                        .addToBackStack("tables")
-                        .commit()
-//                    historyBtn.visibility = View.GONE
-//                    nextStepTextView.visibility = View.VISIBLE
-                }
-                else -> {
-
-                }
-            }
-
-            true
-        }
+//        bottomNavigation.setOnNavigationItemSelectedListener { item ->
+//            when (item.itemId) {
+//                R.id.bottom_scanner -> {
+//                    supportFragmentManager.beginTransaction()
+//                        .replace(R.id.fragment_container, ScannerFragment(), "scanner")
+//                        .addToBackStack("scanner")
+//                        .commit()
+////                    nextStepTextView.visibility = View.GONE
+////                    historyBtn.visibility = View.VISIBLE
+//                }
+//                R.id.bottom_tables -> {
+//                    supportFragmentManager.beginTransaction()
+//                        .replace(R.id.fragment_container, ScanFragment(), "tables")
+//                        .addToBackStack("tables")
+//                        .commit()
+////                    historyBtn.visibility = View.GONE
+////                    nextStepTextView.visibility = View.VISIBLE
+//                }
+//                else -> {
+//
+//                }
+//            }
+//
+//            true
+//        }
+        activeButtonFocus(homeCsvButton, homeInsalesButton,"table")
+        supportFragmentManager.beginTransaction()
+//                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                ScanFragment(),
+                "table"
+            )
+            .addToBackStack("table")
+            .commit()
 
         if (intent != null && intent.hasExtra("KEY") && intent.getStringExtra("KEY") == "tables") {
-            bottomNavigation.selectedItemId = R.id.bottom_tables
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ScanFragment(), "tables")
-                .addToBackStack("tables")
-                .commit()
+//            bottomNavigation.selectedItemId = R.id.bottom_tables
+//            supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, ScanFragment(), "tables")
+//                .addToBackStack("tables")
+//                .commit()
             //historyBtn.visibility = View.GONE
 //            nextStepTextView.visibility = View.VISIBLE
         } else {
 //            nextStepTextView.visibility = View.GONE
             //historyBtn.visibility = View.VISIBLE
-            supportFragmentManager.beginTransaction().add(
-                R.id.fragment_container,
-                ScannerFragment(),
-                "scanner"
-            )
-                .addToBackStack("scanner")
-                .commit()
+//            supportFragmentManager.beginTransaction().add(
+//                R.id.fragment_container,
+//                ScannerFragment(),
+//                "scanner"
+//            )
+//                .addToBackStack("scanner")
+//                .commit()
         }
 
+//        try {
+//            googleAdsClient = GoogleAdsClient.newBuilder().fromPropertiesFile().build()
+//        } catch (fnfe: FileNotFoundException) {
+//            System.err.printf(
+//                "Failed to load GoogleAdsClient configuration from file. Exception: %s%n", fnfe
+//            )
+//        } catch (ioe: IOException) {
+//            System.err.printf("Failed to create GoogleAdsClient. Exception: %s%n", ioe)
+//        }
+//
+//        try {
+//            GenerateKeywords.runExample(
+//                    googleAdsClient!!,
+//                parseLong("INSERT_CUSTOMER_ID_HERE"),
+//                parseLong("1000"),
+//                listOf(parseLong("21167"),
+//                    parseLong("21385")),
+//                    listOf("iphone"),
+//                    null
+//                )
+//        } catch (gae: GoogleAdsException) {
+//            // GoogleAdsException is the base class for most exceptions thrown by an API request.
+//            // Instances of this exception have a message and a GoogleAdsFailure that contains a
+//            // collection of GoogleAdsErrors that indicate the underlying causes of the
+//            // GoogleAdsException.
+//            System.err.printf(
+//                "Request ID %s failed due to GoogleAdsException. Underlying errors:%n",
+//                gae.requestId
+//            )
+//            var i = 0
+//            for (googleAdsError in gae.getGoogleAdsFailure().getErrorsList()) {
+//                System.err.printf("  Error %d: %s%n", i++, googleAdsError)
+//            }
+//        }
+
+    }
+
+    private fun activeButtonFocus(btn: AppCompatButton, otherBtn: AppCompatButton, type: String) {
+
+        btn.setBackgroundColor(ContextCompat.getColor(context,R.color.secondary_positive_color))
+//        btn.isFocusableInTouchMode = true
+//        btn.requestFocus()
+//        otherBtn.isFocusable = false
+//        otherBtn.isFocusableInTouchMode = false
+        otherBtn.setBackgroundColor(ContextCompat.getColor(context,R.color.primary_positive_color))
     }
 
     private fun getAccountsPermission() {
@@ -384,7 +449,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //                    }
                 }
                 if (isLastSignUser == "new") {
-                    if (auth.currentUser != null){
+                    if (auth.currentUser != null) {
                         Constants.firebaseUserId = auth.currentUser!!.uid
                         getUserFeaturesDetails1(context, Constants.firebaseUserId)
                     }
@@ -532,6 +597,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+        this.menu = menu
         return true
     }
 
@@ -590,22 +656,27 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 Constants.sheetService = null
                 Constants.mService = null
 
-                val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
-                if (currentFragment != null && currentFragment.isVisible) {
-                    val scannerFragment =
-                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-                    scannerFragment.restart()
+                startActivity(Intent(context, StartAppActivity::class.java)).apply {
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    finish()
                 }
 
-                val scanFragment = supportFragmentManager.findFragmentByTag("tables")
-                if (scanFragment != null && scanFragment.isVisible) {
-                    val tableFragment =
-                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
-                    tableFragment.restart()
-                }
+//                val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+//                if (currentFragment != null && currentFragment.isVisible) {
+//                    val scannerFragment =
+//                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+//                    scannerFragment.restart()
+//                }
+//
+//                val scanFragment = supportFragmentManager.findFragmentByTag("tables")
+//                if (scanFragment != null && scanFragment.isVisible) {
+//                    val tableFragment =
+//                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+//                    tableFragment.restart()
+//                }
 
 
-                checkUserLoginStatus()
+                //checkUserLoginStatus()
             }
 //
         }
@@ -726,19 +797,20 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
 
     override fun onBackPressed() {
-        val fragment = supportFragmentManager.findFragmentByTag("scanner")
+        val fragment = supportFragmentManager.findFragmentByTag("table")
         if (mDrawer.isDrawerOpen(GravityCompat.START)) {
             mDrawer.closeDrawer(GravityCompat.START)
         } else if (fragment != null && fragment.isVisible) {
             finish()
         } else {
-            bottomNavigation.selectedItemId = R.id.bottom_scanner
+            //bottomNavigation.selectedItemId = R.id.bottom_scanner
+            activeButtonFocus(homeCsvButton, homeInsalesButton,"table")
             supportFragmentManager.beginTransaction().replace(
                 R.id.fragment_container,
-                ScannerFragment(),
-                "scanner"
+                ScanFragment(),
+                "table"
             )
-                .addToBackStack("scanner")
+                .addToBackStack("table")
                 .commit()
         }
     }
@@ -814,7 +886,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     }
 
-    private fun getUserCurrentFeatures(){
+    private fun getUserCurrentFeatures() {
         if (auth.currentUser != null) {
             val uid = auth.currentUser!!.uid
             Constants.firebaseUserId = uid
@@ -847,21 +919,21 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                                 }
                             }
 
-                            val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+                            val currentFragment =
+                                supportFragmentManager.findFragmentByTag("scanner")
                             if (currentFragment != null && currentFragment.isVisible) {
                                 val scannerFragment =
-                                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+                                    supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
                                 scannerFragment.restart()
                             }
 
                             val scanFragment = supportFragmentManager.findFragmentByTag("tables")
                             if (scanFragment != null && scanFragment.isVisible) {
                                 val tableFragment =
-                                        supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
+                                    supportFragmentManager.findFragmentById(R.id.fragment_container) as ScanFragment
                                 tableFragment.restart()
                             }
-                        }
-                        else{
+                        } else {
                             Constants.compressorFeatureStatus = 0
                             Constants.modesSwitcherFeatureStatus = 0
                             Constants.premiumSupportFeatureStatus = 0
@@ -900,7 +972,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //            mNavigation.menu.findItem(R.id.tickets).isVisible = Constants.premiumSupportFeatureStatus == 1
             mNavigation.menu.findItem(R.id.purchase_feature).isVisible = false
             mNavigation.menu.findItem(R.id.field_list).isVisible = true
-            mNavigation.menu.findItem(R.id.insales).isVisible = true
+            mNavigation.menu.findItem(R.id.insales).isVisible = false
             getSearchImageDetail()
             checkAndStartTrialPeriod()
             getPrices()
@@ -959,17 +1031,27 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     }
 
-    private fun getPrices(){
-        firebaseDatabase.child(Constants.firebasePrices).addListenerForSingleValueEvent(object :ValueEventListener{
+    private fun getPrices() {
+        firebaseDatabase.child(Constants.firebasePrices).addListenerForSingleValueEvent(object :
+            ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val pDetailsPrice:String = snapshot.child("rainforest").child("p_details_price").getValue(Float::class.java).toString()
-                val pListPrice:String = snapshot.child("rainforest").child("p_list_price").getValue(Float::class.java).toString()
-                val characters = snapshot.child("translator").child("characters").getValue(Int::class.java)
-                val translatorPrice:String = snapshot.child("translator").child("price").getValue(Float::class.java).toString()
+                val pDetailsPrice: String =
+                    snapshot.child("rainforest").child("p_details_price").getValue(
+                        Float::class.java
+                    ).toString()
+                val pListPrice: String =
+                    snapshot.child("rainforest").child("p_list_price").getValue(
+                        Float::class.java
+                    ).toString()
+                val characters =
+                    snapshot.child("translator").child("characters").getValue(Int::class.java)
+                val translatorPrice: String = snapshot.child("translator").child("price").getValue(
+                    Float::class.java
+                ).toString()
 
                 appSettings.putString("P_DETAILS_PRICE", pDetailsPrice)
                 appSettings.putString("P_LIST_PRICE", pListPrice)
-                appSettings.putInt("TRANSLATOR_CHARACTERS_LIMIT",characters!!)
+                appSettings.putInt("TRANSLATOR_CHARACTERS_LIMIT", characters!!)
                 appSettings.putString("TRANSLATOR_CHARACTERS_PRICE", translatorPrice)
             }
 
@@ -979,7 +1061,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         })
     }
-
 
 
     private fun checkAndStartTrialPeriod() {
@@ -1156,6 +1237,52 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         super.onActivityResult(requestCode, resultCode, data)
         val fragment = supportFragmentManager.findFragmentByTag("scanner")
         fragment?.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onClick(v: View?) {
+        when (v!!.id) {
+            R.id.home_csv_btn -> {
+                activeButtonFocus(homeCsvButton, homeInsalesButton,"table")
+                supportFragmentManager.beginTransaction()
+//                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .replace(
+                        R.id.fragment_container,
+                        ScanFragment(),
+                        "table"
+                    )
+                    .addToBackStack("table")
+                    .commit()
+
+            }
+            R.id.home_insales_btn -> {
+                activeButtonFocus(homeInsalesButton, homeCsvButton,"insales")
+                supportFragmentManager.beginTransaction()
+//                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .replace(
+                        R.id.fragment_container,
+                        InsalesFragment(),
+                        "insales"
+                    )
+                    .addToBackStack("insales")
+                    .commit()
+
+            }
+            else -> {
+
+            }
+        }
+    }
+
+    override fun onChange() {
+        supportFragmentManager.beginTransaction()
+//                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .replace(
+                R.id.fragment_container,
+                ScannerFragment(),
+                "scanner"
+            )
+            .addToBackStack("scanner")
+            .commit()
     }
 
 

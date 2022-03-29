@@ -1,8 +1,10 @@
-package com.boris.expert.csvmagic.view.activities
+package com.boris.expert.csvmagic.view.fragments
 
 import android.Manifest
 import android.app.Activity
-import android.content.*
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -16,10 +18,9 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.fragment.app.Fragment
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -31,12 +32,18 @@ import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
+import com.boris.expert.csvmagic.adapters.KeywordsAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.Category
+import com.boris.expert.csvmagic.model.KeywordObject
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.*
+import com.boris.expert.csvmagic.view.activities.BaseActivity
+import com.boris.expert.csvmagic.view.activities.RainForestApiActivity
+import com.boris.expert.csvmagic.view.activities.SalesCustomersActivity
+import com.boris.expert.csvmagic.view.activities.UserScreenActivity
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.bumptech.glide.Glide
@@ -49,26 +56,16 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.skydoves.balloon.ArrowOrientation
-import com.skydoves.balloon.Balloon
-import com.skydoves.balloon.BalloonAnimation
 import io.paperdb.Paper
 import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
-import android.widget.LinearLayout
-
-import android.view.ViewGroup
-import com.boris.expert.csvmagic.adapters.KeywordsAdapter
-import com.boris.expert.csvmagic.model.KeywordObject
 import kotlin.collections.ArrayList
 
 
-class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
+class InsalesFragment : Fragment(),View.OnClickListener {
 
-    private lateinit var context: Context
-    private lateinit var toolbar: Toolbar
     private lateinit var appSettings: AppSettings
     private lateinit var viewModel: SalesCustomersViewModel
     private lateinit var insalesLoginWrapperLayout: CardView
@@ -107,6 +104,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private var fullDescTextViewList = mutableListOf<MaterialTextView>()
     private var keywordsList = mutableListOf<KeywordObject>()
     private lateinit var keywordsAdapter: KeywordsAdapter
+    lateinit var selectedImageView: AppCompatImageView
 
     var defaultLayout = 0
 
@@ -116,78 +114,23 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         private lateinit var dynamicKeywordsTextViewWrapper: FlowLayout
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sales_customers)
-
-        initViews()
-        setUpToolbar()
-        keywordsList.add(KeywordObject("One", 1))
-        keywordsList.add(KeywordObject("Two", 1))
-        keywordsList.add(KeywordObject("Three", 1))
-        keywordsList.add(KeywordObject("Four", 1))
-        keywordsList.add(KeywordObject("Five", 1))
-    }
-
-    private fun initViews() {
-        context = this
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        appSettings  = AppSettings(context)
         viewModel = ViewModelProviders.of(
             this,
             ViewModelFactory(SalesCustomersViewModel()).createFor()
         )[SalesCustomersViewModel::class.java]
-        appSettings = AppSettings(context)
-        toolbar = findViewById(R.id.toolbar)
-
-        insalesLoginWrapperLayout = findViewById(R.id.insales_login_wrapper_layout)
-        insalesDataWrapperLayout = findViewById(R.id.insales_data_wrapper_layout)
-        insalesSearchWrapperLayout = findViewById(R.id.insales_search_products_layout)
-        insalesShopNameBox = findViewById(R.id.insales_login_shop_name_box)
-        insalesEmailBox = findViewById(R.id.insales_login_email_box)
-        insalesPasswordBox = findViewById(R.id.insales_login_password_box)
-        insalesLoginBtn = findViewById(R.id.insales_login_btn)
-        insalesLoginBtn.setOnClickListener(this)
-        productsRecyclerView = findViewById(R.id.insales_products_recyclerview)
-        searchResetBtn = findViewById(R.id.insales_products_search_reset_btn)
-        searchResetBtn.setOnClickListener(this)
-        searchBox = findViewById(R.id.insales_products_search_box)
-        searchImageBtn = findViewById(R.id.insales_products_search_btn)
-        searchImageBtn.setOnClickListener(this)
-
-
-        searchBox.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                val query = s.toString()
-                search(query)
-            }
-
-        })
-
     }
 
-    private fun setUpToolbar() {
-        setSupportActionBar(toolbar)
-        supportActionBar!!.title = getString(R.string.insales_customers)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        toolbar.setTitleTextColor(ContextCompat.getColor(context, R.color.black))
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
-    // THIS FUNCTION WILL HANDLE THE ON BACK ARROW CLICK EVENT
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return if (item.itemId == android.R.id.home) {
-            onBackPressed()
-            true
-        } else
-            if (item.itemId == R.id.insales_logout) {
-            MaterialAlertDialogBuilder(context)
+       return if (item.itemId == R.id.insales_logout) {
+            MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(getString(R.string.logout))
                 .setMessage(getString(R.string.logout_insales_warning_text))
                 .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
@@ -202,15 +145,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     originalProductsList.clear()
                     productsList.clear()
                     Paper.book().delete(Constants.cacheProducts)
-                    startActivity(Intent(context, SalesCustomersActivity::class.java))
+//                    startActivity(Intent(context, SalesCustomersActivity::class.java))
+                    checkInsalesAccount()
 
                 }
                 .create().show()
             true
         }
-            else if (item.itemId == R.id.insales_data_filter) {
+        else if (item.itemId == R.id.insales_data_filter) {
             if (categoriesList.size == 0) {
-                viewModel.callCategories(context, shopName, email, password)
+                viewModel.callCategories(requireActivity(), shopName, email, password)
                 viewModel.getCategoriesResponse().observe(this, Observer { response ->
                     if (response != null) {
                         if (response.get("status").asString == "200") {
@@ -231,7 +175,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     }
                 })
             }
-            val builder = MaterialAlertDialogBuilder(context)
+            val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setCancelable(false)
             builder.setTitle(getString(R.string.sorting_heading_text))
             builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
@@ -240,9 +184,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
             val arrayAdapter =
                 ArrayAdapter(
-                    context,
+                    requireActivity(),
                     android.R.layout.select_dialog_singlechoice,
-                    getSortingList(context)
+                    BaseActivity.getSortingList(requireActivity())
                 )
             builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
@@ -269,8 +213,28 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    private fun sorting(type: Int) {
+        if (productsList.size > 0) {
+            Collections.sort(productsList, object : Comparator<Product> {
+                override fun compare(o1: Product?, o2: Product?): Int {
+                    return if (type == 0) { // A-Z
+                        o1!!.title.compareTo(o2!!.title, true)
+                    } else if (type == 1) { // Z-A
+                        o2!!.title.compareTo(o1!!.title, true)
+                    } else {
+                        -1
+                    }
+                }
+
+            })
+            adapter.notifyDataSetChanged()
+        } else {
+            BaseActivity.showAlert(requireActivity(), getString(R.string.empty_list_error_message))
+        }
+    }
+
     private fun displayCategoryFilterDialog(categoriesList: MutableList<Category>) {
-        val builder = MaterialAlertDialogBuilder(context)
+        val builder = MaterialAlertDialogBuilder(requireActivity())
         builder.setCancelable(false)
         builder.setTitle(getString(R.string.filter_category_heading_text))
         builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
@@ -278,7 +242,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         }
 
         val arrayAdapter =
-            ArrayAdapter(context, android.R.layout.select_dialog_singlechoice, categoriesList)
+            ArrayAdapter(requireActivity(), android.R.layout.select_dialog_singlechoice, categoriesList)
         builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
             override fun onClick(dialog: DialogInterface?, which: Int) {
                 dialog!!.dismiss()
@@ -291,46 +255,136 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         alert.show()
     }
 
-    private fun inSalesLogin(shopName: String, email: String, password: String) {
+    private fun searchByCategory(id: Int?) {
+        val matchedProducts = mutableListOf<Product>()
 
-        startLoading(context, getString(R.string.please_wait_login_message))
-        viewModel.callSalesAccount(context, shopName, email, password)
-        viewModel.getSalesAccountResponse().observe(this, Observer { response ->
-            dismiss()
-            if (response != null) {
-                if (response.get("status").asString == "200") {
-                    appSettings.putString("INSALES_STATUS", "logged")
-                    appSettings.putString("INSALES_SHOP_NAME", shopName)
-                    appSettings.putString("INSALES_EMAIL", email)
-                    appSettings.putString("INSALES_PASSWORD", password)
-                    this.email = email
-                    this.password = password
-                    this.shopName = shopName
-
-                    insalesLoginWrapperLayout.visibility = View.GONE
-                    insalesDataWrapperLayout.visibility = View.VISIBLE
-                    menu!!.findItem(R.id.insales_logout).isVisible = true
-                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
-                    menu!!.findItem(R.id.insales_data_sync).isVisible = true
-                    showProducts()
-                } else {
-                    showAlert(context, response.get("message").asString)
+        id?.let {
+            productsList.forEach { item ->
+                if (item.categoryId == id) {
+                    matchedProducts.add(item)
                 }
             }
+
+            if (matchedProducts.isEmpty()) {
+                Toast.makeText(
+                    requireActivity(),
+                    getString(R.string.category_products_not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                productsList.clear()
+                productsList.addAll(matchedProducts)
+                adapter.notifyItemRangeChanged(0, productsList.size)
+            }
+        }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        this.menu = menu
+        //requireActivity().menuInflater.inflate(R.menu.insales_main_menu,menu)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        val v = inflater.inflate(R.layout.fragment_insales, container, false)
+
+        initViews(v)
+
+        return v
+    }
+
+    private fun initViews(view: View) {
+        insalesLoginWrapperLayout = view.findViewById(R.id.insales_login_wrapper_layout)
+        insalesDataWrapperLayout = view.findViewById(R.id.insales_data_wrapper_layout)
+        insalesSearchWrapperLayout = view.findViewById(R.id.insales_search_products_layout)
+        insalesShopNameBox = view.findViewById(R.id.insales_login_shop_name_box)
+        insalesEmailBox = view.findViewById(R.id.insales_login_email_box)
+        insalesPasswordBox = view.findViewById(R.id.insales_login_password_box)
+        insalesLoginBtn = view.findViewById(R.id.insales_login_btn)
+        insalesLoginBtn.setOnClickListener(this)
+        productsRecyclerView = view.findViewById(R.id.insales_products_recyclerview)
+        searchResetBtn = view.findViewById(R.id.insales_products_search_reset_btn)
+        searchResetBtn.setOnClickListener(this)
+        searchBox = view.findViewById(R.id.insales_products_search_box)
+        searchImageBtn = view.findViewById(R.id.insales_products_search_btn)
+        searchImageBtn.setOnClickListener(this)
+
+
+        searchBox.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString()
+                search(query)
+            }
+
         })
     }
 
-    lateinit var selectedImageView: AppCompatImageView
+    override fun onResume() {
+        super.onResume()
+        checkInsalesAccount()
+    }
+
+    private fun checkInsalesAccount() {
+        val insalesStatus = appSettings.getString("INSALES_STATUS")
+
+        if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged") {
+            insalesLoginWrapperLayout.visibility = View.GONE
+            insalesSearchWrapperLayout.visibility = View.VISIBLE
+            insalesDataWrapperLayout.visibility = View.VISIBLE
+
+
+            shopName = appSettings.getString("INSALES_SHOP_NAME") as String
+            email = appSettings.getString("INSALES_EMAIL") as String
+            password = appSettings.getString("INSALES_PASSWORD") as String
+
+//            if (originalProductsList.size == 0) {
+            showProducts()
+//            }
+//            else{
+//                Handler(Looper.myLooper()!!).postDelayed({
+//                    if (menu != null) {
+//                        menu!!.findItem(R.id.insales_logout).isVisible = true
+//                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
+//                        menu!!.findItem(R.id.insales_data_sync).isVisible = true
+//                    }
+//                },2000)
+//
+//            }
+
+        } else {
+            insalesDataWrapperLayout.visibility = View.GONE
+            insalesSearchWrapperLayout.visibility = View.GONE
+            insalesLoginWrapperLayout.visibility = View.VISIBLE
+
+            if (menu != null) {
+                menu!!.findItem(R.id.insales_logout).isVisible = false
+                menu!!.findItem(R.id.insales_data_filter).isVisible = false
+                menu!!.findItem(R.id.insales_data_sync).isVisible = false
+            }
+        }
+    }
+
     private fun showProducts() {
         linearLayoutManager = WrapContentLinearLayoutManager(
-            context,
+            requireActivity(),
             RecyclerView.VERTICAL,
             false
         )
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
         adapter = InSalesProductsAdapter(
-            context,
+            requireActivity(),
             productsList as ArrayList<Product>
         )
         productsRecyclerView.adapter = adapter
@@ -360,7 +414,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 cameraImageView.setOnClickListener {
                     intentType = 1
                     if (RuntimePermissionHelper.checkCameraPermission(
-                            context,
+                            requireActivity(),
                             Constants.CAMERA_PERMISSION
                         )
                     ) {
@@ -374,7 +428,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 imagesImageView.setOnClickListener {
                     intentType = 2
                     if (ContextCompat.checkSelfPermission(
-                            context,
+                            requireActivity(),
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
@@ -404,7 +458,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
-                    val builder = MaterialAlertDialogBuilder(context)
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
@@ -420,7 +474,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     )//GridLayoutManager(context, 2)
                     internetImageRecyclerView.hasFixedSize()
                     val internetImageAdapter = InternetImageAdapter(
-                        context,
+                        requireActivity(),
                         searchedImagesList as java.util.ArrayList<String>
                     )
                     internetImageRecyclerView.adapter = internetImageAdapter
@@ -436,12 +490,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                             val selectedImage = searchedImagesList[position]
                             val bitmap: Bitmap? = ImageManager.getBitmapFromURL(
-                                context,
+                                requireActivity(),
                                 selectedImage
                             )
                             if (bitmap != null) {
                                 ImageManager.saveMediaToStorage(
-                                    context,
+                                    requireActivity(),
                                     bitmap,
                                     object : ResponseListener {
                                         override fun onSuccess(result: String) {
@@ -451,23 +505,23 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                                             if (result.isNotEmpty()) {
                                                 currentPhotoPath = ImageManager.getRealPathFromUri(
-                                                    context,
+                                                    requireActivity(),
                                                     Uri.parse(result)
                                                 )!!
-                                                Glide.with(context)
+                                                Glide.with(requireActivity())
                                                     .load(currentPhotoPath)
                                                     .placeholder(R.drawable.placeholder)
                                                     .centerInside()
                                                     .into(selectedImageView)
                                                 selectedImageBase64String =
                                                     ImageManager.convertImageToBase64(
-                                                        context,
+                                                        requireActivity(),
                                                         currentPhotoPath!!
                                                     )
                                                 iAlert.dismiss()
                                             } else {
-                                                showAlert(
-                                                    context,
+                                                BaseActivity.showAlert(
+                                                    requireActivity(),
                                                     getString(R.string.something_wrong_error)
                                                 )
                                             }
@@ -478,8 +532,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                 if (loader.visibility == View.VISIBLE) {
                                     loader.visibility = View.INVISIBLE
                                 }
-                                showAlert(
-                                    context,
+                                BaseActivity.showAlert(
+                                    requireActivity(),
                                     getString(R.string.something_wrong_error)
                                 )
                             }
@@ -508,18 +562,18 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                             appSettings.getString(Constants.userCreditsValue) as String
 
                                         if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
-                                            hideSoftKeyboard(
-                                                context,
+                                            BaseActivity.hideSoftKeyboard(
+                                                requireActivity(),
                                                 searchBtnView
                                             )
                                             //Constants.hideKeyboar(requireActivity())
                                             val query = searchBoxView.text.toString().trim()
-                                            runOnUiThread {
+                                            requireActivity().runOnUiThread {
                                                 loader.visibility = View.VISIBLE
                                             }
 
-                                            searchInternetImages(
-                                                context,
+                                            BaseActivity.searchInternetImages(
+                                                requireActivity(),
                                                 query,
                                                 object : APICallback {
                                                     override fun onSuccess(response: JSONObject) {
@@ -560,8 +614,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                             .child(Constants.firebaseUserId)
                                                             .updateChildren(hashMap)
                                                             .addOnSuccessListener {
-                                                                getUserCredits(
-                                                                    context
+                                                                BaseActivity.getUserCredits(
+                                                                    requireActivity()
                                                                 )
                                                             }
                                                             .addOnFailureListener {
@@ -575,15 +629,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                                 View.INVISIBLE
                                                         }
 
-                                                        showAlert(
-                                                            context,
+                                                        BaseActivity.showAlert(
+                                                            requireActivity(),
                                                             error.localizedMessage!!
                                                         )
                                                     }
 
                                                 })
                                         } else {
-                                            MaterialAlertDialogBuilder(context)
+                                            MaterialAlertDialogBuilder(requireActivity())
                                                 .setMessage(getString(R.string.low_credites_error_message))
                                                 .setCancelable(false)
                                                 .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
@@ -593,7 +647,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                     dialog.dismiss()
                                                     startActivity(
                                                         Intent(
-                                                            context,
+                                                            requireActivity(),
                                                             UserScreenActivity::class.java
                                                         )
                                                     )
@@ -614,8 +668,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                 loader.visibility = View.INVISIBLE
                             }
 
-                            showAlert(
-                                context,
+                            BaseActivity.showAlert(
+                                requireActivity(),
                                 getString(R.string.empty_text_error)
                             )
                         }
@@ -624,12 +678,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
 
 
-                Glide.with(context)
+                Glide.with(requireActivity())
                     .load(imageItem.imageUrl)
-                    .thumbnail(Glide.with(context).load(R.drawable.loader))
+                    .thumbnail(Glide.with(requireActivity()).load(R.drawable.loader))
                     .fitCenter()
                     .into(selectedImageView)
-                val builder = MaterialAlertDialogBuilder(context)
+                val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setCancelable(false)
                 builder.setView(insalesUpdateProductImageLayout)
 
@@ -644,10 +698,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                     if (selectedImageBase64String.isNotEmpty()) {
                         alert.dismiss()
-                        startLoading(context)
+                        BaseActivity.startLoading(requireActivity())
 
                         viewModel.callUpdateProductImage(
-                            context,
+                            requireActivity(),
                             shopName,
                             email,
                             password,
@@ -658,26 +712,29 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             "${System.currentTimeMillis()}.jpg"
                         )
                         viewModel.getUpdateProductImageResponse()
-                            .observe(this@SalesCustomersActivity, Observer { response ->
+                            .observe(requireActivity(), Observer { response ->
 
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
                                         selectedImageBase64String = ""
                                         Handler(Looper.myLooper()!!).postDelayed({
-                                            dismiss()
+                                            BaseActivity.dismiss()
                                             showProducts()
                                         }, 6000)
                                     } else {
-                                        dismiss()
-                                        showAlert(context, response.get("message").asString)
+                                        BaseActivity.dismiss()
+                                        BaseActivity.showAlert(
+                                            requireActivity(),
+                                            response.get("message").asString
+                                        )
                                     }
                                 } else {
-                                    dismiss()
+                                    BaseActivity.dismiss()
                                     showProducts()
                                 }
                             })
                     } else {
-                        showAlert(context, getString(R.string.image_attach_error))
+                        BaseActivity.showAlert(requireActivity(), getString(R.string.image_attach_error))
                     }
                 }
 
@@ -704,7 +761,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 cameraImageView.setOnClickListener {
                     intentType = 1
                     if (RuntimePermissionHelper.checkCameraPermission(
-                            context,
+                            requireActivity(),
                             Constants.CAMERA_PERMISSION
                         )
                     ) {
@@ -718,7 +775,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 imagesImageView.setOnClickListener {
                     intentType = 2
                     if (ContextCompat.checkSelfPermission(
-                            context,
+                            requireActivity(),
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
@@ -748,7 +805,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
-                    val builder = MaterialAlertDialogBuilder(context)
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
@@ -764,7 +821,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     )//GridLayoutManager(context, 2)
                     internetImageRecyclerView.hasFixedSize()
                     val internetImageAdapter = InternetImageAdapter(
-                        context,
+                        requireActivity(),
                         searchedImagesList as java.util.ArrayList<String>
                     )
                     internetImageRecyclerView.adapter = internetImageAdapter
@@ -778,9 +835,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         override fun onItemAttachClick(btn: MaterialButton, position: Int) {
                             iAlert.dismiss()
                             selectedInternetImage = searchedImagesList[position]
-                            Glide.with(context)
+                            Glide.with(requireActivity())
                                 .load(selectedInternetImage)
-                                .thumbnail(Glide.with(context).load(R.drawable.placeholder))
+                                .thumbnail(Glide.with(requireActivity()).load(R.drawable.placeholder))
                                 .fitCenter()
                                 .into(selectedImageView)
                         }
@@ -808,18 +865,18 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                             appSettings.getString(Constants.userCreditsValue) as String
 
                                         if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
-                                            hideSoftKeyboard(
-                                                context,
+                                            BaseActivity.hideSoftKeyboard(
+                                                requireActivity(),
                                                 searchBtnView
                                             )
                                             //Constants.hideKeyboar(requireActivity())
                                             val query = searchBoxView.text.toString().trim()
-                                            runOnUiThread {
+                                            requireActivity().runOnUiThread {
                                                 loader.visibility = View.VISIBLE
                                             }
 
-                                            searchInternetImages(
-                                                context,
+                                            BaseActivity.searchInternetImages(
+                                                requireActivity(),
                                                 query,
                                                 object : APICallback {
                                                     override fun onSuccess(response: JSONObject) {
@@ -860,8 +917,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                             .child(Constants.firebaseUserId)
                                                             .updateChildren(hashMap)
                                                             .addOnSuccessListener {
-                                                                getUserCredits(
-                                                                    context
+                                                                BaseActivity.getUserCredits(
+                                                                    requireActivity()
                                                                 )
                                                             }
                                                             .addOnFailureListener {
@@ -875,15 +932,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                                 View.INVISIBLE
                                                         }
 
-                                                        showAlert(
-                                                            context,
+                                                        BaseActivity.showAlert(
+                                                            requireActivity(),
                                                             error.localizedMessage!!
                                                         )
                                                     }
 
                                                 })
                                         } else {
-                                            MaterialAlertDialogBuilder(context)
+                                            MaterialAlertDialogBuilder(requireActivity())
                                                 .setMessage(getString(R.string.low_credites_error_message))
                                                 .setCancelable(false)
                                                 .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
@@ -893,7 +950,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                     dialog.dismiss()
                                                     startActivity(
                                                         Intent(
-                                                            context,
+                                                            requireActivity(),
                                                             UserScreenActivity::class.java
                                                         )
                                                     )
@@ -914,8 +971,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                 loader.visibility = View.INVISIBLE
                             }
 
-                            showAlert(
-                                context,
+                            BaseActivity.showAlert(
+                                requireActivity(),
                                 getString(R.string.empty_text_error)
                             )
                         }
@@ -923,12 +980,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                 }
 
-                Glide.with(context)
+                Glide.with(requireActivity())
                     .load("")
-                    .thumbnail(Glide.with(context).load(R.drawable.placeholder))
+                    .thumbnail(Glide.with(requireActivity()).load(R.drawable.placeholder))
                     .fitCenter()
                     .into(selectedImageView)
-                val builder = MaterialAlertDialogBuilder(context)
+                val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setCancelable(false)
                 builder.setView(insalesUpdateProductImageLayout)
 
@@ -943,10 +1000,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                     if (selectedImageBase64String.isNotEmpty() || selectedInternetImage.isNotEmpty()) {
                         alert.dismiss()
-                        startLoading(context)
+                        BaseActivity.startLoading(requireActivity())
 
                         viewModel.callAddProductImage(
-                            context,
+                            requireActivity(),
                             shopName,
                             email,
                             password,
@@ -960,27 +1017,33 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             }
                         )
                         viewModel.getAddProductImageResponse()
-                            .observe(this@SalesCustomersActivity, Observer { response ->
+                            .observe(requireActivity(), Observer { response ->
 
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
                                         selectedImageBase64String = ""
                                         selectedInternetImage = ""
                                         Handler(Looper.myLooper()!!).postDelayed({
-                                            dismiss()
+                                            BaseActivity.dismiss()
                                             showProducts()
                                         }, 6000)
                                     } else {
-                                        dismiss()
-                                        showAlert(context, response.get("message").asString)
+                                        BaseActivity.dismiss()
+                                        BaseActivity.showAlert(
+                                            requireActivity(),
+                                            response.get("message").asString
+                                        )
                                     }
                                 } else {
-                                    dismiss()
-                                    showAlert(context, getString(R.string.something_wrong_error))
+                                    BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        getString(R.string.something_wrong_error)
+                                    )
                                 }
                             })
                     } else {
-                        showAlert(context, getString(R.string.image_attach_error))
+                        BaseActivity.showAlert(requireActivity(), getString(R.string.image_attach_error))
                     }
                 }
             }
@@ -989,7 +1052,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 val imageItem = productsList[position].productImages!![imagePosition]
 
 
-                MaterialAlertDialogBuilder(context)
+                MaterialAlertDialogBuilder(requireActivity())
                     .setTitle(getString(R.string.remove_text))
                     .setMessage(getString(R.string.image_remove_warning_message))
                     .setCancelable(false)
@@ -998,9 +1061,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     }
                     .setPositiveButton(getString(R.string.remove_text)) { dialog, which ->
                         dialog.dismiss()
-                        startLoading(context)
+                        BaseActivity.startLoading(requireActivity())
                         viewModel.callRemoveProductImage(
-                            context,
+                            requireActivity(),
                             shopName,
                             email,
                             password,
@@ -1008,20 +1071,23 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             imageItem.id
                         )
                         viewModel.getRemoveProductImageResponse()
-                            .observe(this@SalesCustomersActivity, Observer { response ->
+                            .observe(requireActivity(), Observer { response ->
 
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
                                         Handler(Looper.myLooper()!!).postDelayed({
-                                            dismiss()
+                                            BaseActivity.dismiss()
                                             showProducts()
                                         }, 3000)
                                     } else {
-                                        dismiss()
-                                        showAlert(context, response.get("message").asString)
+                                        BaseActivity.dismiss()
+                                        BaseActivity.showAlert(
+                                            requireActivity(),
+                                            response.get("message").asString
+                                        )
                                     }
                                 } else {
-                                    dismiss()
+                                    BaseActivity.dismiss()
                                     showProducts()
                                 }
                             })
@@ -1033,7 +1099,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             override fun onItemEditImageClick(position: Int) {
                 val pItem = productsList[position]
 
-                val dialogLayout = LayoutInflater.from(context)
+                val dialogLayout = LayoutInflater.from(requireActivity())
                     .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
                 val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
                 val swapLayoutBtn = dialogLayout.findViewById<MaterialCheckBox>(R.id.layout_swap)
@@ -1052,7 +1118,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 keywordsRecyclerView.layoutManager =
                     LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
                 keywordsRecyclerView.hasFixedSize()
-                keywordsAdapter = KeywordsAdapter(context, keywordsList as ArrayList<KeywordObject>)
+                keywordsAdapter = KeywordsAdapter(requireActivity(), keywordsList as ArrayList<KeywordObject>)
                 keywordsRecyclerView.adapter = keywordsAdapter
 
                 keywordsAdapter.setOnItemClickListener(object : KeywordsAdapter.OnItemClickListener{
@@ -1063,15 +1129,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             FlowLayout.LayoutParams.WRAP_CONTENT
                         )
                         params.setMargins(5, 5, 5, 5)
-                        val textView = MaterialTextView(context)
+                        val textView = MaterialTextView(requireActivity())
                         textView.layoutParams = params
                         textView.text = item.keyword
                         textView.tag = "title"
-                        textView.setTextColor(ContextCompat.getColor(context,R.color.white))
-                        textView.setBackgroundColor(ContextCompat.getColor(context,R.color.primary_positive_color))
+                        textView.setTextColor(ContextCompat.getColor(requireActivity(),R.color.white))
+                        textView.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.primary_positive_color))
                         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                         //titleTextViewList.add(textView)
-                        textView.setOnClickListener(this@SalesCustomersActivity)
+                        //textView.setOnClickListener(requireActivity())
                         textView.setOnTouchListener(ChoiceTouchListener())
                         textView.setOnDragListener(ChoiceDragListener())
                         dynamicTitleTextViewWrapper.addView(textView,0)
@@ -1086,15 +1152,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             FlowLayout.LayoutParams.WRAP_CONTENT
                         )
                         params.setMargins(5, 5, 5, 5)
-                        val textView = MaterialTextView(context)
+                        val textView = MaterialTextView(requireActivity())
                         textView.layoutParams = params
                         textView.text = item.keyword
                         textView.tag = "title"
-                        textView.setTextColor(ContextCompat.getColor(context,R.color.white))
-                        textView.setBackgroundColor(ContextCompat.getColor(context,R.color.primary_positive_color))
+                        textView.setTextColor(ContextCompat.getColor(requireActivity(),R.color.white))
+                        textView.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.primary_positive_color))
                         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                         //titleTextViewList.add(textView)
-                        textView.setOnClickListener(this@SalesCustomersActivity)
+                        //textView.setOnClickListener(requireActivity())
                         textView.setOnTouchListener(ChoiceTouchListener())
                         textView.setOnDragListener(ChoiceDragListener())
                         dynamicFullDescTextViewWrapper.addView(textView,0)
@@ -1141,15 +1207,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         FlowLayout.LayoutParams.WRAP_CONTENT
                     )
                     params.setMargins(5, 5, 5, 5)
-                    val textView = MaterialTextView(context)
+                    val textView = MaterialTextView(requireActivity())
                     textView.layoutParams = params
                     textView.text = titleTextList[i].trim()
                     textView.tag = "title"
                     textView.id = i
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(context, R.color.black))
+                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     titleTextViewList.add(textView)
-                    textView.setOnClickListener(this@SalesCustomersActivity)
+//                    textView.setOnClickListener(requireActivity())
                     textView.setOnTouchListener(ChoiceTouchListener())
                     textView.setOnDragListener(ChoiceDragListener())
                     dynamicTitleTextViewWrapper.addView(textView)
@@ -1161,15 +1227,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         FlowLayout.LayoutParams.WRAP_CONTENT
                     )
                     params.setMargins(5, 5, 5, 5)
-                    val textView = MaterialTextView(context)
+                    val textView = MaterialTextView(requireActivity())
                     textView.layoutParams = params
                     textView.text = shortDescTextList[i].trim()
                     textView.tag = "title"
                     textView.id = i
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(context, R.color.black))
+                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     shortDescTextViewList.add(textView)
-                    textView.setOnClickListener(this@SalesCustomersActivity)
+//                    textView.setOnClickListener(requireActivity())
                     textView.setOnTouchListener(ChoiceTouchListener())
                     textView.setOnDragListener(ChoiceDragListener())
                     dynamicShortDescTextViewWrapper.addView(textView)
@@ -1181,15 +1247,15 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         FlowLayout.LayoutParams.WRAP_CONTENT
                     )
                     params.setMargins(5, 5, 5, 5)
-                    val textView = MaterialTextView(context)
+                    val textView = MaterialTextView(requireActivity())
                     textView.layoutParams = params
                     textView.text = fullDescTextList[i].trim()
                     textView.tag = "title"
                     textView.id = i
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(context, R.color.black))
+                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     fullDescTextViewList.add(textView)
-                    textView.setOnClickListener(this@SalesCustomersActivity)
+//                    textView.setOnClickListener(requireActivity())
                     textView.setOnTouchListener(ChoiceTouchListener())
                     textView.setOnDragListener(ChoiceDragListener())
                     dynamicFullDescTextViewWrapper.addView(textView)
@@ -1204,10 +1270,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
                         titleBox.setSelection(pItem.title.length)
                         titleBox.requestFocus()
-                        Constants.openKeyboar(context)
+                        Constants.openKeyboar(requireActivity())
                     } else {
-                        Constants.hideKeyboar(context)
-                        startLoading(context)
+                        Constants.hideKeyboar(requireActivity())
+                        BaseActivity.startLoading(requireActivity())
                         firstLinearLayout.visibility = View.GONE
                         secondLinearLayout.visibility = View.VISIBLE
                         defaultLayout = 0
@@ -1271,7 +1337,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 //                            textView.setOnClickListener(this@SalesCustomersActivity)
 //                            dynamicFullDescTextViewWrapper.addView(textView)
 //                        }
-                        dismiss()
+                        BaseActivity.dismiss()
                     }
                 }
 
@@ -1292,7 +1358,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 //                    }
 //                }
 
-                val builder = MaterialAlertDialogBuilder(context)
+                val builder = MaterialAlertDialogBuilder(requireActivity())
                     .setView(dialogLayout)
                     .setCancelable(false)
                 val alert = builder.create()
@@ -1301,18 +1367,18 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 //                titleBox.requestFocus()
 //                Constants.openKeyboar(context)
                 dialogCancelBtn.setOnClickListener {
-                    Constants.hideKeyboar(context)
+                    Constants.hideKeyboar(requireActivity())
                     alert.dismiss()
                 }
 
                 getDescriptionView.setOnClickListener {
-                    Constants.hideKeyboar(context)
+                    Constants.hideKeyboar(requireActivity())
                     userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 
                     if (userCurrentCredits.toFloat() >= 1.0) {
-                        launchActivity.launch(Intent(context, RainForestApiActivity::class.java))
+                        launchActivity.launch(Intent(requireActivity(), RainForestApiActivity::class.java))
                     } else {
-                        MaterialAlertDialogBuilder(context)
+                        MaterialAlertDialogBuilder(requireActivity())
                             .setMessage(getString(R.string.low_credites_error_message2))
                             .setCancelable(false)
                             .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
@@ -1328,13 +1394,13 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
 
                 getDescriptionView1.setOnClickListener {
-                    Constants.hideKeyboar(context)
+                    Constants.hideKeyboar(requireActivity())
                     userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 
                     if (userCurrentCredits.toFloat() >= 1.0) {
-                        launchActivity.launch(Intent(context, RainForestApiActivity::class.java))
+                        launchActivity.launch(Intent(requireActivity(), RainForestApiActivity::class.java))
                     } else {
-                        MaterialAlertDialogBuilder(context)
+                        MaterialAlertDialogBuilder(requireActivity())
                             .setMessage(getString(R.string.low_credites_error_message2))
                             .setCancelable(false)
                             .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
@@ -1342,7 +1408,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             }
                             .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
                                 dialog.dismiss()
-                                startActivity(Intent(context, UserScreenActivity::class.java))
+                                startActivity(Intent(requireActivity(), UserScreenActivity::class.java))
                             }
                             .create().show()
                     }
@@ -1403,7 +1469,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         }
                         pItem.fullDesc = stringBuilder.toString().trim()
                     } else {
-                        Constants.hideKeyboar(context)
+                        Constants.hideKeyboar(requireActivity())
                         pItem.title = titleText
                         pItem.shortDesc = shortDesc
                         pItem.fullDesc = fullDesc
@@ -1411,8 +1477,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     defaultLayout = 0
                     if (titleText.isNotEmpty()) {
                         alert.dismiss()
-                        startLoading(
-                            context,
+                        BaseActivity.startLoading(
+                            requireActivity(),
                             getString(R.string.please_wait_product_update_message)
                         )
 
@@ -1421,7 +1487,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         adapter.notifyItemChanged(position)
 
                         viewModel.callUpdateProductDetail(
-                            context,
+                            requireActivity(),
                             shopName,
                             email,
                             password,
@@ -1431,28 +1497,31 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             pItem.fullDesc
                         )
                         viewModel.getUpdateProductDetailResponse()
-                            .observe(this@SalesCustomersActivity, Observer { response ->
+                            .observe(requireActivity(), Observer { response ->
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
 //                                        Handler(Looper.myLooper()!!).postDelayed({
-                                        dismiss()
+                                        BaseActivity.dismiss()
 //                                            //showProducts()
 //                                        }, 3000)
                                         Toast.makeText(
-                                            context,
+                                            requireActivity(),
                                             getString(R.string.product_updated_successfully),
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
-                                        dismiss()
-                                        showAlert(context, response.get("message").asString)
+                                        BaseActivity.dismiss()
+                                        BaseActivity.showAlert(
+                                            requireActivity(),
+                                            response.get("message").asString
+                                        )
                                     }
                                 } else {
-                                    dismiss()
+                                    BaseActivity.dismiss()
                                 }
                             })
                     } else {
-                        showAlert(context, getString(R.string.empty_text_error))
+                        BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
                     }
                 }
             }
@@ -1495,7 +1564,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     menu!!.findItem(R.id.insales_data_filter).isVisible = true
                     menu!!.findItem(R.id.insales_data_sync).isVisible = true
                 }
-            }, 3000)
+            }, 1500)
         } else {
             dialogStatus = 1
             fetchProducts(currentPage)
@@ -1540,7 +1609,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                     FlowLayout.LayoutParams.WRAP_CONTENT
                                 )
                                 params.setMargins(5, 5, 5, 5)
-                                val textView = MaterialTextView(context)
+                                val textView = MaterialTextView(requireActivity())
                                 textView.layoutParams = params
                                 textView.text = titleTextList[i].trim()
                                 textView.tag = "title"
@@ -1548,12 +1617,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                                 textView.setTextColor(
                                     ContextCompat.getColor(
-                                        context,
+                                        requireActivity(),
                                         R.color.black
                                     )
                                 )
                                 titleTextViewList.add(textView)
-                                textView.setOnClickListener(this@SalesCustomersActivity)
+//                                textView.setOnClickListener(requireActivity())
                                 textView.setOnTouchListener(ChoiceTouchListener())
                                 textView.setOnDragListener(ChoiceDragListener())
                                 dynamicTitleTextViewWrapper.addView(textView)
@@ -1578,7 +1647,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                     FlowLayout.LayoutParams.WRAP_CONTENT
                                 )
                                 params.setMargins(5, 5, 5, 5)
-                                val textView = MaterialTextView(context)
+                                val textView = MaterialTextView(requireActivity())
                                 textView.layoutParams = params
                                 textView.text = fullDescTextList[i].trim()
                                 textView.tag = "title"
@@ -1586,12 +1655,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                                 textView.setTextColor(
                                     ContextCompat.getColor(
-                                        context,
+                                        requireActivity(),
                                         R.color.black
                                     )
                                 )
                                 fullDescTextViewList.add(textView)
-                                textView.setOnClickListener(this@SalesCustomersActivity)
+//                                textView.setOnClickListener(requireActivity())
                                 textView.setOnTouchListener(ChoiceTouchListener())
                                 textView.setOnDragListener(ChoiceDragListener())
                                 dynamicFullDescTextViewWrapper.addView(textView)
@@ -1606,12 +1675,11 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             }
         }
 
-
     private fun fetchProducts(page: Int) {
         if (dialogStatus == 1) {
-            startLoading(context, getString(R.string.please_wait_products_message))
+            BaseActivity.startLoading(requireActivity(), getString(R.string.please_wait_products_message))
         }
-        viewModel.callProducts(context, shopName, email, password, page)
+        viewModel.callProducts(requireActivity(), shopName, email, password, page)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
 
             if (response != null) {
@@ -1666,7 +1734,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             Paper.book().write(Constants.cacheProducts, originalProductsList)
                             currentTotalProducts = originalProductsList.size
                         }
-                        dismiss()
+                        BaseActivity.dismiss()
                         val cacheList: ArrayList<Product>? =
                             Paper.book().read(Constants.cacheProducts)
                         if (cacheList != null && cacheList.size > 0) {
@@ -1684,14 +1752,43 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                             fetchProducts(currentPage)
                         }
                     } else {
-                        dismiss()
+                        BaseActivity.dismiss()
                     }
                 } else {
-                    dismiss()
-                    showAlert(context, response.get("message").asString)
+                    BaseActivity.dismiss()
+                    BaseActivity.showAlert(requireActivity(), response.get("message").asString)
                 }
             } else {
-                dismiss()
+                BaseActivity.dismiss()
+            }
+        })
+    }
+
+    private fun inSalesLogin(shopName: String, email: String, password: String) {
+
+        BaseActivity.startLoading(requireActivity(), getString(R.string.please_wait_login_message))
+        viewModel.callSalesAccount(requireActivity(), shopName, email, password)
+        viewModel.getSalesAccountResponse().observe(this, Observer { response ->
+            BaseActivity.dismiss()
+            if (response != null) {
+                if (response.get("status").asString == "200") {
+                    appSettings.putString("INSALES_STATUS", "logged")
+                    appSettings.putString("INSALES_SHOP_NAME", shopName)
+                    appSettings.putString("INSALES_EMAIL", email)
+                    appSettings.putString("INSALES_PASSWORD", password)
+                    this.email = email
+                    this.password = password
+                    this.shopName = shopName
+
+                    insalesLoginWrapperLayout.visibility = View.GONE
+                    insalesDataWrapperLayout.visibility = View.VISIBLE
+//                    menu!!.findItem(R.id.insales_logout).isVisible = true
+//                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
+//                    menu!!.findItem(R.id.insales_data_sync).isVisible = true
+                    showProducts()
+                } else {
+                    BaseActivity.showAlert(requireActivity(), response.get("message").asString)
+                }
             }
         })
     }
@@ -1709,11 +1806,11 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             if (result.resultCode == Activity.RESULT_OK) {
                 if (result.data != null) {
                     val imageUri = result.data!!
-                    currentPhotoPath = ImageManager.getRealPathFromUri(context, imageUri.data)
+                    currentPhotoPath = ImageManager.getRealPathFromUri(requireActivity(), imageUri.data)
                     selectedImageBase64String =
-                        ImageManager.convertImageToBase64(context, currentPhotoPath!!)
+                        ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
                     Log.d("TEST199", selectedImageBase64String)
-                    Glide.with(context)
+                    Glide.with(requireActivity())
                         .load(currentPhotoPath)
                         .placeholder(R.drawable.placeholder)
                         .centerInside()
@@ -1733,9 +1830,9 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 val bitmap = data!!.extras!!.get("data") as Bitmap
                 createImageFile(bitmap)
                 selectedImageBase64String =
-                    ImageManager.convertImageToBase64(context, currentPhotoPath!!)
+                    ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
                 Log.d("TEST199", selectedImageBase64String)
-                Glide.with(context)
+                Glide.with(requireActivity())
                     .load(currentPhotoPath)
                     .placeholder(R.drawable.placeholder)
                     .centerInside()
@@ -1744,65 +1841,11 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         }
 
     private fun createImageFile(bitmap: Bitmap) {
-        currentPhotoPath = ImageManager.readWriteImage(context, bitmap).absolutePath
+        currentPhotoPath = ImageManager.readWriteImage(requireActivity(), bitmap).absolutePath
     }
-
-    override fun onResume() {
-        super.onResume()
-
-        checkInsalesAccount()
-    }
-
-    private fun checkInsalesAccount() {
-        val insalesStatus = appSettings.getString("INSALES_STATUS")
-
-        if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged") {
-            insalesLoginWrapperLayout.visibility = View.GONE
-            insalesSearchWrapperLayout.visibility = View.VISIBLE
-            insalesDataWrapperLayout.visibility = View.VISIBLE
-
-
-            shopName = appSettings.getString("INSALES_SHOP_NAME") as String
-            email = appSettings.getString("INSALES_EMAIL") as String
-            password = appSettings.getString("INSALES_PASSWORD") as String
-
-//            if (originalProductsList.size == 0) {
-            showProducts()
-//            }
-//            else{
-//                Handler(Looper.myLooper()!!).postDelayed({
-//                    if (menu != null) {
-//                        menu!!.findItem(R.id.insales_logout).isVisible = true
-//                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
-//                        menu!!.findItem(R.id.insales_data_sync).isVisible = true
-//                    }
-//                },2000)
-//
-//            }
-
-        } else {
-            insalesDataWrapperLayout.visibility = View.GONE
-            insalesSearchWrapperLayout.visibility = View.GONE
-            insalesLoginWrapperLayout.visibility = View.VISIBLE
-
-            if (menu != null) {
-                menu!!.findItem(R.id.insales_logout).isVisible = false
-                menu!!.findItem(R.id.insales_data_filter).isVisible = false
-                menu!!.findItem(R.id.insales_data_sync).isVisible = false
-            }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.insales_main_menu, menu)
-        this.menu = menu
-        return true
-    }
-
 
     override fun onClick(v: View?) {
-        val view = v!!
-        when (view.id) {
+        when(v!!.id){
             R.id.insales_login_btn -> {
                 if (validation()) {
                     val shopName = insalesShopNameBox.text.toString().trim()
@@ -1812,7 +1855,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
             }
             R.id.insales_products_search_reset_btn -> {
-                hideSoftKeyboard(context, searchBox)
+                BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
                 if (searchBox.text.toString().trim().isNotEmpty()) {
                     searchBox.setText("")
                 }
@@ -1826,82 +1869,14 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             R.id.insales_products_search_btn -> {
                 val query = searchBox.text.toString().trim()
                 if (query.isNotEmpty()) {
-                    Constants.hideKeyboar(context)
+                    Constants.hideKeyboar(requireActivity())
                     search(query)
                 } else {
-                    showAlert(context, getString(R.string.empty_text_error))
+                    BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
                 }
             }
-            else -> {
-                val position = view.id
-                val textView = view as MaterialTextView
-                view.setBackgroundColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.primary_positive_color
-                    )
-                )
-                view.setTextColor(ContextCompat.getColor(context, R.color.white))
-                val balloon = Balloon.Builder(context)
-                    .setLayout(R.layout.ballon_layout_design)
-                    .setArrowSize(10)
-                    .setArrowOrientation(ArrowOrientation.TOP)
-                    .setArrowPosition(0.5f)
-                    .setWidthRatio(0.55f)
-                    .setCornerRadius(4f)
-                    .setBackgroundColor(ContextCompat.getColor(context, R.color.light_gray))
-                    .setBalloonAnimation(BalloonAnimation.ELASTIC)
-                    .setLifecycleOwner(this@SalesCustomersActivity)
-                    .build()
-                val editTextBox =
-                    balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
-                editTextBox.setText(textView.text.toString().trim())
-                val closeBtn =
-                    balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
-                val applyBtn =
-                    balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
-                balloon.showAlignTop(textView)
-                editTextBox.requestFocus()
-                Constants.openKeyboar(context)
-                closeBtn.setOnClickListener {
-                    Constants.hideKeyboar(context)
-                    balloon.dismiss()
-                    view.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
-                    view.setTextColor(ContextCompat.getColor(context, R.color.black))
-                }
-                applyBtn.setOnClickListener {
-                    Constants.hideKeyboar(context)
-                    balloon.dismiss()
-                    //val tempText = textView.replace(mWord,editTextBox.text.toString().trim())
-                    textView.text = editTextBox.text.toString().trim()
-                    view.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
-                    view.setTextColor(ContextCompat.getColor(context, R.color.black))
+            else->{
 
-                }
-            }
-        }
-    }
-
-    private fun searchByCategory(id: Int?) {
-        val matchedProducts = mutableListOf<Product>()
-
-        id?.let {
-            productsList.forEach { item ->
-                if (item.categoryId == id) {
-                    matchedProducts.add(item)
-                }
-            }
-
-            if (matchedProducts.isEmpty()) {
-                Toast.makeText(
-                    context,
-                    getString(R.string.category_products_not_found),
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                productsList.clear()
-                productsList.addAll(matchedProducts)
-                adapter.notifyItemRangeChanged(0, productsList.size)
             }
         }
     }
@@ -1918,7 +1893,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
             if (matchedProducts.isEmpty()) {
                 Toast.makeText(
-                    context,
+                    requireActivity(),
                     getString(R.string.no_match_found_error),
                     Toast.LENGTH_SHORT
                 ).show()
@@ -1930,41 +1905,21 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
-    private fun sorting(type: Int) {
-        if (productsList.size > 0) {
-            Collections.sort(productsList, object : Comparator<Product> {
-                override fun compare(o1: Product?, o2: Product?): Int {
-                    return if (type == 0) { // A-Z
-                        o1!!.title.compareTo(o2!!.title, true)
-                    } else if (type == 1) { // Z-A
-                        o2!!.title.compareTo(o1!!.title, true)
-                    } else {
-                        -1
-                    }
-                }
-
-            })
-            adapter.notifyDataSetChanged()
-        } else {
-            showAlert(context, getString(R.string.empty_list_error_message))
-        }
-    }
-
     private fun validation(): Boolean {
         if (insalesShopNameBox.text.toString().trim().isEmpty()) {
-            showAlert(context, getString(R.string.empty_text_error))
+            BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
             return false
         } else if (insalesEmailBox.text.toString().trim().isEmpty()) {
-            showAlert(context, getString(R.string.empty_text_error))
+            BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
             return false
         } else if (!Pattern.compile(Constants.emailPattern)
                 .matcher(insalesEmailBox.text.toString().trim())
                 .matches()
         ) {
-            showAlert(context, getString(R.string.email_valid_error))
+            BaseActivity.showAlert(requireActivity(), getString(R.string.email_valid_error))
             return false
         } else if (insalesPasswordBox.text.toString().trim().isEmpty()) {
-            showAlert(context, getString(R.string.empty_text_error))
+            BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
             return false
         }
         return true
