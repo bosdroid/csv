@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -18,11 +19,11 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
-import androidx.fragment.app.Fragment
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -42,7 +43,6 @@ import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.boris.expert.csvmagic.view.activities.RainForestApiActivity
-import com.boris.expert.csvmagic.view.activities.SalesCustomersActivity
 import com.boris.expert.csvmagic.view.activities.UserScreenActivity
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
@@ -61,7 +61,6 @@ import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.collections.ArrayList
 
 
 class InsalesFragment : Fragment(),View.OnClickListener {
@@ -121,6 +120,11 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             this,
             ViewModelFactory(SalesCustomersViewModel()).createFor()
         )[SalesCustomersViewModel::class.java]
+        keywordsList.add(KeywordObject("One", 1))
+        keywordsList.add(KeywordObject("Two", 1))
+        keywordsList.add(KeywordObject("Three", 1))
+        keywordsList.add(KeywordObject("Four", 1))
+        keywordsList.add(KeywordObject("Five", 1))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -242,7 +246,11 @@ class InsalesFragment : Fragment(),View.OnClickListener {
         }
 
         val arrayAdapter =
-            ArrayAdapter(requireActivity(), android.R.layout.select_dialog_singlechoice, categoriesList)
+            ArrayAdapter(
+                requireActivity(),
+                android.R.layout.select_dialog_singlechoice,
+                categoriesList
+            )
         builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
             override fun onClick(dialog: DialogInterface?, which: Int) {
                 dialog!!.dismiss()
@@ -734,7 +742,10 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                 }
                             })
                     } else {
-                        BaseActivity.showAlert(requireActivity(), getString(R.string.image_attach_error))
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            getString(R.string.image_attach_error)
+                        )
                     }
                 }
 
@@ -837,7 +848,9 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                             selectedInternetImage = searchedImagesList[position]
                             Glide.with(requireActivity())
                                 .load(selectedInternetImage)
-                                .thumbnail(Glide.with(requireActivity()).load(R.drawable.placeholder))
+                                .thumbnail(
+                                    Glide.with(requireActivity()).load(R.drawable.placeholder)
+                                )
                                 .fitCenter()
                                 .into(selectedImageView)
                         }
@@ -1043,7 +1056,10 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                 }
                             })
                     } else {
-                        BaseActivity.showAlert(requireActivity(), getString(R.string.image_attach_error))
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            getString(R.string.image_attach_error)
+                        )
                     }
                 }
             }
@@ -1109,19 +1125,25 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
                 dynamicTitleTextViewWrapper =
                     dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
+//                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
                 val dynamicShortDescTextViewWrapper =
                     dialogLayout.findViewById<FlowLayout>(R.id.dynamic_insales_short_description_textview_wrapper)
                 dynamicFullDescTextViewWrapper =
                     dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
+//                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
                 val keywordsRecyclerView =
                     dialogLayout.findViewById<RecyclerView>(R.id.keywords_recyclerview)
                 keywordsRecyclerView.layoutManager =
                     LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
                 keywordsRecyclerView.hasFixedSize()
-                keywordsAdapter = KeywordsAdapter(requireActivity(), keywordsList as ArrayList<KeywordObject>)
+                keywordsAdapter = KeywordsAdapter(
+                    requireActivity(),
+                    keywordsList as ArrayList<KeywordObject>
+                )
                 keywordsRecyclerView.adapter = keywordsAdapter
 
-                keywordsAdapter.setOnItemClickListener(object : KeywordsAdapter.OnItemClickListener{
+                keywordsAdapter.setOnItemClickListener(object :
+                    KeywordsAdapter.OnItemClickListener {
                     override fun onItemAddTitleClick(position: Int) {
                         val item = keywordsList[position]
                         val params = FlowLayout.LayoutParams(
@@ -1133,14 +1155,24 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                         textView.layoutParams = params
                         textView.text = item.keyword
                         textView.tag = "title"
-                        textView.setTextColor(ContextCompat.getColor(requireActivity(),R.color.white))
-                        textView.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.primary_positive_color))
+                        textView.setTextColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.white
+                            )
+                        )
+                        textView.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.primary_positive_color
+                            )
+                        )
                         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                         //titleTextViewList.add(textView)
                         //textView.setOnClickListener(requireActivity())
                         textView.setOnTouchListener(ChoiceTouchListener())
                         textView.setOnDragListener(ChoiceDragListener())
-                        dynamicTitleTextViewWrapper.addView(textView,0)
+                        dynamicTitleTextViewWrapper.addView(textView, 0)
                         //dynamicTitleTextViewWrapper.invalidate()
 
                     }
@@ -1156,14 +1188,24 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                         textView.layoutParams = params
                         textView.text = item.keyword
                         textView.tag = "title"
-                        textView.setTextColor(ContextCompat.getColor(requireActivity(),R.color.white))
-                        textView.setBackgroundColor(ContextCompat.getColor(requireActivity(),R.color.primary_positive_color))
+                        textView.setTextColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.white
+                            )
+                        )
+                        textView.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.primary_positive_color
+                            )
+                        )
                         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                         //titleTextViewList.add(textView)
                         //textView.setOnClickListener(requireActivity())
                         textView.setOnTouchListener(ChoiceTouchListener())
                         textView.setOnDragListener(ChoiceDragListener())
-                        dynamicFullDescTextViewWrapper.addView(textView,0)
+                        dynamicFullDescTextViewWrapper.addView(textView, 0)
                         //dynamicTitleTextViewWrapper.invalidate()
                     }
 
@@ -1367,7 +1409,8 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 //                titleBox.requestFocus()
 //                Constants.openKeyboar(context)
                 dialogCancelBtn.setOnClickListener {
-                    Constants.hideKeyboar(requireActivity())
+                    BaseActivity.hideSoftKeyboard(requireActivity(),dialogCancelBtn)
+//                    Constants.hideKeyboar(requireActivity())
                     alert.dismiss()
                 }
 
@@ -1376,7 +1419,12 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 
                     if (userCurrentCredits.toFloat() >= 1.0) {
-                        launchActivity.launch(Intent(requireActivity(), RainForestApiActivity::class.java))
+                        launchActivity.launch(
+                            Intent(
+                                requireActivity(),
+                                RainForestApiActivity::class.java
+                            )
+                        )
                     } else {
                         MaterialAlertDialogBuilder(requireActivity())
                             .setMessage(getString(R.string.low_credites_error_message2))
@@ -1398,7 +1446,12 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 
                     if (userCurrentCredits.toFloat() >= 1.0) {
-                        launchActivity.launch(Intent(requireActivity(), RainForestApiActivity::class.java))
+                        launchActivity.launch(
+                            Intent(
+                                requireActivity(),
+                                RainForestApiActivity::class.java
+                            )
+                        )
                     } else {
                         MaterialAlertDialogBuilder(requireActivity())
                             .setMessage(getString(R.string.low_credites_error_message2))
@@ -1408,7 +1461,12 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                             }
                             .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
                                 dialog.dismiss()
-                                startActivity(Intent(requireActivity(), UserScreenActivity::class.java))
+                                startActivity(
+                                    Intent(
+                                        requireActivity(),
+                                        UserScreenActivity::class.java
+                                    )
+                                )
                             }
                             .create().show()
                     }
@@ -1521,7 +1579,10 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                 }
                             })
                     } else {
-                        BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            getString(R.string.empty_text_error)
+                        )
                     }
                 }
             }
@@ -1677,7 +1738,10 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 
     private fun fetchProducts(page: Int) {
         if (dialogStatus == 1) {
-            BaseActivity.startLoading(requireActivity(), getString(R.string.please_wait_products_message))
+            BaseActivity.startLoading(
+                requireActivity(),
+                getString(R.string.please_wait_products_message)
+            )
         }
         viewModel.callProducts(requireActivity(), shopName, email, password, page)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
@@ -1806,7 +1870,10 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             if (result.resultCode == Activity.RESULT_OK) {
                 if (result.data != null) {
                     val imageUri = result.data!!
-                    currentPhotoPath = ImageManager.getRealPathFromUri(requireActivity(), imageUri.data)
+                    currentPhotoPath = ImageManager.getRealPathFromUri(
+                        requireActivity(),
+                        imageUri.data
+                    )
                     selectedImageBase64String =
                         ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
                     Log.d("TEST199", selectedImageBase64String)
@@ -1923,6 +1990,48 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             return false
         }
         return true
+    }
+
+    internal class MyDragListener : View.OnDragListener {
+
+override fun onDrag(v: View, event: DragEvent): Boolean {
+            val action = event.action
+            when (event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> {
+                }
+                DragEvent.ACTION_DRAG_ENTERED -> {}
+//                    v.setBackgroundDrawable(enterShape)
+                DragEvent.ACTION_DRAG_EXITED -> {}
+//                    v.setBackgroundDrawable(normalShape)
+                DragEvent.ACTION_DROP -> {
+                    // Dropped, reassign View to ViewGroup
+                    val t: MaterialTextView
+                    val view = event.localState as View
+                    t = view.findViewById(R.id.keyword_item_name_view)
+
+                    val temp = t.text.toString()
+                    val tempTextView = MaterialTextView(view.context)
+                    tempTextView.text = temp
+//                    val r = temp
+//                    textview.add(r)
+//                    temp = all(textview)
+//                    val container = v as MaterialTextView
+
+//                    container.text = temp
+                    dynamicTitleTextViewWrapper.addView(tempTextView)
+                    dynamicTitleTextViewWrapper.invalidate()
+                    //view.setVisibility(View.VISIBLE);
+//                    wordList.remove(String(r))
+//                    list.setAdapter(null)
+//                    a = adapter(wordList, this@MainActivity)
+//                    list.setAdapter(a)
+                }
+                DragEvent.ACTION_DRAG_ENDED ->{} //v.setBackgroundDrawable(normalShape)
+                else -> {
+                }
+            }
+            return true
+        }
     }
 
 }

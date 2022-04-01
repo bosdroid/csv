@@ -236,7 +236,6 @@
                  android:id="@+id/keywords_recyclerview"
                  xmlns:tools="http://schemas.android.com/tools"
                  tools:listitem="@layout/keyword_item_row_design"
-
                  />
 
 

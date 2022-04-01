@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
@@ -34,23 +35,25 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
     class ItemViewHolder(itemView: View, Listener: OnItemClickListener) :
         RecyclerView.ViewHolder(itemView) {
         val productTitle: MaterialTextView
+        val productDescription: MaterialTextView
         val imagesRecyclerView: RecyclerView
-        val addImageView:AppCompatImageView
+//        val addImageView:AppCompatImageView
         val editImageView:AppCompatImageView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
+            productDescription = itemView.findViewById(R.id.insales_p_item_description)
             imagesRecyclerView = itemView.findViewById(R.id.products_images_recyclerview)
-            addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
+//            addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
             editImageView = itemView.findViewById(R.id.insales_p_item_edit_image)
 
             productTitle.setOnClickListener {
                 Listener.onItemClick(layoutPosition)
             }
 
-            addImageView.setOnClickListener {
-                Listener.onItemAddImageClick(layoutPosition)
-            }
+//            addImageView.setOnClickListener {
+//                Listener.onItemAddImageClick(layoutPosition)
+//            }
 
             editImageView.setOnClickListener {
                 Listener.onItemEditImageClick(layoutPosition)
@@ -72,7 +75,25 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
 
         val item = productsItems[position]
-        holder.productTitle.text = item.title
+        if (item.title.isNotEmpty()){
+            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
+            holder.productTitle.text = item.title
+        }
+        else{
+            holder.productTitle.text = context.getString(R.string.product_title_error)
+            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
+        }
+
+        if (item.fullDesc.isNotEmpty()){
+            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
+            holder.productDescription.text = item.fullDesc
+        }
+        else{
+            holder.productDescription.text = context.getString(R.string.product_description_error)
+            holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
+        }
+
+
         holder.imagesRecyclerView.layoutManager =
             LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         holder.imagesRecyclerView.hasFixedSize()
@@ -89,6 +110,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
             override fun onItemRemoveClick(imagePosition: Int) {
                 mListener!!.onItemRemoveClick(position,imagePosition)
+            }
+
+            override fun onItemAddImageClick(position: Int) {
+                mListener!!.onItemAddImageClick(position)
             }
 
         })

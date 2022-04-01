@@ -221,6 +221,8 @@
     <string name="choose_option">Choose option</string>
     <string name="manual_text">Manual</string>
     <string name="import_file">Import File</string>
+    <string name="product_title_error">Error No Title</string>
+    <string name="product_description_error">Error No Description</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

@@ -127,8 +127,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
+//        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+//        StrictMode.setThreadPolicy(policy)
 
         initViews()
         setUpToolbar()
@@ -142,24 +142,24 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 )
             ) {
 
-                SimpleTooltip.Builder(this)
-                    .anchorView(bottomNavigation)
-                    .text(getString(R.string.bottom_navigation_tip_text))
-                    .gravity(Gravity.TOP)
-                    .animated(true)
-                    .transparentOverlay(false)
-                    .onDismissListener { tooltip ->
-                        tooltip.dismiss()
-                        appSettings.putLong("tt1", System.currentTimeMillis())
-                        val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
-                        if (currentFragment != null && currentFragment.isVisible) {
-                            val fragment =
-                                supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
-                            fragment.showTableSelectTip()
-                        }
-                    }
-                    .build()
-                    .show()
+//                SimpleTooltip.Builder(this)
+//                    .anchorView(bottomNavigation)
+//                    .text(getString(R.string.bottom_navigation_tip_text))
+//                    .gravity(Gravity.TOP)
+//                    .animated(true)
+//                    .transparentOverlay(false)
+//                    .onDismissListener { tooltip ->
+//                        tooltip.dismiss()
+//                        appSettings.putLong("tt1", System.currentTimeMillis())
+//                        val currentFragment = supportFragmentManager.findFragmentByTag("scanner")
+//                        if (currentFragment != null && currentFragment.isVisible) {
+//                            val fragment =
+//                                supportFragmentManager.findFragmentById(R.id.fragment_container) as ScannerFragment
+//                            fragment.showTableSelectTip()
+//                        }
+//                    }
+//                    .build()
+//                    .show()
             }
         }
     }

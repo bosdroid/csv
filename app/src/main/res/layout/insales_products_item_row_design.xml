@@ -6,6 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:cardCornerRadius="8dp"
     android:layout_margin="@dimen/defaultDpMargin"
+    app:cardBackgroundColor="@color/light_gray"
     app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,57 +17,124 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:padding="@dimen/small"
             >
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/defaultDpMargin"
                 >
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="@dimen/largeText"
-                    android:textColor="@color/black"
-                    android:id="@+id/insales_p_item_title"
-                    android:layout_marginEnd="@dimen/eightDpMargin"
-                    />
+                    android:orientation="vertical"
+                    >
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/largeText"
+                        android:textColor="@color/black"
+                        android:layout_margin="@dimen/eightDpMargin"
+                        android:id="@+id/insales_p_item_title"
+                        />
 
-                <androidx.appcompat.widget.AppCompatImageView
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/largeText"
+                        android:textColor="@color/black"
+                        android:layout_margin="@dimen/eightDpMargin"
+                        android:id="@+id/insales_p_item_description"
+                        />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/products_images_recyclerview"
+                        android:layout_marginTop="@dimen/defaultDpMargin"
+                        tools:listitem="@layout/insales_product_image_item_row"
+                        />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                >
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_edit"
-                    android:id="@+id/insales_p_item_edit_image"
-                    app:tint="@color/primary_positive_color"
-                    android:layout_marginEnd="@dimen/sixtyDpMargin"
-                    />
+                    android:layout_height="match_parent"
+                    android:elevation="8dp"
+                    >
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_edit"
+                        android:layout_gravity="center"
+                        android:id="@+id/insales_p_item_edit_image"
+                        app:tint="@color/primary_positive_color"
+                        android:layout_marginEnd="@dimen/sixtyDpMargin"
+                        android:layout_margin="@dimen/defaultDpMargin"
+                        />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_add_image"
-                    android:id="@+id/insales_p_item_add_image"
-                    app:tint="@color/primary_positive_color"
-                    />
-            </LinearLayout>
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/products_images_recyclerview"
-                android:layout_marginTop="@dimen/defaultDpMargin"
-                tools:listitem="@layout/insales_product_image_item_row"
-                />
         </LinearLayout>
+
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            android:padding="@dimen/small"-->
+<!--            >-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:gravity="center_vertical"-->
+<!--                >-->
+<!--                <com.google.android.material.textview.MaterialTextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:textSize="@dimen/largeText"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    android:id="@+id/insales_p_item_title"-->
+<!--                    android:layout_marginEnd="@dimen/eightDpMargin"-->
+<!--                    />-->
+
+<!--                <androidx.appcompat.widget.AppCompatImageView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/ic_edit"-->
+<!--                    android:id="@+id/insales_p_item_edit_image"-->
+<!--                    app:tint="@color/primary_positive_color"-->
+<!--                    android:layout_marginEnd="@dimen/sixtyDpMargin"-->
+<!--                    />-->
+
+<!--                <androidx.appcompat.widget.AppCompatImageView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/ic_add_image"-->
+<!--                    android:id="@+id/insales_p_item_add_image"-->
+<!--                    app:tint="@color/primary_positive_color"-->
+<!--                    />-->
+<!--            </LinearLayout>-->
+
+
+<!--            -->
+<!--        </LinearLayout>-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
