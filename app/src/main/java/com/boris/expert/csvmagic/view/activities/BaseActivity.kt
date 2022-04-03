@@ -114,9 +114,11 @@ open class BaseActivity : AppCompatActivity() {
 
         fun getSortingList(context: Context):MutableList<String>{
             val list = mutableListOf<String>()
+            list.add(context.getString(R.string.all_default))
             list.add(context.getString(R.string.a_to_z))
             list.add(context.getString(R.string.z_to_a))
             list.add(context.getString(R.string.filter_category_heading_text))
+            list.add(context.getString(R.string.filter_error_hightlighted_text))
             return list
         }
 

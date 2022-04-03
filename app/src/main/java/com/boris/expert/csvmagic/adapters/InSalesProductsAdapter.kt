@@ -75,7 +75,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
 
         val item = productsItems[position]
-        holder.productTitle.text = item.title
+
         if (item.title.length > 10){
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
         }
@@ -83,15 +83,16 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             //holder.productTitle.text = context.getString(R.string.product_title_error)
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
         }
-        holder.productDescription.text = item.fullDesc
+        holder.productTitle.text = item.title
+
         if (item.fullDesc.length > 10){
-            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
+            holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
         }
         else{
             //holder.productDescription.text = context.getString(R.string.product_description_error)
             holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
         }
-
+        holder.productDescription.text = item.fullDesc
 
         holder.imagesRecyclerView.layoutManager =
             LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)

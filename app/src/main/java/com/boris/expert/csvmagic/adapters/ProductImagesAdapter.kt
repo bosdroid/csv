@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.ProductImages
@@ -86,6 +87,12 @@ class ProductImagesAdapter(private val context: Context, private val productImag
         when (holder.itemViewType) {
             0 -> {
                 val addViewHolder = holder as AddItemViewHolder
+                if (productImagesList.size == 0){
+                   addViewHolder.addViewBtn.setBackgroundResource(R.drawable.empty_image_background)
+                }
+                else{
+                    addViewHolder.addViewBtn.setBackgroundResource(R.drawable.without_empty_image_background)
+                }
                 addViewHolder.addViewBtn.setOnClickListener {
                     mListener!!.onItemAddImageClick(position)
                 }

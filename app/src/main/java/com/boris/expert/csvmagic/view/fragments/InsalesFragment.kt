@@ -195,9 +195,14 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     dialog!!.dismiss()
-                    if (which == 2) {
+                    if(which == 0){
+                        resetProductList()
+                    }else if (which == 3) {
                         displayCategoryFilterDialog(categoriesList)
-                    } else {
+                    } else if(which == 4){
+                        displayErrorItems()
+                    }
+                    else {
                         sorting(which)
                     }
 
@@ -215,6 +220,34 @@ class InsalesFragment : Fragment(),View.OnClickListener {
         } else {
             super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun resetProductList() {
+        productsList.clear()
+        productsList.addAll(originalProductsList)
+        adapter.notifyItemRangeChanged(0, productsList.size)
+    }
+
+    private fun displayErrorItems() {
+        val matchedProducts = mutableListOf<Product>()
+            productsList.forEach { item ->
+                if (item.title.length < 10 || item.fullDesc.length < 10 || item.productImages!!.size == 0) {
+                    matchedProducts.add(item)
+                }
+            }
+
+            if (matchedProducts.isEmpty()) {
+                Toast.makeText(
+                    requireActivity(),
+                    getString(R.string.error_products_not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                productsList.clear()
+                productsList.addAll(matchedProducts)
+                adapter.notifyItemRangeChanged(0, productsList.size)
+            }
+
     }
 
     private fun sorting(type: Int) {
@@ -728,7 +761,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
                                             showProducts()
-                                        }, 6000)
+                                        }, 3000)
                                     } else {
                                         BaseActivity.dismiss()
                                         BaseActivity.showAlert(
@@ -1527,7 +1560,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                         }
                         pItem.fullDesc = stringBuilder.toString().trim()
                     } else {
-                        Constants.hideKeyboar(requireActivity())
+                        BaseActivity.hideSoftKeyboard(requireActivity(),dialogUpdateBtn)
                         pItem.title = titleText
                         pItem.shortDesc = shortDesc
                         pItem.fullDesc = fullDesc
@@ -1616,6 +1649,8 @@ class InsalesFragment : Fragment(),View.OnClickListener {
         val cacheList: ArrayList<Product>? = Paper.book().read(Constants.cacheProducts)
 
         if (cacheList != null && cacheList.size > 0) {
+            originalProductsList.clear()
+            productsList.clear()
             originalProductsList.addAll(cacheList)
             productsList.addAll(originalProductsList)
             adapter.notifyItemRangeChanged(0, productsList.size)

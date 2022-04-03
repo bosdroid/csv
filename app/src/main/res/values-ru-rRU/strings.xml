@@ -223,6 +223,9 @@
     <string name="import_file">Import File</string>
     <string name="product_title_error">Error No Title</string>
     <string name="product_description_error">Error No Description</string>
+    <string name="filter_error_hightlighted_text">Highlighted Errors</string>
+    <string name="error_products_not_found">Error Highlighted Product not found!</string>
+    <string name="all_default">All (Default)</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

@@ -14,7 +14,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:gravity="center"
-        android:background="@drawable/border"
         android:layout_margin="@dimen/eightDpMargin"
         android:padding="@dimen/small"
         android:id="@+id/insales_add_image_wrapper_layout"
