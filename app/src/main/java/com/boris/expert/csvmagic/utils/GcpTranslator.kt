@@ -11,6 +11,7 @@ import com.google.cloud.translate.TranslateOptions
 object GcpTranslator {
 
     fun translateFromEngToRus(context: Context, text: String, listener: TranslationCallback){
+        listener.onTextTranslation(text)
         System.setProperty("GOOGLE_API_KEY",context.resources.getString(R.string.translation_api_key))
         val translate = TranslateOptions.getDefaultInstance().service
         val detection: Detection = translate.detect(text)
@@ -29,6 +30,7 @@ object GcpTranslator {
     }
 
     fun translateFromRusToEng(context: Context, text: String, listener: TranslationCallback){
+        listener.onTextTranslation(text)
         System.setProperty("GOOGLE_API_KEY",context.resources.getString(R.string.translation_api_key))
         val translate = TranslateOptions.getDefaultInstance().service
         val detection: Detection = translate.detect(text)

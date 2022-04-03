@@ -75,21 +75,20 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
 
         val item = productsItems[position]
-        if (item.title.isNotEmpty()){
+        holder.productTitle.text = item.title
+        if (item.title.length > 10){
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
-            holder.productTitle.text = item.title
         }
         else{
-            holder.productTitle.text = context.getString(R.string.product_title_error)
+            //holder.productTitle.text = context.getString(R.string.product_title_error)
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
         }
-
-        if (item.fullDesc.isNotEmpty()){
+        holder.productDescription.text = item.fullDesc
+        if (item.fullDesc.length > 10){
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
-            holder.productDescription.text = item.fullDesc
         }
         else{
-            holder.productDescription.text = context.getString(R.string.product_description_error)
+            //holder.productDescription.text = context.getString(R.string.product_description_error)
             holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
         }
 
