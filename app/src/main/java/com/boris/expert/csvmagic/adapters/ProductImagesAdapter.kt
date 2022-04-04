@@ -40,17 +40,7 @@ class ProductImagesAdapter(private val context: Context, private val productImag
             editBtn = itemView.findViewById(R.id.insales_product_image_edit_btn)
             removeBtn = itemView.findViewById(R.id.insales_product_remove_view)
 
-            imageView.setOnClickListener {
-                listener.onItemClick(layoutPosition)
-            }
 
-            editBtn.setOnClickListener {
-                listener.onItemEditClick(editBtn,layoutPosition)
-            }
-
-            removeBtn.setOnClickListener {
-                listener.onItemRemoveClick(layoutPosition)
-            }
         }
     }
 
@@ -105,13 +95,26 @@ class ProductImagesAdapter(private val context: Context, private val productImag
             .thumbnail(Glide.with(context).load(R.drawable.loader))
             .fitCenter()
             .into(viewHolder.imageView)
+
+                viewHolder.imageView.setOnClickListener {
+                    mListener!!.onItemClick(position-1)
+                }
+
+                viewHolder.editBtn.setOnClickListener {
+                    mListener!!.onItemEditClick(viewHolder.editBtn,position-1)
+                }
+
+                viewHolder.removeBtn.setOnClickListener {
+                    mListener!!.onItemRemoveClick(position-1)
+                }
+
             }
         }
 
     }
 
     override fun getItemCount(): Int {
-        return productImagesList.size
+        return productImagesList.size+1
     }
 
     override fun getItemViewType(position: Int): Int {

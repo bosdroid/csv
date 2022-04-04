@@ -189,7 +189,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             val arrayAdapter =
                 ArrayAdapter(
                     requireActivity(),
-                    android.R.layout.select_dialog_singlechoice,
+                    android.R.layout.select_dialog_item,
                     BaseActivity.getSortingList(requireActivity())
                 )
             builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
@@ -245,7 +245,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                adapter.notifyItemRangeChanged(0, productsList.size)
+                adapter.notifyDataSetChanged()
             }
 
     }
@@ -760,7 +760,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                         selectedImageBase64String = ""
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
-                                            showProducts()
+                                            fetchProducts()//showProducts()
                                         }, 3000)
                                     } else {
                                         BaseActivity.dismiss()
@@ -771,7 +771,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                     }
                                 } else {
                                     BaseActivity.dismiss()
-                                    showProducts()
+                                    fetchProducts()//showProducts()
                                 }
                             })
                     } else {
@@ -1071,7 +1071,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                         selectedInternetImage = ""
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
-                                            showProducts()
+                                            fetchProducts()//showProducts()
                                         }, 6000)
                                     } else {
                                         BaseActivity.dismiss()
@@ -1126,7 +1126,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                     if (response.get("status").asString == "200") {
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
-                                            showProducts()
+                                            fetchProducts()//showProducts()
                                         }, 3000)
                                     } else {
                                         BaseActivity.dismiss()
@@ -1137,7 +1137,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                                     }
                                 } else {
                                     BaseActivity.dismiss()
-                                    showProducts()
+                                    fetchProducts()//showProducts()
                                 }
                             })
 
@@ -1622,30 +1622,30 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 
         })
 
-        var pastVisiblesItems: Int
-        var visibleItemCount: Int
-        var totalItemCount: Int
+//        var pastVisiblesItems: Int
+//        var visibleItemCount: Int
+//        var totalItemCount: Int
 
-        productsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy > 0) { //check for scroll down
-                    visibleItemCount = linearLayoutManager.childCount
-                    totalItemCount = linearLayoutManager.itemCount
-                    pastVisiblesItems = linearLayoutManager.findFirstVisibleItemPosition()
-
-                    if (visibleItemCount + pastVisiblesItems >= totalItemCount) {
-//                             if (currentTotalProducts == 250){
-//                                 currentPage +=1
-//                                 fetchProducts(currentPage)
-//                             }
-//                            else{
-//                                Toast.makeText(context,getString(R.string.fetch_all_products),Toast.LENGTH_SHORT).show()
-//                            }
-                    }
-
-                }
-            }
-        })
+//        productsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                if (dy > 0) { //check for scroll down
+//                    visibleItemCount = linearLayoutManager.childCount
+//                    totalItemCount = linearLayoutManager.itemCount
+//                    pastVisiblesItems = linearLayoutManager.findFirstVisibleItemPosition()
+//
+//                    if (visibleItemCount + pastVisiblesItems >= totalItemCount) {
+////                             if (currentTotalProducts == 250){
+////                                 currentPage +=1
+////                                 fetchProducts(currentPage)
+////                             }
+////                            else{
+////                                Toast.makeText(context,getString(R.string.fetch_all_products),Toast.LENGTH_SHORT).show()
+////                            }
+//                    }
+//
+//                }
+//            }
+//        })
         val cacheList: ArrayList<Product>? = Paper.book().read(Constants.cacheProducts)
 
         if (cacheList != null && cacheList.size > 0) {
@@ -1666,6 +1666,12 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             fetchProducts(currentPage)
         }
 
+    }
+
+    private fun fetchProducts(){
+        currentPage = 1
+        dialogStatus = 1
+        fetchProducts(currentPage)
     }
 
     var launchActivity =

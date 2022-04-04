@@ -235,6 +235,7 @@ dependencies {
 
     implementation 'com.borjabravo:readmoretextview:2.1.0'
     implementation 'com.github.albfernandez:juniversalchardet:2.4.0'
+    implementation 'com.github.devendroid:ReadMoreOption:1.0.2'
 
     implementation 'io.paperdb:paperdb:2.6'
 

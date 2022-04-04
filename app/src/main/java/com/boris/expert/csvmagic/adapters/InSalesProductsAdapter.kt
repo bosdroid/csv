@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
+import com.boris.expert.csvmagic.utils.ReadMoreObject
+import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
@@ -83,7 +85,12 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             //holder.productTitle.text = context.getString(R.string.product_title_error)
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
         }
-        holder.productTitle.text = item.title
+        if (item.title.length < 30){
+            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,1)
+        }
+        else{
+            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,2)
+        }
 
         if (item.fullDesc.length > 10){
             holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
@@ -92,10 +99,15 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             //holder.productDescription.text = context.getString(R.string.product_description_error)
             holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
         }
-        holder.productDescription.text = item.fullDesc
+        if (item.fullDesc.length < 30){
+            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,1)
+        }
+        else{
+            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,5)
+        }
 
         holder.imagesRecyclerView.layoutManager =
-            LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+            WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         holder.imagesRecyclerView.hasFixedSize()
         val adapter = ProductImagesAdapter(context, item.productImages as ArrayList<ProductImages>)
         holder.imagesRecyclerView.adapter = adapter
