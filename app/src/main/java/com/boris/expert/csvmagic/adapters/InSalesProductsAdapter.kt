@@ -6,26 +6,31 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
-import com.boris.expert.csvmagic.utils.ReadMoreObject
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
+import tm.charlie.expandabletextview.ExpandableTextView
 
 class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<Product>) :
     RecyclerView.Adapter<InSalesProductsAdapter.ItemViewHolder>() {
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
-        fun onItemEditClick(position: Int,imagePosition:Int)
+        fun onItemEditClick(position: Int, imagePosition: Int)
         fun onItemAddImageClick(position: Int)
-        fun onItemRemoveClick(position: Int,imagePosition:Int)
+        fun onItemRemoveClick(position: Int, imagePosition: Int)
         fun onItemEditImageClick(position: Int)
+        fun onItemGrammarCheckClick(
+            position: Int,
+            grammarCheckBtn: AppCompatImageView,
+            title: MaterialTextView,
+            description: MaterialTextView,
+            grammarStatusView: MaterialTextView
+        )
     }
 
     private var mListener: OnItemClickListener? = null
@@ -41,6 +46,11 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val imagesRecyclerView: RecyclerView
 //        val addImageView:AppCompatImageView
         val editImageView:AppCompatImageView
+        val grammarCheckView:AppCompatImageView
+        val grammarStatusView:MaterialTextView
+        val titleSizeView:MaterialTextView
+        val descriptionSizeView:MaterialTextView
+        val totalImagesView:MaterialTextView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
@@ -48,10 +58,20 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             imagesRecyclerView = itemView.findViewById(R.id.products_images_recyclerview)
 //            addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
             editImageView = itemView.findViewById(R.id.insales_p_item_edit_image)
+            grammarCheckView = itemView.findViewById(R.id.grammar_check_icon_view)
+            grammarStatusView = itemView.findViewById(R.id.grammar_status_textview)
+            titleSizeView = itemView.findViewById(R.id.total_title_size_textview)
+            descriptionSizeView = itemView.findViewById(R.id.total_description_size_textview)
+            totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
 
-            productTitle.setOnClickListener {
+            productTitle.setOnClickListener {v->
+                (v as ExpandableTextView).toggle()
                 Listener.onItemClick(layoutPosition)
             }
+
+            productDescription.setOnClickListener(View.OnClickListener { v ->
+                (v as ExpandableTextView).toggle()
+            })
 
 //            addImageView.setOnClickListener {
 //                Listener.onItemAddImageClick(layoutPosition)
@@ -59,6 +79,15 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
             editImageView.setOnClickListener {
                 Listener.onItemEditImageClick(layoutPosition)
+            }
+            grammarCheckView.setOnClickListener {
+                Listener.onItemGrammarCheckClick(
+                    layoutPosition,
+                    grammarCheckView,
+                    productTitle,
+                    productDescription,
+                    grammarStatusView
+                )
             }
         }
     }
@@ -70,6 +99,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             parent,
             false
         )
+
         return ItemViewHolder(view, mListener!!)
     }
 
@@ -78,33 +108,53 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
         val item = productsItems[position]
 
+        holder.titleSizeView.setText("Title Size: ${item.title.length}")
+        holder.descriptionSizeView.setText("Description Size: ${item.fullDesc.length}")
+        holder.totalImagesView.setText("Total Images: ${item.productImages!!.size}")
         if (item.title.length > 10){
-            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
+            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
         }
         else{
             //holder.productTitle.text = context.getString(R.string.product_title_error)
-            holder.productTitle.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
+            holder.productTitle.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.light_red
+                )
+            )
         }
-        if (item.title.length < 30){
-            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,1)
-        }
-        else{
-            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,2)
-        }
+//        if (item.title.length < 30){
+//            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,1)
+//        }
+//        else{
+//            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,2)
+//        }
+        holder.productTitle.setText(item.title)
 
         if (item.fullDesc.length > 10){
-            holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
+            holder.productDescription.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.white
+                )
+            )
         }
         else{
             //holder.productDescription.text = context.getString(R.string.product_description_error)
-            holder.productDescription.setBackgroundColor(ContextCompat.getColor(context,R.color.light_red))
+            holder.productDescription.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.light_red
+                )
+            )
         }
-        if (item.fullDesc.length < 30){
-            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,1)
-        }
-        else{
-            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,5)
-        }
+//        if (item.fullDesc.length < 30){
+//            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,1)
+//        }
+//        else{
+//            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,5)
+//        }
+        holder.productDescription.setText(item.fullDesc)
 
         holder.imagesRecyclerView.layoutManager =
             WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -117,11 +167,11 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             }
 
             override fun onItemEditClick(btn: MaterialButton, imagePosition: Int) {
-               mListener!!.onItemEditClick(position,imagePosition)
+                mListener!!.onItemEditClick(position, imagePosition)
             }
 
             override fun onItemRemoveClick(imagePosition: Int) {
-                mListener!!.onItemRemoveClick(position,imagePosition)
+                mListener!!.onItemRemoveClick(position, imagePosition)
             }
 
             override fun onItemAddImageClick(position: Int) {
@@ -134,10 +184,22 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         } else {
             adapter.notifyDataSetChanged()
         }
+
+
     }
 
     override fun getItemCount(): Int {
         return productsItems.size
     }
+
+
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return position
+    }
+
 
 }

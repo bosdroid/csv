@@ -113,6 +113,7 @@ class ProductImagesAdapter(private val context: Context, private val productImag
 
     }
 
+
     override fun getItemCount(): Int {
         return productImagesList.size+1
     }

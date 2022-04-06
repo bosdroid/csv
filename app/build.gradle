@@ -246,4 +246,5 @@ dependencies {
     implementation "org.apmem.tools:layouts:1.10@aar"
 
     implementation 'com.google.api-ads:google-ads:17.0.1'
+    implementation 'tm.charlie.androidlib:expandable-textview:2.0.0'
 }

@@ -1457,6 +1457,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 }
             }
 
+            override fun onItemGrammarCheckClick(
+                position: Int,
+                grammarCheckBtn: AppCompatImageView,
+                title: MaterialTextView,
+                description: MaterialTextView,
+                grammarStatusView:MaterialTextView
+            ) {
+
+            }
+
         })
 
         var pastVisiblesItems: Int

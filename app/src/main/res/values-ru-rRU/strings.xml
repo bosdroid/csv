@@ -226,6 +226,8 @@
     <string name="filter_error_hightlighted_text">Highlighted Errors</string>
     <string name="error_products_not_found">Error Highlighted Product not found!</string>
     <string name="all_default">All (Default)</string>
+    <string name="grammar_status_text">Grammar Status:</string>
+    <string name="errors_text">Errors</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

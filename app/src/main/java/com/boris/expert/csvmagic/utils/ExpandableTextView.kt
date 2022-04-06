@@ -33,7 +33,7 @@ class ExpandableTextView @JvmOverloads constructor(context: Context,
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         if (!inited) {
-            setCollapsedLines(1)
+            setCollapsedLines(5)
             setMeasuredDimension(widthMeasureSpec, collapsedHeight)
         }
     }

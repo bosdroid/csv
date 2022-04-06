@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -14,6 +15,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.text.Editable
+import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
@@ -35,6 +37,7 @@ import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.adapters.KeywordsAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
+import com.boris.expert.csvmagic.interfaces.GrammarCallback
 import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.Category
 import com.boris.expert.csvmagic.model.KeywordObject
@@ -59,11 +62,12 @@ import com.google.firebase.database.ValueEventListener
 import io.paperdb.Paper
 import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
+import tm.charlie.expandabletextview.ExpandableTextView
 import java.util.*
 import java.util.regex.Pattern
 
 
-class InsalesFragment : Fragment(),View.OnClickListener {
+class InsalesFragment : Fragment(), View.OnClickListener {
 
     private lateinit var appSettings: AppSettings
     private lateinit var viewModel: SalesCustomersViewModel
@@ -115,7 +119,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        appSettings  = AppSettings(context)
+        appSettings = AppSettings(context)
         viewModel = ViewModelProviders.of(
             this,
             ViewModelFactory(SalesCustomersViewModel()).createFor()
@@ -133,7 +137,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-       return if (item.itemId == R.id.insales_logout) {
+        return if (item.itemId == R.id.insales_logout) {
             MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(getString(R.string.logout))
                 .setMessage(getString(R.string.logout_insales_warning_text))
@@ -155,8 +159,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                 }
                 .create().show()
             true
-        }
-        else if (item.itemId == R.id.insales_data_filter) {
+        } else if (item.itemId == R.id.insales_data_filter) {
             if (categoriesList.size == 0) {
                 viewModel.callCategories(requireActivity(), shopName, email, password)
                 viewModel.getCategoriesResponse().observe(this, Observer { response ->
@@ -195,14 +198,13 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     dialog!!.dismiss()
-                    if(which == 0){
+                    if (which == 0) {
                         resetProductList()
-                    }else if (which == 3) {
+                    } else if (which == 3) {
                         displayCategoryFilterDialog(categoriesList)
-                    } else if(which == 4){
+                    } else if (which == 4) {
                         displayErrorItems()
-                    }
-                    else {
+                    } else {
                         sorting(which)
                     }
 
@@ -230,23 +232,23 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 
     private fun displayErrorItems() {
         val matchedProducts = mutableListOf<Product>()
-            productsList.forEach { item ->
-                if (item.title.length < 10 || item.fullDesc.length < 10 || item.productImages!!.size == 0) {
-                    matchedProducts.add(item)
-                }
+        productsList.forEach { item ->
+            if (item.title.length < 10 || item.fullDesc.length < 10 || item.productImages!!.size == 0) {
+                matchedProducts.add(item)
             }
+        }
 
-            if (matchedProducts.isEmpty()) {
-                Toast.makeText(
-                    requireActivity(),
-                    getString(R.string.error_products_not_found),
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                productsList.clear()
-                productsList.addAll(matchedProducts)
-                adapter.notifyDataSetChanged()
-            }
+        if (matchedProducts.isEmpty()) {
+            Toast.makeText(
+                requireActivity(),
+                getString(R.string.error_products_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            productsList.clear()
+            productsList.addAll(matchedProducts)
+            adapter.notifyDataSetChanged()
+        }
 
     }
 
@@ -428,6 +430,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
             requireActivity(),
             productsList as ArrayList<Product>
         )
+
         productsRecyclerView.adapter = adapter
         adapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -1276,6 +1279,8 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                 val fullDescTextList = pItem.fullDesc.trim().split(" ")
 
 
+
+
                 for (i in 0 until titleTextList.size) {
                     val params = FlowLayout.LayoutParams(
                         FlowLayout.LayoutParams.WRAP_CONTENT,
@@ -1288,7 +1293,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     textView.tag = "title"
                     textView.id = i
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+//                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     titleTextViewList.add(textView)
 //                    textView.setOnClickListener(requireActivity())
                     textView.setOnTouchListener(ChoiceTouchListener())
@@ -1315,7 +1320,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     textView.setOnDragListener(ChoiceDragListener())
                     dynamicShortDescTextViewWrapper.addView(textView)
                 }
-
+//
                 for (i in 0 until fullDescTextList.size) {
                     val params = FlowLayout.LayoutParams(
                         FlowLayout.LayoutParams.WRAP_CONTENT,
@@ -1335,6 +1340,9 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     textView.setOnDragListener(ChoiceDragListener())
                     dynamicFullDescTextViewWrapper.addView(textView)
                 }
+
+
+
 
 
                 swapLayoutBtn.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -1442,7 +1450,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 //                titleBox.requestFocus()
 //                Constants.openKeyboar(context)
                 dialogCancelBtn.setOnClickListener {
-                    BaseActivity.hideSoftKeyboard(requireActivity(),dialogCancelBtn)
+                    BaseActivity.hideSoftKeyboard(requireActivity(), dialogCancelBtn)
 //                    Constants.hideKeyboar(requireActivity())
                     alert.dismiss()
                 }
@@ -1560,7 +1568,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                         }
                         pItem.fullDesc = stringBuilder.toString().trim()
                     } else {
-                        BaseActivity.hideSoftKeyboard(requireActivity(),dialogUpdateBtn)
+                        BaseActivity.hideSoftKeyboard(requireActivity(), dialogUpdateBtn)
                         pItem.title = titleText
                         pItem.shortDesc = shortDesc
                         pItem.fullDesc = fullDesc
@@ -1620,6 +1628,42 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                 }
             }
 
+            override fun onItemGrammarCheckClick(
+                position: Int,
+                grammarCheckBtn: AppCompatImageView,
+                title: MaterialTextView,
+                description: MaterialTextView,
+                grammarStatusView:MaterialTextView
+            ) {
+                val item = productsList[position]
+                BaseActivity.startLoading(requireActivity())
+                GrammarCheck.check(requireActivity(), item.title,title,1,grammarStatusView,object :GrammarCallback{
+                    override fun onSuccess(response: SpannableStringBuilder?, errors: Boolean) {
+                        GrammarCheck.check(requireActivity(), item.fullDesc,description,0,grammarStatusView,object :GrammarCallback{
+                            override fun onSuccess(
+                                response: SpannableStringBuilder?,
+                                errors: Boolean
+                            ) {
+                                BaseActivity.dismiss()
+                                if (errors){
+                                    grammarStatusView.setTextColor(Color.RED)
+                                    grammarStatusView.setText("Errors Found")
+                                    grammarCheckBtn.setImageResource(R.drawable.red_cross)
+                                }
+                                else{
+                                    grammarStatusView.setTextColor(Color.GREEN)
+                                    grammarStatusView.setText("No Errors")
+                                    grammarCheckBtn.setImageResource(R.drawable.green_check_48)
+                                }
+                            }
+
+                        })
+                    }
+
+                })
+
+            }
+
         })
 
 //        var pastVisiblesItems: Int
@@ -1668,7 +1712,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 
     }
 
-    private fun fetchProducts(){
+    private fun fetchProducts() {
         currentPage = 1
         dialogStatus = 1
         fetchProducts(currentPage)
@@ -1953,7 +1997,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-        when(v!!.id){
+        when (v!!.id) {
             R.id.insales_login_btn -> {
                 if (validation()) {
                     val shopName = insalesShopNameBox.text.toString().trim()
@@ -1983,7 +2027,7 @@ class InsalesFragment : Fragment(),View.OnClickListener {
                     BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
                 }
             }
-            else->{
+            else -> {
 
             }
         }
@@ -2035,14 +2079,16 @@ class InsalesFragment : Fragment(),View.OnClickListener {
 
     internal class MyDragListener : View.OnDragListener {
 
-override fun onDrag(v: View, event: DragEvent): Boolean {
+        override fun onDrag(v: View, event: DragEvent): Boolean {
             val action = event.action
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
                 }
-                DragEvent.ACTION_DRAG_ENTERED -> {}
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                }
 //                    v.setBackgroundDrawable(enterShape)
-                DragEvent.ACTION_DRAG_EXITED -> {}
+                DragEvent.ACTION_DRAG_EXITED -> {
+                }
 //                    v.setBackgroundDrawable(normalShape)
                 DragEvent.ACTION_DROP -> {
                     // Dropped, reassign View to ViewGroup
@@ -2067,7 +2113,8 @@ override fun onDrag(v: View, event: DragEvent): Boolean {
 //                    a = adapter(wordList, this@MainActivity)
 //                    list.setAdapter(a)
                 }
-                DragEvent.ACTION_DRAG_ENDED ->{} //v.setBackgroundDrawable(normalShape)
+                DragEvent.ACTION_DRAG_ENDED -> {
+                } //v.setBackgroundDrawable(normalShape)
                 else -> {
                 }
             }
