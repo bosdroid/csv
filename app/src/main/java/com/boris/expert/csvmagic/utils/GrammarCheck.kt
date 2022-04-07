@@ -2,27 +2,22 @@ package com.boris.expert.csvmagic.utils
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Color.green
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
-import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.GrammarCallback
-import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.google.android.material.textview.MaterialTextView
+import net.expandable.ExpandableTextView
 import org.json.JSONObject
-import tm.charlie.expandabletextview.ExpandableTextView
 
 
 object GrammarCheck {
     var grammarErrors = false
-    fun check(context: Context, text: String, output: MaterialTextView, type:Int, grammarStatusView:MaterialTextView,listener:GrammarCallback){
+    fun check(context: Context, text: String, output: ExpandableTextView, type:Int, grammarStatusView:MaterialTextView, listener:GrammarCallback){
         //BaseActivity.startLoading(context)
         val FirstPart = "https://api.textgears.com/grammar?key=vJTW1KUmyAxAEzAy&text="
         val Last_Part = "&language=ru-RU"

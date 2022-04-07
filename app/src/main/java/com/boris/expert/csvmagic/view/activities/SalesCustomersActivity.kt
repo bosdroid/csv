@@ -62,6 +62,7 @@ import android.widget.LinearLayout
 import android.view.ViewGroup
 import com.boris.expert.csvmagic.adapters.KeywordsAdapter
 import com.boris.expert.csvmagic.model.KeywordObject
+import net.expandable.ExpandableTextView
 import kotlin.collections.ArrayList
 
 
@@ -1460,8 +1461,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
             override fun onItemGrammarCheckClick(
                 position: Int,
                 grammarCheckBtn: AppCompatImageView,
-                title: MaterialTextView,
-                description: MaterialTextView,
+                title: ExpandableTextView,
+                description: ExpandableTextView,
                 grammarStatusView:MaterialTextView
             ) {
 

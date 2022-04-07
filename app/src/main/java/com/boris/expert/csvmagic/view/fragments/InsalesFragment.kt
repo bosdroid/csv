@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -60,9 +59,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import io.paperdb.Paper
+import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
-import tm.charlie.expandabletextview.ExpandableTextView
 import java.util.*
 import java.util.regex.Pattern
 
@@ -1631,8 +1630,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             override fun onItemGrammarCheckClick(
                 position: Int,
                 grammarCheckBtn: AppCompatImageView,
-                title: MaterialTextView,
-                description: MaterialTextView,
+                title: ExpandableTextView,
+                description: ExpandableTextView,
                 grammarStatusView:MaterialTextView
             ) {
                 val item = productsList[position]

@@ -13,7 +13,7 @@ import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
-import tm.charlie.expandabletextview.ExpandableTextView
+import net.expandable.ExpandableTextView
 
 class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<Product>) :
     RecyclerView.Adapter<InSalesProductsAdapter.ItemViewHolder>() {
@@ -27,8 +27,8 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         fun onItemGrammarCheckClick(
             position: Int,
             grammarCheckBtn: AppCompatImageView,
-            title: MaterialTextView,
-            description: MaterialTextView,
+            title: ExpandableTextView,
+            description: ExpandableTextView,
             grammarStatusView: MaterialTextView
         )
     }
@@ -41,8 +41,8 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
     class ItemViewHolder(itemView: View, Listener: OnItemClickListener) :
         RecyclerView.ViewHolder(itemView) {
-        val productTitle: MaterialTextView
-        val productDescription: MaterialTextView
+        val productTitle: ExpandableTextView
+        val productDescription: ExpandableTextView
         val imagesRecyclerView: RecyclerView
 //        val addImageView:AppCompatImageView
         val editImageView:AppCompatImageView
@@ -65,12 +65,12 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
 
             productTitle.setOnClickListener {v->
-                (v as ExpandableTextView).toggle()
+                //(v as ExpandableTextView).toggle()
                 Listener.onItemClick(layoutPosition)
             }
 
             productDescription.setOnClickListener(View.OnClickListener { v ->
-                (v as ExpandableTextView).toggle()
+                //(v as ExpandableTextView).toggle()
             })
 
 //            addImageView.setOnClickListener {
