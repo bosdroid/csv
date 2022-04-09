@@ -13,6 +13,7 @@ class KeywordsAdapter(val context: Context, val keywordsList: ArrayList<KeywordO
     RecyclerView.Adapter<KeywordsAdapter.ItemViewHolder>() {
 
     interface OnItemClickListener {
+        fun onItemClick(position: Int)
         fun onItemAddTitleClick(position: Int)
         fun onItemAddDescriptionClick(position: Int)
     }
@@ -32,6 +33,9 @@ class KeywordsAdapter(val context: Context, val keywordsList: ArrayList<KeywordO
 
         init {
             keywordView = itemView.findViewById(R.id.keyword_item_name_view)
+            itemView.setOnClickListener {
+                listener.onItemClick(layoutPosition)
+            }
 //            addTitleView = itemView.findViewById(R.id.keyword_item_add_title_view)
 //            addDescriptionView = itemView.findViewById(R.id.keyword_item_add_description_view)
 
@@ -43,7 +47,7 @@ class KeywordsAdapter(val context: Context, val keywordsList: ArrayList<KeywordO
 //                listener.onItemAddDescriptionClick(layoutPosition)
 //            }
 
-            keywordView.setOnLongClickListener(Longpress())
+            //keywordView.setOnLongClickListener(Longpress())
 
         }
 

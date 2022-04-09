@@ -123,11 +123,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             this,
             ViewModelFactory(SalesCustomersViewModel()).createFor()
         )[SalesCustomersViewModel::class.java]
-        keywordsList.add(KeywordObject("One", 1))
-        keywordsList.add(KeywordObject("Two", 1))
-        keywordsList.add(KeywordObject("Three", 1))
-        keywordsList.add(KeywordObject("Four", 1))
-        keywordsList.add(KeywordObject("Five", 1))
+        keywordsList.add(KeywordObject("Keyword1", 1))
+        keywordsList.add(KeywordObject("Keyword2", 1))
+        keywordsList.add(KeywordObject("Keyword3", 1))
+        keywordsList.add(KeywordObject("Keyword4", 1))
+        keywordsList.add(KeywordObject("Keyword5", 1))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1179,6 +1179,51 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 keywordsAdapter.setOnItemClickListener(object :
                     KeywordsAdapter.OnItemClickListener {
+                    override fun onItemClick(position: Int) {
+                        val item = keywordsList[position]
+                        val builder = MaterialAlertDialogBuilder(requireActivity())
+                        val options = arrayOf("+add in title", "+add in description")
+                        var isTitleChecked = false
+                        var isDescriptionChecked = false
+                        val checkedItems = booleanArrayOf(false, false)
+                        builder.setMultiChoiceItems(
+                            options,
+                            checkedItems
+                        ) { dialog, which, isCheck ->
+                            when (which) {
+                                0 -> {
+                                    isTitleChecked = isCheck
+                                }
+                                1 -> {
+                                    isDescriptionChecked = isCheck
+                                }
+                                else -> {
+
+                                }
+                            }
+                        }
+                        builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
+
+                            if (isTitleChecked) {
+                                val textView = getMaterialTextView(item.keyword)
+                                dynamicTitleTextViewWrapper.addView(textView, 0)
+                                dynamicTitleTextViewWrapper.invalidate()
+                            }
+
+                            if (isDescriptionChecked) {
+                                val textView = getMaterialTextView(item.keyword)
+                                dynamicFullDescTextViewWrapper.addView(textView, 0)
+                                dynamicFullDescTextViewWrapper.invalidate()
+                            }
+                        }
+                        builder.setNegativeButton(
+                            requireActivity().resources.getString(R.string.cancel_text),
+                            null
+                        )
+                        val alert = builder.create()
+                        alert.show()
+                    }
+
                     override fun onItemAddTitleClick(position: Int) {
                         val item = keywordsList[position]
                         val params = FlowLayout.LayoutParams(
@@ -1292,7 +1337,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     textView.tag = "title"
                     textView.id = i
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     titleTextViewList.add(textView)
 //                    textView.setOnClickListener(requireActivity())
                     textView.setOnTouchListener(ChoiceTouchListener())
@@ -1632,34 +1677,45 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 grammarCheckBtn: AppCompatImageView,
                 title: ExpandableTextView,
                 description: ExpandableTextView,
-                grammarStatusView:MaterialTextView
+                grammarStatusView: MaterialTextView
             ) {
                 val item = productsList[position]
                 BaseActivity.startLoading(requireActivity())
-                GrammarCheck.check(requireActivity(), item.title,title,1,grammarStatusView,object :GrammarCallback{
-                    override fun onSuccess(response: SpannableStringBuilder?, errors: Boolean) {
-                        GrammarCheck.check(requireActivity(), item.fullDesc,description,0,grammarStatusView,object :GrammarCallback{
-                            override fun onSuccess(
-                                response: SpannableStringBuilder?,
-                                errors: Boolean
-                            ) {
-                                BaseActivity.dismiss()
-                                if (errors){
-                                    grammarStatusView.setTextColor(Color.RED)
-                                    grammarStatusView.setText("Errors Found")
-                                    grammarCheckBtn.setImageResource(R.drawable.red_cross)
-                                }
-                                else{
-                                    grammarStatusView.setTextColor(Color.GREEN)
-                                    grammarStatusView.setText("No Errors")
-                                    grammarCheckBtn.setImageResource(R.drawable.green_check_48)
-                                }
-                            }
+                GrammarCheck.check(
+                    requireActivity(),
+                    item.title,
+                    title,
+                    1,
+                    grammarStatusView,
+                    object : GrammarCallback {
+                        override fun onSuccess(response: SpannableStringBuilder?, errors: Boolean) {
+                            GrammarCheck.check(
+                                requireActivity(),
+                                item.fullDesc,
+                                description,
+                                0,
+                                grammarStatusView,
+                                object : GrammarCallback {
+                                    override fun onSuccess(
+                                        response: SpannableStringBuilder?,
+                                        errors: Boolean
+                                    ) {
+                                        BaseActivity.dismiss()
+                                        if (errors) {
+                                            grammarStatusView.setTextColor(Color.RED)
+                                            grammarStatusView.setText("Errors Found")
+                                            grammarCheckBtn.setImageResource(R.drawable.red_cross)
+                                        } else {
+                                            grammarStatusView.setTextColor(Color.GREEN)
+                                            grammarStatusView.setText("No Errors")
+                                            grammarCheckBtn.setImageResource(R.drawable.green_check_48)
+                                        }
+                                    }
 
-                        })
-                    }
+                                })
+                        }
 
-                })
+                    })
 
             }
 
@@ -1709,6 +1765,36 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             fetchProducts(currentPage)
         }
 
+    }
+
+    private fun getMaterialTextView(text:String):MaterialTextView{
+        val params = FlowLayout.LayoutParams(
+            FlowLayout.LayoutParams.WRAP_CONTENT,
+            FlowLayout.LayoutParams.WRAP_CONTENT
+        )
+        params.setMargins(5, 5, 5, 5)
+        val textView = MaterialTextView(requireActivity())
+        textView.layoutParams = params
+        textView.text = text
+        textView.tag = "title"
+        textView.setTextColor(
+            ContextCompat.getColor(
+                requireActivity(),
+                R.color.white
+            )
+        )
+        textView.setBackgroundColor(
+            ContextCompat.getColor(
+                requireActivity(),
+                R.color.primary_positive_color
+            )
+        )
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        //titleTextViewList.add(textView)
+        //textView.setOnClickListener(requireActivity())
+        textView.setOnTouchListener(ChoiceTouchListener())
+        textView.setOnDragListener(ChoiceDragListener())
+        return textView
     }
 
     private fun fetchProducts() {

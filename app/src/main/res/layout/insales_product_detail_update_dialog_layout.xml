@@ -195,6 +195,14 @@
             android:id="@+id/second_linear_layout"
 
             >
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/eightDpMargin"
+                android:id="@+id/keywords_recyclerview"
+                xmlns:tools="http://schemas.android.com/tools"
+                tools:listitem="@layout/keyword_item_row_design"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -228,16 +236,6 @@
                 android:id="@+id/dynamic_insales_short_description_textview_wrapper"
                 f:layoutDirection="rtl"
                 />
-
-             <androidx.recyclerview.widget.RecyclerView
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_margin="@dimen/eightDpMargin"
-                 android:id="@+id/keywords_recyclerview"
-                 xmlns:tools="http://schemas.android.com/tools"
-                 tools:listitem="@layout/keyword_item_row_design"
-                 />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
