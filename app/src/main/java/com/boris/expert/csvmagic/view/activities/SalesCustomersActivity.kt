@@ -1057,6 +1057,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                 keywordsRecyclerView.adapter = keywordsAdapter
 
                 keywordsAdapter.setOnItemClickListener(object : KeywordsAdapter.OnItemClickListener{
+                    override fun onItemClick(position: Int) {
+
+                    }
+
                     override fun onItemAddTitleClick(position: Int) {
                         val item = keywordsList[position]
                         val params = FlowLayout.LayoutParams(
