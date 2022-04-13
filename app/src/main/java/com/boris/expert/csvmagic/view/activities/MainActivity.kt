@@ -17,6 +17,7 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -80,6 +81,7 @@ import org.json.JSONObject
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.lang.Long.parseLong
+import java.math.RoundingMode
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -115,6 +117,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private lateinit var homeCsvButton: AppCompatButton
     private lateinit var homeInsalesButton: AppCompatButton
     private var menu: Menu? = null
+    private lateinit var homeCurrentCreditsLayout:LinearLayout
+    private lateinit var homeCurrentCreditsView:MaterialTextView
+    var userCurrentCreditsValue: Float = 0F
 
     companion object {
         lateinit var context: Context
@@ -132,6 +137,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         initViews()
         setUpToolbar()
+        getUserCredit()
         getAccountsPermission()
         initializeGoogleLoginParameters()
 
@@ -183,7 +189,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         homeInsalesButton = findViewById(R.id.home_insales_btn)
         homeCsvButton.setOnClickListener(this)
         homeInsalesButton.setOnClickListener(this)
-
+        homeCurrentCreditsLayout = findViewById(R.id.home_current_credits_layout)
+        homeCurrentCreditsView = findViewById(R.id.home_current_credits_view)
 
         historyBtn.setOnClickListener {
             startActivity(Intent(context, BarcodeHistoryActivity::class.java))
@@ -295,6 +302,38 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     }
 
+    private fun getUserCredit() {
+        if (auth.currentUser != null) {
+
+            val userId = auth.currentUser!!.uid
+            Constants.firebaseUserId = userId
+            firebaseDatabase.child(Constants.firebaseUserCredits)
+                .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+
+                        if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                            val previousCredits =
+                                snapshot.child("credits").getValue(String::class.java)
+                            userCurrentCreditsValue = if (previousCredits!!.isNotEmpty()) {
+                                previousCredits.toFloat()
+                            } else {
+                                0F
+                            }
+                        }
+                        val roundedCreditValues =
+                            userCurrentCreditsValue.toBigDecimal().setScale(2, RoundingMode.UP)
+                                .toDouble()
+                        homeCurrentCreditsView.text = "$roundedCreditValues"
+                        appSettings.putString(Constants.userCreditsValue, "$roundedCreditValues")
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+
+                    }
+
+                })
+        }
+    }
     private fun activeButtonFocus(btn: AppCompatButton, otherBtn: AppCompatButton, type: String) {
 
         btn.setBackgroundColor(ContextCompat.getColor(context,R.color.secondary_positive_color))

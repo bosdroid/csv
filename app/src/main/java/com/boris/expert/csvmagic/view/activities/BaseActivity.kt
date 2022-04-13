@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatRatingBar
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
@@ -73,10 +74,24 @@ open class BaseActivity : AppCompatActivity() {
             }
             .addOnFailureListener {
                 // Error.
-                Log.d("TEST199",it.localizedMessage!!.toString())
+                Log.d("TEST199", it.localizedMessage!!.toString())
             }
 
     }
+
+//    override fun setContentView(layoutResID: Int) {
+//       // super.setContentView(layoutResID)
+//        val screenRootView = ConstraintLayout(this)
+//        val topView = LayoutInflater.from(applicationContext).inflate(
+//            R.layout.global_current_credits_layout,
+//            null
+//        )
+//        val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+//        val screenView = layoutInflater.inflate(layoutResID, null)
+//        screenRootView.addView(topView)
+//        screenRootView.addView(screenView)
+//        super.setContentView(screenRootView)
+//    }
 
     companion object {
         private var prDownloader: DownloadRequest? = null
@@ -129,7 +144,11 @@ open class BaseActivity : AppCompatActivity() {
             return df.format(c).toUpperCase(Locale.ENGLISH)
         }
 
-        fun uploadImageOnFirebaseStorage(referenceName:String,imagePath:String,listener: UploadImageCallback){
+        fun uploadImageOnFirebaseStorage(
+            referenceName: String,
+            imagePath: String,
+            listener: UploadImageCallback
+        ){
             val storageReference = FirebaseStorage.getInstance().reference
             if (FirebaseAuth.getInstance().currentUser != null) {
 
@@ -154,8 +173,8 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
-        fun getTimeStampFromStringDate(date:String):Long{
-            val sdf = SimpleDateFormat("dd-MM-yyyy",Locale.ENGLISH)
+        fun getTimeStampFromStringDate(date: String):Long{
+            val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
             val parseDate = sdf.parse(date)
             return parseDate!!.time
         }
@@ -493,7 +512,7 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
 
-        fun startLoading(context: Context,message: String) {
+        fun startLoading(context: Context, message: String) {
             if (alert == null) {
                 val builder = MaterialAlertDialogBuilder(context)
                 val layout = LayoutInflater.from(context).inflate(R.layout.custom_loading, null)
@@ -679,10 +698,13 @@ open class BaseActivity : AppCompatActivity() {
 
         fun getSearchImageDetail(){
             val firebaseDatabase = FirebaseDatabase.getInstance().reference
-            firebaseDatabase.child("SearchImagesLimit").addListenerForSingleValueEvent(object : ValueEventListener{
+            firebaseDatabase.child("SearchImagesLimit").addListenerForSingleValueEvent(object :
+                ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    Constants.searchImageCreditPrice = snapshot.child("credits").getValue(Int::class.java) as Int
-                    Constants.searchImagesLimit = snapshot.child("images").getValue(Int::class.java) as Int
+                    Constants.searchImageCreditPrice =
+                        snapshot.child("credits").getValue(Int::class.java) as Int
+                    Constants.searchImagesLimit =
+                        snapshot.child("images").getValue(Int::class.java) as Int
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -737,11 +759,11 @@ open class BaseActivity : AppCompatActivity() {
         fun updateUserFeature(
             context: Context,
             user_id: String,
-            start_date:String,
-            end_date:String,
-            featureName:String,
-            op:String,
-            type:String,
+            start_date: String,
+            end_date: String,
+            featureName: String,
+            op: String,
+            type: String,
             listener: APICallback
         ) {
             val stringRequest = object : StringRequest(
@@ -869,20 +891,20 @@ open class BaseActivity : AppCompatActivity() {
                             for (i in 0 until features.length()) {
                                 val feature = features.getJSONObject(i)
                                 val status = feature.getInt("status")
-                                when(feature.getString("feature")){
-                                    "compressor_feature"->{
+                                when (feature.getString("feature")) {
+                                    "compressor_feature" -> {
                                         Constants.compressorFeatureStatus = status
                                     }
-                                    "modes_switcher"->{
+                                    "modes_switcher" -> {
                                         Constants.modesSwitcherFeatureStatus = status
                                     }
-                                    "premium_support"->{
+                                    "premium_support" -> {
                                         Constants.premiumSupportFeatureStatus = status
                                     }
-                                    "unlimited_tables"->{
+                                    "unlimited_tables" -> {
                                         Constants.unlimitedTablesFeatureStatus = status
                                     }
-                                    else->{
+                                    else -> {
 
                                     }
                                 }

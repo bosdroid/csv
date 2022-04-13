@@ -1,14 +1,13 @@
 package com.boris.expert.csvmagic.utils
 
 import android.content.ClipDescription
-import android.content.Context
 import android.view.DragEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.boris.expert.csvmagic.R
 import com.google.android.material.textview.MaterialTextView
-import org.apmem.tools.layouts.FlowLayout
+
 
 class ChoiceDragListener : View.OnDragListener {
     override fun onDrag(v: View?, event: DragEvent?): Boolean {
@@ -32,7 +31,7 @@ class ChoiceDragListener : View.OnDragListener {
                 return true
             }
             DragEvent.ACTION_DROP -> {
-//                v!!.invalidate()
+
                 val dragged = event.localState as MaterialTextView
                 val targetView = v as MaterialTextView
 
@@ -44,7 +43,7 @@ class ChoiceDragListener : View.OnDragListener {
 
 
 
-                dragged.setTextColor(ContextCompat.getColor(dragged.context,R.color.white))
+                dragged.setTextColor(ContextCompat.getColor(dragged.context, R.color.white))
                 dragged.setBackgroundColor(ContextCompat.getColor(dragged.context,R.color.secondary_positive_color))
 
                 oldOwner.removeView(dragged)
@@ -52,7 +51,7 @@ class ChoiceDragListener : View.OnDragListener {
 
                 newOwner.removeView(v)
                 oldOwner.addView(v,draggedPosition)
-
+                v!!.invalidate()
                 return true
 
             }

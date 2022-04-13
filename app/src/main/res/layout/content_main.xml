@@ -108,4 +108,34 @@
             android:visibility="gone"
             />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/home_current_credits_layout"
+        android:gravity="end"
+        android:background="@color/black"
+        android:alpha="0.4"
+        >
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/current_credits_text"
+            android:textColor="@color/white"
+            android:textSize="@dimen/mediumText" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/home_current_credits_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/eightDpMargin"
+            android:text="0.0"
+            android:textColor="@color/white"
+            android:textSize="@dimen/mediumText" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
