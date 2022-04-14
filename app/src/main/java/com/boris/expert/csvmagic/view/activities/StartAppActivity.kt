@@ -1,11 +1,16 @@
 package com.boris.expert.csvmagic.view.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +44,9 @@ import com.google.api.services.sheets.v4.SheetsScopes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
+import java.math.RoundingMode
 
 class StartAppActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -56,6 +63,8 @@ class StartAppActivity : AppCompatActivity(), View.OnClickListener {
     private val httpTransport = NetHttpTransport()
     private val jacksonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
     private var user: User? = null
+    private lateinit var firebaseDatabase: DatabaseReference
+    var userCurrentCreditsValue: Float = 0F
 
     companion object{
         var credential: GoogleAccountCredential? = null
@@ -71,6 +80,7 @@ class StartAppActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun initViews(){
         context = this
+        firebaseDatabase = FirebaseDatabase.getInstance().reference
         auth = Firebase.auth
         appSettings = AppSettings(context)
         loginBtn = findViewById(R.id.login_btn)
@@ -197,10 +207,6 @@ class StartAppActivity : AppCompatActivity(), View.OnClickListener {
                 if (isLastSignUser == "new") {
                     appSettings.putBoolean(Constants.isLogin, true)
                 }
-
-                startActivity(Intent(context,MainActivity::class.java)).apply {
-                    finish()
-                }
                 }
         } catch (e: Exception) {
 
@@ -213,8 +219,151 @@ class StartAppActivity : AppCompatActivity(), View.OnClickListener {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-
+                    add50CreditsFree()
                 }
             }
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun add50CreditsFree() {
+        BaseActivity.startLoading(context)
+        val user = Firebase.auth.currentUser
+        if (user != null) {
+
+            val id = user.uid as String
+            Constants.firebaseUserId = id
+            val email = user.email.toString()
+            val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+
+            val usedIdReference = firebaseDatabase.child("USERS_DEVICES_EMAILS")
+            val params = HashMap<String, Any>()
+            params["email"] = email
+            params["deviceId"] = deviceId
+
+            usedIdReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.hasChildren()) {
+                        var isFound = false
+
+                        for (item: DataSnapshot in snapshot.children) {
+                            if (item.child("deviceId").getValue(String::class.java) == deviceId &&
+                                item.child("email").getValue(String::class.java) == email) {
+                                isFound = true
+
+                                break
+                            }
+                        }
+
+                        if (!isFound) {
+                            firebaseDatabase.child(Constants.firebaseUserCredits)
+                                .child(id).addListenerForSingleValueEvent(object :
+                                    ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+
+                                        if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                            val previousCredits =
+                                                snapshot.child("credits").getValue(String::class.java)
+                                            userCurrentCreditsValue =
+                                                if (previousCredits!!.isNotEmpty()) {
+                                                    previousCredits.toFloat()
+                                                } else {
+                                                    0F
+                                                }
+                                        }
+
+                                        val roundedCreditValues =
+                                            userCurrentCreditsValue.toBigDecimal()
+                                                .setScale(2, RoundingMode.UP)
+                                                .toDouble()
+                                        val totalCredits = roundedCreditValues + 50
+                                        val hashMap = HashMap<String, Any>()
+
+                                        hashMap["credits"] = totalCredits.toString()
+                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                                            .child(id)
+                                            .updateChildren(hashMap)
+                                            .addOnSuccessListener {
+                                                usedIdReference.push().setValue(params)
+                                                moveNext()
+                                            }
+                                            .addOnFailureListener {
+                                                moveNext()
+                                            }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        moveNext()
+                                    }
+
+                                })
+                        }
+                        else {
+                            moveNext()
+                        }
+                    } else {
+
+                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                            .child(id).addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+
+                                    if (snapshot.hasChildren() && snapshot.hasChild("credits")) {
+                                        val previousCredits =
+                                            snapshot.child("credits").getValue(String::class.java)
+                                        userCurrentCreditsValue =
+                                            if (previousCredits!!.isNotEmpty()) {
+                                                previousCredits.toFloat()
+                                            } else {
+                                                0F
+                                            }
+                                    }
+
+                                    val roundedCreditValues =
+                                        userCurrentCreditsValue.toBigDecimal()
+                                            .setScale(2, RoundingMode.UP)
+                                            .toDouble()
+                                    val totalCredits = roundedCreditValues + 50
+                                    val hashMap = HashMap<String, Any>()
+
+                                    hashMap["credits"] = totalCredits.toString()
+                                    firebaseDatabase.child(Constants.firebaseUserCredits)
+                                        .child(id)
+                                        .updateChildren(hashMap)
+                                        .addOnSuccessListener {
+                                            usedIdReference.push().setValue(params)
+                                            moveNext()
+                                        }
+                                        .addOnFailureListener {
+                                            moveNext()
+                                        }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    moveNext()
+                                }
+
+                            })
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    moveNext()
+                }
+
+            })
+        }
+        else{
+            moveNext()
+        }
+    }
+
+    private fun moveNext(){
+
+        Handler(Looper.myLooper()!!).postDelayed({
+            BaseActivity.dismiss()
+            startActivity(Intent(context,MainActivity::class.java)).apply {
+                finish()
+            }
+        },2000)
+
     }
 }

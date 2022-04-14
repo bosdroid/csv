@@ -1,5 +1,6 @@
 package com.boris.expert.csvmagic.view.activities
 
+import android.R.layout
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
@@ -10,15 +11,16 @@ import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatRatingBar
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
@@ -77,21 +79,9 @@ open class BaseActivity : AppCompatActivity() {
                 Log.d("TEST199", it.localizedMessage!!.toString())
             }
 
+
     }
 
-//    override fun setContentView(layoutResID: Int) {
-//       // super.setContentView(layoutResID)
-//        val screenRootView = ConstraintLayout(this)
-//        val topView = LayoutInflater.from(applicationContext).inflate(
-//            R.layout.global_current_credits_layout,
-//            null
-//        )
-//        val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
-//        val screenView = layoutInflater.inflate(layoutResID, null)
-//        screenRootView.addView(topView)
-//        screenRootView.addView(screenView)
-//        super.setContentView(screenRootView)
-//    }
 
     companion object {
         private var prDownloader: DownloadRequest? = null
@@ -981,5 +971,6 @@ open class BaseActivity : AppCompatActivity() {
 
 
     }
+
 
 }

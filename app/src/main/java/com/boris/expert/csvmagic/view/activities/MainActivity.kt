@@ -1,6 +1,7 @@
 package com.boris.expert.csvmagic.view.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.StrictMode
+import android.provider.Settings
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.Gravity
@@ -84,10 +86,11 @@ import java.lang.Long.parseLong
 import java.math.RoundingMode
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.HashMap
 
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener,
-    OnCompleteAction, ScannerInterface, View.OnClickListener,ScanFragment.FragmentChangeListener {
+    OnCompleteAction, ScannerInterface, View.OnClickListener, ScanFragment.FragmentChangeListener {
 
 
     private lateinit var eventListener: ValueEventListener
@@ -117,8 +120,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private lateinit var homeCsvButton: AppCompatButton
     private lateinit var homeInsalesButton: AppCompatButton
     private var menu: Menu? = null
-    private lateinit var homeCurrentCreditsLayout:LinearLayout
-    private lateinit var homeCurrentCreditsView:MaterialTextView
+    private lateinit var homeCurrentCreditsLayout: LinearLayout
+    private lateinit var homeCurrentCreditsView: MaterialTextView
     var userCurrentCreditsValue: Float = 0F
 
     companion object {
@@ -234,7 +237,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //
 //            true
 //        }
-        activeButtonFocus(homeCsvButton, homeInsalesButton,"table")
+        activeButtonFocus(homeCsvButton, homeInsalesButton, "table")
         supportFragmentManager.beginTransaction()
 //                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             .add(
@@ -334,14 +337,15 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 })
         }
     }
+
     private fun activeButtonFocus(btn: AppCompatButton, otherBtn: AppCompatButton, type: String) {
 
-        btn.setBackgroundColor(ContextCompat.getColor(context,R.color.secondary_positive_color))
+        btn.setBackgroundColor(ContextCompat.getColor(context, R.color.secondary_positive_color))
 //        btn.isFocusableInTouchMode = true
 //        btn.requestFocus()
 //        otherBtn.isFocusable = false
 //        otherBtn.isFocusableInTouchMode = false
-        otherBtn.setBackgroundColor(ContextCompat.getColor(context,R.color.primary_positive_color))
+        otherBtn.setBackgroundColor(ContextCompat.getColor(context, R.color.primary_positive_color))
     }
 
     private fun getAccountsPermission() {
@@ -843,7 +847,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             finish()
         } else {
             //bottomNavigation.selectedItemId = R.id.bottom_scanner
-            activeButtonFocus(homeCsvButton, homeInsalesButton,"table")
+            activeButtonFocus(homeCsvButton, homeInsalesButton, "table")
             supportFragmentManager.beginTransaction().replace(
                 R.id.fragment_container,
                 ScanFragment(),
@@ -1037,6 +1041,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 }
 
                 add5MbFreeStorage()
+
                 val alreadyImported = appSettings.getString(Constants.dbImport)
                 if (alreadyImported != null && alreadyImported.isEmpty()) {
                     DatabaseHandler.importer(context, "login")
@@ -1281,7 +1286,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.home_csv_btn -> {
-                activeButtonFocus(homeCsvButton, homeInsalesButton,"table")
+                activeButtonFocus(homeCsvButton, homeInsalesButton, "table")
                 supportFragmentManager.beginTransaction()
 //                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .replace(
@@ -1294,7 +1299,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
             }
             R.id.home_insales_btn -> {
-                activeButtonFocus(homeInsalesButton, homeCsvButton,"insales")
+                activeButtonFocus(homeInsalesButton, homeCsvButton, "insales")
                 supportFragmentManager.beginTransaction()
 //                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .replace(
