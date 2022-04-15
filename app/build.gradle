@@ -247,4 +247,7 @@ dependencies {
 
     implementation 'com.google.api-ads:google-ads:17.0.1'
     implementation 'com.github.yuzumone:ExpandableTextView:0.3.1'
+
+    implementation 'com.afollestad.material-dialogs:core:3.3.0'
+
 }

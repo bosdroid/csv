@@ -91,8 +91,8 @@ class StartAppActivity : AppCompatActivity(), View.OnClickListener {
         mGoogleSignInClient = GoogleSignIn.getClient(this, signInOptions)
 
         val acct: GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(context)
-
-        if (acct != null) {
+        var i=0;
+        if (acct!=null) {
             startActivity(Intent(context,MainActivity::class.java)).apply {
                 finish()
             }

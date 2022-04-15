@@ -2,6 +2,7 @@ package com.boris.expert.csvmagic.view.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -30,7 +31,11 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.android.volley.AuthFailureError
+import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
@@ -52,6 +57,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.database.DataSnapshot
@@ -61,6 +67,7 @@ import com.google.firebase.database.ValueEventListener
 import io.paperdb.Paper
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
@@ -77,6 +84,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private lateinit var insalesEmailBox: TextInputEditText
     private lateinit var insalesPasswordBox: TextInputEditText
     private lateinit var insalesLoginBtn: MaterialButton
+    private lateinit var Fab: FloatingActionButton
     private var productsList = mutableListOf<Product>()
     private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
@@ -110,6 +118,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     var defaultLayout = 0
 
+    //Saiful
+    var listofid = mutableListOf<String>()
+
+
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
         private lateinit var dynamicFullDescTextViewWrapper: FlowLayout
@@ -132,6 +144,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        listofid.add("Select Category")
+        idlist()
         setHasOptionsMenu(true)
     }
 
@@ -353,7 +367,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         searchBox = view.findViewById(R.id.insales_products_search_box)
         searchImageBtn = view.findViewById(R.id.insales_products_search_btn)
         searchImageBtn.setOnClickListener(this)
-
+        Fab = view.findViewById<FloatingActionButton>(R.id.fab);
+        Fab.setOnClickListener() {
+            //Toast.makeText(this,"Fab", Toast.LENGTH_LONG).show();
+            fab()
+        }
 
         searchBox.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -1767,7 +1785,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     }
 
-    private fun getMaterialTextView(text:String):MaterialTextView{
+    private fun getMaterialTextView(text: String): MaterialTextView {
         val params = FlowLayout.LayoutParams(
             FlowLayout.LayoutParams.WRAP_CONTENT,
             FlowLayout.LayoutParams.WRAP_CONTENT
@@ -2205,6 +2223,154 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
             return true
         }
+    }
+
+    //Saiful
+    private fun fab() {
+        val view = LayoutInflater.from(context).inflate(R.layout.addproductdialouge, null)
+        val builder = AlertDialog.Builder(context).setView(view)
+            .setPositiveButton("Add", { dialog, whichbutton -> addproduct(view) })
+        builder.setNegativeButton("Cancel", { dialog, whichbutton -> })
+
+        builder.show()
+        val id = view.findViewById<Spinner>(R.id.category_id)
+        val adapter = ArrayAdapter(
+            requireActivity().applicationContext,
+            android.R.layout.simple_spinner_dropdown_item,
+            listofid
+        )
+        id.adapter = adapter
+
+        val submit = view.findViewById<Button>(R.id.submit)
+
+        submit.setOnClickListener() {
+            addproduct(view)
+        }
+
+
+    }
+
+    private fun idlist() {
+
+        val url = " https://itmagic.app/api/insales/categories.php"
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.POST, url,
+            Response.Listener { response: String? ->
+                try {
+                    val respon = JSONObject(response.toString())
+                    val categories = respon.getJSONArray("categories")
+                    var single: JSONObject
+                    for (i in 0 until categories.length()) {
+
+                        single = categories.getJSONObject(i)
+                        listofid.add(single.getString("id"))
+                        //Toast.makeText(this,single.getString("id"),Toast.LENGTH_LONG).show()
+                        //Toast.makeText(getContext(),single.toString(), Toast.LENGTH_LONG).show();
+                    }
+
+
+                } catch (e: JSONException) {
+
+                }
+            },
+            Response.ErrorListener { error: VolleyError? ->
+                Toast.makeText(context, "failed", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this,"\\\\\failed",Toast.LENGTH_LONG).show()
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getParams(): Map<String, String>? {
+                val params: MutableMap<String, String> = HashMap()
+                params["shop_name"] = "myshop-bsq158"
+                params["email"] = "asatarpk@gmail.com"
+                params["password"] = "Sattar_786"
+                return params
+            }
+        }
+        //val queue = Volley.newRequestQueue(context)
+        //queue.add<String>(stringRequest)
+        VolleySingleton.getInstance(requireContext())?.addToRequestQueue(stringRequest)
+
+    }
+
+    private fun addproduct(view: View?) {
+        val idview = view?.findViewById<Spinner>(R.id.category_id)
+        val Tittle = view?.findViewById<EditText>(R.id.Title)
+        val Quantity = view?.findViewById<EditText>(R.id.Quantity)
+        val Price = view?.findViewById<EditText>(R.id.Price)
+        val Desc = view?.findViewById<EditText>(R.id.Desc)
+
+        val id: String = idview?.selectedItem.toString()
+        val tittle: String = Tittle?.text.toString()
+        val quantity: String = Quantity?.text.toString()
+        val price: String = Price?.text.toString()
+        val desc: String = Desc?.text.toString()
+        var tf=0
+
+        if (id.equals("Select Category")) {
+            Toast.makeText(context, "Please Select a Category", Toast.LENGTH_LONG).show()
+            tf++
+            return
+        }
+        if (desc.isEmpty()) {
+            Desc?.setError("Invalid Description")
+            Desc?.requestFocus()
+            tf++
+
+        }
+        if (price.isEmpty()) {
+            Price?.setError("Invalid Price")
+            Price?.requestFocus()
+            tf++
+        }
+        if (quantity.isEmpty()) {
+            Quantity?.setError("Invalid Quantity")
+            Quantity?.requestFocus()
+            tf++
+        }
+        if (tittle.isEmpty()) {
+            Tittle?.setError("Invalid Tittle")
+            Tittle?.requestFocus()
+            tf++
+        }
+        if(tf!=0){
+            return;
+        }
+
+        val url = "https://itmagic.app/api/insales/add_product.php"
+
+        val stringRequest: StringRequest = object : StringRequest(
+            Method.POST, url,
+            Response.Listener { response: String? ->
+                Toast.makeText(context, "Success", Toast.LENGTH_LONG).show()
+
+            },
+            Response.ErrorListener { error: VolleyError? ->
+                Toast.makeText(
+                    context,
+                    "failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getParams(): Map<String, String>? {
+                val params: MutableMap<String, String> = HashMap()
+                params["shop_name"] = "myshop-bsq158"
+                params["email"] = "asatarpk@gmail.com"
+                params["password"] = "Sattar_786"
+                params["category_id"] = id
+                params["title"] = tittle
+                params["description"] = desc
+                params["sku"] = "Random"
+                params["quantity"] = quantity
+                params["price"] = price
+                return params
+            }
+        }
+        //val queue = Volley.newRequestQueue(context)
+        //  queue.add<String>(stringRequest)
+        VolleySingleton.getInstance(requireActivity())?.addToRequestQueue(stringRequest)
+
+
     }
 
 }
