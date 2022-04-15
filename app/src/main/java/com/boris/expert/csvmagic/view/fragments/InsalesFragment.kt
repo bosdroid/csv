@@ -120,6 +120,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     //Saiful
     var listofid = mutableListOf<String>()
+    var nameofid= mutableMapOf<String,String>()
 
 
     companion object {
@@ -2229,8 +2230,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun fab() {
         val view = LayoutInflater.from(context).inflate(R.layout.addproductdialouge, null)
         val builder = AlertDialog.Builder(context).setView(view)
-            .setPositiveButton("Add", { dialog, whichbutton -> addproduct(view) })
-        builder.setNegativeButton("Cancel", { dialog, whichbutton -> })
 
         builder.show()
         val id = view.findViewById<Spinner>(R.id.category_id)
@@ -2263,9 +2262,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     for (i in 0 until categories.length()) {
 
                         single = categories.getJSONObject(i)
-                        listofid.add(single.getString("id"))
-                        //Toast.makeText(this,single.getString("id"),Toast.LENGTH_LONG).show()
-                        //Toast.makeText(getContext(),single.toString(), Toast.LENGTH_LONG).show();
+                        listofid.add(single.getString("title"))
+                       // val id=single.getString("title")
+                      //  nameofid.put(single.getString(""))
+                       // Toast.makeText(requireContext(),single.getString("id")+" "+single.getString("title"),Toast.LENGTH_LONG).show()
+                        nameofid.put(single.getString("title"),single.getString("id"))
+                       // Toast.makeText(getContext(),single.toString(), Toast.LENGTH_LONG).show();
                     }
 
 
@@ -2311,6 +2313,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             tf++
             return
         }
+       // Toast.makeText(requireContext(),id,Toast.LENGTH_LONG).show()
+        val idf: String? =nameofid.get(id)
+       // Toast.makeText(requireContext(),idf,Toast.LENGTH_LONG).show()
         if (desc.isEmpty()) {
             Desc?.setError("Invalid Description")
             Desc?.requestFocus()
@@ -2341,6 +2346,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         val stringRequest: StringRequest = object : StringRequest(
             Method.POST, url,
             Response.Listener { response: String? ->
+
                 Toast.makeText(context, "Success", Toast.LENGTH_LONG).show()
 
             },
