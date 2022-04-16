@@ -22,6 +22,7 @@ import android.view.*
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatSpinner
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -30,7 +31,10 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.android.volley.AuthFailureError
+import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
@@ -52,6 +56,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.database.DataSnapshot
@@ -61,6 +66,7 @@ import com.google.firebase.database.ValueEventListener
 import io.paperdb.Paper
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
@@ -98,6 +104,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var currentTotalProducts = 0
     private lateinit var linearLayoutManager: WrapContentLinearLayoutManager
     private var dialogStatus = 0
+    private var originalCategoriesList = mutableListOf<Category>()
     private var categoriesList = mutableListOf<Category>()
     private lateinit var fullDescriptionBox: TextInputEditText
     private lateinit var titleBox: TextInputEditText
@@ -107,8 +114,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var keywordsList = mutableListOf<KeywordObject>()
     private lateinit var keywordsAdapter: KeywordsAdapter
     lateinit var selectedImageView: AppCompatImageView
-
+    private lateinit var fabAddProduct:FloatingActionButton
+    private var categoryList = mutableListOf<Category>()
     var defaultLayout = 0
+    var selectedCategoryId:Int = 0
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -132,6 +141,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getCategories()
         setHasOptionsMenu(true)
     }
 
@@ -181,6 +191,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
                 })
             }
+
             val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setCancelable(false)
             builder.setTitle(getString(R.string.sorting_heading_text))
@@ -221,6 +232,34 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         } else {
             super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun getCategories(){
+        viewModel.callCategories(requireActivity(), shopName, email, password)
+        viewModel.getCategoriesResponse().observe(this, Observer { response ->
+            if (response != null) {
+                if (response.get("status").asString == "200") {
+                    val categories = response.get("categories").asJsonArray
+                    if (categories.size() > 0) {
+                        originalCategoriesList.add(
+                            Category(
+                                "Select Category",
+                                0
+                            )
+                        )
+                        for (i in 0 until categories.size()) {
+                            val category = categories[i].asJsonObject
+                            originalCategoriesList.add(
+                                Category(
+                                    category.get("title").asString,
+                                    category.get("id").asInt
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun resetProductList() {
@@ -353,6 +392,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         searchBox = view.findViewById(R.id.insales_products_search_box)
         searchImageBtn = view.findViewById(R.id.insales_products_search_btn)
         searchImageBtn.setOnClickListener(this)
+        fabAddProduct = view.findViewById(R.id.fab)
+        fabAddProduct.setOnClickListener(this)
 
 
         searchBox.addTextChangedListener(object : TextWatcher {
@@ -384,6 +425,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             insalesLoginWrapperLayout.visibility = View.GONE
             insalesSearchWrapperLayout.visibility = View.VISIBLE
             insalesDataWrapperLayout.visibility = View.VISIBLE
+            fabAddProduct.visibility = View.VISIBLE
 
 
             shopName = appSettings.getString("INSALES_SHOP_NAME") as String
@@ -407,6 +449,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         } else {
             insalesDataWrapperLayout.visibility = View.GONE
             insalesSearchWrapperLayout.visibility = View.GONE
+            fabAddProduct.visibility = View.GONE
             insalesLoginWrapperLayout.visibility = View.VISIBLE
 
             if (menu != null) {
@@ -2016,6 +2059,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     insalesLoginWrapperLayout.visibility = View.GONE
                     insalesDataWrapperLayout.visibility = View.VISIBLE
+                    fabAddProduct.visibility = View.VISIBLE
 //                    menu!!.findItem(R.id.insales_logout).isVisible = true
 //                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
 //                    menu!!.findItem(R.id.insales_data_sync).isVisible = true
@@ -2112,11 +2156,116 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
                 }
             }
+            R.id.fab->{
+                addProduct()
+            }
             else -> {
 
             }
         }
     }
+
+
+    private fun addProduct(){
+        val addProductLayout = LayoutInflater.from(requireActivity()).inflate(R.layout.insales_add_product_dialog,null)
+        val categoriesSpinner = addProductLayout.findViewById<AppCompatSpinner>(R.id.ap_cate_spinner)
+        val apTitleView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_title)
+        val apDescriptionView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_description)
+        val apQuantityView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_quantity)
+        val apPriceView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_price)
+        val apSubmitBtn = addProductLayout.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
+        val apCancelBtn = addProductLayout.findViewById<MaterialButton>(R.id.ap_dialog_cancel_btn)
+
+
+        val builder = MaterialAlertDialogBuilder(requireActivity())
+        builder.setView(addProductLayout)
+        builder.setCancelable(false)
+        val alert = builder.create()
+        alert.show()
+
+        val cateSpinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, originalCategoriesList)
+        categoriesSpinner.adapter = cateSpinnerAdapter
+
+
+        categoriesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                if (position > 0){
+                    val selectedItem = originalCategoriesList[position]
+                    selectedCategoryId = selectedItem.id
+                }
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+        }
+
+        apCancelBtn.setOnClickListener {
+            alert.dismiss()
+        }
+
+        apSubmitBtn.setOnClickListener {
+
+            if (addProductValidation(categoriesSpinner,apTitleView,apQuantityView,apPriceView)){
+                alert.dismiss()
+                BaseActivity.startLoading(requireActivity())
+               viewModel.callAddProduct(requireActivity(),shopName,email,password,selectedCategoryId,apTitleView.text.toString().trim(),apDescriptionView.text.toString().trim(),
+               apQuantityView.text.toString().trim(),apPriceView.text.toString().trim())
+                viewModel.getAddProductResponse()
+                    .observe(requireActivity(), Observer { response ->
+                        if (response != null) {
+                            if (response.get("status").asString == "200") {
+                                Handler(Looper.myLooper()!!).postDelayed({
+                                    BaseActivity.dismiss()
+                                    fetchProducts()//showProducts()
+                                }, 3000)
+                            } else {
+                                BaseActivity.dismiss()
+                                BaseActivity.showAlert(
+                                    requireActivity(),
+                                    response.get("message").asString
+                                )
+                            }
+                        } else {
+                            BaseActivity.dismiss()
+                        }
+                    })
+            }
+        }
+    }
+
+    private fun addProductValidation(
+        categoriesSpinner: AppCompatSpinner?,
+        apTitleView: TextInputEditText?,
+        apQuantityView: TextInputEditText?,
+        apPriceView: TextInputEditText?
+    ): Boolean {
+        if (categoriesSpinner!!.selectedItemPosition == 0){
+            BaseActivity.showAlert(requireActivity(),requireActivity().resources.getString(R.string.add_product_cate_error))
+            return false
+        }
+        else if (apTitleView!!.text.toString().isEmpty()){
+            apTitleView.error = requireActivity().resources.getString(R.string.empty_text_error)
+            return false
+        }
+        else if (apQuantityView!!.text.toString().isEmpty()){
+            apQuantityView.error = requireActivity().resources.getString(R.string.empty_text_error)
+            return false
+        }
+        else if (apPriceView!!.text.toString().isEmpty()){
+            apPriceView.error = requireActivity().resources.getString(R.string.empty_text_error)
+            return false
+        }
+        return true
+    }
+
 
     private fun search(text: String?) {
         val matchedProducts = mutableListOf<Product>()

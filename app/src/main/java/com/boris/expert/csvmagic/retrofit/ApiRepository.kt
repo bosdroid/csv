@@ -348,4 +348,20 @@ class ApiRepository {
         return res
     }
 
+    fun addProduct(shopName:String,email:String,password:String,cId:Int,title:String,desc:String,quantity:String,price:String):MutableLiveData<JsonObject?>
+    {
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.addProduct(email,password,shopName,cId,title,desc,quantity,price).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
 }
