@@ -141,7 +141,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getCategories()
+
         setHasOptionsMenu(true)
     }
 
@@ -431,7 +431,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             shopName = appSettings.getString("INSALES_SHOP_NAME") as String
             email = appSettings.getString("INSALES_EMAIL") as String
             password = appSettings.getString("INSALES_PASSWORD") as String
-
+            getCategories()
 //            if (originalProductsList.size == 0) {
             showProducts()
 //            }
@@ -2184,6 +2184,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         alert.show()
 
         val cateSpinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, originalCategoriesList)
+        cateSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         categoriesSpinner.adapter = cateSpinnerAdapter
 
 
