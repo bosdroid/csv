@@ -15,6 +15,7 @@ class App : Application() {
         Paper.init(applicationContext)
         appSettings = AppSettings(applicationContext)
         getUserDetail()
+
     }
 
 
