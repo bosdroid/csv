@@ -245,12 +245,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 if (response.get("status").asString == "200") {
                     val categories = response.get("categories").asJsonArray
                     if (categories.size() > 0) {
-                        originalCategoriesList.add(
-                            Category(
-                                "Select Category",
-                                0
-                            )
-                        )
                         for (i in 0 until categories.size()) {
                             val category = categories[i].asJsonObject
                             originalCategoriesList.add(
@@ -259,6 +253,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     category.get("id").asInt
                                 )
                             )
+                        }
+                        if (originalCategoriesList.size > 0){
+                            selectedCategoryId = originalCategoriesList[0].id
                         }
                     }
                 }
@@ -406,7 +403,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+                      if (s.toString().isEmpty()){
+                          resetProductList()
+                      }
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -2229,6 +2228,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         cateSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         categoriesSpinner.adapter = cateSpinnerAdapter
 
+        if (selectedCategoryId != 0){
+            categoriesSpinner!!.setSelection(0)
+        }
 
         categoriesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(
@@ -2237,10 +2239,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 position: Int,
                 id: Long
             ) {
-                if (position > 0){
                     val selectedItem = originalCategoriesList[position]
                     selectedCategoryId = selectedItem.id
-                }
 
             }
 
@@ -2290,7 +2290,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         apQuantityView: TextInputEditText?,
         apPriceView: TextInputEditText?
     ): Boolean {
-        if (categoriesSpinner!!.selectedItemPosition == 0){
+        if (selectedCategoryId == 0){
             BaseActivity.showAlert(requireActivity(),requireActivity().resources.getString(R.string.add_product_cate_error))
             return false
         }

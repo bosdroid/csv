@@ -151,7 +151,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                     tableObjectList.add(tableObject)
                 } while (cursor.moveToNext())
             }
-        } else {
+
+            cursor.close()
+        }
+        else {
             val selectQuery =
                 "SELECT  * FROM $tableName ORDER BY $column ${order.toUpperCase(Locale.ENGLISH)}"
             val list = mutableListOf<Pair<String, String>>()
@@ -180,9 +183,10 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                     tableObjectList.add(tableObject)
                 } while (cursor.moveToNext())
             }
+            cursor.close()
         }
 
-        db.close()
+        //db.close()
         return tableObjectList
 
     }
@@ -236,7 +240,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             }
         }
 
-        db.close()
+//        db.close()
         return tableObjectList
 
     }
@@ -247,7 +251,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         values.put("code_data", code_data)
         values.put("date", date)
         db.insert(DEFAULT_TABLE_NAME, null, values)
-        db.close()
+//        db.close()
     }
 
     fun insertData(tableName: String, data: List<Pair<String, String>>) {
@@ -261,7 +265,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
             }
         }
         val res = db.insert(tableName, null, values)
-        db.close()
+//        db.close()
     }
 
     fun convertStringToUTF8(s: String): String? {
@@ -364,7 +368,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                 c.moveToNext()
             }
         }
-        db.close()
+//        db.close()
         return list
     }
 
@@ -410,7 +414,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         values.put(LIST_COLUMN_OPTIONS, options)
         values.put(LIST_COLUMN_TYPE, type)
         db.insert(LIST_FIELDS_TABLE_NAME, null, values)
-        db.close()
+//        db.close()
     }
 
     fun getFieldList(fieldName: String, tableName: String): Pair<String, String>? {
@@ -431,7 +435,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
 
                 } while (cursor.moveToNext())
             }
-            db.close()
+//            db.close()
 
             return options
         } else {
@@ -463,7 +467,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
         values.put(LIST_META_DATA_COLUMN_LIST_ID, listId)
         values.put(LIST_META_DATA_COLUMN_VALUE, value)
         db.insert(LIST_META_DATA_TABLE_NAME, null, values)
-        db.close()
+//        db.close()
     }
 
     fun getList(): List<ListItem> {
@@ -476,7 +480,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                 list.add(ListItem(cursor.getInt(0), cursor.getString(1)))
             } while (cursor.moveToNext())
         }
-        db.close()
+//        db.close()
         return list
     }
 
@@ -493,7 +497,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
 //                listOptions += cursor.getString(2) + ","
             } while (cursor.moveToNext())
         }
-        db.close()
+//        db.close()
         listOptions = list.joinToString()
         Log.d("TEST199", listOptions)
         return listOptions
@@ -523,7 +527,7 @@ class Database(private val context: Context) : SQLiteOpenHelper(
                 list.add(cursor.getString(2))
             } while (cursor.moveToNext())
         }
-        db.close()
+//        db.close()
 
         return list
     }

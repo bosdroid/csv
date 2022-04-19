@@ -408,11 +408,11 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     private fun getTableList() {
 
         val tablesList = mutableListOf<String>()
-        if (Constants.unlimitedTablesFeatureStatus == 0) {
-            tablesList.add(tableGenerator.getAllDatabaseTables()[0])
-        } else {
+//        if (Constants.unlimitedTablesFeatureStatus == 0) {
+//            tablesList.add(tableGenerator.getAllDatabaseTables()[0])
+//        } else {
             tablesList.addAll(tableGenerator.getAllDatabaseTables())
-        }
+//        }
 
         if (tablesList.isNotEmpty()) {
             tableName = tablesList[0]
@@ -2525,170 +2525,181 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     }
 
     private fun getTableData(tName: String, column: String, order: String) {
-        val tempList = tableGenerator.getTableDate(tName, column, order)
-        if (tempList.isNotEmpty()) {
-            dataList.clear()
-        }
-        if (tableMainLayout.childCount > 1) {
-            tableMainLayout.removeViews(1, tableMainLayout.childCount - 1)
-        }
-
-        dataList.addAll(tempList)
-        tableMainLayout.weightSum = dataList.size * 2F
-
-        if (dataList.isNotEmpty()) {
-            BaseActivity.startLoading(requireActivity())
-            for (j in 0 until dataList.size) {
-
-                val textViewIdLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                val textViewId = textViewIdLayout.findViewById<MaterialTextView>(R.id.cell_value)
-                val data = dataList[j]
-                val tableRow = TableRow(requireActivity())
-                tableRow.id = j
-                tableRow.tag = "row"
-                tableRow.setOnClickListener(this)
-
-                val moreLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_more_option_layout, null)
-                moreLayout.layoutParams = TableRow.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
-                moreImage.id = j
-                moreImage.tag = "more"
-                moreImage.setOnClickListener(this)
-                tableRow.addView(moreLayout)
-
-                textViewId.text = "${data.id}"
-                tableRow.addView(textViewIdLayout)
-                val textViewCodeDateLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                textViewCodeDateLayout.layoutParams = layoutParams
-                val textViewCodeDate =
-                    textViewCodeDateLayout.findViewById<MaterialTextView>(R.id.cell_value)
-                textViewCodeDate.text = data.code_data
-                tableRow.addView(textViewCodeDateLayout)
-
-                val textViewDateLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                textViewDateLayout.layoutParams = layoutParams
-                val textViewDate =
-                    textViewDateLayout.findViewById<MaterialTextView>(R.id.cell_value)
-                textViewDate.text = data.date
-                tableRow.addView(textViewDateLayout)
-
-                val textViewImageLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                textViewImageLayout.layoutParams = layoutParams
-                val textViewImage =
-                    textViewImageLayout.findViewById<MaterialTextView>(R.id.cell_value)
-
-                if (data.image.isNotEmpty() && data.image.length >= 20) {
-                    textViewImage.text = data.image.substring(0, 20)
-                } else {
-                    textViewImage.text = data.image
-                }
-                tableRow.addView(textViewImageLayout)
-
-                val textViewQuantityLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                textViewQuantityLayout.layoutParams = layoutParams
-                val textViewQuantity =
-                    textViewQuantityLayout.findViewById<MaterialTextView>(R.id.cell_value)
-                textViewQuantity.text = "${data.quantity}"
-
-                tableRow.addView(textViewQuantityLayout)
-
-                if (data.dynamicColumns.size > 0) {
-                    for (k in 0 until data.dynamicColumns.size) {
-                        val item = data.dynamicColumns[k]
-                        val cell =
-                            LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                        cell.layoutParams = layoutParams
-                        val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
-
-                        textV.text = item.second
-                        tableRow.addView(cell)
-                    }
-
-                }
-                if (j % 2 == 0) {
-                    tableRow.setBackgroundColor(Color.parseColor("#EAEAF6"))
-                } else {
-                    tableRow.setBackgroundColor(Color.parseColor("#f2f2f2"))
-                }
-                tableMainLayout.addView(tableRow)
+        var tempList: List<TableObject>?=null
+        CoroutineScope(Dispatchers.IO).launch {
+            tempList = tableGenerator.getTableDate(tName, column, order)
+            if (tempList!!.isNotEmpty()) {
+                dataList.clear()
             }
-            BaseActivity.dismiss()
         }
+        CoroutineScope(Dispatchers.Main).launch {
+            if (tableMainLayout.childCount > 0) {
+                tableMainLayout.removeViews(0, tableMainLayout.childCount - 1)
+            }
+
+            dataList.addAll(tempList!!)
+            tableMainLayout.weightSum = dataList.size * 2F
+
+            if (dataList.isNotEmpty()) {
+                BaseActivity.startLoading(requireActivity())
+                for (j in 0 until dataList.size) {
+
+                    val textViewIdLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                    val textViewId = textViewIdLayout.findViewById<MaterialTextView>(R.id.cell_value)
+                    val data = dataList[j]
+                    val tableRow = TableRow(requireActivity())
+                    tableRow.id = j
+                    tableRow.tag = "row"
+                    tableRow.setOnClickListener(this@ScanFragment)
+
+                    val moreLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_more_option_layout, null)
+                    moreLayout.layoutParams = TableRow.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
+                    moreImage.id = j
+                    moreImage.tag = "more"
+                    moreImage.setOnClickListener(this@ScanFragment)
+                    tableRow.addView(moreLayout)
+
+                    textViewId.text = "${data.id}"
+                    tableRow.addView(textViewIdLayout)
+                    val textViewCodeDateLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                    textViewCodeDateLayout.layoutParams = layoutParams
+                    val textViewCodeDate =
+                        textViewCodeDateLayout.findViewById<MaterialTextView>(R.id.cell_value)
+                    textViewCodeDate.text = data.code_data
+                    tableRow.addView(textViewCodeDateLayout)
+
+                    val textViewDateLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                    textViewDateLayout.layoutParams = layoutParams
+                    val textViewDate =
+                        textViewDateLayout.findViewById<MaterialTextView>(R.id.cell_value)
+                    textViewDate.text = data.date
+                    tableRow.addView(textViewDateLayout)
+
+                    val textViewImageLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                    textViewImageLayout.layoutParams = layoutParams
+                    val textViewImage =
+                        textViewImageLayout.findViewById<MaterialTextView>(R.id.cell_value)
+
+                    if (data.image.isNotEmpty() && data.image.length >= 20) {
+                        textViewImage.text = data.image.substring(0, 20)
+                    } else {
+                        textViewImage.text = data.image
+                    }
+                    tableRow.addView(textViewImageLayout)
+
+                    val textViewQuantityLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                    textViewQuantityLayout.layoutParams = layoutParams
+                    val textViewQuantity =
+                        textViewQuantityLayout.findViewById<MaterialTextView>(R.id.cell_value)
+                    textViewQuantity.text = "${data.quantity}"
+
+                    tableRow.addView(textViewQuantityLayout)
+
+                    if (data.dynamicColumns.size > 0) {
+                        for (k in 0 until data.dynamicColumns.size) {
+                            val item = data.dynamicColumns[k]
+                            val cell =
+                                LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                            cell.layoutParams = layoutParams
+                            val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
+
+                            textV.text = item.second
+                            tableRow.addView(cell)
+                        }
+
+                    }
+                    if (j % 2 == 0) {
+                        tableRow.setBackgroundColor(Color.parseColor("#EAEAF6"))
+                    } else {
+                        tableRow.setBackgroundColor(Color.parseColor("#f2f2f2"))
+                    }
+                    tableMainLayout.addView(tableRow)
+                }
+                BaseActivity.dismiss()
+            }
+        }
+
 
     }
 
     private fun getTableDataFromCsv(tName: String, column: String, order: String) {
-        val tempList = tableGenerator.getTableDateFromCsv(tName, column, order)
-        if (tempList.isNotEmpty()) {
-            dataListCsv.clear()
-        }
-        if (tableMainLayout.childCount > 1) {
-            tableMainLayout.removeViews(1, tableMainLayout.childCount - 1)
-        }
-
-        dataListCsv.addAll(tempList)
-        tableMainLayout.weightSum = dataListCsv.size * 2F
-
-        if (dataListCsv.isNotEmpty()) {
-            BaseActivity.startLoading(requireActivity())
-            for (j in 0 until dataListCsv.size) {
-
-                val listPair = dataListCsv[j]
-
-                val tableRow = TableRow(requireActivity())
-                tableRow.id = j
-                tableRow.tag = "row"
-                tableRow.setOnClickListener(this)
-
-                val moreLayout =
-                    LayoutInflater.from(requireActivity()).inflate(R.layout.table_more_option_layout, null)
-                moreLayout.layoutParams = TableRow.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
-                moreImage.id = j
-                moreImage.tag = "more"
-                moreImage.setOnClickListener(this)
-                tableRow.addView(moreLayout)
-
-                if (listPair.isNotEmpty()) {
-                    for (i in 0 until listPair.size) {
-
-                        val item = listPair[i]
-                        val cell =
-                            LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                        cell.layoutParams = layoutParams
-                        val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
-
-                        if (item.second.length > 8) {
-                            textV.text = "${item.second.substring(0, 9)}..."
-                        } else {
-                            textV.text = item.second.trim()
-                        }
-                        tableRow.addView(cell)
-                    }
-                }
-
-                if (j % 2 == 0) {
-                    tableRow.setBackgroundColor(Color.parseColor("#EAEAF6"))
-                } else {
-                    tableRow.setBackgroundColor(Color.parseColor("#f2f2f2"))
-                }
-                tableMainLayout.addView(tableRow)
+        var tempList: List<List<Pair<String, String>>>?=null
+        CoroutineScope(Dispatchers.IO).launch {
+            tempList = tableGenerator.getTableDateFromCsv(tName, column, order)
+            if (tempList!!.isNotEmpty()) {
+                dataListCsv.clear()
             }
-            BaseActivity.dismiss()
         }
+        CoroutineScope(Dispatchers.Main).launch {
+            if (tableMainLayout.childCount > 0) {
+                tableMainLayout.removeViews(0, tableMainLayout.childCount - 1)
+            }
 
+            dataListCsv.addAll(tempList!!)
+            tableMainLayout.weightSum = dataListCsv.size * 2F
+
+            if (dataListCsv.isNotEmpty()) {
+                BaseActivity.startLoading(requireActivity())
+                for (j in 0 until dataListCsv.size) {
+
+                    val listPair = dataListCsv[j]
+
+                    val tableRow = TableRow(requireActivity())
+                    tableRow.id = j
+                    tableRow.tag = "row"
+                    tableRow.setOnClickListener(this@ScanFragment)
+
+                    val moreLayout =
+                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_more_option_layout, null)
+                    moreLayout.layoutParams = TableRow.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
+                    moreImage.id = j
+                    moreImage.tag = "more"
+                    moreImage.setOnClickListener(this@ScanFragment)
+                    tableRow.addView(moreLayout)
+
+                    if (listPair.isNotEmpty()) {
+                        for (i in 0 until listPair.size) {
+
+                            val item = listPair[i]
+                            val cell =
+                                LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                            cell.layoutParams = layoutParams
+                            val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
+
+                            if (item.second.length > 8) {
+                                textV.text = "${item.second.substring(0, 9)}..."
+                            } else {
+                                textV.text = item.second.trim()
+                            }
+                            tableRow.addView(cell)
+                        }
+                    }
+
+                    if (j % 2 == 0) {
+                        tableRow.setBackgroundColor(Color.parseColor("#EAEAF6"))
+                    } else {
+                        tableRow.setBackgroundColor(Color.parseColor("#f2f2f2"))
+                    }
+                    tableMainLayout.addView(tableRow)
+                }
+                BaseActivity.dismiss()
+            }
+
+        }
 
     }
 
@@ -2725,7 +2736,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                             val columnsList = mutableListOf<String>()
                             var tableData = mutableListOf<Pair<String, String>>()
                             val listRecord = mutableListOf<List<Pair<String, String>>>()
-                            val tableName = "${fileName}_import"
+                            val createdTableName = "${fileName}_import"
 //                            var tempLine:String = ""
 //
 //                            BaseActivity.startLoading(requireActivity())
@@ -2814,8 +2825,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
 //
 //                            }
 
-                            if (tableName.isNotEmpty() && listRecord.isNotEmpty()) {
-                                val isFound = tableGenerator.tableExists(tableName)
+                            if (createdTableName.isNotEmpty() && listRecord.isNotEmpty()) {
+                                val isFound = tableGenerator.tableExists(createdTableName)
                                 if (isFound) {
                                     BaseActivity.dismiss()
                                     BaseActivity.showAlert(
@@ -2825,19 +2836,23 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                                 } else {
 
                                     tableGenerator.createTableFromCsv(
-                                        tableName,
+                                        createdTableName,
                                         columnsList as ArrayList<String>
                                     )
 
                                     Handler(Looper.myLooper()!!).postDelayed({
 
-                                        val isExist = tableGenerator.tableExists(tableName)
+                                        val isExist = tableGenerator.tableExists(createdTableName)
                                         if (isExist) {
                                             displayTableList()
                                             for (j in 0 until listRecord.size) {
-                                                tableGenerator.insertData(tableName, listRecord[j])
+                                                tableGenerator.insertData(createdTableName, listRecord[j])
                                             }
                                             BaseActivity.dismiss()
+                                            tableName = createdTableName
+                                            appSettings.putString("SCAN_SELECTED_TABLE",tableName)
+                                            getTableList()
+                                            displayTableData()
 //                                            if (checkCyrillicCharacter(originalColumns.joinToString(","))){
 //                                                tableGenerator.insertExportColumns(tableName,originalColumns.joinToString(","))
 //                                            }
