@@ -24,10 +24,19 @@
             android:src="@mipmap/ic_launcher"
             />
 
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/sixtyDpMargin"
+            android:text="@string/google_account_heading"
+            android:textColor="@color/black"
+            android:textSize="@dimen/largeText"
+            />
+
         <com.google.android.material.button.MaterialButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/sixtyDpMargin"
+            android:layout_margin="@dimen/eightDpMargin"
             android:text="@string/login_text"
             android:textColor="@color/white"
             android:textSize="@dimen/xlargeText"

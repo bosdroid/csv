@@ -311,7 +311,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             val userId = auth.currentUser!!.uid
             Constants.firebaseUserId = userId
             firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                .child(userId).addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
 
                         if (snapshot.hasChildren() && snapshot.hasChild("credits")) {

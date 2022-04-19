@@ -520,6 +520,7 @@
     <string name="quantity_text">Quantity</string>
 	<string name="price_text">Price</string>
     <string name="add_product_cate_error">Please select the product category</string>
+    <string name="google_account_heading">Need Google account to enter</string>
 
     <string-array name="features_keys">
 		<item>compressor_feature</item>

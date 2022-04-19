@@ -21,6 +21,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.cardview.widget.CardView
@@ -63,6 +64,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.skydoves.balloon.ArrowOrientation
+import com.skydoves.balloon.Balloon
+import com.skydoves.balloon.BalloonAnimation
 import io.paperdb.Paper
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
@@ -1382,9 +1386,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                     textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     titleTextViewList.add(textView)
-//                    textView.setOnClickListener(requireActivity())
-                    textView.setOnTouchListener(ChoiceTouchListener())
-                    textView.setOnDragListener(ChoiceDragListener())
+                    textView.setOnClickListener(this@InsalesFragment)
+//                    textView.setOnTouchListener(ChoiceTouchListener())
+//                    textView.setOnDragListener(ChoiceDragListener())
                     dynamicTitleTextViewWrapper.addView(textView)
                 }
 
@@ -1402,9 +1406,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                     textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     shortDescTextViewList.add(textView)
-//                    textView.setOnClickListener(requireActivity())
-                    textView.setOnTouchListener(ChoiceTouchListener())
-                    textView.setOnDragListener(ChoiceDragListener())
+                    textView.setOnClickListener(this@InsalesFragment)
+//                    textView.setOnTouchListener(ChoiceTouchListener())
+//                    textView.setOnDragListener(ChoiceDragListener())
                     dynamicShortDescTextViewWrapper.addView(textView)
                 }
 //
@@ -1422,9 +1426,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                     textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     fullDescTextViewList.add(textView)
-//                    textView.setOnClickListener(requireActivity())
-                    textView.setOnTouchListener(ChoiceTouchListener())
-                    textView.setOnDragListener(ChoiceDragListener())
+                    textView.setOnClickListener(this@InsalesFragment)
+//                    textView.setOnTouchListener(ChoiceTouchListener())
+//                    textView.setOnDragListener(ChoiceDragListener())
                     dynamicFullDescTextViewWrapper.addView(textView)
                 }
 
@@ -1688,7 +1692,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     if (response.get("status").asString == "200") {
 //                                        Handler(Looper.myLooper()!!).postDelayed({
                                         BaseActivity.dismiss()
-//                                            //showProducts()
+                                        fetchProducts()
+//                                            showProducts()
 //                                        }, 3000)
                                         Toast.makeText(
                                             requireActivity(),
@@ -1896,9 +1901,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     )
                                 )
                                 titleTextViewList.add(textView)
-//                                textView.setOnClickListener(requireActivity())
-                                textView.setOnTouchListener(ChoiceTouchListener())
-                                textView.setOnDragListener(ChoiceDragListener())
+                                textView.setOnClickListener(this@InsalesFragment)
+//                                textView.setOnTouchListener(ChoiceTouchListener())
+//                                textView.setOnDragListener(ChoiceDragListener())
                                 dynamicTitleTextViewWrapper.addView(textView)
                             }
 
@@ -1934,9 +1939,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     )
                                 )
                                 fullDescTextViewList.add(textView)
-//                                textView.setOnClickListener(requireActivity())
-                                textView.setOnTouchListener(ChoiceTouchListener())
-                                textView.setOnDragListener(ChoiceDragListener())
+                                textView.setOnClickListener(this@InsalesFragment)
+//                                textView.setOnTouchListener(ChoiceTouchListener())
+//                                textView.setOnDragListener(ChoiceDragListener())
                                 dynamicFullDescTextViewWrapper.addView(textView)
                             }
 
@@ -2126,7 +2131,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-        when (v!!.id) {
+        val view = v!!
+        when (view.id) {
             R.id.insales_login_btn -> {
                 if (validation()) {
                     val shopName = insalesShopNameBox.text.toString().trim()
@@ -2160,7 +2166,43 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 addProduct()
             }
             else -> {
+                val position = view.id
+                val textView = view as MaterialTextView
+                view.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.primary_positive_color))
+                view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
+                val balloon = Balloon.Builder(requireActivity())
+                    .setLayout(R.layout.ballon_layout_design)
+                    .setArrowSize(10)
+                    .setArrowOrientation(ArrowOrientation.TOP)
+                    .setArrowPosition(0.5f)
+                    .setWidthRatio(0.55f)
+                    .setCornerRadius(4f)
+                    .setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.light_gray))
+                    .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                    .setLifecycleOwner(this)
+                    .build()
+                val editTextBox = balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
+                editTextBox.setText(textView.text.toString().trim())
+                val closeBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
+                val applyBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
+                balloon.showAlignTop(textView,)
+                editTextBox.requestFocus()
+                Constants.openKeyboar(requireActivity())
+                closeBtn.setOnClickListener {
+                    Constants.hideKeyboar(requireActivity())
+                    balloon.dismiss()
+                    view.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.white))
+                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                }
+                applyBtn.setOnClickListener {
+                    Constants.hideKeyboar(requireActivity())
+                    balloon.dismiss()
+                    //val tempText = textView.replace(mWord,editTextBox.text.toString().trim())
+                    textView.text = editTextBox.text.toString().trim()
+                    view.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.white))
+                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
 
+                }
             }
         }
     }

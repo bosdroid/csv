@@ -151,24 +151,29 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= total) {
                 if (query.isNotEmpty()) {
                     Constants.hideKeyboar(context)
-
-                    GcpTranslator.translateFromRusToEng(
+                    CoroutineScope(Dispatchers.IO).launch {
+                        GcpTranslator.translateFromRusToEng(
                             context,
                             query,
                             object : TranslationCallback {
                                 override fun onTextTranslation(translatedText: String) {
-                                    if (translatedText.isNotEmpty()) {
-                                        //showAlert(context,translatedText)
-                                        getProducts(translatedText)
-                                    } else {
-                                        showAlert(
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        if (translatedText.isNotEmpty()) {
+                                            //showAlert(context,translatedText)
+                                            getProducts(translatedText)
+                                        } else {
+                                            showAlert(
                                                 context,
                                                 "Something wrong with translator, please try later!"
-                                        )
+                                            )
+                                        }
                                     }
+
                                 }
 
                             })
+                    }
+
                 } else {
                     showAlert(context, getString(R.string.empty_text_error))
                 }
@@ -265,10 +270,10 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
 
                             CoroutineScope(Dispatchers.IO).launch {
-
-                                for (i in 0 until rainForestList.size) {
-                                    val text = rainForestList[i].title
-                                    GcpTranslator.translateFromEngToRus(
+                                try {
+                                    for (i in 0 until rainForestList.size) {
+                                        val text = rainForestList[i].title
+                                        GcpTranslator.translateFromEngToRus(
                                             context,
                                             text,
                                             object : TranslationCallback {
@@ -277,7 +282,12 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                                 }
 
                                             })
+                                    }
                                 }
+                                catch (e:Exception){
+                                    e.printStackTrace()
+                                }
+
                                 CoroutineScope(Dispatchers.Main).launch {
                                     dismiss()
                                     if (rainForestList.size > 0) {
