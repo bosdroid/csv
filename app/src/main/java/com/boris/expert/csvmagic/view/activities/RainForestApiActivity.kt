@@ -551,6 +551,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                 dialog.dismiss()
                                 titleAddBtn.text = getString(R.string.added_text)
                                 titleAddBtn.isEnabled = false
+                                doneBtn.visibility = View.VISIBLE
                             }
 
                             val alert1 = builder.create()
@@ -570,6 +571,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                     dialog.dismiss()
                                     descriptionAddBtn.text = getString(R.string.added_text)
                                     descriptionAddBtn.isEnabled = false
+                                    doneBtn.visibility = View.VISIBLE
                                 }
 
                                 val alert1 = builder.create()
