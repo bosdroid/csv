@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -51,6 +52,8 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val titleSizeView:MaterialTextView
         val descriptionSizeView:MaterialTextView
         val totalImagesView:MaterialTextView
+        val collapseExpandImg:AppCompatImageView
+        val collapseExpandLayout:LinearLayout
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
@@ -63,6 +66,9 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             titleSizeView = itemView.findViewById(R.id.total_title_size_textview)
             descriptionSizeView = itemView.findViewById(R.id.total_description_size_textview)
             totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
+            collapseExpandLayout = itemView.findViewById(R.id.collapse_expand_layout)
+
+            collapseExpandImg = itemView.findViewById(R.id.collapse_expand_img)
 
             productTitle.setOnClickListener {v->
                 //(v as ExpandableTextView).toggle()
@@ -76,6 +82,17 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 //            addImageView.setOnClickListener {
 //                Listener.onItemAddImageClick(layoutPosition)
 //            }
+
+            collapseExpandImg.setOnClickListener {
+                if (collapseExpandLayout.visibility == View.VISIBLE){
+                    collapseExpandLayout.visibility = View.GONE
+                    collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
+                }
+                else{
+                    collapseExpandLayout.visibility = View.VISIBLE
+                    collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
+                }
+            }
 
             editImageView.setOnClickListener {
                 Listener.onItemEditImageClick(layoutPosition)

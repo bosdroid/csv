@@ -1867,7 +1867,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (data != null && data.hasExtra("DESCRIPTION")) {
                         val description = data.getStringExtra("DESCRIPTION") as String
                         if (description.isNotEmpty()) {
-                            fullDescriptionBox.setText(description)
+                            val stringBuilder = StringBuilder()
+                            stringBuilder.append(fullDescriptionBox.text.toString())
+                            stringBuilder.append(description)
+                            fullDescriptionBox.setText(stringBuilder.toString())
                             fullDescriptionBox.setSelection(fullDescriptionBox.length())
                             fullDescriptionBox.requestFocus()
                         }
@@ -1915,8 +1918,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (data != null && data.hasExtra("DESCRIPTION")) {
                         val description = data.getStringExtra("DESCRIPTION") as String
                         if (description.isNotEmpty()) {
-                            fullDescTextViewList.clear()
-                            dynamicFullDescTextViewWrapper.removeAllViews()
+//                            fullDescTextViewList.clear()
+//                            dynamicFullDescTextViewWrapper.removeAllViews()
                             val fullDescTextList = description.trim().split(" ")
 
                             for (i in 0 until fullDescTextList.size) {

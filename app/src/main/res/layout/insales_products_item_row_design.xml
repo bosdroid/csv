@@ -25,148 +25,291 @@
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                style="@style/CardView.Light"
+                >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/grammar_check_icon_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_margin="@dimen/eightDpMargin"
-                        android:src="@drawable/grammar_check" />
-
-                    <net.expandable.ExpandableTextView
-                        android:id="@+id/insales_p_item_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/eightDpMargin"
-                        android:textColor="@color/black"
-                        app:expanded="false"
-                        app:expand_enabled="true"
-                        app:collapse_lines="2"
-                        android:textSize="@dimen/largeText" />
-
-                    <net.expandable.ExpandableTextView
-                        android:id="@+id/insales_p_item_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/eightDpMargin"
-                        app:expanded="false"
-                        app:expand_enabled="true"
-                        app:collapse_lines="5"
-                        android:textColor="@color/black"
-                        android:textSize="@dimen/largeText" />
-
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/products_images_recyclerview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/defaultDpMargin" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/defaultDpMargin">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginEnd="@dimen/defaultDpMargin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_margin="@dimen/defaultDpMargin"
                         >
-                      <LinearLayout
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:orientation="horizontal"
-                          android:gravity="center_vertical"
-                          android:layout_margin="2dp"
-                          >
-                          <com.google.android.material.textview.MaterialTextView
-                              android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:textSize="@dimen/mediumText"
-                              android:textColor="@color/black"
-                              android:text="@string/grammar_status_text"
-                              />
-                          <com.google.android.material.textview.MaterialTextView
-                              android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:id="@+id/grammar_status_textview"
-                              android:textSize="@dimen/mediumText"
-                              android:text="@string/errors_text"
-                              android:textColor="@color/yellow"
-                              android:layout_marginStart="@dimen/defaultDpMargin"
-                              />
-                      </LinearLayout>
-
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
+                        <net.expandable.ExpandableTextView
+                            android:id="@+id/insales_p_item_title"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:id="@+id/total_title_size_textview"
-                            android:textSize="@dimen/mediumText"
+                            android:layout_weight="1"
                             android:textColor="@color/black"
-                            android:layout_margin="2dp"
-                            />
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/total_description_size_textview"
-                            android:textSize="@dimen/mediumText"
-                            android:textColor="@color/black"
-                            android:layout_margin="2dp"
-                            />
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/total_images_size_textview"
-                            android:textSize="@dimen/mediumText"
-                            android:textColor="@color/black"
-                            android:layout_margin="2dp"
-                            />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="end"
-                        android:elevation="8dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/edit_text"
-                            android:textColor="@color/primary_positive_color"
+                            app:expanded="false"
+                            app:expand_enabled="true"
+                            app:collapse_lines="2"
                             android:textSize="@dimen/largeText" />
 
                         <androidx.appcompat.widget.AppCompatImageView
-                            android:id="@+id/insales_p_item_edit_image"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:id="@+id/collapse_expand_img"
+                            android:src="@drawable/ic_arrow_down"
+                            />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_margin="@dimen/eightDpMargin"
+                        android:id="@+id/collapse_expand_layout"
+                        android:visibility="gone"
+                        >
+                        <net.expandable.ExpandableTextView
+                            android:id="@+id/insales_p_item_description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:expanded="false"
+                            app:expand_enabled="true"
+                            app:collapse_lines="5"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginTop="@dimen/defaultDpMargin"
+                            android:background="@android:color/darker_gray" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="@dimen/defaultDpMargin"
+                            android:baselineAligned="false">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginEnd="@dimen/defaultDpMargin"
+                                >
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:layout_margin="2dp"
+                                    >
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textSize="@dimen/mediumText"
+                                        android:textColor="@color/black"
+                                        android:text="@string/grammar_status_text"
+                                        />
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:id="@+id/grammar_status_textview"
+                                        android:textSize="@dimen/mediumText"
+                                        android:text="@string/errors_text"
+                                        android:textColor="@color/yellow"
+                                        android:layout_marginStart="@dimen/defaultDpMargin"
+                                        />
+                                </LinearLayout>
+
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/total_title_size_textview"
+                                    android:textSize="@dimen/mediumText"
+                                    android:textColor="@color/black"
+                                    android:layout_margin="2dp"
+                                    />
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/total_description_size_textview"
+                                    android:textSize="@dimen/mediumText"
+                                    android:textColor="@color/black"
+                                    android:layout_margin="2dp"
+                                    />
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/total_images_size_textview"
+                                    android:textSize="@dimen/mediumText"
+                                    android:textColor="@color/black"
+                                    android:layout_margin="2dp"
+                                    />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </LinearLayout>
+<!--                    <net.expandable.ExpandableTextView-->
+<!--                        android:id="@+id/insales_p_item_description"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_margin="@dimen/eightDpMargin"-->
+<!--                        android:visibility="gone"-->
+<!--                        app:expanded="false"-->
+<!--                        app:expand_enabled="true"-->
+<!--                        app:collapse_lines="5"-->
+<!--                        android:textColor="@color/black"-->
+<!--                        android:textSize="@dimen/largeText" />-->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        >
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:elevation="8dp"
+                            android:layout_marginStart="@dimen/defaultDpMargin"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/edit_text"
+                                android:textColor="@color/primary_positive_color"
+                                android:textSize="@dimen/largeText" />
+
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:id="@+id/insales_p_item_edit_image"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="@dimen/defaultDpMargin"
+                                android:layout_marginEnd="@dimen/sixtyDpMargin"
+                                android:src="@drawable/ic_edit"
+                                app:tint="@color/primary_positive_color" />
+                        </LinearLayout>
+                        <androidx.appcompat.widget.AppCompatImageView
+                            android:id="@+id/grammar_check_icon_view"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="@dimen/defaultDpMargin"
-                            android:layout_marginEnd="@dimen/sixtyDpMargin"
-                            android:src="@drawable/ic_edit"
-                            app:tint="@color/primary_positive_color" />
-                    </LinearLayout>
-                </LinearLayout>
+                            android:layout_margin="@dimen/eightDpMargin"
+                            android:src="@drawable/grammar_check" />
 
+
+                    </LinearLayout>
+
+                </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="@dimen/defaultDpMargin">-->
+
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal">-->
+
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="match_parent"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:orientation="vertical"-->
+<!--                        android:layout_marginEnd="@dimen/defaultDpMargin"-->
+<!--                        >-->
+<!--                      <LinearLayout-->
+<!--                          android:layout_width="match_parent"-->
+<!--                          android:layout_height="wrap_content"-->
+<!--                          android:orientation="horizontal"-->
+<!--                          android:gravity="center_vertical"-->
+<!--                          android:layout_margin="2dp"-->
+<!--                          >-->
+<!--                          <com.google.android.material.textview.MaterialTextView-->
+<!--                              android:layout_width="wrap_content"-->
+<!--                              android:layout_height="wrap_content"-->
+<!--                              android:textSize="@dimen/mediumText"-->
+<!--                              android:textColor="@color/black"-->
+<!--                              android:text="@string/grammar_status_text"-->
+<!--                              />-->
+<!--                          <com.google.android.material.textview.MaterialTextView-->
+<!--                              android:layout_width="wrap_content"-->
+<!--                              android:layout_height="wrap_content"-->
+<!--                              android:id="@+id/grammar_status_textview"-->
+<!--                              android:textSize="@dimen/mediumText"-->
+<!--                              android:text="@string/errors_text"-->
+<!--                              android:textColor="@color/yellow"-->
+<!--                              android:layout_marginStart="@dimen/defaultDpMargin"-->
+<!--                              />-->
+<!--                      </LinearLayout>-->
+
+<!--                        <com.google.android.material.textview.MaterialTextView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:id="@+id/total_title_size_textview"-->
+<!--                            android:textSize="@dimen/mediumText"-->
+<!--                            android:textColor="@color/black"-->
+<!--                            android:layout_margin="2dp"-->
+<!--                            />-->
+<!--                        <com.google.android.material.textview.MaterialTextView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:id="@+id/total_description_size_textview"-->
+<!--                            android:textSize="@dimen/mediumText"-->
+<!--                            android:textColor="@color/black"-->
+<!--                            android:layout_margin="2dp"-->
+<!--                            />-->
+<!--                        <com.google.android.material.textview.MaterialTextView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:id="@+id/total_images_size_textview"-->
+<!--                            android:textSize="@dimen/mediumText"-->
+<!--                            android:textColor="@color/black"-->
+<!--                            android:layout_margin="2dp"-->
+<!--                            />-->
+
+<!--                    </LinearLayout>-->
+
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="match_parent"-->
+<!--                        android:layout_gravity="end"-->
+<!--                        android:elevation="8dp"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:orientation="horizontal">-->
+
+<!--                        <com.google.android.material.textview.MaterialTextView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:text="@string/edit_text"-->
+<!--                            android:textColor="@color/primary_positive_color"-->
+<!--                            android:textSize="@dimen/largeText" />-->
+
+<!--                        <androidx.appcompat.widget.AppCompatImageView-->
+<!--                            android:id="@+id/insales_p_item_edit_image"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_gravity="center"-->
+<!--                            android:layout_margin="@dimen/defaultDpMargin"-->
+<!--                            android:layout_marginEnd="@dimen/sixtyDpMargin"-->
+<!--                            android:src="@drawable/ic_edit"-->
+<!--                            app:tint="@color/primary_positive_color" />-->
+<!--                    </LinearLayout>-->
+<!--                </LinearLayout>-->
+
+<!--            </androidx.cardview.widget.CardView>-->
 
 
         </LinearLayout>
