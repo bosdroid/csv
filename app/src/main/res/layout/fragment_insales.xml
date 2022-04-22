@@ -67,7 +67,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/defaultDpMargin"
-            android:background="@color/light_gray"
             android:id="@+id/insales_products_recyclerview"
             tools:listitem="@layout/insales_products_item_row_design"
             />

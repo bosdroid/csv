@@ -1,6 +1,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:f="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
@@ -47,25 +47,22 @@
             android:text="@string/edit_text"
             />
 
-         <ScrollView
-             android:layout_width="match_parent"
-             android:layout_height="450dp"
-             android:id="@+id/wrapper_layout"
-             app:layout_constraintStart_toStartOf="parent"
-             app:layout_constraintEnd_toEndOf="parent"
-             app:layout_constraintTop_toBottomOf="@id/dialog_heading"
-             android:layout_marginTop="@dimen/sixtyDpMargin"
-             >
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_heading"
+            app:layout_constraintBottom_toTopOf="@id/insales_product_detail_dialog_cancel_btn"
+            android:layout_marginTop="@dimen/sixtyDpMargin"
+            android:id="@+id/wrapper_layout"
             >
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:id="@+id/first_linear_layout"
                 android:visibility="gone"
@@ -211,7 +208,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:id="@+id/second_linear_layout"
                 android:background="@color/light_gray"
@@ -317,6 +314,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:gravity="end"
+                                android:visibility="gone"
                                 android:id="@+id/get_description_text_view"
                                 android:textColor="@color/primary_positive_color"
                                 android:text="@string/get_description_text"
@@ -325,13 +323,20 @@
                         </LinearLayout>
 
 
-                        <org.apmem.tools.layouts.FlowLayout
+                        <ScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="@dimen/eightDpMargin"
+                            >
+
+
+                        <org.apmem.tools.layouts.FlowLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:id="@+id/dynamic_insales_full_description_textview_wrapper"
                             f:layoutDirection="rtl"
                             />
+                        </ScrollView>
                     </LinearLayout>
 
                 </androidx.cardview.widget.CardView>
@@ -342,7 +347,7 @@
 
 
         </LinearLayout>
-         </ScrollView>
+
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -351,6 +356,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wrapper_layout"
             app:layout_constraintEnd_toStartOf="@id/insales_product_detail_dialog_update_btn"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             />
@@ -363,6 +369,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/wrapper_layout"
             app:layout_constraintStart_toEndOf="@id/insales_product_detail_dialog_cancel_btn"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
             />

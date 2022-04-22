@@ -2,6 +2,7 @@ package com.boris.expert.csvmagic.view.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -26,16 +27,14 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.android.volley.AuthFailureError
-import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.StringRequest
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.InSalesProductsAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
@@ -49,6 +48,7 @@ import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.activities.BaseActivity
+import com.boris.expert.csvmagic.view.activities.MainActivity
 import com.boris.expert.csvmagic.view.activities.RainForestApiActivity
 import com.boris.expert.csvmagic.view.activities.UserScreenActivity
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
@@ -70,7 +70,6 @@ import com.skydoves.balloon.BalloonAnimation
 import io.paperdb.Paper
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
-import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import java.util.regex.Pattern
@@ -92,8 +91,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private lateinit var productsRecyclerView: RecyclerView
     private lateinit var adapter: InSalesProductsAdapter
     private var galleryIntentType = 0
-    var currentPhotoPath: String? = null
-    var selectedImageBase64String: String = ""
+    private var currentPhotoPath: String? = null
+    private var selectedImageBase64String: String = ""
     private var email = ""
     private var password = ""
     private var shopName = ""
@@ -117,11 +116,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var fullDescTextViewList = mutableListOf<MaterialTextView>()
     private var keywordsList = mutableListOf<KeywordObject>()
     private lateinit var keywordsAdapter: KeywordsAdapter
-    lateinit var selectedImageView: AppCompatImageView
+    private lateinit var selectedImageView: AppCompatImageView
     private lateinit var fabAddProduct:FloatingActionButton
     private var categoryList = mutableListOf<Category>()
-    var defaultLayout = 0
-    var selectedCategoryId:Int = 0
+    private var defaultLayout = 0
+    private var selectedCategoryId:Int = 0
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -254,7 +253,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 )
                             )
                         }
-                        if (originalCategoriesList.size > 0){
+                        if (originalCategoriesList.size > 0) {
                             selectedCategoryId = originalCategoriesList[0].id
                         }
                     }
@@ -403,9 +402,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                      if (s.toString().isEmpty()){
-                          resetProductList()
-                      }
+                if (s.toString().isEmpty()) {
+                    resetProductList()
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -1195,528 +1194,526 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             override fun onItemEditImageClick(position: Int) {
                 val pItem = productsList[position]
+                CustomDialog(pItem,position,adapter,viewModel).show(childFragmentManager,"dialog")
 
-                val dialogLayout = LayoutInflater.from(requireActivity())
-                    .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
-                val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
-                val swapLayoutBtn = dialogLayout.findViewById<MaterialCheckBox>(R.id.layout_swap)
-                val firstLinearLayout =
-                    dialogLayout.findViewById<LinearLayout>(R.id.first_linear_layout)
-                val secondLinearLayout =
-                    dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
-                dynamicTitleTextViewWrapper =
-                    dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
-//                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
-                val dynamicShortDescTextViewWrapper =
-                    dialogLayout.findViewById<FlowLayout>(R.id.dynamic_insales_short_description_textview_wrapper)
-                dynamicFullDescTextViewWrapper =
-                    dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
-//                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
-                val keywordsRecyclerView =
-                    dialogLayout.findViewById<RecyclerView>(R.id.keywords_recyclerview)
-                keywordsRecyclerView.layoutManager =
-                    LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-                keywordsRecyclerView.hasFixedSize()
-                keywordsAdapter = KeywordsAdapter(
-                    requireActivity(),
-                    keywordsList as ArrayList<KeywordObject>
-                )
-                keywordsRecyclerView.adapter = keywordsAdapter
-
-                keywordsAdapter.setOnItemClickListener(object :
-                    KeywordsAdapter.OnItemClickListener {
-                    override fun onItemClick(position: Int) {
-                        val item = keywordsList[position]
-                        val builder = MaterialAlertDialogBuilder(requireActivity())
-                        val options = arrayOf("+add in title", "+add in description")
-                        var isTitleChecked = false
-                        var isDescriptionChecked = false
-                        val checkedItems = booleanArrayOf(false, false)
-                        builder.setMultiChoiceItems(
-                            options,
-                            checkedItems
-                        ) { dialog, which, isCheck ->
-                            when (which) {
-                                0 -> {
-                                    isTitleChecked = isCheck
-                                }
-                                1 -> {
-                                    isDescriptionChecked = isCheck
-                                }
-                                else -> {
-
-                                }
-                            }
-                        }
-                        builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
-
-                            if (isTitleChecked) {
-                                val textView = getMaterialTextView(item.keyword)
-                                dynamicTitleTextViewWrapper.addView(textView, 0)
-                                dynamicTitleTextViewWrapper.invalidate()
-                            }
-
-                            if (isDescriptionChecked) {
-                                val textView = getMaterialTextView(item.keyword)
-                                dynamicFullDescTextViewWrapper.addView(textView, 0)
-                                dynamicFullDescTextViewWrapper.invalidate()
-                            }
-                        }
-                        builder.setNegativeButton(
-                            requireActivity().resources.getString(R.string.cancel_text),
-                            null
-                        )
-                        val alert = builder.create()
-                        alert.show()
-                    }
-
-                    override fun onItemAddTitleClick(position: Int) {
-                        val item = keywordsList[position]
-                        val params = FlowLayout.LayoutParams(
-                            FlowLayout.LayoutParams.WRAP_CONTENT,
-                            FlowLayout.LayoutParams.WRAP_CONTENT
-                        )
-                        params.setMargins(5, 5, 5, 5)
-                        val textView = MaterialTextView(requireActivity())
-                        textView.layoutParams = params
-                        textView.text = item.keyword
-                        textView.tag = "title"
-                        textView.setTextColor(
-                            ContextCompat.getColor(
-                                requireActivity(),
-                                R.color.white
-                            )
-                        )
-                        textView.setBackgroundColor(
-                            ContextCompat.getColor(
-                                requireActivity(),
-                                R.color.primary_positive_color
-                            )
-                        )
-                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                        //titleTextViewList.add(textView)
-                        //textView.setOnClickListener(requireActivity())
-                        textView.setOnTouchListener(ChoiceTouchListener())
-                        textView.setOnDragListener(ChoiceDragListener())
-                        dynamicTitleTextViewWrapper.addView(textView, 0)
-                        //dynamicTitleTextViewWrapper.invalidate()
-
-                    }
-
-                    override fun onItemAddDescriptionClick(position: Int) {
-                        val item = keywordsList[position]
-                        val params = FlowLayout.LayoutParams(
-                            FlowLayout.LayoutParams.WRAP_CONTENT,
-                            FlowLayout.LayoutParams.WRAP_CONTENT
-                        )
-                        params.setMargins(5, 5, 5, 5)
-                        val textView = MaterialTextView(requireActivity())
-                        textView.layoutParams = params
-                        textView.text = item.keyword
-                        textView.tag = "title"
-                        textView.setTextColor(
-                            ContextCompat.getColor(
-                                requireActivity(),
-                                R.color.white
-                            )
-                        )
-                        textView.setBackgroundColor(
-                            ContextCompat.getColor(
-                                requireActivity(),
-                                R.color.primary_positive_color
-                            )
-                        )
-                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                        //titleTextViewList.add(textView)
-                        //textView.setOnClickListener(requireActivity())
-                        textView.setOnTouchListener(ChoiceTouchListener())
-                        textView.setOnDragListener(ChoiceDragListener())
-                        dynamicFullDescTextViewWrapper.addView(textView, 0)
-                        //dynamicTitleTextViewWrapper.invalidate()
-                    }
-
-                })
-
-                secondLinearLayout.visibility = View.VISIBLE
-                titleBox =
-                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
-                val productShortDescriptionBox =
-                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
-                fullDescriptionBox =
-                    dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
-                val getDescriptionView =
-                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
-                val getDescriptionView1 =
-                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
-
-                titleBox.setText(pItem.title)
-                productShortDescriptionBox.setText(pItem.shortDesc)
-                fullDescriptionBox.setText(pItem.fullDesc)
-                val dialogCancelBtn =
-                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
-                val dialogUpdateBtn =
-                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_update_btn)
-
-                titleTextViewList.clear()
-                shortDescTextViewList.clear()
-                fullDescTextViewList.clear()
-                dynamicTitleTextViewWrapper.removeAllViews()
-                dynamicShortDescTextViewWrapper.removeAllViews()
-                dynamicFullDescTextViewWrapper.removeAllViews()
-
-                val titleTextList = pItem.title.trim().split(" ")
-                val shortDescTextList = pItem.shortDesc.trim().split(" ")
-                val fullDescTextList = pItem.fullDesc.trim().split(" ")
-
-
-
-
-                for (i in 0 until titleTextList.size) {
-                    val params = FlowLayout.LayoutParams(
-                        FlowLayout.LayoutParams.WRAP_CONTENT,
-                        FlowLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    params.setMargins(5, 5, 5, 5)
-                    val textView = MaterialTextView(requireActivity())
-                    textView.layoutParams = params
-                    textView.text = titleTextList[i].trim()
-                    textView.tag = "title"
-                    textView.id = i
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
-                    titleTextViewList.add(textView)
-                    textView.setOnClickListener(this@InsalesFragment)
-//                    textView.setOnTouchListener(ChoiceTouchListener())
-//                    textView.setOnDragListener(ChoiceDragListener())
-                    dynamicTitleTextViewWrapper.addView(textView)
-                }
-
-                for (i in 0 until shortDescTextList.size) {
-                    val params = FlowLayout.LayoutParams(
-                        FlowLayout.LayoutParams.WRAP_CONTENT,
-                        FlowLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    params.setMargins(5, 5, 5, 5)
-                    val textView = MaterialTextView(requireActivity())
-                    textView.layoutParams = params
-                    textView.text = shortDescTextList[i].trim()
-                    textView.tag = "title"
-                    textView.id = i
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
-                    shortDescTextViewList.add(textView)
-                    textView.setOnClickListener(this@InsalesFragment)
-//                    textView.setOnTouchListener(ChoiceTouchListener())
-//                    textView.setOnDragListener(ChoiceDragListener())
-                    dynamicShortDescTextViewWrapper.addView(textView)
-                }
+//                val dialogLayout = LayoutInflater.from(requireActivity())
+//                    .inflate(R.layout.insales_product_detail_update_dialog_layout, null)
+//                val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
+//                val swapLayoutBtn = dialogLayout.findViewById<MaterialCheckBox>(R.id.layout_swap)
+//                val firstLinearLayout =
+//                    dialogLayout.findViewById<LinearLayout>(R.id.first_linear_layout)
+//                val secondLinearLayout =
+//                    dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
+//                dynamicTitleTextViewWrapper =
+//                    dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
+////                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
+//                val dynamicShortDescTextViewWrapper =
+//                    dialogLayout.findViewById<FlowLayout>(R.id.dynamic_insales_short_description_textview_wrapper)
+//                dynamicFullDescTextViewWrapper =
+//                    dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
+////                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
+//                val keywordsRecyclerView =
+//                    dialogLayout.findViewById<RecyclerView>(R.id.keywords_recyclerview)
+//                keywordsRecyclerView.layoutManager =
+//                    LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+//                keywordsRecyclerView.hasFixedSize()
+//                keywordsAdapter = KeywordsAdapter(
+//                    requireActivity(),
+//                    keywordsList as ArrayList<KeywordObject>
+//                )
+//                keywordsRecyclerView.adapter = keywordsAdapter
 //
-                for (i in 0 until fullDescTextList.size) {
-                    val params = FlowLayout.LayoutParams(
-                        FlowLayout.LayoutParams.WRAP_CONTENT,
-                        FlowLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    params.setMargins(5, 5, 5, 5)
-                    val textView = MaterialTextView(requireActivity())
-                    textView.layoutParams = params
-                    textView.text = fullDescTextList[i].trim()
-                    textView.tag = "title"
-                    textView.id = i
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
-                    fullDescTextViewList.add(textView)
-                    textView.setOnClickListener(this@InsalesFragment)
-//                    textView.setOnTouchListener(ChoiceTouchListener())
-//                    textView.setOnDragListener(ChoiceDragListener())
-                    dynamicFullDescTextViewWrapper.addView(textView)
-                }
-
-
-
-
-
-                swapLayoutBtn.setOnCheckedChangeListener { buttonView, isChecked ->
-                    if (isChecked) {
-                        secondLinearLayout.visibility = View.GONE
-                        firstLinearLayout.visibility = View.VISIBLE
-                        defaultLayout = 1
-
-                        titleBox.setSelection(pItem.title.length)
-                        titleBox.requestFocus()
-                        Constants.openKeyboar(requireActivity())
-                    } else {
-                        Constants.hideKeyboar(requireActivity())
-                        BaseActivity.startLoading(requireActivity())
-                        firstLinearLayout.visibility = View.GONE
-                        secondLinearLayout.visibility = View.VISIBLE
-                        defaultLayout = 0
-//                        val titleTextList = titleBox.text.toString().trim().split(" ")
-//                        val shortDescTextList =
-//                            productShortDescriptionBox.text.toString().trim().split(
-//                                " "
-//                            )
-//                        val fullDescTextList = fullDescriptionBox.text.toString().trim().split(" ")
+//                keywordsAdapter.setOnItemClickListener(object :
+//                    KeywordsAdapter.OnItemClickListener {
+//                    override fun onItemClick(position: Int) {
+//                        val item = keywordsList[position]
+//                        val builder = MaterialAlertDialogBuilder(requireActivity())
+//                        val options = arrayOf("+add in title", "+add in description")
+//                        var isTitleChecked = false
+//                        var isDescriptionChecked = false
+//                        val checkedItems = booleanArrayOf(false, false)
+//                        builder.setMultiChoiceItems(
+//                            options,
+//                            checkedItems
+//                        ) { dialog, which, isCheck ->
+//                            when (which) {
+//                                0 -> {
+//                                    isTitleChecked = isCheck
+//                                }
+//                                1 -> {
+//                                    isDescriptionChecked = isCheck
+//                                }
+//                                else -> {
 //
-//                        for (i in 0 until titleTextList.size) {
-//                            val params = FlowLayout.LayoutParams(
-//                                FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                FlowLayout.LayoutParams.WRAP_CONTENT
-//                            )
-//                            params.setMargins(5, 5, 5, 5)
-//                            val textView = MaterialTextView(context)
-//                            textView.layoutParams = params
-//                            textView.text = titleTextList[i].trim()
-//                            textView.tag = "title"
-//                            textView.id = i
-//                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                            textView.setTextColor(ContextCompat.getColor(context, R.color.black))
-//                            titleTextViewList.add(textView)
-//                            textView.setOnClickListener(this@SalesCustomersActivity)
-//                            dynamicTitleTextViewWrapper.addView(textView)
+//                                }
+//                            }
 //                        }
+//                        builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
 //
-//                        for (i in 0 until shortDescTextList.size) {
-//                            val params = FlowLayout.LayoutParams(
-//                                FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                FlowLayout.LayoutParams.WRAP_CONTENT
-//                            )
-//                            params.setMargins(5, 5, 5, 5)
-//                            val textView = MaterialTextView(context)
-//                            textView.layoutParams = params
-//                            textView.text = shortDescTextList[i].trim()
-//                            textView.tag = "title"
-//                            textView.id = i
-//                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                            textView.setTextColor(ContextCompat.getColor(context, R.color.black))
-//                            shortDescTextViewList.add(textView)
-//                            textView.setOnClickListener(this@SalesCustomersActivity)
-//                            dynamicShortDescTextViewWrapper.addView(textView)
+//                            if (isTitleChecked) {
+//                                val textView = getMaterialTextView(item.keyword)
+//                                dynamicTitleTextViewWrapper.addView(textView, 0)
+//                                dynamicTitleTextViewWrapper.invalidate()
+//                            }
+//
+//                            if (isDescriptionChecked) {
+//                                val textView = getMaterialTextView(item.keyword)
+//                                dynamicFullDescTextViewWrapper.addView(textView, 0)
+//                                dynamicFullDescTextViewWrapper.invalidate()
+//                            }
 //                        }
+//                        builder.setNegativeButton(
+//                            requireActivity().resources.getString(R.string.cancel_text),
+//                            null
+//                        )
+//                        val alert = builder.create()
+//                        alert.show()
+//                    }
 //
-//                        for (i in 0 until fullDescTextList.size) {
-//                            val params = FlowLayout.LayoutParams(
-//                                FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                FlowLayout.LayoutParams.WRAP_CONTENT
+//                    override fun onItemAddTitleClick(position: Int) {
+//                        val item = keywordsList[position]
+//                        val params = FlowLayout.LayoutParams(
+//                            FlowLayout.LayoutParams.WRAP_CONTENT,
+//                            FlowLayout.LayoutParams.WRAP_CONTENT
+//                        )
+//                        params.setMargins(5, 5, 5, 5)
+//                        val textView = MaterialTextView(requireActivity())
+//                        textView.layoutParams = params
+//                        textView.text = item.keyword
+//                        textView.tag = "title"
+//                        textView.setTextColor(
+//                            ContextCompat.getColor(
+//                                requireActivity(),
+//                                R.color.white
 //                            )
-//                            params.setMargins(5, 5, 5, 5)
-//                            val textView = MaterialTextView(context)
-//                            textView.layoutParams = params
-//                            textView.text = fullDescTextList[i].trim()
-//                            textView.tag = "title"
-//                            textView.id = i
-//                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                            textView.setTextColor(ContextCompat.getColor(context, R.color.black))
-//                            fullDescTextViewList.add(textView)
-//                            textView.setOnClickListener(this@SalesCustomersActivity)
-//                            dynamicFullDescTextViewWrapper.addView(textView)
-//                        }
-                        BaseActivity.dismiss()
-                    }
-                }
-
-//                swapLayoutBtn.setOnClickListener {
-//                    titleTextViewList.clear()
-//                    shortDescTextViewList.clear()
-//                    fullDescTextViewList.clear()
-//                    dynamicTitleTextViewWrapper.removeAllViews()
-//                    dynamicShortDescTextViewWrapper.removeAllViews()
-//                    dynamicFullDescTextViewWrapper.removeAllViews()
-//
-//
-//                    if (defaultLayout == 0){
+//                        )
+//                        textView.setBackgroundColor(
+//                            ContextCompat.getColor(
+//                                requireActivity(),
+//                                R.color.primary_positive_color
+//                            )
+//                        )
+//                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+//                        //titleTextViewList.add(textView)
+//                        //textView.setOnClickListener(requireActivity())
+//                        textView.setOnTouchListener(ChoiceTouchListener())
+//                        textView.setOnDragListener(ChoiceDragListener())
+//                        dynamicTitleTextViewWrapper.addView(textView, 0)
+//                        //dynamicTitleTextViewWrapper.invalidate()
 //
 //                    }
-//                    else{
 //
+//                    override fun onItemAddDescriptionClick(position: Int) {
+//                        val item = keywordsList[position]
+//                        val params = FlowLayout.LayoutParams(
+//                            FlowLayout.LayoutParams.WRAP_CONTENT,
+//                            FlowLayout.LayoutParams.WRAP_CONTENT
+//                        )
+//                        params.setMargins(5, 5, 5, 5)
+//                        val textView = MaterialTextView(requireActivity())
+//                        textView.layoutParams = params
+//                        textView.text = item.keyword
+//                        textView.tag = "title"
+//                        textView.setTextColor(
+//                            ContextCompat.getColor(
+//                                requireActivity(),
+//                                R.color.white
+//                            )
+//                        )
+//                        textView.setBackgroundColor(
+//                            ContextCompat.getColor(
+//                                requireActivity(),
+//                                R.color.primary_positive_color
+//                            )
+//                        )
+//                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+//                        //titleTextViewList.add(textView)
+//                        //textView.setOnClickListener(requireActivity())
+//                        textView.setOnTouchListener(ChoiceTouchListener())
+//                        textView.setOnDragListener(ChoiceDragListener())
+//                        dynamicFullDescTextViewWrapper.addView(textView, 0)
+//                        //dynamicTitleTextViewWrapper.invalidate()
+//                    }
+//
+//                })
+//
+//                secondLinearLayout.visibility = View.VISIBLE
+//                titleBox =
+//                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
+//                val productShortDescriptionBox =
+//                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
+//                fullDescriptionBox =
+//                    dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
+//                val getDescriptionView =
+//                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
+//                val getDescriptionView1 =
+//                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
+//
+//                titleBox.setText(pItem.title)
+//                productShortDescriptionBox.setText(pItem.shortDesc)
+//                fullDescriptionBox.setText(pItem.fullDesc)
+//                val dialogCancelBtn =
+//                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
+//                val dialogUpdateBtn =
+//                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_update_btn)
+//
+//                titleTextViewList.clear()
+//                shortDescTextViewList.clear()
+//                fullDescTextViewList.clear()
+//                dynamicTitleTextViewWrapper.removeAllViews()
+//                dynamicShortDescTextViewWrapper.removeAllViews()
+//                dynamicFullDescTextViewWrapper.removeAllViews()
+//
+//                val titleTextList = pItem.title.trim().split(" ")
+//                val shortDescTextList = pItem.shortDesc.trim().split(" ")
+//                val fullDescTextList = pItem.fullDesc.trim().split(" ")
+//
+//                for (i in 0 until titleTextList.size) {
+//                    val params = FlowLayout.LayoutParams(
+//                        FlowLayout.LayoutParams.WRAP_CONTENT,
+//                        FlowLayout.LayoutParams.WRAP_CONTENT
+//                    )
+//                    params.setMargins(5, 5, 5, 5)
+//                    val textView = MaterialTextView(requireActivity())
+//                    textView.layoutParams = params
+//                    textView.text = titleTextList[i].trim()
+//                    textView.tag = "title"
+//                    textView.id = i
+//                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+//                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+//                    titleTextViewList.add(textView)
+//                    textView.setOnClickListener(this@InsalesFragment)
+////                    textView.setOnTouchListener(ChoiceTouchListener())
+////                    textView.setOnDragListener(ChoiceDragListener())
+//                    dynamicTitleTextViewWrapper.addView(textView)
+//                }
+//
+//                for (i in 0 until shortDescTextList.size) {
+//                    val params = FlowLayout.LayoutParams(
+//                        FlowLayout.LayoutParams.WRAP_CONTENT,
+//                        FlowLayout.LayoutParams.WRAP_CONTENT
+//                    )
+//                    params.setMargins(5, 5, 5, 5)
+//                    val textView = MaterialTextView(requireActivity())
+//                    textView.layoutParams = params
+//                    textView.text = shortDescTextList[i].trim()
+//                    textView.tag = "title"
+//                    textView.id = i
+//                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+//                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+//                    shortDescTextViewList.add(textView)
+//                    textView.setOnClickListener(this@InsalesFragment)
+////                    textView.setOnTouchListener(ChoiceTouchListener())
+////                    textView.setOnDragListener(ChoiceDragListener())
+//                    dynamicShortDescTextViewWrapper.addView(textView)
+//                }
+////
+//                for (i in 0 until fullDescTextList.size) {
+//                    val params = FlowLayout.LayoutParams(
+//                        FlowLayout.LayoutParams.WRAP_CONTENT,
+//                        FlowLayout.LayoutParams.WRAP_CONTENT
+//                    )
+//                    params.setMargins(5, 5, 5, 5)
+//                    val textView = MaterialTextView(requireActivity())
+//                    textView.layoutParams = params
+//                    textView.text = fullDescTextList[i].trim()
+//                    textView.tag = "title"
+//                    textView.id = i
+//                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+//                    textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+//                    fullDescTextViewList.add(textView)
+//                    textView.setOnClickListener(this@InsalesFragment)
+////                    textView.setOnTouchListener(ChoiceTouchListener())
+////                    textView.setOnDragListener(ChoiceDragListener())
+//                    dynamicFullDescTextViewWrapper.addView(textView)
+//                }
+//
+//
+//
+//
+//
+//                swapLayoutBtn.setOnCheckedChangeListener { buttonView, isChecked ->
+//                    if (isChecked) {
+//                        secondLinearLayout.visibility = View.GONE
+//                        firstLinearLayout.visibility = View.VISIBLE
+//                        defaultLayout = 1
+//
+//                        titleBox.setSelection(pItem.title.length)
+//                        titleBox.requestFocus()
+//                        Constants.openKeyboar(requireActivity())
+//                    } else {
+//                        Constants.hideKeyboar(requireActivity())
+//                        BaseActivity.startLoading(requireActivity())
+//                        firstLinearLayout.visibility = View.GONE
+//                        secondLinearLayout.visibility = View.VISIBLE
+//                        defaultLayout = 0
+////                        val titleTextList = titleBox.text.toString().trim().split(" ")
+////                        val shortDescTextList =
+////                            productShortDescriptionBox.text.toString().trim().split(
+////                                " "
+////                            )
+////                        val fullDescTextList = fullDescriptionBox.text.toString().trim().split(" ")
+////
+////                        for (i in 0 until titleTextList.size) {
+////                            val params = FlowLayout.LayoutParams(
+////                                FlowLayout.LayoutParams.WRAP_CONTENT,
+////                                FlowLayout.LayoutParams.WRAP_CONTENT
+////                            )
+////                            params.setMargins(5, 5, 5, 5)
+////                            val textView = MaterialTextView(context)
+////                            textView.layoutParams = params
+////                            textView.text = titleTextList[i].trim()
+////                            textView.tag = "title"
+////                            textView.id = i
+////                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+////                            textView.setTextColor(ContextCompat.getColor(context, R.color.black))
+////                            titleTextViewList.add(textView)
+////                            textView.setOnClickListener(this@SalesCustomersActivity)
+////                            dynamicTitleTextViewWrapper.addView(textView)
+////                        }
+////
+////                        for (i in 0 until shortDescTextList.size) {
+////                            val params = FlowLayout.LayoutParams(
+////                                FlowLayout.LayoutParams.WRAP_CONTENT,
+////                                FlowLayout.LayoutParams.WRAP_CONTENT
+////                            )
+////                            params.setMargins(5, 5, 5, 5)
+////                            val textView = MaterialTextView(context)
+////                            textView.layoutParams = params
+////                            textView.text = shortDescTextList[i].trim()
+////                            textView.tag = "title"
+////                            textView.id = i
+////                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+////                            textView.setTextColor(ContextCompat.getColor(context, R.color.black))
+////                            shortDescTextViewList.add(textView)
+////                            textView.setOnClickListener(this@SalesCustomersActivity)
+////                            dynamicShortDescTextViewWrapper.addView(textView)
+////                        }
+////
+////                        for (i in 0 until fullDescTextList.size) {
+////                            val params = FlowLayout.LayoutParams(
+////                                FlowLayout.LayoutParams.WRAP_CONTENT,
+////                                FlowLayout.LayoutParams.WRAP_CONTENT
+////                            )
+////                            params.setMargins(5, 5, 5, 5)
+////                            val textView = MaterialTextView(context)
+////                            textView.layoutParams = params
+////                            textView.text = fullDescTextList[i].trim()
+////                            textView.tag = "title"
+////                            textView.id = i
+////                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+////                            textView.setTextColor(ContextCompat.getColor(context, R.color.black))
+////                            fullDescTextViewList.add(textView)
+////                            textView.setOnClickListener(this@SalesCustomersActivity)
+////                            dynamicFullDescTextViewWrapper.addView(textView)
+////                        }
+//                        BaseActivity.dismiss()
 //                    }
 //                }
-
-                val builder = MaterialAlertDialogBuilder(requireActivity(),R.style.DialogTheme)
-                    .setView(dialogLayout)
-                    .setCancelable(false)
-                val alert = builder.create()
-                alert.show()
-                 titleBox.setSelection(pItem.title.length)
-//                titleBox.requestFocus()
-//                Constants.openKeyboar(context)
-                dialogCancelBtn.setOnClickListener {
-                    BaseActivity.hideSoftKeyboard(requireActivity(), dialogCancelBtn)
-//                    Constants.hideKeyboar(requireActivity())
-                    alert.dismiss()
-                }
-
-                getDescriptionView.setOnClickListener {
-                    Constants.hideKeyboar(requireActivity())
-                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-
-                    if (userCurrentCredits.toFloat() >= 1.0) {
-                        launchActivity.launch(
-                            Intent(
-                                requireActivity(),
-                                RainForestApiActivity::class.java
-                            )
-                        )
-                    } else {
-                        MaterialAlertDialogBuilder(requireActivity())
-                            .setMessage(getString(R.string.low_credites_error_message2))
-                            .setCancelable(false)
-                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                                dialog.dismiss()
-                                startActivity(Intent(context, UserScreenActivity::class.java))
-                            }
-                            .create().show()
-                    }
-
-                }
-
-                getDescriptionView1.setOnClickListener {
-                    Constants.hideKeyboar(requireActivity())
-                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-
-                    if (userCurrentCredits.toFloat() >= 1.0) {
-                        launchActivity.launch(
-                            Intent(
-                                requireActivity(),
-                                RainForestApiActivity::class.java
-                            )
-                        )
-                    } else {
-                        MaterialAlertDialogBuilder(requireActivity())
-                            .setMessage(getString(R.string.low_credites_error_message2))
-                            .setCancelable(false)
-                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                                dialog.dismiss()
-                                startActivity(
-                                    Intent(
-                                        requireActivity(),
-                                        UserScreenActivity::class.java
-                                    )
-                                )
-                            }
-                            .create().show()
-                    }
-
-                }
-
-                dialogUpdateBtn.setOnClickListener {
-                    val titleText = titleBox.text.toString().trim()
-                    val shortDesc = productShortDescriptionBox.text.toString().trim()
-                    val fullDesc = fullDescriptionBox.text.toString().trim()
 //
-                    if (defaultLayout == 0) {
-                        var stringBuilder = StringBuilder()
-
-                        for (i in 0 until (dynamicTitleTextViewWrapper as ViewGroup).childCount) {
-                            val nextChild = (dynamicTitleTextViewWrapper as ViewGroup).getChildAt(i)
-                            val text = (nextChild as MaterialTextView).text.toString()
-                            stringBuilder.append(text)
-                            stringBuilder.append(" ")
-                        }
-
-//                        for (i in 0 until titleTextViewList.size) {
-//                            val item = titleTextViewList[i]
-//                            stringBuilder.append(item.text.toString())
+////                swapLayoutBtn.setOnClickListener {
+////                    titleTextViewList.clear()
+////                    shortDescTextViewList.clear()
+////                    fullDescTextViewList.clear()
+////                    dynamicTitleTextViewWrapper.removeAllViews()
+////                    dynamicShortDescTextViewWrapper.removeAllViews()
+////                    dynamicFullDescTextViewWrapper.removeAllViews()
+////
+////
+////                    if (defaultLayout == 0){
+////
+////                    }
+////                    else{
+////
+////                    }
+////                }
+//
+//                val builder = MaterialAlertDialogBuilder(requireActivity())
+//                    .setView(dialogLayout)
+//                    .setCancelable(false)
+//                val alert = builder.create()
+//                alert.show()
+//                titleBox.setSelection(pItem.title.length)
+////                titleBox.requestFocus()
+////                Constants.openKeyboar(context)
+//                dialogCancelBtn.setOnClickListener {
+//                    BaseActivity.hideSoftKeyboard(requireActivity(), dialogCancelBtn)
+////                    Constants.hideKeyboar(requireActivity())
+//                    alert.dismiss()
+//                }
+//
+//                getDescriptionView.setOnClickListener {
+//                    Constants.hideKeyboar(requireActivity())
+//                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//
+//                    if (userCurrentCredits.toFloat() >= 1.0) {
+//                        launchActivity.launch(
+//                            Intent(
+//                                requireActivity(),
+//                                RainForestApiActivity::class.java
+//                            )
+//                        )
+//                    } else {
+//                        MaterialAlertDialogBuilder(requireActivity())
+//                            .setMessage(getString(R.string.low_credites_error_message2))
+//                            .setCancelable(false)
+//                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                                dialog.dismiss()
+//                            }
+//                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                                dialog.dismiss()
+//                                startActivity(Intent(context, UserScreenActivity::class.java))
+//                            }
+//                            .create().show()
+//                    }
+//
+//                }
+//
+//                getDescriptionView1.setOnClickListener {
+//                    Constants.hideKeyboar(requireActivity())
+//                    userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//
+//                    if (userCurrentCredits.toFloat() >= 1.0) {
+//                        launchActivity.launch(
+//                            Intent(
+//                                requireActivity(),
+//                                RainForestApiActivity::class.java
+//                            )
+//                        )
+//                    } else {
+//                        MaterialAlertDialogBuilder(requireActivity())
+//                            .setMessage(getString(R.string.low_credites_error_message2))
+//                            .setCancelable(false)
+//                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                                dialog.dismiss()
+//                            }
+//                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                                dialog.dismiss()
+//                                startActivity(
+//                                    Intent(
+//                                        requireActivity(),
+//                                        UserScreenActivity::class.java
+//                                    )
+//                                )
+//                            }
+//                            .create().show()
+//                    }
+//
+//                }
+//
+//                dialogUpdateBtn.setOnClickListener {
+//                    val titleText = titleBox.text.toString().trim()
+//                    val shortDesc = productShortDescriptionBox.text.toString().trim()
+//                    val fullDesc = fullDescriptionBox.text.toString().trim()
+////
+//                    if (defaultLayout == 0) {
+//                        var stringBuilder = StringBuilder()
+//
+//                        for (i in 0 until (dynamicTitleTextViewWrapper as ViewGroup).childCount) {
+//                            val nextChild = (dynamicTitleTextViewWrapper as ViewGroup).getChildAt(i)
+//                            val text = (nextChild as MaterialTextView).text.toString()
+//                            stringBuilder.append(text)
 //                            stringBuilder.append(" ")
 //                        }
-
-                        pItem.title = stringBuilder.toString().trim()
-                        stringBuilder = StringBuilder()
-//                        for (i in 0 until shortDescTextViewList.size) {
-//                            val item = shortDescTextViewList[i]
-//                            stringBuilder.append(item.text.toString())
+//
+////                        for (i in 0 until titleTextViewList.size) {
+////                            val item = titleTextViewList[i]
+////                            stringBuilder.append(item.text.toString())
+////                            stringBuilder.append(" ")
+////                        }
+//
+//                        pItem.title = stringBuilder.toString().trim()
+//                        stringBuilder = StringBuilder()
+////                        for (i in 0 until shortDescTextViewList.size) {
+////                            val item = shortDescTextViewList[i]
+////                            stringBuilder.append(item.text.toString())
+////                            stringBuilder.append(" ")
+////                        }
+//
+//                        for (i in 0 until (dynamicShortDescTextViewWrapper as ViewGroup).childCount) {
+//                            val nextChild =
+//                                (dynamicShortDescTextViewWrapper as ViewGroup).getChildAt(i)
+//                            val text = (nextChild as MaterialTextView).text.toString()
+//                            stringBuilder.append(text)
 //                            stringBuilder.append(" ")
 //                        }
-
-                        for (i in 0 until (dynamicShortDescTextViewWrapper as ViewGroup).childCount) {
-                            val nextChild =
-                                (dynamicShortDescTextViewWrapper as ViewGroup).getChildAt(i)
-                            val text = (nextChild as MaterialTextView).text.toString()
-                            stringBuilder.append(text)
-                            stringBuilder.append(" ")
-                        }
-
-                        pItem.shortDesc = stringBuilder.toString().trim()
-
-                        stringBuilder = StringBuilder()
-//                        for (i in 0 until fullDescTextViewList.size) {
-//                            val item = fullDescTextViewList[i]
-//                            stringBuilder.append(item.text.toString())
+//
+//                        pItem.shortDesc = stringBuilder.toString().trim()
+//
+//                        stringBuilder = StringBuilder()
+////                        for (i in 0 until fullDescTextViewList.size) {
+////                            val item = fullDescTextViewList[i]
+////                            stringBuilder.append(item.text.toString())
+////                            stringBuilder.append(" ")
+////                        }
+//                        for (i in 0 until (dynamicFullDescTextViewWrapper as ViewGroup).childCount) {
+//                            val nextChild =
+//                                (dynamicFullDescTextViewWrapper as ViewGroup).getChildAt(i)
+//                            val text = (nextChild as MaterialTextView).text.toString()
+//                            stringBuilder.append(text)
 //                            stringBuilder.append(" ")
 //                        }
-                        for (i in 0 until (dynamicFullDescTextViewWrapper as ViewGroup).childCount) {
-                            val nextChild =
-                                (dynamicFullDescTextViewWrapper as ViewGroup).getChildAt(i)
-                            val text = (nextChild as MaterialTextView).text.toString()
-                            stringBuilder.append(text)
-                            stringBuilder.append(" ")
-                        }
-                        pItem.fullDesc = stringBuilder.toString().trim()
-                    } else {
-                        BaseActivity.hideSoftKeyboard(requireActivity(), dialogUpdateBtn)
-                        pItem.title = titleText
-                        pItem.shortDesc = shortDesc
-                        pItem.fullDesc = fullDesc
-                    }
-                    defaultLayout = 0
-                    if (titleText.isNotEmpty()) {
-                        alert.dismiss()
-                        BaseActivity.startLoading(
-                            requireActivity(),
-                            getString(R.string.please_wait_product_update_message)
-                        )
-
-                        Paper.book().delete(Constants.cacheProducts)
-                        Paper.book().write(Constants.cacheProducts, originalProductsList)
-                        adapter.notifyItemChanged(position)
-
-                        viewModel.callUpdateProductDetail(
-                            requireActivity(),
-                            shopName,
-                            email,
-                            password,
-                            pItem.id,
-                            pItem.title,
-                            pItem.shortDesc,
-                            pItem.fullDesc
-                        )
-                        viewModel.getUpdateProductDetailResponse()
-                            .observe(requireActivity(), Observer { response ->
-                                if (response != null) {
-                                    if (response.get("status").asString == "200") {
-//                                        Handler(Looper.myLooper()!!).postDelayed({
-                                        BaseActivity.dismiss()
-                                        fetchProducts()
-//                                            showProducts()
-//                                        }, 3000)
-                                        Toast.makeText(
-                                            requireActivity(),
-                                            getString(R.string.product_updated_successfully),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        BaseActivity.dismiss()
-                                        BaseActivity.showAlert(
-                                            requireActivity(),
-                                            response.get("message").asString
-                                        )
-                                    }
-                                } else {
-                                    BaseActivity.dismiss()
-                                }
-                            })
-                    } else {
-                        BaseActivity.showAlert(
-                            requireActivity(),
-                            getString(R.string.empty_text_error)
-                        )
-                    }
-                }
+//                        pItem.fullDesc = stringBuilder.toString().trim()
+//                    } else {
+//                        BaseActivity.hideSoftKeyboard(requireActivity(), dialogUpdateBtn)
+//                        pItem.title = titleText
+//                        pItem.shortDesc = shortDesc
+//                        pItem.fullDesc = fullDesc
+//                    }
+//                    defaultLayout = 0
+//                    if (titleText.isNotEmpty()) {
+//                        alert.dismiss()
+//                        BaseActivity.startLoading(
+//                            requireActivity(),
+//                            getString(R.string.please_wait_product_update_message)
+//                        )
+//
+//                        Paper.book().delete(Constants.cacheProducts)
+//                        Paper.book().write(Constants.cacheProducts, originalProductsList)
+//                        adapter.notifyItemChanged(position)
+//
+//                        viewModel.callUpdateProductDetail(
+//                            requireActivity(),
+//                            shopName,
+//                            email,
+//                            password,
+//                            pItem.id,
+//                            pItem.title,
+//                            pItem.shortDesc,
+//                            pItem.fullDesc
+//                        )
+//                        viewModel.getUpdateProductDetailResponse()
+//                            .observe(requireActivity(), Observer { response ->
+//                                if (response != null) {
+//                                    if (response.get("status").asString == "200") {
+////                                        Handler(Looper.myLooper()!!).postDelayed({
+//                                        BaseActivity.dismiss()
+//                                        fetchProducts()
+////                                            showProducts()
+////                                        }, 3000)
+//                                        Toast.makeText(
+//                                            requireActivity(),
+//                                            getString(R.string.product_updated_successfully),
+//                                            Toast.LENGTH_SHORT
+//                                        ).show()
+//                                    } else {
+//                                        BaseActivity.dismiss()
+//                                        BaseActivity.showAlert(
+//                                            requireActivity(),
+//                                            response.get("message").asString
+//                                        )
+//                                    }
+//                                } else {
+//                                    BaseActivity.dismiss()
+//                                }
+//                            })
+//                    } else {
+//                        BaseActivity.showAlert(
+//                            requireActivity(),
+//                            getString(R.string.empty_text_error)
+//                        )
+//                    }
+//                }
             }
 
             override fun onItemGrammarCheckClick(
@@ -1814,7 +1811,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     }
 
-    private fun getMaterialTextView(text:String):MaterialTextView{
+    private fun getMaterialTextView(text: String):MaterialTextView{
         val params = FlowLayout.LayoutParams(
             FlowLayout.LayoutParams.WRAP_CONTENT,
             FlowLayout.LayoutParams.WRAP_CONTENT
@@ -2164,54 +2161,77 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
                 }
             }
-            R.id.fab->{
+            R.id.fab -> {
                 addProduct()
             }
             else -> {
-                val position = view.id
-                val textView = view as MaterialTextView
-                view.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.primary_positive_color))
-                view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
-                val balloon = Balloon.Builder(requireActivity())
-                    .setLayout(R.layout.ballon_layout_design)
-                    .setArrowSize(10)
-                    .setArrowOrientation(ArrowOrientation.TOP)
-                    .setArrowPosition(0.5f)
-                    .setWidthRatio(0.55f)
-                    .setCornerRadius(4f)
-                    .setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.light_gray))
-                    .setBalloonAnimation(BalloonAnimation.ELASTIC)
-                    .setLifecycleOwner(this)
-                    .build()
-                val editTextBox = balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
-                editTextBox.setText(textView.text.toString().trim())
-                val closeBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
-                val applyBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
-                balloon.showAlignTop(textView,)
-                editTextBox.requestFocus()
-                Constants.openKeyboar(requireActivity())
-                closeBtn.setOnClickListener {
-                    Constants.hideKeyboar(requireActivity())
-                    balloon.dismiss()
-                    view.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.white))
-                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
-                }
-                applyBtn.setOnClickListener {
-                    Constants.hideKeyboar(requireActivity())
-                    balloon.dismiss()
-                    //val tempText = textView.replace(mWord,editTextBox.text.toString().trim())
-                    textView.text = editTextBox.text.toString().trim()
-                    view.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.white))
-                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
-
-                }
+//                val position = view.id
+//                val textView = view as MaterialTextView
+//                view.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        requireActivity(),
+//                        R.color.primary_positive_color
+//                    )
+//                )
+//                view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
+//                val balloon = Balloon.Builder(requireActivity())
+//                    .setLayout(R.layout.ballon_layout_design)
+//                    .setArrowSize(10)
+//                    .setArrowOrientation(ArrowOrientation.TOP)
+//                    .setArrowPosition(0.5f)
+//                    .setWidthRatio(0.55f)
+//                    .setCornerRadius(4f)
+//                    .setBackgroundColor(
+//                        ContextCompat.getColor(
+//                            requireActivity(),
+//                            R.color.light_gray
+//                        )
+//                    )
+//                    .setBalloonAnimation(BalloonAnimation.ELASTIC)
+//                    .setLifecycleOwner(this)
+//                    .build()
+//                val editTextBox = balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
+//                editTextBox.setText(textView.text.toString().trim())
+//                val closeBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
+//                val applyBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
+//                balloon.showAlignTop(textView)
+//                editTextBox.requestFocus()
+//                Constants.openKeyboar(requireActivity())
+//                closeBtn.setOnClickListener {
+//                    Constants.hideKeyboar(requireActivity())
+//                    balloon.dismiss()
+//                    view.setBackgroundColor(
+//                        ContextCompat.getColor(
+//                            requireActivity(),
+//                            R.color.white
+//                        )
+//                    )
+//                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+//                }
+//                applyBtn.setOnClickListener {
+//                    Constants.hideKeyboar(requireActivity())
+//                    balloon.dismiss()
+//                    //val tempText = textView.replace(mWord,editTextBox.text.toString().trim())
+//                    textView.text = editTextBox.text.toString().trim()
+//                    view.setBackgroundColor(
+//                        ContextCompat.getColor(
+//                            requireActivity(),
+//                            R.color.white
+//                        )
+//                    )
+//                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+//
+//                }
             }
         }
     }
 
 
     private fun addProduct(){
-        val addProductLayout = LayoutInflater.from(requireActivity()).inflate(R.layout.insales_add_product_dialog,null)
+        val addProductLayout = LayoutInflater.from(requireActivity()).inflate(
+            R.layout.insales_add_product_dialog,
+            null
+        )
         val categoriesSpinner = addProductLayout.findViewById<AppCompatSpinner>(R.id.ap_cate_spinner)
         val apTitleView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_title)
         val apDescriptionView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_description)
@@ -2227,7 +2247,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         val alert = builder.create()
         alert.show()
 
-        val cateSpinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, originalCategoriesList)
+        val cateSpinnerAdapter = ArrayAdapter(
+            requireActivity(),
+            android.R.layout.simple_spinner_item,
+            originalCategoriesList
+        )
         cateSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         categoriesSpinner.adapter = cateSpinnerAdapter
 
@@ -2259,11 +2283,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         apSubmitBtn.setOnClickListener {
 
-            if (addProductValidation(categoriesSpinner,apTitleView,apQuantityView,apPriceView)){
+            if (addProductValidation(categoriesSpinner, apTitleView, apQuantityView, apPriceView)){
                 alert.dismiss()
                 BaseActivity.startLoading(requireActivity())
-               viewModel.callAddProduct(requireActivity(),shopName,email,password,selectedCategoryId,apTitleView.text.toString().trim(),apDescriptionView.text.toString().trim(),
-               apQuantityView.text.toString().trim(),apPriceView.text.toString().trim())
+               viewModel.callAddProduct(
+                   requireActivity(),
+                   shopName,
+                   email,
+                   password,
+                   selectedCategoryId,
+                   apTitleView.text.toString().trim(),
+                   apDescriptionView.text.toString().trim(),
+                   apQuantityView.text.toString().trim(),
+                   apPriceView.text.toString().trim()
+               )
                 viewModel.getAddProductResponse()
                     .observe(requireActivity(), Observer { response ->
                         if (response != null) {
@@ -2294,7 +2327,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         apPriceView: TextInputEditText?
     ): Boolean {
         if (selectedCategoryId == 0){
-            BaseActivity.showAlert(requireActivity(),requireActivity().resources.getString(R.string.add_product_cate_error))
+            BaseActivity.showAlert(
+                requireActivity(),
+                requireActivity().resources.getString(R.string.add_product_cate_error)
+            )
             return false
         }
         else if (apTitleView!!.text.toString().isEmpty()){
@@ -2399,6 +2435,414 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
             }
             return true
+        }
+    }
+
+    private fun updateProductDetail(){
+
+    }
+
+
+    class CustomDialog(private val pItem:Product,private val position:Int,private val insalesAdapter:InSalesProductsAdapter,private val viewModel:SalesCustomersViewModel) : DialogFragment(), View.OnClickListener{
+
+        private var insalesFragment:InsalesFragment?=null
+
+        override fun onAttach(context: Context) {
+            super.onAttach(context)
+        }
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setStyle(
+                STYLE_NORMAL,
+                R.style.FullScreenDialogStyle
+            )
+            insalesFragment = InsalesFragment()
+        }
+
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val v =  inflater.inflate(R.layout.insales_product_detail_update_dialog_layout, container)
+
+            initViews(v)
+
+            return v
+        }
+
+        private fun initViews(dialogLayout: View) {
+            val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
+            val swapLayoutBtn = dialogLayout.findViewById<MaterialCheckBox>(R.id.layout_swap)
+            val firstLinearLayout =
+                dialogLayout.findViewById<LinearLayout>(R.id.first_linear_layout)
+            val secondLinearLayout =
+                dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
+            dynamicTitleTextViewWrapper =
+                dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
+//                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
+            val dynamicShortDescTextViewWrapper =
+                dialogLayout.findViewById<FlowLayout>(R.id.dynamic_insales_short_description_textview_wrapper)
+            dynamicFullDescTextViewWrapper =
+                dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
+
+            secondLinearLayout.visibility = View.VISIBLE
+            insalesFragment!!.titleBox =
+                dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
+            val productShortDescriptionBox =
+                dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
+            insalesFragment!!.fullDescriptionBox =
+                dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
+            val getDescriptionView =
+                dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
+            val getDescriptionView1 =
+                dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
+
+            insalesFragment!!.titleBox.setText(pItem.title)
+            productShortDescriptionBox.setText(pItem.shortDesc)
+            insalesFragment!!.fullDescriptionBox.setText(pItem.fullDesc)
+            val dialogCancelBtn =
+                dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
+            val dialogUpdateBtn =
+                dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_update_btn)
+
+            insalesFragment!!.titleTextViewList.clear()
+            insalesFragment!!.shortDescTextViewList.clear()
+            insalesFragment!!.fullDescTextViewList.clear()
+            dynamicTitleTextViewWrapper.removeAllViews()
+            dynamicShortDescTextViewWrapper.removeAllViews()
+            dynamicFullDescTextViewWrapper.removeAllViews()
+
+            val titleTextList = pItem.title.trim().split(" ")
+            val shortDescTextList = pItem.shortDesc.trim().split(" ")
+            val fullDescTextList = pItem.fullDesc.trim().split(" ")
+
+            for (i in 0 until titleTextList.size) {
+                val params = FlowLayout.LayoutParams(
+                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                    FlowLayout.LayoutParams.WRAP_CONTENT
+                )
+                params.setMargins(5, 5, 5, 5)
+                val textView = MaterialTextView(requireActivity())
+                textView.layoutParams = params
+                textView.text = titleTextList[i].trim()
+                textView.tag = "title"
+                textView.id = i
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                insalesFragment!!.titleTextViewList.add(textView)
+                textView.setOnClickListener(this)
+                dynamicTitleTextViewWrapper.addView(textView)
+            }
+
+            for (i in 0 until shortDescTextList.size) {
+                val params = FlowLayout.LayoutParams(
+                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                    FlowLayout.LayoutParams.WRAP_CONTENT
+                )
+                params.setMargins(5, 5, 5, 5)
+                val textView = MaterialTextView(requireActivity())
+                textView.layoutParams = params
+                textView.text = shortDescTextList[i].trim()
+                textView.tag = "title"
+                textView.id = i
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                insalesFragment!!.shortDescTextViewList.add(textView)
+                textView.setOnClickListener(this)
+                dynamicShortDescTextViewWrapper.addView(textView)
+            }
+//
+            for (i in 0 until fullDescTextList.size) {
+                val params = FlowLayout.LayoutParams(
+                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                    FlowLayout.LayoutParams.WRAP_CONTENT
+                )
+                params.setMargins(5, 5, 5, 5)
+                val textView = MaterialTextView(requireActivity())
+                textView.layoutParams = params
+                textView.text = fullDescTextList[i].trim()
+                textView.tag = "title"
+                textView.id = i
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                insalesFragment!!.fullDescTextViewList.add(textView)
+                textView.setOnClickListener(this)
+                dynamicFullDescTextViewWrapper.addView(textView)
+            }
+
+            swapLayoutBtn.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    secondLinearLayout.visibility = View.GONE
+                    firstLinearLayout.visibility = View.VISIBLE
+                    insalesFragment!!.defaultLayout = 1
+
+                    insalesFragment!!.titleBox.setSelection(pItem.title.length)
+                    insalesFragment!!.titleBox.requestFocus()
+                    Constants.openKeyboar(requireContext())
+                } else {
+                    Constants.hideKeyboar(requireContext())
+                    BaseActivity.startLoading(requireContext())
+                    firstLinearLayout.visibility = View.GONE
+                    secondLinearLayout.visibility = View.VISIBLE
+                    insalesFragment!!.defaultLayout = 0
+                    BaseActivity.dismiss()
+                }
+            }
+
+            insalesFragment!!.titleBox.setSelection(pItem.title.length)
+//                titleBox.requestFocus()
+//                Constants.openKeyboar(context)
+            dialogCancelBtn.setOnClickListener {
+                BaseActivity.hideSoftKeyboard(requireContext(), dialogCancelBtn)
+//                    Constants.hideKeyboar(requireActivity())
+                dismiss()
+            }
+
+//            getDescriptionView.setOnClickListener {
+//                Constants.hideKeyboar(requireActivity())
+//                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//
+//                if (userCurrentCredits.toFloat() >= 1.0) {
+//                    launchActivity.launch(
+//                        Intent(
+//                            requireActivity(),
+//                            RainForestApiActivity::class.java
+//                        )
+//                    )
+//                } else {
+//                    MaterialAlertDialogBuilder(requireActivity())
+//                        .setMessage(getString(R.string.low_credites_error_message2))
+//                        .setCancelable(false)
+//                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                            dialog.dismiss()
+//                        }
+//                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                            dialog.dismiss()
+//                            startActivity(Intent(context, UserScreenActivity::class.java))
+//                        }
+//                        .create().show()
+//                }
+//
+//            }
+//
+//            getDescriptionView1.setOnClickListener {
+//                Constants.hideKeyboar(requireActivity())
+//                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//
+//                if (userCurrentCredits.toFloat() >= 1.0) {
+//                    launchActivity.launch(
+//                        Intent(
+//                            requireActivity(),
+//                            RainForestApiActivity::class.java
+//                        )
+//                    )
+//                } else {
+//                    MaterialAlertDialogBuilder(requireActivity())
+//                        .setMessage(getString(R.string.low_credites_error_message2))
+//                        .setCancelable(false)
+//                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                            dialog.dismiss()
+//                        }
+//                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                            dialog.dismiss()
+//                            startActivity(
+//                                Intent(
+//                                    requireActivity(),
+//                                    UserScreenActivity::class.java
+//                                )
+//                            )
+//                        }
+//                        .create().show()
+//                }
+//
+//            }
+
+            dialogUpdateBtn.setOnClickListener {
+                val titleText = insalesFragment!!.titleBox.text.toString().trim()
+                val shortDesc = productShortDescriptionBox.text.toString().trim()
+                val fullDesc = insalesFragment!!.fullDescriptionBox.text.toString().trim()
+//
+                if (insalesFragment!!.defaultLayout == 0) {
+                    var stringBuilder = StringBuilder()
+
+                    for (i in 0 until (dynamicTitleTextViewWrapper as ViewGroup).childCount) {
+                        val nextChild = (dynamicTitleTextViewWrapper as ViewGroup).getChildAt(i)
+                        val text = (nextChild as MaterialTextView).text.toString()
+                        stringBuilder.append(text)
+                        stringBuilder.append(" ")
+                    }
+
+//                        for (i in 0 until titleTextViewList.size) {
+//                            val item = titleTextViewList[i]
+//                            stringBuilder.append(item.text.toString())
+//                            stringBuilder.append(" ")
+//                        }
+
+                    pItem.title = stringBuilder.toString().trim()
+                    stringBuilder = StringBuilder()
+//                        for (i in 0 until shortDescTextViewList.size) {
+//                            val item = shortDescTextViewList[i]
+//                            stringBuilder.append(item.text.toString())
+//                            stringBuilder.append(" ")
+//                        }
+
+                    for (i in 0 until (dynamicShortDescTextViewWrapper as ViewGroup).childCount) {
+                        val nextChild =
+                            (dynamicShortDescTextViewWrapper as ViewGroup).getChildAt(i)
+                        val text = (nextChild as MaterialTextView).text.toString()
+                        stringBuilder.append(text)
+                        stringBuilder.append(" ")
+                    }
+
+                    pItem.shortDesc = stringBuilder.toString().trim()
+
+                    stringBuilder = StringBuilder()
+//                        for (i in 0 until fullDescTextViewList.size) {
+//                            val item = fullDescTextViewList[i]
+//                            stringBuilder.append(item.text.toString())
+//                            stringBuilder.append(" ")
+//                        }
+                    for (i in 0 until (dynamicFullDescTextViewWrapper as ViewGroup).childCount) {
+                        val nextChild =
+                            (dynamicFullDescTextViewWrapper as ViewGroup).getChildAt(i)
+                        val text = (nextChild as MaterialTextView).text.toString()
+                        stringBuilder.append(text)
+                        stringBuilder.append(" ")
+                    }
+                    pItem.fullDesc = stringBuilder.toString().trim()
+                } else {
+                    BaseActivity.hideSoftKeyboard(requireContext(), dialogUpdateBtn)
+                    pItem.title = titleText
+                    pItem.shortDesc = shortDesc
+                    pItem.fullDesc = fullDesc
+                }
+                insalesFragment!!.defaultLayout = 0
+                if (titleText.isNotEmpty()) {
+                    BaseActivity.startLoading(
+                        requireActivity(),
+                        getString(R.string.please_wait_product_update_message)
+                    )
+
+                    Paper.book().delete(Constants.cacheProducts)
+                    Paper.book().write(Constants.cacheProducts, insalesFragment!!.originalProductsList)
+                    insalesAdapter.notifyItemChanged(position)
+
+                    viewModel.callUpdateProductDetail(
+                        requireContext(),
+                        insalesFragment!!.shopName,
+                        insalesFragment!!.email,
+                        insalesFragment!!.password,
+                        pItem.id,
+                        pItem.title,
+                        pItem.shortDesc,
+                        pItem.fullDesc
+                    )
+                    viewModel.getUpdateProductDetailResponse()
+                        .observe(requireActivity(), Observer { response ->
+                            if (response != null) {
+                                if (response.get("status").asString == "200") {
+//                                        Handler(Looper.myLooper()!!).postDelayed({
+                                    BaseActivity.dismiss()
+                                    dismiss()
+                                    insalesFragment!!.fetchProducts()
+//                                            showProducts()
+//                                        }, 3000)
+//                                    Toast.makeText(
+//                                        requireContext(),
+//                                        getString(R.string.product_updated_successfully),
+//                                        Toast.LENGTH_SHORT
+//                                    ).show()
+                                } else {
+                                    BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        response.get("message").asString
+                                    )
+                                }
+                            } else {
+                                BaseActivity.dismiss()
+                            }
+                        })
+                } else {
+                    BaseActivity.showAlert(
+                        requireActivity(),
+                        getString(R.string.empty_text_error)
+                    )
+                }
+            }
+        }
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            val dialog = super.onCreateDialog(savedInstanceState)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            return dialog
+        }
+
+        override fun onClick(v: View?) {
+            val view = v!!
+            when (view.id) {
+                else -> {
+                    val position = view.id
+                    val textView = view as MaterialTextView
+                    view.setBackgroundColor(
+                        ContextCompat.getColor(
+                            requireActivity(),
+                            R.color.primary_positive_color
+                        )
+                    )
+                    view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
+                    val balloon = Balloon.Builder(requireActivity())
+                        .setLayout(R.layout.ballon_layout_design)
+                        .setArrowSize(10)
+                        .setArrowOrientation(ArrowOrientation.TOP)
+                        .setArrowPosition(0.5f)
+                        .setWidthRatio(0.55f)
+                        .setCornerRadius(4f)
+                        .setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.light_gray
+                            )
+                        )
+                        .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                        .setLifecycleOwner(this)
+                        .build()
+                    val editTextBox = balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
+                    editTextBox.setText(textView.text.toString().trim())
+                    val closeBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
+                    val applyBtn = balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
+                    balloon.showAlignTop(textView)
+                    editTextBox.requestFocus()
+                    Constants.openKeyboar(requireActivity())
+                    closeBtn.setOnClickListener {
+                        Constants.hideKeyboar(requireActivity())
+                        balloon.dismiss()
+                        view.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.white
+                            )
+                        )
+                        view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                    }
+                    applyBtn.setOnClickListener {
+                        Constants.hideKeyboar(requireActivity())
+                        balloon.dismiss()
+                        //val tempText = textView.replace(mWord,editTextBox.text.toString().trim())
+                        textView.text = editTextBox.text.toString().trim()
+                        view.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.white
+                            )
+                        )
+                        view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+
+                    }
+                }
+            }
         }
     }
 
