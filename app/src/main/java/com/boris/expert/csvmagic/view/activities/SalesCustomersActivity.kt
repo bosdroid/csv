@@ -1472,6 +1472,10 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
             }
 
+            override fun onItemGetDescriptionClick(position: Int) {
+
+            }
+
         })
 
         var pastVisiblesItems: Int

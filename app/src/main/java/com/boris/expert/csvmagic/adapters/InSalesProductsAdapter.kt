@@ -1,13 +1,11 @@
 package com.boris.expert.csvmagic.adapters
 
 import android.content.Context
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
@@ -16,9 +14,6 @@ import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
-import com.smarteist.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
-import com.smarteist.autoimageslider.SliderAnimations
-import com.smarteist.autoimageslider.SliderView
 import net.expandable.ExpandableTextView
 import java.util.*
 
@@ -38,6 +33,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             description: ExpandableTextView,
             grammarStatusView: MaterialTextView
         )
+        fun onItemGetDescriptionClick(position: Int)
     }
 
     private var mListener: OnItemClickListener? = null
@@ -60,8 +56,9 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val totalImagesView:MaterialTextView
         val collapseExpandImg:AppCompatImageView
         val collapseExpandLayout:LinearLayout
-        val sliderView:SliderView
-        val addProductCard: CardView
+//        val sliderView:SliderView
+//        val addProductCard: CardView
+        val getDescriptionBtn:MaterialTextView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
@@ -76,8 +73,9 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
             collapseExpandLayout = itemView.findViewById(R.id.collapse_expand_layout)
             collapseExpandImg = itemView.findViewById(R.id.collapse_expand_img)
-            sliderView = itemView.findViewById(R.id.imageSlider)
-            addProductCard = itemView.findViewById(R.id.add_product_card)
+//            sliderView = itemView.findViewById(R.id.imageSlider)
+//            addProductCard = itemView.findViewById(R.id.add_product_card)
+            getDescriptionBtn = itemView.findViewById(R.id.get_description_text_view)
 
             productTitle.setOnClickListener {v->
                 //(v as ExpandableTextView).toggle()
@@ -103,9 +101,9 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
                 }
             }
 
-            addProductCard.setOnClickListener {
-                Listener.onItemAddImageClick(layoutPosition)
-            }
+//            addProductCard.setOnClickListener {
+//                Listener.onItemAddImageClick(layoutPosition)
+//            }
 
             editImageView.setOnClickListener {
                 Listener.onItemEditImageClick(layoutPosition)
@@ -118,6 +116,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
                     productDescription,
                     grammarStatusView
                 )
+            }
+
+            getDescriptionBtn.setOnClickListener {
+                Listener.onItemGetDescriptionClick(layoutPosition)
             }
         }
     }
@@ -186,42 +188,42 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 //        }
         holder.productDescription.setText(item.fullDesc)
 
-//        holder.imagesRecyclerView.layoutManager =
-//            WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-//        holder.imagesRecyclerView.hasFixedSize()
-//        val adapter = ProductImagesAdapter(context, item.productImages as ArrayList<ProductImages>)
-//        holder.imagesRecyclerView.adapter = adapter
-//        adapter.setOnItemClickListener(object : ProductImagesAdapter.OnItemClickListener {
-//            override fun onItemClick(position: Int) {
-//
-//            }
-//
-//            override fun onItemEditClick(btn: MaterialButton, imagePosition: Int) {
-//                mListener!!.onItemEditClick(position, imagePosition)
-//            }
-//
-//            override fun onItemRemoveClick(imagePosition: Int) {
-//                mListener!!.onItemRemoveClick(position, imagePosition)
-//            }
-//
-//            override fun onItemAddImageClick(position: Int) {
-//                mListener!!.onItemAddImageClick(position)
-//            }
-//
-//        })
+        holder.imagesRecyclerView.layoutManager =
+            WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        holder.imagesRecyclerView.hasFixedSize()
+        val adapter = ProductImagesAdapter(context, item.productImages as ArrayList<ProductImages>)
+        holder.imagesRecyclerView.adapter = adapter
+        adapter.setOnItemClickListener(object : ProductImagesAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+
+            }
+
+            override fun onItemEditClick(btn: MaterialButton, imagePosition: Int) {
+                mListener!!.onItemEditClick(position, imagePosition)
+            }
+
+            override fun onItemRemoveClick(imagePosition: Int) {
+                mListener!!.onItemRemoveClick(position, imagePosition)
+            }
+
+            override fun onItemAddImageClick(position: Int) {
+                mListener!!.onItemAddImageClick(position)
+            }
+
+        })
         if (item.productImages.size > 0) {
-//            adapter.notifyItemRangeChanged(0, item.productImages.size)
-            val sliderAdapter = ProductImagesSlider(context,item.productImages as ArrayList<ProductImages>)
-            holder.sliderView.setSliderAdapter(sliderAdapter)
-            holder.sliderView.setIndicatorEnabled(true)
-            holder.sliderView.setIndicatorAnimation(IndicatorAnimationType.WORM); //set indicator animation by using IndicatorAnimationType. :WORM or THIN_WORM or COLOR or DROP or FILL or NONE or SCALE or SCALE_DOWN or SLIDE and SWAP!!
-            holder.sliderView.setSliderTransformAnimation(SliderAnimations.SIMPLETRANSFORMATION);
-            holder.sliderView.autoCycleDirection = SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH;
-            holder.sliderView.indicatorSelectedColor = Color.WHITE
-            holder.sliderView.indicatorUnselectedColor = Color.GRAY
+            adapter.notifyItemRangeChanged(0, item.productImages.size)
+//            val sliderAdapter = ProductImagesSlider(context,item.productImages as ArrayList<ProductImages>)
+//            holder.sliderView.setSliderAdapter(sliderAdapter)
+//            holder.sliderView.setIndicatorEnabled(true)
+//            holder.sliderView.setIndicatorAnimation(IndicatorAnimationType.WORM); //set indicator animation by using IndicatorAnimationType. :WORM or THIN_WORM or COLOR or DROP or FILL or NONE or SCALE or SCALE_DOWN or SLIDE and SWAP!!
+//            holder.sliderView.setSliderTransformAnimation(SliderAnimations.SIMPLETRANSFORMATION);
+//            holder.sliderView.autoCycleDirection = SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH;
+//            holder.sliderView.indicatorSelectedColor = Color.WHITE
+//            holder.sliderView.indicatorUnselectedColor = Color.GRAY
         } else {
-//            adapter.notifyDataSetChanged()
-            holder.sliderView.setIndicatorEnabled(false)
+            adapter.notifyDataSetChanged()
+//            holder.sliderView.setIndicatorEnabled(false)
         }
 
 

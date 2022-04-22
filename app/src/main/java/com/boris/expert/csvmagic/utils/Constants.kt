@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
+import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.QRTypes
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.model.User
@@ -105,7 +106,8 @@ class Constants {
         var premiumSupportFeatureStatus = 0
         var unlimitedTablesFeatureStatus = 0
         var cacheProducts = "cacheProducts"
-
+        var pItemPosition:Int?=null
+        var pItem:Product?=null
 
 
         private fun getBackgroundImageFolderFile(context: Context): File {
