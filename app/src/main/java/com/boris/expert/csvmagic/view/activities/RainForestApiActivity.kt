@@ -466,7 +466,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                                 textView.text = textList[i]
                                                 textView.tag = "title"
                                                 textView.id = i
-                                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                                                 textView.setTextColor(ContextCompat.getColor(context,R.color.black))
                                                 titleTextViewList.add(textView)
                                                 textView.setOnClickListener(this@RainForestApiActivity)
@@ -506,7 +506,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                                     textView.text = textList[i]
                                                     textView.tag = "title"
                                                     textView.id = i
-                                                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                                                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                                                     textView.setTextColor(ContextCompat.getColor(context,R.color.black))
                                                     descriptionTextViewList.add(textView)
                                                     textView.setOnClickListener(this@RainForestApiActivity)
@@ -519,6 +519,16 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                         }
 
                                     })
+                        }else{
+                            val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
+                                FlowLayout.LayoutParams.WRAP_CONTENT)
+                            params.setMargins(5, 5, 5, 5)
+                            val textView = MaterialTextView(context)
+                            textView.layoutParams = params
+                            textView.text = "Nothing to show"
+                            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                            textView.setTextColor(ContextCompat.getColor(context,R.color.red))
+                            dynamicDescriptionTextViewWrapper.addView(textView)
                         }
 //                        initSelectebleWord(descriptionTextView.text.toString(), descriptionTextView)
 //                        descriptionTextView.setOnTouchListener(LinkMovementMethodOverride())

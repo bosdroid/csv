@@ -15,6 +15,7 @@ object GcpTranslator {
 
     fun translateFromEngToRus(context: Context, text: String, listener: TranslationCallback){
         listener.onTextTranslation(text)
+
         System.setProperty("GOOGLE_API_KEY",context.resources.getString(R.string.translation_api_key))
         CoroutineScope(Dispatchers.IO).launch {
             val translate = TranslateOptions.getDefaultInstance().service

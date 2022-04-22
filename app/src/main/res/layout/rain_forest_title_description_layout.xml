@@ -1,140 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     xmlns:f="http://schemas.android.com/tools"
-   >
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content">-->
+    <!--    <androidx.constraintlayout.widget.ConstraintLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content">-->
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_margin="@dimen/eightDpMargin"
-            android:src="@drawable/ic_close"
-            android:id="@+id/dialog_close_btn"
-            />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dialog_close_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/defaultDpMargin"
+        android:src="@drawable/ic_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:layout_marginTop="@dimen/thirtyTwoDpMargin"
-            android:id="@+id/rf_linearlayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/light_gray"
+            android:id="@+id/rf_linearlayout"
             android:orientation="vertical"
-            android:padding="@dimen/small"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_close_btn"
             >
 
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_margin="@dimen/defaultDpMargin">
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/title_text"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/largeText" />
+                    android:orientation="vertical">
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/add_title_button"
-                    android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_margin="@dimen/defaultDpMargin"
+                        >
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/title_text"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/add_title_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/plus_add_text"
+                            android:textColor="@color/primary_positive_color"
+                            android:textSize="@dimen/largeText" />
+                    </LinearLayout>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/title_text_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/defaultDpMargin"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/mediumText"
+                        android:visibility="gone" />
+
+
+                    <org.apmem.tools.layouts.FlowLayout
+                        android:id="@+id/dynamic_textview_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/eightDpMargin"
+                        android:layout_marginBottom="@dimen/eightDpMargin"
+                        f:layoutDirection="rtl" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/defaultDpMargin">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/plus_add_text"
-                    android:textColor="@color/primary_positive_color"
-                    android:textSize="@dimen/largeText" />
-            </LinearLayout>
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/title_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/defaultDpMargin"
-                android:visibility="gone"
-                android:textColor="@color/black"
-                android:textSize="@dimen/mediumText" />
+                    android:orientation="vertical">
 
 
-            <org.apmem.tools.layouts.FlowLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/eightDpMargin"
-                android:layout_marginBottom="@dimen/eightDpMargin"
-                android:id="@+id/dynamic_textview_wrapper"
-                f:layoutDirection="rtl"
-                />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_margin="@dimen/defaultDpMargin"
+                        >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/description_text"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText" />
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/description_text"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/largeText" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/add_description_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/plus_add_text"
+                            android:textColor="@color/primary_positive_color"
+                            android:textSize="@dimen/largeText" />
+                    </LinearLayout>
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/add_description_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/plus_add_text"
-                    android:textColor="@color/primary_positive_color"
-                    android:textSize="@dimen/largeText" />
-            </LinearLayout>
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/description_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/defaultDpMargin"
-                android:textColor="@color/black"
-                android:visibility="gone"
-                android:textSize="@dimen/mediumText" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/description_text_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/defaultDpMargin"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/mediumText"
+                        android:visibility="gone" />
 
 
+                    <ScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_marginTop="@dimen/eightDpMargin"
+                        android:layout_marginBottom="@dimen/eightDpMargin"
+                        >
 
-            <org.apmem.tools.layouts.FlowLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/eightDpMargin"
-                android:layout_marginBottom="@dimen/eightDpMargin"
-                android:id="@+id/dynamic_description_textview_wrapper"
-                f:layoutDirection="rtl"
-                />
-
+                    <org.apmem.tools.layouts.FlowLayout
+                        android:id="@+id/dynamic_description_textview_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        f:layoutDirection="rtl" />
+                    </ScrollView>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
-        </ScrollView>
-        <com.google.android.material.button.MaterialButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/eightDpMargin"
-            android:text="@string/done_text"
-            android:textSize="@dimen/largeText"
-            android:id="@+id/rfa_item_done_btn"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rf_linearlayout"
-            android:visibility="gone"
-            />
-<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/rfa_item_done_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDpMargin"
+        android:text="@string/done_text"
+        android:textSize="@dimen/largeText"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rf_linearlayout" />
+    <!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 </androidx.constraintlayout.widget.ConstraintLayout>

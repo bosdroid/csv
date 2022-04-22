@@ -1531,12 +1531,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                    }
 //                }
 
-                val builder = MaterialAlertDialogBuilder(requireActivity())
+                val builder = MaterialAlertDialogBuilder(requireActivity(),R.style.DialogTheme)
                     .setView(dialogLayout)
                     .setCancelable(false)
                 val alert = builder.create()
                 alert.show()
-//                titleBox.setSelection(pItem.title.length)
+                 titleBox.setSelection(pItem.title.length)
 //                titleBox.requestFocus()
 //                Constants.openKeyboar(context)
                 dialogCancelBtn.setOnClickListener {
