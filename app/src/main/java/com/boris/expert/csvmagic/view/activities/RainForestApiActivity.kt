@@ -380,7 +380,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         }
                         val title = productResults.getString("title")
 
-                        CustomDialog(title,description,unitCharacterPrice,howMuchChargeCredits).show(supportFragmentManager,"dialog")
+                        CustomDialog(title,description,userCurrentCredits,unitCharacterPrice,howMuchChargeCredits).show(supportFragmentManager,"dialog")
 
 //                        val layoutBuilder = MaterialAlertDialogBuilder(context)
 //                        val dialogLayout = LayoutInflater.from(context)
@@ -715,7 +715,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         }
     }
 
-    open class CustomDialog(private val title:String,private val description:String,private val unitCharacterPrice:Float,private var howMuchChargeCredits:Float) : DialogFragment(),View.OnClickListener{
+    open class CustomDialog(private val title:String,private val description:String,private var userCurrentCredits:String,private val unitCharacterPrice:Float,private var howMuchChargeCredits:Float) : DialogFragment(),View.OnClickListener{
 
         private var titleTextViewList = mutableListOf<TextView>()
         private var descriptionTextViewList = mutableListOf<TextView>()
@@ -764,6 +764,10 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
             titleAddBtn.isEnabled = true
             descriptionAddBtn.isEnabled = true
+
+                        dialogCloseBtn.setOnClickListener {
+                            dismiss()
+                        }
 
             doneBtn.setOnClickListener {
                 val finalTitleText = if (titleAddBtn.isEnabled) {
@@ -891,7 +895,23 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
             }
 //                        initSelectebleWord(descriptionTextView.text.toString(), descriptionTextView)
 //                        descriptionTextView.setOnTouchListener(LinkMovementMethodOverride())
-            rainForestApiInstance!!.chargeCreditsPrice()
+            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+            val hashMap = HashMap<String, Any>()
+            val remaining = userCurrentCredits.toFloat() - howMuchChargeCredits
+            userCurrentCredits = remaining.toString()
+            hashMap["credits"] = userCurrentCredits
+            firebaseDatabase.child(Constants.firebaseUserCredits)
+                .child(Constants.firebaseUserId)
+                .updateChildren(hashMap)
+                .addOnSuccessListener {
+                    howMuchChargeCredits = 0F
+                    getUserCredits(
+                        requireActivity()
+                    )
+                }
+                .addOnFailureListener {
+
+                }
 //                    }
 //                    else{
 //                        titleTextView.text = title
@@ -995,6 +1015,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 }
             }
         }
+
     }
 
 }
