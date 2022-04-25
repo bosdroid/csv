@@ -1,6 +1,7 @@
 package com.boris.expert.csvmagic.utils
 
 import android.content.Context
+import android.text.TextUtils
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.interfaces.TranslationCallback
 import com.google.cloud.translate.Detection
@@ -51,11 +52,17 @@ object GcpTranslator {
             listener.onTextTranslation(text)
         }
         else{
-            val translation = translate.translate(
-                text,
-                Translate.TranslateOption.sourceLanguage(detectedLanguage),
-                Translate.TranslateOption.targetLanguage("en"))
-            listener.onTextTranslation(translation.translatedText)
+            if (TextUtils.isDigitsOnly(text)){
+                listener.onTextTranslation(text)
+            }
+            else{
+                val translation = translate.translate(
+                    text,
+                    Translate.TranslateOption.sourceLanguage(detectedLanguage),
+                    Translate.TranslateOption.targetLanguage("en"))
+                listener.onTextTranslation(translation.translatedText)
+            }
+
         }
 
     }

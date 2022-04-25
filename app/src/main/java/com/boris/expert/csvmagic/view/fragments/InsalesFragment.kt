@@ -171,7 +171,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 .create().show()
             true
         } else if (item.itemId == R.id.insales_data_filter) {
-            if (categoriesList.size == 0) {
+            if (originalCategoriesList.size == 0) {
                 viewModel.callCategories(requireActivity(), shopName, email, password)
                 viewModel.getCategoriesResponse().observe(this, Observer { response ->
                     if (response != null) {
@@ -192,6 +192,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         }
                     }
                 })
+            } else {
+                categoriesList.addAll(originalCategoriesList)
             }
 
             val builder = MaterialAlertDialogBuilder(requireActivity())
@@ -1193,7 +1195,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             override fun onItemEditImageClick(position: Int) {
                 val pItem = productsList[position]
-                CustomDialog(shopName, email, password, pItem, position, adapter, viewModel).show(
+                CustomDialog(shopName, email, password, pItem, position, adapter, viewModel,object : ResponseListener{
+                    override fun onSuccess(result: String) {
+                        fetchProducts()
+                    }
+
+                }).show(
                     childFragmentManager,
                     "dialog"
                 )
@@ -1323,35 +1330,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     }
 
-    private fun getMaterialTextView(text: String): MaterialTextView {
-        val params = FlowLayout.LayoutParams(
-            FlowLayout.LayoutParams.WRAP_CONTENT,
-            FlowLayout.LayoutParams.WRAP_CONTENT
-        )
-        params.setMargins(5, 5, 5, 5)
-        val textView = MaterialTextView(requireActivity())
-        textView.layoutParams = params
-        textView.text = text
-        textView.tag = "title"
-        textView.setTextColor(
-            ContextCompat.getColor(
-                requireActivity(),
-                R.color.white
-            )
-        )
-        textView.setBackgroundColor(
-            ContextCompat.getColor(
-                requireActivity(),
-                R.color.primary_positive_color
-            )
-        )
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-        //titleTextViewList.add(textView)
-        //textView.setOnClickListener(requireActivity())
-        textView.setOnTouchListener(ChoiceTouchListener())
-        textView.setOnDragListener(ChoiceDragListener())
-        return textView
-    }
 
     private fun fetchProducts() {
         currentPage = 1
@@ -1363,118 +1341,44 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && Constants.pItem != null) {
                 val data: Intent? = result.data
-//                if (defaultLayout == 1) {
-//                    if (data != null && data.hasExtra("TITLE")) {
-//                        val title = data.getStringExtra("TITLE") as String
-//                        if (title.isNotEmpty()) {
-//                            titleBox.setText(title)
-//                            titleBox.setSelection(titleBox.length())
-//                            //titleBox.requestFocus()
-//                        }
-//                    }
-//
-//                    if (data != null && data.hasExtra("DESCRIPTION")) {
-//                        val description = data.getStringExtra("DESCRIPTION") as String
-//                        if (description.isNotEmpty()) {
-//                            val stringBuilder = StringBuilder()
-//                            stringBuilder.append(fullDescriptionBox.text.toString())
-//                            stringBuilder.append(description)
-//                            fullDescriptionBox.setText(stringBuilder.toString())
-//                            fullDescriptionBox.setSelection(fullDescriptionBox.length())
-//                            fullDescriptionBox.requestFocus()
-//                        }
-//                    }
-//                } else {
 
-                    if (data != null && data.hasExtra("TITLE")) {
-                        val title = data.getStringExtra("TITLE") as String
-                        if (title.isNotEmpty()) {
-                            val currentPItemTitle = Constants.pItem!!.title
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(title)
-                            Constants.pItem!!.title = stringBuilder.toString()
-//                            titleTextViewList.clear()
-//                            dynamicTitleTextViewWrapper.removeAllViews()
-//                            val titleTextList = title.trim().split(" ")
-//
-//                            for (i in 0 until titleTextList.size) {
-//                                val params = FlowLayout.LayoutParams(
-//                                    FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                    FlowLayout.LayoutParams.WRAP_CONTENT
-//                                )
-//                                params.setMargins(5, 5, 5, 5)
-//                                val textView = MaterialTextView(requireActivity())
-//                                textView.layoutParams = params
-//                                textView.text = titleTextList[i].trim()
-//                                textView.tag = "title"
-//                                textView.id = i
-//                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                                textView.setTextColor(
-//                                    ContextCompat.getColor(
-//                                        requireActivity(),
-//                                        R.color.black
-//                                    )
-//                                )
-//                                titleTextViewList.add(textView)
-//                                textView.setOnClickListener(this@InsalesFragment)
-////                                textView.setOnTouchListener(ChoiceTouchListener())
-////                                textView.setOnDragListener(ChoiceDragListener())
-//                                dynamicTitleTextViewWrapper.addView(textView)
-//                            }
-
-                            //titleBox.setText(title)
-                            //titleBox.setSelection(titleBox.length())
-                            //titleBox.requestFocus()
-                        }
+                if (data != null && data.hasExtra("TITLE")) {
+                    val title = data.getStringExtra("TITLE") as String
+                    if (title.isNotEmpty()) {
+                        val currentPItemTitle = Constants.pItem!!.title
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemTitle)
+                        stringBuilder.append(title)
+                        Constants.pItem!!.title = stringBuilder.toString()
                     }
-
-                    if (data != null && data.hasExtra("DESCRIPTION")) {
-                        val description = data.getStringExtra("DESCRIPTION") as String
-                        if (description.isNotEmpty()) {
-
-                            val currentPItemDescription = Constants.pItem!!.fullDesc
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemDescription)
-                            stringBuilder.append(description)
-                            Constants.pItem!!.fullDesc = stringBuilder.toString()
-
-//                            fullDescTextViewList.clear()
-//                            dynamicFullDescTextViewWrapper.removeAllViews()
-//                            val fullDescTextList = description.trim().split(" ")
-//
-//                            for (i in 0 until fullDescTextList.size) {
-//                                val params = FlowLayout.LayoutParams(
-//                                    FlowLayout.LayoutParams.WRAP_CONTENT,
-//                                    FlowLayout.LayoutParams.WRAP_CONTENT
-//                                )
-//                                params.setMargins(5, 5, 5, 5)
-//                                val textView = MaterialTextView(requireActivity())
-//                                textView.layoutParams = params
-//                                textView.text = fullDescTextList[i].trim()
-//                                textView.tag = "title"
-//                                textView.id = i
-//                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-//                                textView.setTextColor(
-//                                    ContextCompat.getColor(
-//                                        requireActivity(),
-//                                        R.color.black
-//                                    )
-//                                )
-//                                fullDescTextViewList.add(textView)
-//                                textView.setOnClickListener(this@InsalesFragment)
-////                                textView.setOnTouchListener(ChoiceTouchListener())
-////                                textView.setOnDragListener(ChoiceDragListener())
-//                                dynamicFullDescTextViewWrapper.addView(textView)
-//                            }
-
-                            //fullDescriptionBox.setText(description)
-//                        fullDescriptionBox.setSelection(fullDescriptionBox.length())
-//                        fullDescriptionBox.requestFocus()
-                        }
-//                    }
                 }
-                CustomDialog(shopName,email,password,Constants.pItem!!,Constants.pItemPosition!!,adapter,viewModel).show(childFragmentManager,"dialog")
+
+                if (data != null && data.hasExtra("DESCRIPTION")) {
+                    val description = data.getStringExtra("DESCRIPTION") as String
+                    if (description.isNotEmpty()) {
+
+                        val currentPItemDescription = Constants.pItem!!.fullDesc
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemDescription)
+                        stringBuilder.append(description)
+                        Constants.pItem!!.fullDesc = stringBuilder.toString()
+
+                    }
+                }
+                CustomDialog(
+                    shopName,
+                    email,
+                    password,
+                    Constants.pItem!!,
+                    Constants.pItemPosition!!,
+                    adapter,
+                    viewModel,object : ResponseListener{
+                        override fun onSuccess(result: String) {
+                            fetchProducts()
+                        }
+
+                    }
+                ).show(childFragmentManager, "dialog")
                 adapter.notifyItemChanged(Constants.pItemPosition!!)
             }
         }
@@ -1755,123 +1659,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
 
     private fun addProduct() {
-        val addProductLayout = LayoutInflater.from(requireActivity()).inflate(
-            R.layout.insales_add_product_dialog,
-            null
-        )
-        val categoriesSpinner =
-            addProductLayout.findViewById<AppCompatSpinner>(R.id.ap_cate_spinner)
-        val apTitleView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_title)
-        val apDescriptionView =
-            addProductLayout.findViewById<TextInputEditText>(R.id.ap_description)
-        val apQuantityView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_quantity)
-        val apPriceView = addProductLayout.findViewById<TextInputEditText>(R.id.ap_price)
-        val apSubmitBtn = addProductLayout.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
-        val apCancelBtn = addProductLayout.findViewById<MaterialButton>(R.id.ap_dialog_cancel_btn)
 
-
-        val builder = MaterialAlertDialogBuilder(requireActivity())
-        builder.setView(addProductLayout)
-        builder.setCancelable(false)
-        val alert = builder.create()
-        alert.show()
-
-        val cateSpinnerAdapter = ArrayAdapter(
-            requireActivity(),
-            android.R.layout.simple_spinner_item,
-            originalCategoriesList
-        )
-        cateSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        categoriesSpinner.adapter = cateSpinnerAdapter
-
-        if (selectedCategoryId != 0) {
-            categoriesSpinner!!.setSelection(0)
-        }
-
-        categoriesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selectedItem = originalCategoriesList[position]
-                selectedCategoryId = selectedItem.id
-
+        AddProductCustomDialog(originalCategoriesList,shopName,email,password,viewModel,object : ResponseListener{
+            override fun onSuccess(result: String) {
+                fetchProducts()
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
+        }).show(childFragmentManager,"add-dialog")
 
-            }
-
-        }
-
-        apCancelBtn.setOnClickListener {
-            alert.dismiss()
-        }
-
-        apSubmitBtn.setOnClickListener {
-
-            if (addProductValidation(categoriesSpinner, apTitleView, apQuantityView, apPriceView)) {
-                alert.dismiss()
-                BaseActivity.startLoading(requireActivity())
-                viewModel.callAddProduct(
-                    requireActivity(),
-                    shopName,
-                    email,
-                    password,
-                    selectedCategoryId,
-                    apTitleView.text.toString().trim(),
-                    apDescriptionView.text.toString().trim(),
-                    apQuantityView.text.toString().trim(),
-                    apPriceView.text.toString().trim()
-                )
-                viewModel.getAddProductResponse()
-                    .observe(requireActivity(), Observer { response ->
-                        if (response != null) {
-                            if (response.get("status").asString == "200") {
-                                Handler(Looper.myLooper()!!).postDelayed({
-                                    BaseActivity.dismiss()
-                                    fetchProducts()//showProducts()
-                                }, 3000)
-                            } else {
-                                BaseActivity.dismiss()
-                                BaseActivity.showAlert(
-                                    requireActivity(),
-                                    response.get("message").asString
-                                )
-                            }
-                        } else {
-                            BaseActivity.dismiss()
-                        }
-                    })
-            }
-        }
-    }
-
-    private fun addProductValidation(
-        categoriesSpinner: AppCompatSpinner?,
-        apTitleView: TextInputEditText?,
-        apQuantityView: TextInputEditText?,
-        apPriceView: TextInputEditText?
-    ): Boolean {
-        if (selectedCategoryId == 0) {
-            BaseActivity.showAlert(
-                requireActivity(),
-                requireActivity().resources.getString(R.string.add_product_cate_error)
-            )
-            return false
-        } else if (apTitleView!!.text.toString().isEmpty()) {
-            apTitleView.error = requireActivity().resources.getString(R.string.empty_text_error)
-            return false
-        } else if (apQuantityView!!.text.toString().isEmpty()) {
-            apQuantityView.error = requireActivity().resources.getString(R.string.empty_text_error)
-            return false
-        } else if (apPriceView!!.text.toString().isEmpty()) {
-            apPriceView.error = requireActivity().resources.getString(R.string.empty_text_error)
-            return false
-        }
-        return true
     }
 
 
@@ -1965,6 +1760,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
 
+
+
     class CustomDialog(
         private val shopName: String,
         private val email: String,
@@ -1972,7 +1769,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val pItem: Product,
         private val position: Int,
         private val insalesAdapter: InSalesProductsAdapter,
-        private val viewModel: SalesCustomersViewModel
+        private val viewModel: SalesCustomersViewModel,
+        private val listener:ResponseListener
     ) : DialogFragment(), View.OnClickListener {
 
         private var insalesFragment: InsalesFragment? = null
@@ -2210,6 +2008,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         getString(R.string.product_updated_successfully),
                                         Toast.LENGTH_SHORT
                                     ).show()
+                                    dismiss()
+                                    listener.onSuccess("")
                                 } else {
                                     BaseActivity.dismiss()
                                     BaseActivity.showAlert(
@@ -2303,6 +2103,161 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
             }
         }
+    }
+
+
+    class AddProductCustomDialog(
+        private val originalCategoriesList: MutableList<Category>,
+        private val shopName: String,
+        private val email: String,
+        private val password: String,
+        private val viewModel: SalesCustomersViewModel,
+        private val listener:ResponseListener
+    ) : DialogFragment() {
+
+        private var insalesFragment: InsalesFragment? = null
+        private var selectedCategoryId = 0
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setStyle(
+                STYLE_NORMAL,
+                R.style.FullScreenDialogStyle
+            )
+            insalesFragment = InsalesFragment()
+        }
+
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val v =
+                inflater.inflate(R.layout.insales_add_product_dialog, container)
+
+            initViews(v)
+
+            return v
+        }
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            val dialog = super.onCreateDialog(savedInstanceState)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            return dialog
+        }
+
+        private fun initViews(view: View) {
+            val categoriesSpinner =
+                view.findViewById<AppCompatSpinner>(R.id.ap_cate_spinner)
+            val apTitleView = view.findViewById<TextInputEditText>(R.id.ap_title)
+            val apDescriptionView =
+                view.findViewById<TextInputEditText>(R.id.ap_description)
+            val apQuantityView = view.findViewById<TextInputEditText>(R.id.ap_quantity)
+            val apPriceView = view.findViewById<TextInputEditText>(R.id.ap_price)
+            val apSubmitBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
+            val apCancelBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_cancel_btn)
+
+            val cateSpinnerAdapter = ArrayAdapter(
+                requireActivity(),
+                android.R.layout.simple_spinner_item,
+                originalCategoriesList
+            )
+            cateSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            categoriesSpinner.adapter = cateSpinnerAdapter
+
+            categoriesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    val selectedItem = originalCategoriesList[position]
+                    selectedCategoryId = selectedItem.id
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                }
+
+            }
+
+            apCancelBtn.setOnClickListener {
+               dismiss()
+            }
+
+            apSubmitBtn.setOnClickListener {
+
+                if (addProductValidation(
+                        categoriesSpinner,
+                        apTitleView,
+                        apQuantityView,
+                        apPriceView
+                    )
+                ) {
+                    BaseActivity.startLoading(requireActivity())
+                    viewModel.callAddProduct(
+                        requireActivity(),
+                        shopName,
+                        email,
+                        password,
+                        selectedCategoryId,
+                        apTitleView.text.toString().trim(),
+                        apDescriptionView.text.toString().trim(),
+                        apQuantityView.text.toString().trim(),
+                        apPriceView.text.toString().trim()
+                    )
+                    viewModel.getAddProductResponse()
+                        .observe(requireActivity(), Observer { response ->
+                            if (response != null) {
+                                if (response.get("status").asString == "200") {
+                                    Handler(Looper.myLooper()!!).postDelayed({
+                                        BaseActivity.dismiss()
+                                        dismiss()
+                                        listener.onSuccess("")
+                                    }, 3000)
+                                } else {
+                                    BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        response.get("message").asString
+                                    )
+                                }
+                            } else {
+                                BaseActivity.dismiss()
+                            }
+                        })
+                }
+            }
+
+        }
+
+        private fun addProductValidation(
+            categoriesSpinner: AppCompatSpinner?,
+            apTitleView: TextInputEditText?,
+            apQuantityView: TextInputEditText?,
+            apPriceView: TextInputEditText?
+        ): Boolean {
+            if (selectedCategoryId == 0) {
+                BaseActivity.showAlert(
+                    requireActivity(),
+                    requireActivity().resources.getString(R.string.add_product_cate_error)
+                )
+                return false
+            } else if (apTitleView!!.text.toString().isEmpty()) {
+                apTitleView.error = requireActivity().resources.getString(R.string.empty_text_error)
+                return false
+            } else if (apQuantityView!!.text.toString().isEmpty()) {
+                apQuantityView.error =
+                    requireActivity().resources.getString(R.string.empty_text_error)
+                return false
+            } else if (apPriceView!!.text.toString().isEmpty()) {
+                apPriceView.error = requireActivity().resources.getString(R.string.empty_text_error)
+                return false
+            }
+            return true
+        }
+
     }
 
 }

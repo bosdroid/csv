@@ -239,7 +239,7 @@
                             android:layout_margin="@dimen/eightDpMargin"
                             android:textColor="@color/black"
                             android:text="@string/product_title_text"
-                            android:textSize="@dimen/largeText"
+                            android:textSize="@dimen/mediumText"
                             />
 
                         <org.apmem.tools.layouts.FlowLayout
@@ -269,7 +269,7 @@
                             android:layout_margin="@dimen/eightDpMargin"
                             android:textColor="@color/black"
                             android:text="@string/product_short_description_text"
-                            android:textSize="@dimen/largeText"
+                            android:textSize="@dimen/mediumText"
                             />
 
                         <org.apmem.tools.layouts.FlowLayout
@@ -306,7 +306,7 @@
                                 android:layout_weight="1"
                                 android:textColor="@color/black"
                                 android:text="@string/product_full_description_text"
-                                android:textSize="@dimen/largeText"
+                                android:textSize="@dimen/mediumText"
                                 />
 
                             <com.google.android.material.textview.MaterialTextView
