@@ -58,7 +58,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val collapseExpandLayout:LinearLayout
 //        val sliderView:SliderView
 //        val addProductCard: CardView
-        val getDescriptionBtn:MaterialTextView
+        val getDescriptionBtn:AppCompatImageView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
@@ -206,7 +206,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
                 mListener!!.onItemRemoveClick(position, imagePosition)
             }
 
-            override fun onItemAddImageClick(position: Int) {
+            override fun onItemAddImageClick(pos: Int) {
                 mListener!!.onItemAddImageClick(position)
             }
 

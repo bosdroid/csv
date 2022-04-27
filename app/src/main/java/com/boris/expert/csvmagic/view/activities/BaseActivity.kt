@@ -1,6 +1,5 @@
 package com.boris.expert.csvmagic.view.activities
 
-import android.R.layout
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
@@ -11,10 +10,8 @@ import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity

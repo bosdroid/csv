@@ -82,8 +82,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 
 
-class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAlertDialog.CustomDialogListener,
-    View.OnFocusChangeListener,View.OnClickListener {
+class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,
+    CustomAlertDialog.CustomDialogListener,
+    View.OnFocusChangeListener, View.OnClickListener {
 
     //    private lateinit var qrCodeHistoryRecyclerView: RecyclerView
 //    private lateinit var emptyView: MaterialTextView
@@ -97,7 +98,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     private lateinit var fabUploadFile: FloatingActionButton
     private lateinit var fabAddOption: FloatingActionButton
     private var listener: ScannerInterface? = null
-    private var fragmentChangeListener:FragmentChangeListener?=null
+    private var fragmentChangeListener: FragmentChangeListener? = null
     private var codeDataTInputView: CustomTextInputEditText? = null
     private var columns = mutableListOf<String>()
     private var availableStorageMemory: Float = 0F
@@ -112,6 +113,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     private var barcodeImageList = mutableListOf<String>()
     private lateinit var barcodeImageadapter: BarcodeImageAdapter
     var currentPhotoPath: String? = null
+
     //private var codeScanner: CodeScanner? = null
     private lateinit var scannerView: CodeScannerView
     private lateinit var appViewModel: AppViewModel
@@ -181,7 +183,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
         2f
     )
 
-    interface FragmentChangeListener{
+    interface FragmentChangeListener {
         fun onChange()
     }
 
@@ -325,7 +327,6 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
             }
 
 
-
         }
 
 //        emptyView = view.findViewById(R.id.emptyView)
@@ -345,7 +346,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
 //        })
     }
 
-    private fun displayTableData(){
+    private fun displayTableData() {
 
         val columns = tableGenerator.getTableColumns(tableName)
         val tableHeaders = TableRow(context)
@@ -411,7 +412,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
 //        if (Constants.unlimitedTablesFeatureStatus == 0) {
 //            tablesList.add(tableGenerator.getAllDatabaseTables()[0])
 //        } else {
-            tablesList.addAll(tableGenerator.getAllDatabaseTables())
+        tablesList.addAll(tableGenerator.getAllDatabaseTables())
 //        }
 
         if (tablesList.isNotEmpty()) {
@@ -428,7 +429,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                 for (i in 0 until tablesList.size) {
                     val value = tablesList[i]
                     if (value == appSettings.getString("SCAN_SELECTED_TABLE")) {
-                        tablesSpinner.setSelection(i)
+                        tablesSpinner.setSelection(i,false)
                         tableName = value
                         break
                     }
@@ -448,10 +449,9 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                 i: Int,
                 l: Long
             ) {
-                tableName = adapterView!!.getItemAtPosition(i).toString()
-                appSettings.putString("SCAN_SELECTED_TABLE", tableName)
-                displayTableData()
-
+                    tableName = adapterView!!.getItemAtPosition(i).toString()
+                    appSettings.putString("SCAN_SELECTED_TABLE", tableName)
+                    displayTableData()
             }
         }
     }
@@ -732,7 +732,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                                                     Uri.parse(result)
                                                 )!!
                                             )
-                                            btn.text = requireActivity().resources.getString(R.string.attached_text)
+                                            btn.text =
+                                                requireActivity().resources.getString(R.string.attached_text)
                                             btn.setBackgroundColor(
                                                 ContextCompat.getColor(
                                                     requireActivity(),
@@ -740,7 +741,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                                                 )
                                             )
                                         } else {
-                                            btn.text = requireActivity().resources.getString(R.string.attach_text)
+                                            btn.text =
+                                                requireActivity().resources.getString(R.string.attach_text)
                                             BaseActivity.showAlert(
                                                 requireActivity(),
                                                 requireActivity().resources.getString(R.string.something_wrong_error)
@@ -792,8 +794,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
 
                                 userCurrentCredits =
                                     appSettings.getString(Constants.userCreditsValue) as String
-                                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice)
-                                {
+                                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
                                     BaseActivity.hideSoftKeyboard(
                                         requireActivity(),
                                         searchBtnView
@@ -868,19 +869,21 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                                             }
 
                                         })
-                                }
-                                else
-                                {
+                                } else {
                                     MaterialAlertDialogBuilder(requireActivity())
                                         .setMessage(requireActivity().resources.getString(R.string.low_credites_error_message))
                                         .setCancelable(false)
-                                        .setNegativeButton(requireActivity().resources.getString(R.string.no_text)){dialog,which->
+                                        .setNegativeButton(requireActivity().resources.getString(R.string.no_text)) { dialog, which ->
                                             dialog.dismiss()
                                         }
-                                        .setPositiveButton(requireActivity().resources.getString(R.string.buy_credits)){dialog,which ->
+                                        .setPositiveButton(requireActivity().resources.getString(R.string.buy_credits)) { dialog, which ->
                                             dialog.dismiss()
-                                            requireActivity().startActivity(Intent(requireContext(),
-                                                UserScreenActivity::class.java))
+                                            requireActivity().startActivity(
+                                                Intent(
+                                                    requireContext(),
+                                                    UserScreenActivity::class.java
+                                                )
+                                            )
                                         }
                                         .create().show()
                                 }
@@ -1476,7 +1479,10 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                                         }
                                     }
                                 } else {
-                                    BaseActivity.showAlert(requireActivity(), requireActivity().resources.getString(R.string.subscription_expired_text))
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        requireActivity().resources.getString(R.string.subscription_expired_text)
+                                    )
                                 }
                             } else {
                                 BaseActivity.showAlert(
@@ -1981,7 +1987,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     private fun openQuickEditDialog(item: TableObject) {
 
         val quickEditParentLayout =
-            LayoutInflater.from(requireActivity()).inflate(R.layout.update_quick_edit_table_layout, null)
+            LayoutInflater.from(requireActivity())
+                .inflate(R.layout.update_quick_edit_table_layout, null)
         val cancelDialogBtn =
             quickEditParentLayout.findViewById<MaterialButton>(R.id.quick_edit_dialog_cancel_btn)
         val updateDialogBtn =
@@ -2283,7 +2290,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     private fun openQuickEditDialogCsv(item: List<Pair<String, String>>) {
 
         val quickEditParentLayout =
-            LayoutInflater.from(requireActivity()).inflate(R.layout.update_quick_edit_table_layout, null)
+            LayoutInflater.from(requireActivity())
+                .inflate(R.layout.update_quick_edit_table_layout, null)
         val cancelDialogBtn =
             quickEditParentLayout.findViewById<MaterialButton>(R.id.quick_edit_dialog_cancel_btn)
         val updateDialogBtn =
@@ -2452,7 +2460,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
             val columns = mutableListOf<String>()
             columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
             val builder = StringBuilder()
-            if(columns.isNotEmpty()) {
+            if (columns.isNotEmpty()) {
                 if (columns[0].toLowerCase(Locale.ENGLISH) == "_id") {
                     columns.removeAt(0)
                 }
@@ -2522,10 +2530,12 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
         super.onResume()
         getTableList()
         displayTableList()
+
     }
 
     private fun getTableData(tName: String, column: String, order: String) {
-        var tempList: List<TableObject>?=null
+        Log.d("TEST199TABLEDATA","true")
+        var tempList: List<TableObject>? = null
         CoroutineScope(Dispatchers.IO).launch {
             tempList = tableGenerator.getTableDate(tName, column, order)
             if (tempList!!.isNotEmpty()) {
@@ -2545,8 +2555,10 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                 for (j in 0 until dataList.size) {
 
                     val textViewIdLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
-                    val textViewId = textViewIdLayout.findViewById<MaterialTextView>(R.id.cell_value)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_row_cell, null)
+                    val textViewId =
+                        textViewIdLayout.findViewById<MaterialTextView>(R.id.cell_value)
                     val data = dataList[j]
                     val tableRow = TableRow(requireActivity())
                     tableRow.id = j
@@ -2554,12 +2566,14 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                     tableRow.setOnClickListener(this@ScanFragment)
 
                     val moreLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_more_option_layout, null)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_more_option_layout, null)
                     moreLayout.layoutParams = TableRow.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
-                    val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
+                    val moreImage =
+                        moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
                     moreImage.id = j
                     moreImage.tag = "more"
                     moreImage.setOnClickListener(this@ScanFragment)
@@ -2568,7 +2582,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                     textViewId.text = "${data.id}"
                     tableRow.addView(textViewIdLayout)
                     val textViewCodeDateLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_row_cell, null)
                     textViewCodeDateLayout.layoutParams = layoutParams
                     val textViewCodeDate =
                         textViewCodeDateLayout.findViewById<MaterialTextView>(R.id.cell_value)
@@ -2576,7 +2591,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                     tableRow.addView(textViewCodeDateLayout)
 
                     val textViewDateLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_row_cell, null)
                     textViewDateLayout.layoutParams = layoutParams
                     val textViewDate =
                         textViewDateLayout.findViewById<MaterialTextView>(R.id.cell_value)
@@ -2584,7 +2600,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                     tableRow.addView(textViewDateLayout)
 
                     val textViewImageLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_row_cell, null)
                     textViewImageLayout.layoutParams = layoutParams
                     val textViewImage =
                         textViewImageLayout.findViewById<MaterialTextView>(R.id.cell_value)
@@ -2597,7 +2614,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                     tableRow.addView(textViewImageLayout)
 
                     val textViewQuantityLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_row_cell, null)
                     textViewQuantityLayout.layoutParams = layoutParams
                     val textViewQuantity =
                         textViewQuantityLayout.findViewById<MaterialTextView>(R.id.cell_value)
@@ -2609,7 +2627,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                         for (k in 0 until data.dynamicColumns.size) {
                             val item = data.dynamicColumns[k]
                             val cell =
-                                LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                                LayoutInflater.from(requireActivity())
+                                    .inflate(R.layout.table_row_cell, null)
                             cell.layoutParams = layoutParams
                             val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
 
@@ -2633,7 +2652,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     }
 
     private fun getTableDataFromCsv(tName: String, column: String, order: String) {
-        var tempList: List<List<Pair<String, String>>>?=null
+        var tempList: List<List<Pair<String, String>>>? = null
         CoroutineScope(Dispatchers.IO).launch {
             tempList = tableGenerator.getTableDateFromCsv(tName, column, order)
             if (tempList!!.isNotEmpty()) {
@@ -2660,12 +2679,14 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                     tableRow.setOnClickListener(this@ScanFragment)
 
                     val moreLayout =
-                        LayoutInflater.from(requireActivity()).inflate(R.layout.table_more_option_layout, null)
+                        LayoutInflater.from(requireActivity())
+                            .inflate(R.layout.table_more_option_layout, null)
                     moreLayout.layoutParams = TableRow.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
-                    val moreImage = moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
+                    val moreImage =
+                        moreLayout.findViewById<AppCompatImageView>(R.id.cell_more_image)
                     moreImage.id = j
                     moreImage.tag = "more"
                     moreImage.setOnClickListener(this@ScanFragment)
@@ -2676,7 +2697,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
 
                             val item = listPair[i]
                             val cell =
-                                LayoutInflater.from(requireActivity()).inflate(R.layout.table_row_cell, null)
+                                LayoutInflater.from(requireActivity())
+                                    .inflate(R.layout.table_row_cell, null)
                             cell.layoutParams = layoutParams
                             val textV = cell.findViewById<MaterialTextView>(R.id.cell_value)
 
@@ -2846,11 +2868,14 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
                                         if (isExist) {
                                             displayTableList()
                                             for (j in 0 until listRecord.size) {
-                                                tableGenerator.insertData(createdTableName, listRecord[j])
+                                                tableGenerator.insertData(
+                                                    createdTableName,
+                                                    listRecord[j]
+                                                )
                                             }
                                             BaseActivity.dismiss()
                                             tableName = createdTableName
-                                            appSettings.putString("SCAN_SELECTED_TABLE",tableName)
+                                            appSettings.putString("SCAN_SELECTED_TABLE", tableName)
                                             getTableList()
                                             displayTableData()
 //                                            if (checkCyrillicCharacter(originalColumns.joinToString(","))){
@@ -3028,7 +3053,6 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     }
 
 
-
 //    private fun getDisplayScanHistory(){
 //        BaseActivity.startLoading(requireActivity())
 //        appViewModel.getAllScanQRCodeHistory().observe(this, Observer { list ->
@@ -3114,7 +3138,9 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
             Constants.openKeyboar(requireActivity())
         }
     }
-    private var barcodeEditList = mutableListOf<Triple<TextInputEditText, AppCompatImageView, String>>()
+
+    private var barcodeEditList =
+        mutableListOf<Triple<TextInputEditText, AppCompatImageView, String>>()
     private var counter: Int = 0
     private var detailList = mutableListOf<Pair<String, String>>()
     private var imageList = mutableListOf<String>()
@@ -3245,7 +3271,8 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,CustomAle
     }
 
     private fun copyToClipBoard(content: String) {
-        val clipboard = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard =
+            requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Barcode Detail", content)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(context, "Copied", Toast.LENGTH_LONG).show()

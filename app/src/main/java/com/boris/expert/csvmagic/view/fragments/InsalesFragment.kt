@@ -178,6 +178,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         if (response.get("status").asString == "200") {
                             val categories = response.get("categories").asJsonArray
                             if (categories.size() > 0) {
+                                if (categoriesList.isNotEmpty()){
+                                    categoriesList.clear()
+                                }
                                 for (i in 0 until categories.size()) {
                                     val category = categories[i].asJsonObject
                                     categoriesList.add(
@@ -187,12 +190,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         )
                                     )
                                 }
-                                //categoriesList.add(Category("Test Category",2767276))
                             }
                         }
                     }
                 })
             } else {
+                if (categoriesList.isNotEmpty()){
+                    categoriesList.clear()
+                }
                 categoriesList.addAll(originalCategoriesList)
             }
 
@@ -1238,11 +1243,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         if (errors) {
                                             grammarStatusView.setTextColor(Color.RED)
                                             grammarStatusView.setText("Errors Found")
-                                            grammarCheckBtn.setImageResource(R.drawable.red_cross)
+                                            //grammarCheckBtn.setImageResource(R.drawable.red_cross)
+                                            grammarCheckBtn.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.red), android.graphics.PorterDuff.Mode.MULTIPLY)
                                         } else {
                                             grammarStatusView.setTextColor(Color.GREEN)
                                             grammarStatusView.setText("No Errors")
-                                            grammarCheckBtn.setImageResource(R.drawable.green_check_48)
+                                           // grammarCheckBtn.setImageResource(R.drawable.green_check_48)
+                                            grammarCheckBtn.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.green), android.graphics.PorterDuff.Mode.MULTIPLY)
                                         }
                                     }
 
@@ -1828,6 +1835,25 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
             val getDescriptionView1 =
                 dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
+
+            val titleClearBrush = dialogLayout.findViewById<AppCompatImageView>(R.id.title_clear_brush_view)
+            val shortDescClearBrush = dialogLayout.findViewById<AppCompatImageView>(R.id.short_desc_clear_brush_view)
+            val fullDescClearBrush = dialogLayout.findViewById<AppCompatImageView>(R.id.full_desc_clear_brush_view)
+
+            titleClearBrush.setOnClickListener {
+                dynamicTitleTextViewWrapper.removeAllViews()
+                insalesFragment!!.titleTextViewList.clear()
+            }
+
+            shortDescClearBrush.setOnClickListener {
+                dynamicShortDescTextViewWrapper.removeAllViews()
+                insalesFragment!!.shortDescTextViewList.clear()
+            }
+
+            fullDescClearBrush.setOnClickListener {
+                dynamicFullDescTextViewWrapper.removeAllViews()
+                insalesFragment!!.fullDescTextViewList.clear()
+            }
 
             insalesFragment!!.titleBox.setText(pItem.title)
             productShortDescriptionBox.setText(pItem.shortDesc)

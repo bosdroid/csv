@@ -114,7 +114,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private var customAlertDialog: CustomAlertDialog? = null
     private var updateInputBox: CustomTextInputEditText? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
-
     private var arrayList = mutableListOf<String>()
     private var filePathView: MaterialTextView? = null
     private var barcodeImagesRecyclerView: RecyclerView? = null
@@ -144,7 +143,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     private var databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storageReference: StorageReference = FirebaseStorage.getInstance().reference
     private var textRecognitionButtonsLayout: LinearLayout? = null
-
+    private lateinit var scannerCancelTextview:MaterialTextView
     //private var previewView: PreviewView? = null
     private var imageAnalyzer: MyImageAnalyzer? = null
     private var isFlashOn = false
@@ -176,7 +175,6 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
             ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
         ).get(AppViewModel::class.java)
         tableGenerator = TableGenerator(requireActivity())
-
     }
 
     override fun onCreateView(
@@ -241,9 +239,14 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
         connectGoogleSheetsTextView = view.findViewById(R.id.connect_google_sheets_text_view)
         sheetsTopLayout = view.findViewById(R.id.sheets_top_layout)
         barcodeLocalImageScannerView = view.findViewById(R.id.image_barcode_scanner_view)
+        scannerCancelTextview = view.findViewById(R.id.scanner_cancel_textview)
         flashImg = view.findViewById(R.id.flashImg)
         addNewTableBtn.setOnClickListener {
             startActivity(Intent(requireActivity(), TablesActivity::class.java))
+        }
+
+        scannerCancelTextview.setOnClickListener {
+          requireActivity().supportFragmentManager.popBackStack()
         }
 
         connectGoogleSheetsTextView.setOnClickListener {
@@ -464,33 +467,37 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                             return@runOnUiThread
                         }
                         if (it.text.isNotEmpty() && it.text.matches(Regex("[0-9]+"))) {
+                           if (!tableName.contains("import")) {
+                               val isFound = tableGenerator.searchItem(tableName, it.text)
+                               if (isFound && appSettings.getString(getString(R.string.key_mode)) == "0") {
+                                   val quantity = tableGenerator.getScanQuantity(tableName, it.text)
+                                   var qty = 0
+                                   qty = if (quantity != null) {
+                                       quantity.toInt() + 1
+                                   } else {
+                                       1
+                                   }
 
-                            val isFound = tableGenerator.searchItem(tableName, it.text)
-                            if (isFound && appSettings.getString(getString(R.string.key_mode)) == "0") {
-                                val quantity = tableGenerator.getScanQuantity(tableName, it.text)
-                                var qty = 0
-                                qty = if (quantity != null) {
-                                    quantity.toInt() + 1
-                                } else {
-                                    1
-                                }
+                                   val isUpdate =
+                                       tableGenerator.updateScanQuantity(tableName, it.text, qty)
+                                   if (isUpdate) {
+                                       //showAlert(requireActivity(),requireActivity().getString(R.string.scan_quantity_increase_success_text))
+                                       Toast.makeText(
+                                           requireActivity(),
+                                           requireActivity().getString(R.string.scan_quantity_increase_success_text),
+                                           Toast.LENGTH_SHORT
+                                       ).show()
+                                       Handler(Looper.myLooper()!!).postDelayed({
+                                           startPreview()
+                                       }, 2000)
 
-                                val isUpdate =
-                                    tableGenerator.updateScanQuantity(tableName, it.text, qty)
-                                if (isUpdate) {
-                                    //showAlert(requireActivity(),requireActivity().getString(R.string.scan_quantity_increase_success_text))
-                                    Toast.makeText(
-                                        requireActivity(),
-                                        requireActivity().getString(R.string.scan_quantity_increase_success_text),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    Handler(Looper.myLooper()!!).postDelayed({
-                                        startPreview()
-                                    }, 2000)
-
-                                }
-                            } else {
-                                displayDataSubmitDialog(it, "")
+                                   }
+                               } else {
+                                   displayDataSubmitDialog(it, "")
+                               }
+                           }
+                            else{
+                               displayDataSubmitDialog(it, "")
                             }
                         } else {
                             showAlert(
@@ -638,6 +645,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         scanResultLayout.findViewById<MaterialTextView>(R.id.filePath)
                     barcodeImagesRecyclerView =
                         scanResultLayout.findViewById(R.id.selected_barcode_images_recyclerview)
+                    val defaultCodeDataLayout = scanResultLayout.findViewById<LinearLayout>(R.id.default_code_data_layout)
                     barcodeImagesRecyclerView!!.layoutManager = LinearLayoutManager(
                         requireActivity(), RecyclerView.HORIZONTAL,
                         false
@@ -1066,14 +1074,19 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
 
                     }
 
-
+                    if (tableName.contains("import")){
+                        defaultCodeDataLayout.visibility = View.GONE
+                    }
+                    else{
+                        defaultCodeDataLayout.visibility = View.VISIBLE
+                    }
                     columns.addAll(tableGenerator.getTableColumns(tableName)!!.toList())
                     Log.d("TEST1999", columns.toString())
                     for (i in columns.indices) {
                         val value = columns[i]
                         if (value == "id" || value == "quantity") {
                             continue
-                        } else if (value == "code_data") {
+                        } else if (value == "code_data" || value == "Code Data" || value == "code data") {
                             textInputIdsList.add(Pair(value, codeDataTInputView!!))
                             codeDataTInputView!!.setText(text)
                         } else {

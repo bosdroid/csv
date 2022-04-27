@@ -96,7 +96,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/sixtyDpMargin"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:id="@+id/default_code_data_layout"
+                android:visibility="gone"
+                >
 
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"

@@ -233,14 +233,28 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         >
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:orientation="horizontal"
                             android:layout_margin="@dimen/eightDpMargin"
-                            android:textColor="@color/black"
-                            android:text="@string/product_title_text"
-                            android:textSize="@dimen/mediumText"
-                            />
+                            >
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="@color/black"
+                                android:text="@string/product_title_text"
+                                android:textSize="@dimen/mediumText"
+                                />
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@drawable/cleaning_brush"
+                                android:id="@+id/title_clear_brush_view"
+                                />
+                        </LinearLayout>
+
 
                         <org.apmem.tools.layouts.FlowLayout
                             android:layout_width="match_parent"
@@ -263,15 +277,27 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         >
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
+                         <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:orientation="horizontal"
                             android:layout_margin="@dimen/eightDpMargin"
+                            >
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:textColor="@color/black"
                             android:text="@string/product_short_description_text"
                             android:textSize="@dimen/mediumText"
                             />
-
+                             <androidx.appcompat.widget.AppCompatImageView
+                                 android:layout_width="36dp"
+                                 android:layout_height="36dp"
+                                 android:src="@drawable/cleaning_brush"
+                                 android:id="@+id/short_desc_clear_brush_view"
+                                 />
+                         </LinearLayout>
                         <org.apmem.tools.layouts.FlowLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -300,6 +326,11 @@
                             android:layout_margin="@dimen/eightDpMargin"
                             android:gravity="center_vertical"
                             >
+                             <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            >
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -308,7 +339,13 @@
                                 android:text="@string/product_full_description_text"
                                 android:textSize="@dimen/mediumText"
                                 />
-
+                                 <androidx.appcompat.widget.AppCompatImageView
+                                     android:layout_width="36dp"
+                                     android:layout_height="36dp"
+                                     android:src="@drawable/cleaning_brush"
+                                     android:id="@+id/full_desc_clear_brush_view"
+                                     />
+                             </LinearLayout>
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"

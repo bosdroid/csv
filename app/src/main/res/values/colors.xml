@@ -20,4 +20,5 @@
     <color name="primary_positive_color">#6301EF</color>
     <color name="secondary_positive_color">#bb85fe</color>
     <color name="purple_bright_accent_color">#6200ee</color>
+    <color name="green">#008000</color>
 </resources>

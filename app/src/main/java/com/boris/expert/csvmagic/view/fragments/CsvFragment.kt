@@ -11,7 +11,7 @@ import com.boris.expert.csvmagic.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
-class CsvFragment : Fragment() {
+class CsvFragment : Fragment(){
 
     private lateinit var bottomNavigation: BottomNavigationView
 
@@ -70,5 +70,6 @@ class CsvFragment : Fragment() {
                 .addToBackStack("scanner")
                 .commit()
     }
+
 
 }
