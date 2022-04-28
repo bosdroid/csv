@@ -882,7 +882,9 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         }
 
                     })
-            }else{
+            }
+            else
+            {
                 val params = FlowLayout.LayoutParams(FlowLayout.LayoutParams.WRAP_CONTENT,
                     FlowLayout.LayoutParams.WRAP_CONTENT)
                 params.setMargins(5, 5, 5, 5)

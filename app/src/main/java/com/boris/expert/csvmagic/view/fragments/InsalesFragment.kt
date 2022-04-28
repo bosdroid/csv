@@ -178,7 +178,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         if (response.get("status").asString == "200") {
                             val categories = response.get("categories").asJsonArray
                             if (categories.size() > 0) {
-                                if (categoriesList.isNotEmpty()){
+                                if (categoriesList.isNotEmpty()) {
                                     categoriesList.clear()
                                 }
                                 for (i in 0 until categories.size()) {
@@ -195,7 +195,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
                 })
             } else {
-                if (categoriesList.isNotEmpty()){
+                if (categoriesList.isNotEmpty()) {
                     categoriesList.clear()
                 }
                 categoriesList.addAll(originalCategoriesList)
@@ -468,6 +468,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
     }
 
+    private var characters = 0
+    private var grammarPrice = 0F
+    private var unitCharacterPrice = 0F
+    private var howMuchChargeCredits = 0F
     private fun showProducts() {
         linearLayoutManager = WrapContentLinearLayoutManager(
             requireActivity(),
@@ -1200,12 +1204,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             override fun onItemEditImageClick(position: Int) {
                 val pItem = productsList[position]
-                CustomDialog(shopName, email, password, pItem, position, adapter, viewModel,object : ResponseListener{
-                    override fun onSuccess(result: String) {
-                        fetchProducts()
-                    }
+                CustomDialog(
+                    shopName,
+                    email,
+                    password,
+                    pItem,
+                    position,
+                    adapter,
+                    viewModel,
+                    object : ResponseListener {
+                        override fun onSuccess(result: String) {
+                            fetchProducts()
+                        }
 
-                }).show(
+                    }).show(
                     childFragmentManager,
                     "dialog"
                 )
@@ -1219,44 +1231,81 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 grammarStatusView: MaterialTextView
             ) {
                 val item = productsList[position]
-                BaseActivity.startLoading(requireActivity())
-                GrammarCheck.check(
-                    requireActivity(),
-                    item.title,
-                    title,
-                    1,
-                    grammarStatusView,
-                    object : GrammarCallback {
-                        override fun onSuccess(response: SpannableStringBuilder?, errors: Boolean) {
-                            GrammarCheck.check(
-                                requireActivity(),
-                                item.fullDesc,
-                                description,
-                                0,
-                                grammarStatusView,
-                                object : GrammarCallback {
-                                    override fun onSuccess(
-                                        response: SpannableStringBuilder?,
-                                        errors: Boolean
-                                    ) {
-                                        BaseActivity.dismiss()
-                                        if (errors) {
-                                            grammarStatusView.setTextColor(Color.RED)
-                                            grammarStatusView.setText("Errors Found")
-                                            //grammarCheckBtn.setImageResource(R.drawable.red_cross)
-                                            grammarCheckBtn.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.red), android.graphics.PorterDuff.Mode.MULTIPLY)
-                                        } else {
-                                            grammarStatusView.setTextColor(Color.GREEN)
-                                            grammarStatusView.setText("No Errors")
-                                           // grammarCheckBtn.setImageResource(R.drawable.green_check_48)
-                                            grammarCheckBtn.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.green), android.graphics.PorterDuff.Mode.MULTIPLY)
+                characters = appSettings.getInt("GRAMMAR_CHARACTERS_LIMIT")
+                grammarPrice = appSettings.getString("GRAMMAR_CHARACTERS_PRICE")!!.toFloat()
+                unitCharacterPrice = grammarPrice / characters
+                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+                val totalCharacters = item.title.length + item.fullDesc.length
+                val totalCreditPrice = unitCharacterPrice * totalCharacters
+                howMuchChargeCredits = totalCreditPrice
+
+                if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
+                    BaseActivity.startLoading(requireActivity())
+                    GrammarCheck.check(
+                        requireActivity(),
+                        item.title,
+                        title,
+                        1,
+                        grammarStatusView,
+                        object : GrammarCallback {
+                            override fun onSuccess(
+                                response: SpannableStringBuilder?,
+                                errors: Boolean
+                            ) {
+                                GrammarCheck.check(
+                                    requireActivity(),
+                                    item.fullDesc,
+                                    description,
+                                    0,
+                                    grammarStatusView,
+                                    object : GrammarCallback {
+                                        override fun onSuccess(
+                                            response: SpannableStringBuilder?,
+                                            errors: Boolean
+                                        ) {
+                                            BaseActivity.dismiss()
+                                            chargeCreditsPrice()
+                                            if (errors) {
+                                                grammarStatusView.setTextColor(Color.RED)
+                                                grammarStatusView.setText("Errors Found")
+                                                //grammarCheckBtn.setImageResource(R.drawable.red_cross)
+                                                grammarCheckBtn.setColorFilter(
+                                                    ContextCompat.getColor(
+                                                        requireActivity(),
+                                                        R.color.red
+                                                    ), android.graphics.PorterDuff.Mode.MULTIPLY
+                                                )
+                                            } else {
+                                                grammarStatusView.setTextColor(Color.GREEN)
+                                                grammarStatusView.setText("No Errors")
+                                                // grammarCheckBtn.setImageResource(R.drawable.green_check_48)
+                                                grammarCheckBtn.setColorFilter(
+                                                    ContextCompat.getColor(
+                                                        requireActivity(),
+                                                        R.color.green
+                                                    ), android.graphics.PorterDuff.Mode.MULTIPLY
+                                                )
+                                            }
                                         }
-                                    }
 
-                                })
+                                    })
+                            }
+
+                        })
+                } else {
+                    MaterialAlertDialogBuilder(requireActivity())
+                        .setMessage(requireActivity().getString(R.string.low_credites_error_message))
+                        .setCancelable(false)
+                        .setNegativeButton(requireActivity().getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
                         }
-
-                    })
+                        .setPositiveButton(requireActivity().getString(R.string.buy_credits)) { dialog, which ->
+                            dialog.dismiss()
+                            requireActivity().startActivity(Intent(requireActivity(), UserScreenActivity::class.java))
+                        }
+                        .create().show()
+                }
 
             }
 
@@ -1337,6 +1386,25 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     }
 
+    private fun chargeCreditsPrice() {
+        val firebaseDatabase = FirebaseDatabase.getInstance().reference
+        val hashMap = HashMap<String, Any>()
+        val remaining = userCurrentCredits.toFloat() - howMuchChargeCredits
+        userCurrentCredits = remaining.toString()
+        hashMap["credits"] = userCurrentCredits
+        firebaseDatabase.child(Constants.firebaseUserCredits)
+            .child(Constants.firebaseUserId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                howMuchChargeCredits = 0F
+                BaseActivity.getUserCredits(
+                    requireActivity()
+                )
+            }
+            .addOnFailureListener {
+
+            }
+    }
 
     private fun fetchProducts() {
         currentPage = 1
@@ -1379,7 +1447,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     Constants.pItem!!,
                     Constants.pItemPosition!!,
                     adapter,
-                    viewModel,object : ResponseListener{
+                    viewModel, object : ResponseListener {
                         override fun onSuccess(result: String) {
                             fetchProducts()
                         }
@@ -1667,12 +1735,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     private fun addProduct() {
 
-        AddProductCustomDialog(originalCategoriesList,shopName,email,password,viewModel,object : ResponseListener{
-            override fun onSuccess(result: String) {
-                fetchProducts()
-            }
+        AddProductCustomDialog(
+            originalCategoriesList,
+            shopName,
+            email,
+            password,
+            viewModel,
+            object : ResponseListener {
+                override fun onSuccess(result: String) {
+                    fetchProducts()
+                }
 
-        }).show(childFragmentManager,"add-dialog")
+            }).show(childFragmentManager, "add-dialog")
 
     }
 
@@ -1767,8 +1841,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
 
-
-
     class CustomDialog(
         private val shopName: String,
         private val email: String,
@@ -1777,7 +1849,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val position: Int,
         private val insalesAdapter: InSalesProductsAdapter,
         private val viewModel: SalesCustomersViewModel,
-        private val listener:ResponseListener
+        private val listener: ResponseListener
     ) : DialogFragment(), View.OnClickListener {
 
         private var insalesFragment: InsalesFragment? = null
@@ -1836,9 +1908,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val getDescriptionView1 =
                 dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
 
-            val titleClearBrush = dialogLayout.findViewById<AppCompatImageView>(R.id.title_clear_brush_view)
-            val shortDescClearBrush = dialogLayout.findViewById<AppCompatImageView>(R.id.short_desc_clear_brush_view)
-            val fullDescClearBrush = dialogLayout.findViewById<AppCompatImageView>(R.id.full_desc_clear_brush_view)
+            val titleClearBrush =
+                dialogLayout.findViewById<AppCompatImageView>(R.id.title_clear_brush_view)
+            val shortDescClearBrush =
+                dialogLayout.findViewById<AppCompatImageView>(R.id.short_desc_clear_brush_view)
+            val fullDescClearBrush =
+                dialogLayout.findViewById<AppCompatImageView>(R.id.full_desc_clear_brush_view)
 
             titleClearBrush.setOnClickListener {
                 dynamicTitleTextViewWrapper.removeAllViews()
@@ -2138,7 +2213,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val email: String,
         private val password: String,
         private val viewModel: SalesCustomersViewModel,
-        private val listener:ResponseListener
+        private val listener: ResponseListener
     ) : DialogFragment() {
 
         private var insalesFragment: InsalesFragment? = null
@@ -2209,7 +2284,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
             apCancelBtn.setOnClickListener {
-               dismiss()
+                dismiss()
             }
 
             apSubmitBtn.setOnClickListener {

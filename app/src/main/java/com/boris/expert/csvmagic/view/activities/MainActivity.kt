@@ -1094,10 +1094,18 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     Float::class.java
                 ).toString()
 
+                val grammarCharacters =
+                    snapshot.child("grammar").child("characters").getValue(Int::class.java)
+                val grammarPrice: String = snapshot.child("grammar").child("price").getValue(
+                    Float::class.java
+                ).toString()
+
                 appSettings.putString("P_DETAILS_PRICE", pDetailsPrice)
                 appSettings.putString("P_LIST_PRICE", pListPrice)
                 appSettings.putInt("TRANSLATOR_CHARACTERS_LIMIT", characters!!)
                 appSettings.putString("TRANSLATOR_CHARACTERS_PRICE", translatorPrice)
+                appSettings.putInt("GRAMMAR_CHARACTERS_LIMIT", grammarCharacters!!)
+                appSettings.putString("GRAMMAR_CHARACTERS_PRICE", grammarPrice)
             }
 
             override fun onCancelled(error: DatabaseError) {
