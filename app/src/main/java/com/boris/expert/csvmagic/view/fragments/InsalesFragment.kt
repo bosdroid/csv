@@ -3,6 +3,7 @@ package com.boris.expert.csvmagic.view.fragments
 import android.Manifest
 import android.app.Activity
 import android.app.Dialog
+import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -22,6 +23,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
@@ -47,10 +49,7 @@ import com.boris.expert.csvmagic.model.KeywordObject
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.*
-import com.boris.expert.csvmagic.view.activities.BaseActivity
-import com.boris.expert.csvmagic.view.activities.MainActivity
-import com.boris.expert.csvmagic.view.activities.RainForestApiActivity
-import com.boris.expert.csvmagic.view.activities.UserScreenActivity
+import com.boris.expert.csvmagic.view.activities.*
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.bumptech.glide.Glide
@@ -67,10 +66,13 @@ import com.google.firebase.database.ValueEventListener
 import com.skydoves.balloon.ArrowOrientation
 import com.skydoves.balloon.Balloon
 import com.skydoves.balloon.BalloonAnimation
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import io.paperdb.Paper
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
+import java.io.IOException
 import java.util.*
 import java.util.regex.Pattern
 
@@ -1338,6 +1340,39 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
             }
 
+            override fun onItemCameraIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView) {
+               val item = productsList[position]
+                Constants.pItemPosition = position
+                Constants.pItem = item
+               Constants.pTitle = title
+               Constants.pDescription = description
+                //BaseActivity.showAlert(requireActivity(),item.title)
+                if (RuntimePermissionHelper.checkCameraPermission(
+                        requireActivity(), Constants.CAMERA_PERMISSION
+                    )
+                ) {
+                   // BaseActivity.hideSoftKeyboard(requireActivity())
+                    pickImageFromCamera()
+                }
+            }
+
+            override fun onItemImageIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView) {
+                val item = productsList[position]
+                Constants.pItemPosition = position
+                Constants.pItem = item
+                Constants.pTitle = title
+                Constants.pDescription = description
+                //BaseActivity.showAlert(requireActivity(),item.fullDesc)
+                if (RuntimePermissionHelper.checkCameraPermission(
+                        requireActivity(),
+                        Constants.READ_STORAGE_PERMISSION
+                    )
+                ) {
+                    //BaseActivity.hideSoftKeyboard(requireActivity())
+                    pickImageFromGallery()
+                }
+            }
+
         })
 
 //        var pastVisiblesItems: Int
@@ -1384,6 +1419,205 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             fetchProducts(currentPage)
         }
 
+    }
+
+    private fun pickImageFromGallery() {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        resultLauncher1.launch(
+            Intent.createChooser(
+                pickPhoto, getString(R.string.choose_image_gallery)
+            )
+        )
+
+    }
+
+
+    private var resultLauncher1 =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val cropPicUri = CropImage.getPickImageResultUri(requireActivity(), data)
+                cropImage(cropPicUri)
+            }
+
+        }
+
+    private fun cropImage(imageUri: Uri) {
+
+        CropImage.activity(imageUri)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setMultiTouchEnabled(true)
+            .start(requireActivity())
+    }
+
+    private fun pickImageFromCamera() {
+        val takePictureIntent = Intent(context, OcrActivity::class.java)
+        cameraResultLauncher1.launch(takePictureIntent)
+
+    }
+
+    private var cameraResultLauncher1 =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+
+//                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                val text = result.data!!.getStringExtra("SCAN_TEXT")
+                if (text!!.isNotEmpty()){
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
+                    val options = arrayOf("+add in title", "+add in description")
+                    var isTitleChecked = false
+                    var isDescriptionChecked = false
+                    val checkedItems = booleanArrayOf(false, false)
+                    builder.setMultiChoiceItems(
+                        options,
+                        checkedItems
+                    ) { dialog, which, isCheck ->
+                        when (which) {
+                            0 -> {
+                                isTitleChecked = isCheck
+                            }
+                            1 -> {
+                                isDescriptionChecked = isCheck
+                            }
+                            else -> {
+
+                            }
+                        }
+                    }
+                    builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
+
+                        if (isTitleChecked) {
+                         if (Constants.pTitle != null){
+                             val stringBuilder = StringBuilder()
+                             Constants.pTitle!!.isExpanded = true
+                             stringBuilder.append(Constants.pTitle!!.text.toString())
+                             stringBuilder.append(" $text")
+                             productsList[Constants.pItemPosition!!].title = stringBuilder.toString()
+                             Constants.pItem!!.title = stringBuilder.toString()
+                             if (Constants.pItemPosition != null){
+                                 adapter.notifyItemChanged(Constants.pItemPosition!!)
+                             }
+                         }
+                        }
+
+                        if (isDescriptionChecked) {
+                            if (Constants.pDescription != null){
+                                val stringBuilder = StringBuilder()
+                                Constants.pDescription!!.isExpanded = true
+                                stringBuilder.append(Constants.pDescription!!.text.toString())
+                                stringBuilder.append(" $text")
+                                productsList[Constants.pItemPosition!!].fullDesc = stringBuilder.toString()
+                                Constants.pItem!!.fullDesc = stringBuilder.toString()
+                                if (Constants.pItemPosition != null){
+                                    adapter.notifyItemChanged(Constants.pItemPosition!!)
+                                }
+                            }
+                        }
+
+                        dialog.dismiss()
+                        if (isTitleChecked || isDescriptionChecked){
+                            updateInsalesProductDetail(Constants.pItem!!)
+                        }
+
+                    }
+                    builder.setNegativeButton(
+                        requireActivity().resources.getString(R.string.cancel_text),
+                        null
+                    )
+                    val alert = builder.create()
+                    alert.show()
+                }
+//                updateInputBox.setText(text)
+//                updateInputBox.setSelection(updateInputBox.text.toString().length)
+//                val data: Intent? = result.data
+//                val bitmap = data!!.extras!!.get("data") as Bitmap
+//                val file = ImageManager.readWriteImage(context,bitmap)
+//                cropImage(Uri.fromFile(file))
+            }
+        }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+       // super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
+            val result = CropImage.getActivityResult(data)
+            val imgUri = result.uri
+            try {
+                //TextRecogniser.runTextRecognition(requireActivity(), updateInputBox, imgUri)
+                if (imgUri != null){
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
+                    val options = arrayOf("+add in title", "+add in description")
+                    var isTitleChecked = false
+                    var isDescriptionChecked = false
+                    val checkedItems = booleanArrayOf(false, false)
+                    builder.setMultiChoiceItems(
+                        options,
+                        checkedItems
+                    ) { dialog, which, isCheck ->
+                        when (which) {
+                            0 -> {
+                                isTitleChecked = isCheck
+                            }
+                            1 -> {
+                                isDescriptionChecked = isCheck
+                            }
+                            else -> {
+
+                            }
+                        }
+                    }
+                    builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
+
+                        if (isTitleChecked) {
+                         if (Constants.pTitle != null){
+                             TextRecogniser.runTextRecognition(requireActivity(),
+                                 Constants.pTitle!!, imgUri,object:ResponseListener{
+                                 override fun onSuccess(result: String) {
+                                     productsList[Constants.pItemPosition!!].title = result
+                                     Constants.pItem!!.title = result
+                                     if (Constants.pItemPosition != null){
+                                         adapter.notifyItemChanged(Constants.pItemPosition!!)
+                                     }
+                                 }
+
+                             })
+                         }
+                        }
+
+                        if (isDescriptionChecked) {
+                            if (Constants.pDescription != null){
+                                TextRecogniser.runTextRecognition(requireActivity(), Constants.pDescription!!, imgUri,object:ResponseListener{
+                                    override fun onSuccess(result: String) {
+                                        productsList[Constants.pItemPosition!!].fullDesc = result
+                                        Constants.pItem!!.fullDesc = result
+                                        if (Constants.pItemPosition != null){
+                                            adapter.notifyItemChanged(Constants.pItemPosition!!)
+                                        }
+                                    }
+
+                                })
+                            }
+                        }
+                        dialog.dismiss()
+                        if (isTitleChecked || isDescriptionChecked){
+                            BaseActivity.startLoading(requireActivity())
+                            Handler(Looper.myLooper()!!).postDelayed({
+                                BaseActivity.dismiss()
+                                updateInsalesProductDetail(Constants.pItem!!)
+                            },2000)
+                        }
+                    }
+                    builder.setNegativeButton(
+                        requireActivity().resources.getString(R.string.cancel_text),
+                        null
+                    )
+                    val alert = builder.create()
+                    alert.show()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun chargeCreditsPrice() {
@@ -1730,6 +1964,46 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                }
             }
         }
+    }
+
+    private fun updateInsalesProductDetail(pItem: Product){
+        viewModel.callUpdateProductDetail(
+            requireContext(),
+            shopName,
+            email,
+            password,
+            pItem.id,
+            pItem.title,
+            pItem.shortDesc,
+            pItem.fullDesc
+        )
+        viewModel.getUpdateProductDetailResponse()
+            .observe(requireActivity(), Observer { response ->
+                if (response != null) {
+                    if (response.get("status").asString == "200") {
+                        BaseActivity.dismiss()
+                        Constants.pItem = null
+                        Constants.pItemPosition = null
+                        Constants.pTitle = null
+                        Constants.pDescription = null
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.product_updated_successfully),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        fetchProducts()
+
+                    } else {
+                        BaseActivity.dismiss()
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            response.get("message").asString
+                        )
+                    }
+                } else {
+                    BaseActivity.dismiss()
+                }
+            })
     }
 
 

@@ -33,7 +33,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             description: ExpandableTextView,
             grammarStatusView: MaterialTextView
         )
+
         fun onItemGetDescriptionClick(position: Int)
+        fun onItemCameraIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView)
+        fun onItemImageIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView)
     }
 
     private var mListener: OnItemClickListener? = null
@@ -47,18 +50,22 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val productTitle: ExpandableTextView
         val productDescription: ExpandableTextView
         val imagesRecyclerView: RecyclerView
-//        val addImageView:AppCompatImageView
-        val editImageView:AppCompatImageView
-        val grammarCheckView:AppCompatImageView
-        val grammarStatusView:MaterialTextView
-        val titleSizeView:MaterialTextView
-        val descriptionSizeView:MaterialTextView
-        val totalImagesView:MaterialTextView
-        val collapseExpandImg:AppCompatImageView
-        val collapseExpandLayout:LinearLayout
-//        val sliderView:SliderView
+
+        //        val addImageView:AppCompatImageView
+        val editImageView: AppCompatImageView
+        val grammarCheckView: AppCompatImageView
+        val grammarStatusView: MaterialTextView
+        val titleSizeView: MaterialTextView
+        val descriptionSizeView: MaterialTextView
+        val totalImagesView: MaterialTextView
+        val collapseExpandImg: AppCompatImageView
+        val collapseExpandLayout: LinearLayout
+
+        //        val sliderView:SliderView
 //        val addProductCard: CardView
-        val getDescriptionBtn:AppCompatImageView
+        val getDescriptionBtn: AppCompatImageView
+        val cameraIconView: AppCompatImageView
+        val imageIconView: AppCompatImageView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
@@ -76,8 +83,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 //            sliderView = itemView.findViewById(R.id.imageSlider)
 //            addProductCard = itemView.findViewById(R.id.add_product_card)
             getDescriptionBtn = itemView.findViewById(R.id.get_description_text_view)
+            cameraIconView = itemView.findViewById(R.id.insales_item_photo_icon_view)
+            imageIconView = itemView.findViewById(R.id.insales_item_image_icon_view)
 
-            productTitle.setOnClickListener {v->
+            productTitle.setOnClickListener { v ->
                 //(v as ExpandableTextView).toggle()
                 Listener.onItemClick(layoutPosition)
             }
@@ -91,11 +100,10 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 //            }
 
             collapseExpandImg.setOnClickListener {
-                if (collapseExpandLayout.visibility == View.VISIBLE){
+                if (collapseExpandLayout.visibility == View.VISIBLE) {
                     collapseExpandLayout.visibility = View.GONE
                     collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
-                }
-                else{
+                } else {
                     collapseExpandLayout.visibility = View.VISIBLE
                     collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
                 }
@@ -121,6 +129,13 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             getDescriptionBtn.setOnClickListener {
                 Listener.onItemGetDescriptionClick(layoutPosition)
             }
+
+            cameraIconView.setOnClickListener {
+                Listener.onItemCameraIconClick(layoutPosition,productTitle,productDescription)
+            }
+            imageIconView.setOnClickListener {
+                Listener.onItemImageIconClick(layoutPosition,productTitle,productDescription)
+            }
         }
     }
 
@@ -143,10 +158,9 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         holder.titleSizeView.setText("Title Size: ${item.title.length}")
         holder.descriptionSizeView.setText("Description Size: ${item.fullDesc.length}")
         holder.totalImagesView.setText("Total Images: ${item.productImages!!.size}")
-        if (item.title.length > 10){
+        if (item.title.length > 10) {
             holder.productTitle.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
-        }
-        else{
+        } else {
             //holder.productTitle.text = context.getString(R.string.product_title_error)
             holder.productTitle.setBackgroundColor(
                 ContextCompat.getColor(
@@ -163,15 +177,14 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 //        }
         holder.productTitle.setText(item.title)
 
-        if (item.fullDesc.length > 10){
+        if (item.fullDesc.length > 10) {
             holder.productDescription.setBackgroundColor(
                 ContextCompat.getColor(
                     context,
                     R.color.white
                 )
             )
-        }
-        else{
+        } else {
             //holder.productDescription.text = context.getString(R.string.product_description_error)
             holder.productDescription.setBackgroundColor(
                 ContextCompat.getColor(

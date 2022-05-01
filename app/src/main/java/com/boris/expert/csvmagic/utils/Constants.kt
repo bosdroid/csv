@@ -27,6 +27,7 @@ import com.google.android.material.textview.MaterialTextView
 import com.google.api.services.drive.Drive
 import com.google.api.services.sheets.v4.Sheets
 import com.google.firebase.storage.FirebaseStorage
+import net.expandable.ExpandableTextView
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -108,6 +109,8 @@ class Constants {
         var cacheProducts = "cacheProducts"
         var pItemPosition:Int?=null
         var pItem:Product?=null
+        var pTitle: ExpandableTextView?=null
+        var pDescription: ExpandableTextView?=null
 
 
         private fun getBackgroundImageFolderFile(context: Context): File {

@@ -1476,6 +1476,14 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
 
             }
 
+            override fun onItemCameraIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView) {
+
+            }
+
+            override fun onItemImageIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView) {
+
+            }
+
         })
 
         var pastVisiblesItems: Int
