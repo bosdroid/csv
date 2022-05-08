@@ -2314,7 +2314,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             return
         }
        // Toast.makeText(requireContext(),id,Toast.LENGTH_LONG).show()
-        val idf: String? =nameofid.get(id)
+        var idf: String = nameofid.get(id).toString()
        // Toast.makeText(requireContext(),idf,Toast.LENGTH_LONG).show()
         if (desc.isEmpty()) {
             Desc?.setError("Invalid Description")
@@ -2363,7 +2363,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 params["shop_name"] = "myshop-bsq158"
                 params["email"] = "asatarpk@gmail.com"
                 params["password"] = "Sattar_786"
-                params["category_id"] = id
+                params["category_id"] = idf
                 params["title"] = tittle
                 params["description"] = desc
                 params["sku"] = "Random"
