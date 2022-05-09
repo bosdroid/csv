@@ -255,14 +255,18 @@
                                 />
                         </LinearLayout>
 
-
-                        <org.apmem.tools.layouts.FlowLayout
+                        <ScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="@dimen/eightDpMargin"
+                            >
+                        <org.apmem.tools.layouts.FlowLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:id="@+id/dynamic_insales_title_textview_wrapper"
                             f:layoutDirection="rtl"
                             />
+                        </ScrollView>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 

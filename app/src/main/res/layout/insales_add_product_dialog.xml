@@ -1,102 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:fillViewport="true">
 
-
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="@dimen/eightDpMargin"
-        android:gravity="center_horizontal"
-        >
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_product_text"
-            android:textColor="@color/black"
-            android:textSize="@dimen/xxlargeText"
-            />
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/eightDpMargin"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:background="@drawable/border"
-            android:gravity="center"
-            android:layout_marginTop="@dimen/sixtyDpMargin"
-            >
-           <androidx.appcompat.widget.AppCompatSpinner
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:id="@+id/ap_cate_spinner"
-               android:layout_margin="@dimen/defaultDpMargin"
-               />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_product_text"
+                android:textColor="@color/black"
+                android:textSize="@dimen/xxlargeText" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/test_data_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="@dimen/eightDpMargin"
+                android:text="@string/test_data_text"
+                android:textColor="@color/primary_positive_color"
+                android:textSize="@dimen/largeText" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:background="@drawable/border"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/ap_cate_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/defaultDpMargin" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ap_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tenDpMargin"
+                android:background="@drawable/radius_text_input_field"
+                android:hint="@string/title_text"
+                android:inputType="textMultiLine" />
+
+
+             <com.google.android.material.textview.MaterialTextView
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="end"
+                 android:layout_marginTop="@dimen/eightDpMargin"
+                 android:layout_marginEnd="@dimen/eightDpMargin"
+                 android:text="@string/add_description_button_text"
+                 android:textSize="@dimen/largeText"
+                 android:textColor="@color/secondary_positive_color"
+                 android:id="@+id/ap_add_description_text_view"
+                 />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ap_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/defaultDpMargin"
+                android:background="@drawable/radius_text_input_field"
+                android:gravity="start"
+                android:hint="@string/description_text"
+                android:inputType="textMultiLine" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ap_quantity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tenDpMargin"
+                android:background="@drawable/radius_text_input_field"
+                android:hint="@string/quantity_text"
+                android:inputType="number" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ap_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tenDpMargin"
+                android:background="@drawable/radius_text_input_field"
+                android:hint="@string/price_text"
+                android:inputType="number" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/selected_insales_add_product_image_view"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_marginTop="@dimen/defaultDpMargin"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/placeholder"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/image_sources_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/eightDpMargin"
+                android:layout_marginTop="@dimen/sixtyDpMargin"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/selected_insales_product_image_view">
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/camera_image_view"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/camera" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/images_image_view"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:padding="5dp"
+                        android:src="@drawable/gallery" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/internet_image_view"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:padding="5dp"
+                        android:src="@drawable/internet"
+                        app:tint="@color/primary_positive_color" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ap_dialog_submit_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/tenDpMargin"
+                android:text="@string/submit" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ap_dialog_cancel_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/eightDpMargin"
+                android:text="@string/cancel_text"
+                app:backgroundTint="@color/secondary_positive_color" />
+
         </LinearLayout>
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/tenDpMargin"
-            android:background="@drawable/radius_text_input_field"
-            android:id="@+id/ap_title"
-            android:hint="@string/title_text"
-            android:inputType="text"
-            />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginTop="@dimen/tenDpMargin"
-            android:background="@drawable/radius_text_input_field"
-            android:id="@+id/ap_description"
-            android:inputType="textMultiLine"
-            android:gravity="start"
-            android:hint="@string/description_text"
-            />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/tenDpMargin"
-            android:background="@drawable/radius_text_input_field"
-            android:id="@+id/ap_quantity"
-            android:hint="@string/quantity_text"
-            android:inputType="number"
-            />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/tenDpMargin"
-            android:background="@drawable/radius_text_input_field"
-            android:id="@+id/ap_price"
-            android:hint="@string/price_text"
-            android:inputType="number"
-            />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/ap_dialog_submit_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/tenDpMargin"
-            android:text="@string/submit" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/ap_dialog_cancel_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/eightDpMargin"
-            android:text="@string/cancel_text"
-            app:backgroundTint="@color/secondary_positive_color" />
-
-    </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

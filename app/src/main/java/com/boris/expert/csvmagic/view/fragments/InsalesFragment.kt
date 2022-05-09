@@ -185,7 +185,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 }
                                 for (i in 0 until categories.size()) {
                                     val category = categories[i].asJsonObject
-                                    categoriesList.add(
+                                    originalCategoriesList.add(
                                         Category(
                                             category.get("title").asString,
                                             category.get("id").asInt
@@ -245,30 +245,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun getCategories() {
-        viewModel.callCategories(requireActivity(), shopName, email, password)
-        viewModel.getCategoriesResponse().observe(this, Observer { response ->
-            if (response != null) {
-                if (response.get("status").asString == "200") {
-                    val categories = response.get("categories").asJsonArray
-                    if (categories.size() > 0) {
-                        for (i in 0 until categories.size()) {
-                            val category = categories[i].asJsonObject
-                            originalCategoriesList.add(
-                                Category(
-                                    category.get("title").asString,
-                                    category.get("id").asInt
-                                )
-                            )
-                        }
-                        if (originalCategoriesList.size > 0) {
-                            selectedCategoryId = originalCategoriesList[0].id
-                        }
-                    }
-                }
-            }
-        })
-    }
 
     private fun resetProductList() {
         productsList.clear()
@@ -441,7 +417,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             shopName = appSettings.getString("INSALES_SHOP_NAME") as String
             email = appSettings.getString("INSALES_EMAIL") as String
             password = appSettings.getString("INSALES_PASSWORD") as String
-            getCategories()
+
 //            if (originalProductsList.size == 0) {
             showProducts()
 //            }
@@ -1270,7 +1246,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                             chargeCreditsPrice()
                                             if (errors) {
                                                 grammarStatusView.setTextColor(Color.RED)
-                                                grammarStatusView.setText("Errors Found")
+                                                grammarStatusView.text =
+                                                    requireActivity().resources.getString(R.string.error_found_text)
                                                 //grammarCheckBtn.setImageResource(R.drawable.red_cross)
                                                 grammarCheckBtn.setColorFilter(
                                                     ContextCompat.getColor(
@@ -1280,7 +1257,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 )
                                             } else {
                                                 grammarStatusView.setTextColor(Color.GREEN)
-                                                grammarStatusView.setText("No Errors")
+                                                grammarStatusView.text =
+                                                    requireActivity().resources.getString(R.string.no_erros_text)
                                                 // grammarCheckBtn.setImageResource(R.drawable.green_check_48)
                                                 grammarCheckBtn.setColorFilter(
                                                     ContextCompat.getColor(
@@ -1304,7 +1282,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         }
                         .setPositiveButton(requireActivity().getString(R.string.buy_credits)) { dialog, which ->
                             dialog.dismiss()
-                            requireActivity().startActivity(Intent(requireActivity(), UserScreenActivity::class.java))
+                            requireActivity().startActivity(
+                                Intent(
+                                    requireActivity(),
+                                    UserScreenActivity::class.java
+                                )
+                            )
                         }
                         .create().show()
                 }
@@ -1340,23 +1323,31 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
             }
 
-            override fun onItemCameraIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView) {
-               val item = productsList[position]
+            override fun onItemCameraIconClick(
+                position: Int,
+                title: ExpandableTextView,
+                description: ExpandableTextView
+            ) {
+                val item = productsList[position]
                 Constants.pItemPosition = position
                 Constants.pItem = item
-               Constants.pTitle = title
-               Constants.pDescription = description
+                Constants.pTitle = title
+                Constants.pDescription = description
                 //BaseActivity.showAlert(requireActivity(),item.title)
                 if (RuntimePermissionHelper.checkCameraPermission(
                         requireActivity(), Constants.CAMERA_PERMISSION
                     )
                 ) {
-                   // BaseActivity.hideSoftKeyboard(requireActivity())
+                    // BaseActivity.hideSoftKeyboard(requireActivity())
                     pickImageFromCamera()
                 }
             }
 
-            override fun onItemImageIconClick(position: Int,title:ExpandableTextView,description: ExpandableTextView) {
+            override fun onItemImageIconClick(
+                position: Int,
+                title: ExpandableTextView,
+                description: ExpandableTextView
+            ) {
                 val item = productsList[position]
                 Constants.pItemPosition = position
                 Constants.pItem = item
@@ -1405,6 +1396,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             originalProductsList.clear()
             productsList.clear()
             originalProductsList.addAll(cacheList)
+            originalProductsList.sortByDescending { it.id }
             productsList.addAll(originalProductsList)
             adapter.notifyItemRangeChanged(0, productsList.size)
             Handler(Looper.myLooper()!!).postDelayed({
@@ -1425,7 +1417,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         resultLauncher1.launch(
             Intent.createChooser(
-                pickPhoto, getString(R.string.choose_image_gallery)
+                pickPhoto, getString(R.string.image_to_text_mode)
             )
         )
 
@@ -1463,9 +1455,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
             if (result.resultCode == Activity.RESULT_OK) {
                 val text = result.data!!.getStringExtra("SCAN_TEXT")
-                if (text!!.isNotEmpty()){
+                if (text!!.isNotEmpty()) {
                     val builder = MaterialAlertDialogBuilder(requireActivity())
-                    val options = arrayOf("+add in title", "+add in description")
+                    val options = arrayOf(
+                        requireActivity().resources.getString(R.string.plus_add_title_text),
+                        requireActivity().resources.getString(R.string.plus_add_description_text)
+                    )
                     var isTitleChecked = false
                     var isDescriptionChecked = false
                     val checkedItems = booleanArrayOf(false, false)
@@ -1476,9 +1471,38 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         when (which) {
                             0 -> {
                                 isTitleChecked = isCheck
+                                if (isTitleChecked) {
+                                    if (Constants.pTitle != null) {
+                                        val stringBuilder = StringBuilder()
+                                        Constants.pTitle!!.isExpanded = true
+                                        stringBuilder.append(Constants.pTitle!!.text.toString())
+                                        stringBuilder.append(" $text")
+                                        productsList[Constants.pItemPosition!!].title =
+                                            stringBuilder.toString()
+                                        Constants.pItem!!.title = stringBuilder.toString()
+//                                        if (Constants.pItemPosition != null){
+//                                            adapter.notifyItemChanged(Constants.pItemPosition!!)
+//                                        }
+                                    }
+                                }
+
                             }
                             1 -> {
                                 isDescriptionChecked = isCheck
+                                if (isDescriptionChecked) {
+                                    if (Constants.pDescription != null) {
+                                        val stringBuilder = StringBuilder()
+                                        Constants.pDescription!!.isExpanded = true
+                                        stringBuilder.append(Constants.pDescription!!.text.toString())
+                                        stringBuilder.append(" $text")
+                                        productsList[Constants.pItemPosition!!].fullDesc =
+                                            stringBuilder.toString()
+                                        Constants.pItem!!.fullDesc = stringBuilder.toString()
+//                                        if (Constants.pItemPosition != null){
+//                                            adapter.notifyItemChanged(Constants.pItemPosition!!)
+//                                        }
+                                    }
+                                }
                             }
                             else -> {
 
@@ -1487,37 +1511,24 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
                     builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
 
-                        if (isTitleChecked) {
-                         if (Constants.pTitle != null){
-                             val stringBuilder = StringBuilder()
-                             Constants.pTitle!!.isExpanded = true
-                             stringBuilder.append(Constants.pTitle!!.text.toString())
-                             stringBuilder.append(" $text")
-                             productsList[Constants.pItemPosition!!].title = stringBuilder.toString()
-                             Constants.pItem!!.title = stringBuilder.toString()
-                             if (Constants.pItemPosition != null){
-                                 adapter.notifyItemChanged(Constants.pItemPosition!!)
-                             }
-                         }
-                        }
-
-                        if (isDescriptionChecked) {
-                            if (Constants.pDescription != null){
-                                val stringBuilder = StringBuilder()
-                                Constants.pDescription!!.isExpanded = true
-                                stringBuilder.append(Constants.pDescription!!.text.toString())
-                                stringBuilder.append(" $text")
-                                productsList[Constants.pItemPosition!!].fullDesc = stringBuilder.toString()
-                                Constants.pItem!!.fullDesc = stringBuilder.toString()
-                                if (Constants.pItemPosition != null){
-                                    adapter.notifyItemChanged(Constants.pItemPosition!!)
-                                }
-                            }
-                        }
 
                         dialog.dismiss()
-                        if (isTitleChecked || isDescriptionChecked){
-                            updateInsalesProductDetail(Constants.pItem!!)
+                        if (isTitleChecked || isDescriptionChecked) {
+                            //updateInsalesProductDetail(Constants.pItem!!)
+                            CustomDialog(
+                                shopName,
+                                email,
+                                password,
+                                productsList[Constants.pItemPosition!!],
+                                Constants.pItemPosition!!,
+                                adapter,
+                                viewModel,
+                                object : ResponseListener {
+                                    override fun onSuccess(result: String) {
+                                        fetchProducts()
+                                    }
+
+                                }).show(childFragmentManager, "dialog")
                         }
 
                     }
@@ -1538,15 +1549,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-       // super.onActivityResult(requestCode, resultCode, data)
+        // super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
             val result = CropImage.getActivityResult(data)
             val imgUri = result.uri
             try {
                 //TextRecogniser.runTextRecognition(requireActivity(), updateInputBox, imgUri)
-                if (imgUri != null){
+                if (imgUri != null) {
                     val builder = MaterialAlertDialogBuilder(requireActivity())
-                    val options = arrayOf("+add in title", "+add in description")
+                    val options = arrayOf(
+                        requireActivity().resources.getString(R.string.plus_add_title_text),
+                        requireActivity().resources.getString(R.string.plus_add_description_text)
+                    )
                     var isTitleChecked = false
                     var isDescriptionChecked = false
                     val checkedItems = booleanArrayOf(false, false)
@@ -1557,9 +1571,44 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         when (which) {
                             0 -> {
                                 isTitleChecked = isCheck
+                                if (isTitleChecked) {
+                                    if (Constants.pTitle != null) {
+                                        TextRecogniser.runTextRecognition(requireActivity(),
+                                            Constants.pTitle!!, imgUri, object : ResponseListener {
+                                                override fun onSuccess(result: String) {
+                                                    productsList[Constants.pItemPosition!!].title =
+                                                        result
+                                                    Constants.pItem!!.title = result
+//                                                 if (Constants.pItemPosition != null){
+//                                                     adapter.notifyItemChanged(Constants.pItemPosition!!)
+//                                                 }
+                                                }
+
+                                            })
+                                    }
+                                }
                             }
                             1 -> {
                                 isDescriptionChecked = isCheck
+                                if (isDescriptionChecked) {
+                                    if (Constants.pDescription != null) {
+                                        TextRecogniser.runTextRecognition(
+                                            requireActivity(),
+                                            Constants.pDescription!!,
+                                            imgUri,
+                                            object : ResponseListener {
+                                                override fun onSuccess(result: String) {
+                                                    productsList[Constants.pItemPosition!!].fullDesc =
+                                                        result
+                                                    Constants.pItem!!.fullDesc = result
+//                                                if (Constants.pItemPosition != null){
+//                                                    adapter.notifyItemChanged(Constants.pItemPosition!!)
+//                                                }
+                                                }
+
+                                            })
+                                    }
+                                }
                             }
                             else -> {
 
@@ -1568,43 +1617,27 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
                     builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
 
-                        if (isTitleChecked) {
-                         if (Constants.pTitle != null){
-                             TextRecogniser.runTextRecognition(requireActivity(),
-                                 Constants.pTitle!!, imgUri,object:ResponseListener{
-                                 override fun onSuccess(result: String) {
-                                     productsList[Constants.pItemPosition!!].title = result
-                                     Constants.pItem!!.title = result
-                                     if (Constants.pItemPosition != null){
-                                         adapter.notifyItemChanged(Constants.pItemPosition!!)
-                                     }
-                                 }
-
-                             })
-                         }
-                        }
-
-                        if (isDescriptionChecked) {
-                            if (Constants.pDescription != null){
-                                TextRecogniser.runTextRecognition(requireActivity(), Constants.pDescription!!, imgUri,object:ResponseListener{
+                        dialog.dismiss()
+                        if (isTitleChecked || isDescriptionChecked) {
+//                            BaseActivity.startLoading(requireActivity())
+//                            Handler(Looper.myLooper()!!).postDelayed({
+//                                BaseActivity.dismiss()
+//                                updateInsalesProductDetail(Constants.pItem!!)
+//                            },2000)
+                            CustomDialog(
+                                shopName,
+                                email,
+                                password,
+                                productsList[Constants.pItemPosition!!],
+                                Constants.pItemPosition!!,
+                                adapter,
+                                viewModel,
+                                object : ResponseListener {
                                     override fun onSuccess(result: String) {
-                                        productsList[Constants.pItemPosition!!].fullDesc = result
-                                        Constants.pItem!!.fullDesc = result
-                                        if (Constants.pItemPosition != null){
-                                            adapter.notifyItemChanged(Constants.pItemPosition!!)
-                                        }
+                                        fetchProducts()
                                     }
 
-                                })
-                            }
-                        }
-                        dialog.dismiss()
-                        if (isTitleChecked || isDescriptionChecked){
-                            BaseActivity.startLoading(requireActivity())
-                            Handler(Looper.myLooper()!!).postDelayed({
-                                BaseActivity.dismiss()
-                                updateInsalesProductDetail(Constants.pItem!!)
-                            },2000)
+                                }).show(childFragmentManager, "dialog")
                         }
                     }
                     builder.setNegativeButton(
@@ -1751,7 +1784,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )
-
+                            originalProductsList.sortByDescending { it.id }
                             Paper.book().write(Constants.cacheProducts, originalProductsList)
                             currentTotalProducts = originalProductsList.size
                         }
@@ -1966,45 +1999,45 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun updateInsalesProductDetail(pItem: Product){
-        viewModel.callUpdateProductDetail(
-            requireContext(),
-            shopName,
-            email,
-            password,
-            pItem.id,
-            pItem.title,
-            pItem.shortDesc,
-            pItem.fullDesc
-        )
-        viewModel.getUpdateProductDetailResponse()
-            .observe(requireActivity(), Observer { response ->
-                if (response != null) {
-                    if (response.get("status").asString == "200") {
-                        BaseActivity.dismiss()
-                        Constants.pItem = null
-                        Constants.pItemPosition = null
-                        Constants.pTitle = null
-                        Constants.pDescription = null
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.product_updated_successfully),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        fetchProducts()
-
-                    } else {
-                        BaseActivity.dismiss()
-                        BaseActivity.showAlert(
-                            requireActivity(),
-                            response.get("message").asString
-                        )
-                    }
-                } else {
-                    BaseActivity.dismiss()
-                }
-            })
-    }
+//    private fun updateInsalesProductDetail(pItem: Product){
+//        viewModel.callUpdateProductDetail(
+//            requireContext(),
+//            shopName,
+//            email,
+//            password,
+//            pItem.id,
+//            pItem.title,
+//            pItem.shortDesc,
+//            pItem.fullDesc
+//        )
+//        viewModel.getUpdateProductDetailResponse()
+//            .observe(requireActivity(), Observer { response ->
+//                if (response != null) {
+//                    if (response.get("status").asString == "200") {
+//                        BaseActivity.dismiss()
+//                        Constants.pItem = null
+//                        Constants.pItemPosition = null
+//                        Constants.pTitle = null
+//                        Constants.pDescription = null
+//                        Toast.makeText(
+//                            requireContext(),
+//                            getString(R.string.product_updated_successfully),
+//                            Toast.LENGTH_SHORT
+//                        ).show()
+//                        fetchProducts()
+//
+//                    } else {
+//                        BaseActivity.dismiss()
+//                        BaseActivity.showAlert(
+//                            requireActivity(),
+//                            response.get("message").asString
+//                        )
+//                    }
+//                } else {
+//                    BaseActivity.dismiss()
+//                }
+//            })
+//    }
 
 
     private fun addProduct() {
@@ -2189,19 +2222,101 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val fullDescClearBrush =
                 dialogLayout.findViewById<AppCompatImageView>(R.id.full_desc_clear_brush_view)
 
+            if (pItem.title.length > 10) {
+                insalesFragment!!.titleBox.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.white
+                    )
+                )
+                dynamicTitleTextViewWrapper.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.white
+                    )
+                )
+            } else {
+                //holder.productTitle.text = context.getString(R.string.product_title_error)
+                insalesFragment!!.titleBox.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.light_red
+                    )
+                )
+                dynamicTitleTextViewWrapper.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.light_red
+                    )
+                )
+            }
+
+            if (pItem.fullDesc.length > 10) {
+                insalesFragment!!.fullDescriptionBox.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.white
+                    )
+                )
+                dynamicFullDescTextViewWrapper.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.white
+                    )
+                )
+            } else {
+                //holder.productDescription.text = context.getString(R.string.product_description_error)
+                insalesFragment!!.fullDescriptionBox.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.light_red
+                    )
+                )
+                dynamicFullDescTextViewWrapper.setBackgroundColor(
+                    ContextCompat.getColor(
+                        requireActivity(),
+                        R.color.light_red
+                    )
+                )
+            }
+
             titleClearBrush.setOnClickListener {
                 dynamicTitleTextViewWrapper.removeAllViews()
                 insalesFragment!!.titleTextViewList.clear()
+                insalesFragment!!.titleBox.setText("")
+                secondLinearLayout.visibility = View.GONE
+                firstLinearLayout.visibility = View.VISIBLE
+
+                defaultLayout = 1
+                swapLayoutBtn.isChecked = true
+                insalesFragment!!.titleBox.requestFocus()
+                Constants.openKeyboar(requireContext())
             }
 
             shortDescClearBrush.setOnClickListener {
                 dynamicShortDescTextViewWrapper.removeAllViews()
                 insalesFragment!!.shortDescTextViewList.clear()
+                productShortDescriptionBox.setText("")
+                secondLinearLayout.visibility = View.GONE
+                firstLinearLayout.visibility = View.VISIBLE
+
+                defaultLayout = 1
+                swapLayoutBtn.isChecked = true
+                productShortDescriptionBox.requestFocus()
+                Constants.openKeyboar(requireContext())
             }
 
             fullDescClearBrush.setOnClickListener {
                 dynamicFullDescTextViewWrapper.removeAllViews()
                 insalesFragment!!.fullDescTextViewList.clear()
+                insalesFragment!!.fullDescriptionBox.setText("")
+                secondLinearLayout.visibility = View.GONE
+                firstLinearLayout.visibility = View.VISIBLE
+
+                defaultLayout = 1
+                swapLayoutBtn.isChecked = true
+                insalesFragment!!.fullDescriptionBox.requestFocus()
+                Constants.openKeyboar(requireContext())
             }
 
             insalesFragment!!.titleBox.setText(pItem.title)
@@ -2284,7 +2399,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     defaultLayout = 1
 
-                    insalesFragment!!.titleBox.setSelection(pItem.title.length)
+                    if (insalesFragment!!.titleBox.text.toString().isNotEmpty()) {
+                        insalesFragment!!.titleBox.setSelection(pItem.title.length)
+                    }
                     insalesFragment!!.titleBox.requestFocus()
                     Constants.openKeyboar(requireContext())
                 } else {
@@ -2492,6 +2609,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         private var insalesFragment: InsalesFragment? = null
         private var selectedCategoryId = 0
+        private var selectedInternetImage = ""
+        private var userCurrentCredits = ""
+        private lateinit var appSettings: AppSettings
+        private lateinit var selectedImageView: AppCompatImageView
+        private var currentPhotoPath: String? = null
+        private var selectedImageBase64String: String = ""
+        private var intentType = 0
+        private lateinit var categoriesSpinner:AppCompatSpinner
+        private lateinit var apTitleView:TextInputEditText
+        private lateinit var apDescriptionView:TextInputEditText
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -2499,6 +2626,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 STYLE_NORMAL,
                 R.style.FullScreenDialogStyle
             )
+            appSettings = AppSettings(requireActivity())
             insalesFragment = InsalesFragment()
         }
 
@@ -2522,15 +2650,277 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
         private fun initViews(view: View) {
-            val categoriesSpinner =
-                view.findViewById<AppCompatSpinner>(R.id.ap_cate_spinner)
-            val apTitleView = view.findViewById<TextInputEditText>(R.id.ap_title)
-            val apDescriptionView =
-                view.findViewById<TextInputEditText>(R.id.ap_description)
+           categoriesSpinner =
+                view.findViewById(R.id.ap_cate_spinner)
+            apTitleView = view.findViewById(R.id.ap_title)
+            val apTestDataView = view.findViewById<MaterialTextView>(R.id.test_data_button)
+            apDescriptionView =
+                view.findViewById(R.id.ap_description)
+            val apAddDescriptionView =
+                view.findViewById<MaterialTextView>(R.id.ap_add_description_text_view)
             val apQuantityView = view.findViewById<TextInputEditText>(R.id.ap_quantity)
             val apPriceView = view.findViewById<TextInputEditText>(R.id.ap_price)
             val apSubmitBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
             val apCancelBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_cancel_btn)
+
+            selectedImageView =
+                view.findViewById(R.id.selected_insales_add_product_image_view)
+            val cameraImageView =
+                view.findViewById<AppCompatImageView>(R.id.camera_image_view)
+            val imagesImageView =
+                view.findViewById<AppCompatImageView>(R.id.images_image_view)
+            val internetImageView =
+                view.findViewById<AppCompatImageView>(R.id.internet_image_view)
+
+            cameraImageView.setOnClickListener {
+                intentType = 1
+                if (RuntimePermissionHelper.checkCameraPermission(
+                        requireActivity(),
+                        Constants.CAMERA_PERMISSION
+                    )
+                ) {
+                    //dispatchTakePictureIntent()
+                    val cameraIntent =
+                        Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    cameraResultLauncher.launch(cameraIntent)
+                }
+            }
+
+            imagesImageView.setOnClickListener {
+                intentType = 2
+                if (ContextCompat.checkSelfPermission(
+                        requireActivity(),
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+
+                    getImageFromGallery()
+                } else {
+                    requestPermissions(
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        Constants.READ_STORAGE_REQUEST_CODE
+                    )
+                }
+            }
+
+            internetImageView.setOnClickListener {
+                intentType = 3
+                val searchedImagesList = mutableListOf<String>()
+                val tempImageList = mutableListOf<String>()
+                val internetSearchLayout = LayoutInflater.from(context)
+                    .inflate(R.layout.internet_image_search_dialog_layout, null)
+                val loader =
+                    internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
+                val searchBoxView =
+                    internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
+                val searchBtnView =
+                    internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
+                val internetImageRecyclerView =
+                    internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
+                val closeBtn =
+                    internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                val builder = MaterialAlertDialogBuilder(requireActivity())
+                builder.setCancelable(false)
+                builder.setView(internetSearchLayout)
+                val iAlert = builder.create()
+                iAlert.show()
+
+                closeBtn.setOnClickListener {
+                    iAlert.dismiss()
+                }
+
+                internetImageRecyclerView.layoutManager = StaggeredGridLayoutManager(
+                    2,
+                    LinearLayoutManager.VERTICAL
+                )//GridLayoutManager(context, 2)
+                internetImageRecyclerView.hasFixedSize()
+                val internetImageAdapter = InternetImageAdapter(
+                    requireActivity(),
+                    searchedImagesList as java.util.ArrayList<String>
+                )
+                internetImageRecyclerView.adapter = internetImageAdapter
+                internetImageAdapter.setOnItemClickListener(object :
+                    InternetImageAdapter.OnItemClickListener {
+                    override fun onItemClick(position: Int) {
+                        val selectedImage = searchedImagesList[position]
+
+                    }
+
+                    override fun onItemAttachClick(btn: MaterialButton, position: Int) {
+                        iAlert.dismiss()
+                        selectedInternetImage = searchedImagesList[position]
+                        Glide.with(requireActivity())
+                            .load(selectedInternetImage)
+                            .thumbnail(
+                                Glide.with(requireActivity()).load(R.drawable.placeholder)
+                            )
+                            .fitCenter()
+                            .into(selectedImageView)
+                    }
+
+                })
+
+
+                searchBtnView.setOnClickListener {
+                    var creditChargePrice: Float = 0F
+                    if (searchBoxView.text.toString().trim().isNotEmpty()) {
+
+
+                        val firebaseDatabase = FirebaseDatabase.getInstance().reference
+                        firebaseDatabase.child("SearchImagesLimit")
+                            .addListenerForSingleValueEvent(object :
+                                ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    val creditPrice = snapshot.child("credits")
+                                        .getValue(Int::class.java) as Int
+                                    val images = snapshot.child("images")
+                                        .getValue(Int::class.java) as Int
+                                    creditChargePrice = creditPrice.toFloat() / images
+
+                                    userCurrentCredits =
+                                        appSettings.getString(Constants.userCreditsValue) as String
+
+                                    if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+                                        BaseActivity.hideSoftKeyboard(
+                                            requireActivity(),
+                                            searchBtnView
+                                        )
+                                        //Constants.hideKeyboar(requireActivity())
+                                        val query = searchBoxView.text.toString().trim()
+                                        requireActivity().runOnUiThread {
+                                            loader.visibility = View.VISIBLE
+                                        }
+
+                                        BaseActivity.searchInternetImages(
+                                            requireActivity(),
+                                            query,
+                                            object : APICallback {
+                                                override fun onSuccess(response: JSONObject) {
+                                                    if (loader.visibility == View.VISIBLE) {
+                                                        loader.visibility =
+                                                            View.INVISIBLE
+                                                    }
+
+                                                    val items =
+                                                        response.getJSONArray("items")
+                                                    if (items.length() > 0) {
+                                                        searchedImagesList.clear()
+                                                        for (i in 0 until items.length()) {
+                                                            val item =
+                                                                items.getJSONObject(i)
+                                                            if (item.has("link")) {
+                                                                searchedImagesList.add(
+                                                                    item.getString(
+                                                                        "link"
+                                                                    )
+                                                                )
+                                                            }
+                                                        }
+                                                        internetImageAdapter.notifyItemRangeChanged(
+                                                            0,
+                                                            searchedImagesList.size
+                                                        )
+
+                                                    }
+                                                    //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                                                    val hashMap = HashMap<String, Any>()
+                                                    val remaining =
+                                                        userCurrentCredits.toFloat() - creditChargePrice
+                                                    Log.d("TEST199", "$remaining")
+                                                    hashMap["credits"] =
+                                                        remaining.toString()
+                                                    firebaseDatabase.child(Constants.firebaseUserCredits)
+                                                        .child(Constants.firebaseUserId)
+                                                        .updateChildren(hashMap)
+                                                        .addOnSuccessListener {
+                                                            BaseActivity.getUserCredits(
+                                                                requireActivity()
+                                                            )
+                                                        }
+                                                        .addOnFailureListener {
+
+                                                        }
+                                                }
+
+                                                override fun onError(error: VolleyError) {
+                                                    if (loader.visibility == View.VISIBLE) {
+                                                        loader.visibility =
+                                                            View.INVISIBLE
+                                                    }
+
+                                                    BaseActivity.showAlert(
+                                                        requireActivity(),
+                                                        error.localizedMessage!!
+                                                    )
+                                                }
+
+                                            })
+                                    } else {
+                                        MaterialAlertDialogBuilder(requireActivity())
+                                            .setMessage(getString(R.string.low_credites_error_message))
+                                            .setCancelable(false)
+                                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                                dialog.dismiss()
+                                            }
+                                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                                                dialog.dismiss()
+                                                startActivity(
+                                                    Intent(
+                                                        requireActivity(),
+                                                        UserScreenActivity::class.java
+                                                    )
+                                                )
+                                            }
+                                            .create().show()
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+
+                                }
+
+                            })
+
+
+                    } else {
+                        if (loader.visibility == View.VISIBLE) {
+                            loader.visibility = View.INVISIBLE
+                        }
+
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            getString(R.string.empty_text_error)
+                        )
+                    }
+                }
+
+            }
+
+            apAddDescriptionView.setOnClickListener {
+                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+                if (userCurrentCredits.toFloat() >= 1.0) {
+
+                    launchActivity.launch(
+                        Intent(
+                            requireActivity(),
+                            RainForestApiActivity::class.java
+                        )
+                    )
+                } else {
+                    MaterialAlertDialogBuilder(requireActivity())
+                        .setMessage(getString(R.string.low_credites_error_message2))
+                        .setCancelable(false)
+                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                            dialog.dismiss()
+                            startActivity(Intent(context, UserScreenActivity::class.java))
+                        }
+                        .create().show()
+                }
+            }
 
             val cateSpinnerAdapter = ArrayAdapter(
                 requireActivity(),
@@ -2555,6 +2945,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 }
 
+            }
+            getCategories(cateSpinnerAdapter)
+
+
+            apTestDataView.setOnClickListener {
+                apTitleView.setText(requireActivity().resources.getString(R.string.test_text))
+                apDescriptionView.setText(requireActivity().resources.getString(R.string.test_text))
+                apPriceView.setText("1")
+                apQuantityView.setText("1")
             }
 
             apCancelBtn.setOnClickListener {
@@ -2586,11 +2985,62 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         .observe(requireActivity(), Observer { response ->
                             if (response != null) {
                                 if (response.get("status").asString == "200") {
-                                    Handler(Looper.myLooper()!!).postDelayed({
+                                    val details = response.getAsJsonObject("details")
+                                    val productId = details.get("id").asInt
+
+                                    if (selectedImageBase64String.isNotEmpty()) {
                                         BaseActivity.dismiss()
-                                        dismiss()
-                                        listener.onSuccess("")
-                                    }, 3000)
+                                        BaseActivity.startLoading(requireActivity())
+
+                                        viewModel.callAddProductImage(
+                                            requireActivity(),
+                                            shopName,
+                                            email,
+                                            password,
+                                            selectedImageBase64String,
+                                            productId,
+                                            "${System.currentTimeMillis()}.jpg",
+                                            if (intentType != 3) {
+                                                ""
+                                            } else {
+                                                selectedInternetImage
+                                            }
+                                        )
+                                        viewModel.getAddProductImageResponse()
+                                            .observe(requireActivity(), Observer { response ->
+
+                                                if (response != null) {
+                                                    if (response.get("status").asString == "200") {
+                                                        selectedImageBase64String = ""
+                                                        selectedInternetImage = ""
+                                                        Handler(Looper.myLooper()!!).postDelayed({
+                                                            BaseActivity.dismiss()
+                                                            dismiss()
+                                                            listener.onSuccess("")
+                                                        }, 6000)
+                                                    } else {
+                                                        BaseActivity.dismiss()
+                                                        BaseActivity.showAlert(
+                                                            requireActivity(),
+                                                            response.get("message").asString
+                                                        )
+                                                    }
+                                                } else {
+                                                    BaseActivity.dismiss()
+                                                    BaseActivity.showAlert(
+                                                        requireActivity(),
+                                                        getString(R.string.something_wrong_error)
+                                                    )
+                                                }
+                                            })
+                                    } else {
+                                        Handler(Looper.myLooper()!!).postDelayed({
+                                            BaseActivity.dismiss()
+                                            dismiss()
+                                            listener.onSuccess("")
+                                        }, 3000)
+                                    }
+
                                 } else {
                                     BaseActivity.dismiss()
                                     BaseActivity.showAlert(
@@ -2606,6 +3056,42 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
         }
+
+        var launchActivity =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+
+                    if (data != null && data.hasExtra("TITLE")) {
+                        val title = data.getStringExtra("TITLE") as String
+                        if (title.isNotEmpty()) {
+                            val currentPItemTitle = apTitleView.text.toString().trim()
+                            val stringBuilder = java.lang.StringBuilder()
+                            stringBuilder.append(currentPItemTitle)
+                            stringBuilder.append(title)
+                            apTitleView.setText(stringBuilder.toString())
+                        }
+                    }
+
+                    if (data != null && data.hasExtra("DESCRIPTION")) {
+                        val description = data.getStringExtra("DESCRIPTION") as String
+                        if (description.isNotEmpty()) {
+
+                            val currentPItemDescription = apDescriptionView.text.toString().trim()
+                            val stringBuilder = java.lang.StringBuilder()
+                            stringBuilder.append(currentPItemDescription)
+                            stringBuilder.append(description)
+                           apDescriptionView.setText(stringBuilder.toString())
+
+                        }
+                    }
+                    if (apDescriptionView.text.toString().isNotEmpty()){
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                        apDescriptionView.requestFocus()
+                        Constants.openKeyboar(requireActivity())
+                    }
+                }
+            }
 
         private fun addProductValidation(
             categoriesSpinner: AppCompatSpinner?,
@@ -2631,6 +3117,95 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 return false
             }
             return true
+        }
+
+        private fun getImageFromGallery() {
+            val fileIntent = Intent(Intent.ACTION_PICK)
+            fileIntent.type = "image/*"
+            resultLauncher.launch(fileIntent)
+        }
+
+        private var resultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    if (result.data != null) {
+                        val imageUri = result.data!!
+                        currentPhotoPath = ImageManager.getRealPathFromUri(
+                            requireActivity(),
+                            imageUri.data
+                        )
+                        selectedImageBase64String =
+                            ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
+                        Log.d("TEST199DIALOG", selectedImageBase64String)
+                        Glide.with(requireActivity())
+                            .load(currentPhotoPath)
+                            .placeholder(R.drawable.placeholder)
+                            .centerInside()
+                            .into(selectedImageView)
+                    }
+
+                }
+            }
+
+        // THIS RESULT LAUNCHER WILL CALL THE ACTION PICK FROM FILES FOR BACKGROUND AND LOGO IMAGE
+        private var cameraResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+                    val bitmap = data!!.extras!!.get("data") as Bitmap
+                    createImageFile(bitmap)
+                    selectedImageBase64String =
+                        ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
+                    Log.d("TEST199DIALOG", selectedImageBase64String)
+                    Glide.with(requireActivity())
+                        .load(currentPhotoPath)
+                        .placeholder(R.drawable.placeholder)
+                        .centerInside()
+                        .into(selectedImageView)
+                }
+            }
+
+        private fun createImageFile(bitmap: Bitmap) {
+            currentPhotoPath = ImageManager.readWriteImage(requireActivity(), bitmap).absolutePath
+        }
+
+        private fun getCategories(adapter:ArrayAdapter<Category>) {
+            BaseActivity.startLoading(requireActivity())
+            viewModel.callCategories(requireActivity(), shopName, email, password)
+            viewModel.getCategoriesResponse().observe(this, Observer { response ->
+                if (response != null) {
+                    BaseActivity.dismiss()
+                    if (response.get("status").asString == "200") {
+                        val categories = response.get("categories").asJsonArray
+                        if (categories.size() > 0) {
+                            for (i in 0 until categories.size()) {
+                                val category = categories[i].asJsonObject
+                                originalCategoriesList.add(
+                                    Category(
+                                        category.get("title").asString,
+                                        category.get("id").asInt
+                                    )
+                                )
+                            }
+                            adapter.notifyDataSetChanged()
+                            if (originalCategoriesList.size > 0) {
+                                selectedCategoryId = originalCategoriesList[0].id
+                                //categoriesSpinner.setSelection(0)
+                            }
+                        }
+                    }
+                    else{
+                        BaseActivity.dismiss()
+                    }
+                }
+                else{
+                    BaseActivity.dismiss()
+                }
+            })
         }
 
     }

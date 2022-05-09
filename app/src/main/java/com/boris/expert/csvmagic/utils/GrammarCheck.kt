@@ -20,8 +20,8 @@ object GrammarCheck {
     fun check(context: Context, text: String, output: ExpandableTextView, type:Int, grammarStatusView:MaterialTextView, listener:GrammarCallback){
         //BaseActivity.startLoading(context)
         val FirstPart = "https://api.textgears.com/grammar?key=vJTW1KUmyAxAEzAy&text="
-        val Last_Part = "&language=ru-RU"
-        val url = "$FirstPart${text.trim()}$Last_Part"//FirstPart + text + Last_Part
+        //val Last_Part = "&language=ru-RU"
+        val url = "$FirstPart${text.trim()}"//FirstPart + text + Last_Part
          if (type == 1){
              grammarErrors = false
          }

@@ -522,6 +522,18 @@
     <string name="add_product_cate_error">Please select the product category</string>
     <string name="google_account_heading">Need Google account to enter</string>
     <string name="add_product_text">Add Product</string>
+    <string name="test_data_text">Test Data</string>
+	<string name="test_text">Test</string>
+    <string name="back_to_description_list_text">Back to Description List</string>
+    <string name="error_found_text">Errors Found</string>
+	<string name="no_erros_text">No Errors</string>
+	<string name="plus_add_title_text">+add in title</string>
+	<string name="plus_add_description_text">+add in description</string>
+    <string name="something_wrong_with_translator_error">Something wrong with translator, please try later!</string>
+	<string name="nothing_show_text">Nothing to show</string>
+    <string name="image_to_text_mode">Image to text Mode</string>
+    <string name="camera_text_mode">Camera to text Mode</string>
+    <string name="add_description_button_text">Add Description</string>
 
     <string-array name="features_keys">
 		<item>compressor_feature</item>

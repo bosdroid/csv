@@ -3,11 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:f="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
     <!--    <androidx.constraintlayout.widget.ConstraintLayout-->
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="wrap_content">-->
+
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/dialog_close_btn"
@@ -160,9 +162,21 @@
         android:text="@string/done_text"
         android:textSize="@dimen/largeText"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rf_linearlayout" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/rfa_item_back_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/eightDpMargin"
+        app:backgroundTint="@color/secondary_positive_color"
+        android:text="@string/back_text"
+        android:textSize="@dimen/largeText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rfa_item_done_btn" />
     <!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 </androidx.constraintlayout.widget.ConstraintLayout>
