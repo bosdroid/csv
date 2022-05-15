@@ -78,8 +78,12 @@ object TextRecogniser {
                 }
             }
         }
-        container.setText(stringBuilder)
-        container.setSelection(container.text.toString().length)
+//        container.setText(stringBuilder)
+//        container.setSelection(container.text.toString().length)
+        val stringBuilder1 = StringBuilder()
+        stringBuilder1.append(container.text.toString().trim())
+        stringBuilder1.append(" $stringBuilder")
+        container.setText(stringBuilder1.toString())
     }
 
     private fun processTextRecognitionResult(context: Context, container: ExpandableTextView, texts: Text,listener: ResponseListener) {

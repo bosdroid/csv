@@ -567,4 +567,19 @@
         <item>Seller</item>
         <item>Search</item>
     </string-array>
+
+    <string-array name="add_product_options">
+        <item>Default</item>
+        <item>Non Changeable</item>
+        <item>List of Values</item>
+        <item>Voice Recognition</item>
+        <item>Camera Recognition</item>
+        <item>Image Recognition</item>
+    </string-array>
+
+    <string-array name="three_add_product_options">
+        <item>Default</item>
+        <item>Non Changeable</item>
+        <item>List of Values</item>
+    </string-array>
 </resources>

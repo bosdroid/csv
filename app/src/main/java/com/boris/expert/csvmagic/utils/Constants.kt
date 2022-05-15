@@ -111,7 +111,8 @@ class Constants {
         var pItem:Product?=null
         var pTitle: ExpandableTextView?=null
         var pDescription: ExpandableTextView?=null
-
+        var hint = "default"
+        var CIVType = ""
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
