@@ -249,4 +249,7 @@ dependencies {
     implementation 'com.github.yuzumone:ExpandableTextView:0.3.1'
 
     implementation 'com.github.smarteist:autoimageslider:1.4.0'
+
+    implementation 'com.github.Yalantis:Koloda-Android:v0.0.2-alpha'
+
 }

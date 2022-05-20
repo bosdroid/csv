@@ -246,6 +246,14 @@
     <string name="image_to_text_mode">Image to text Mode</string>
     <string name="camera_text_mode">Camera to text Mode</string>
     <string name="add_description_button_text">Add Description</string>
+    <string name="quick_mode_text">Quick mode</string>
+    <string name="select_product_category">Select product category</string>
+    <string name="ap_missing_data_error">Product category, title, description, quantity or price is missing!</string>
+    <string name="set_product_title">Set the product title</string>
+    <string name="set_product_description">Set the product description</string>
+    <string name="set_product_quantity">Set the product quantity</string>
+    <string name="set_product_price">Set the product price</string>
+    <string name="attach_product_image">Attach the product image</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>
