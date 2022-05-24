@@ -60,6 +60,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val totalImagesView: MaterialTextView
         val collapseExpandImg: AppCompatImageView
         val collapseExpandLayout: LinearLayout
+        val insalesItemEditTextview:MaterialTextView
 
         //        val sliderView:SliderView
 //        val addProductCard: CardView
@@ -73,6 +74,7 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             imagesRecyclerView = itemView.findViewById(R.id.products_images_recyclerview)
 //            addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
             editImageView = itemView.findViewById(R.id.insales_p_item_edit_image)
+            insalesItemEditTextview = itemView.findViewById(R.id.insales_item_edit_textview)
             grammarCheckView = itemView.findViewById(R.id.grammar_check_icon_view)
             grammarStatusView = itemView.findViewById(R.id.grammar_status_textview)
             titleSizeView = itemView.findViewById(R.id.total_title_size_textview)
@@ -116,6 +118,11 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             editImageView.setOnClickListener {
                 Listener.onItemEditImageClick(layoutPosition)
             }
+
+            insalesItemEditTextview.setOnClickListener {
+                Listener.onItemEditImageClick(layoutPosition)
+            }
+
             grammarCheckView.setOnClickListener {
                 Listener.onItemGrammarCheckClick(
                     layoutPosition,
