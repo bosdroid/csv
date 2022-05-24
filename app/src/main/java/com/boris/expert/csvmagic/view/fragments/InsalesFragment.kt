@@ -2590,6 +2590,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     val editTextBox = balloon.getContentView()
                             .findViewById<TextInputEditText>(R.id.balloon_edit_text)
                     editTextBox.setText(textView.text.toString().trim())
+                    val clearTextView = balloon.getContentView().findViewById<AppCompatImageView>(R.id.balloon_brush_clear_view)
                     val closeBtn = balloon.getContentView()
                             .findViewById<AppCompatButton>(R.id.balloon_close_btn)
                     val applyBtn = balloon.getContentView()
@@ -2608,6 +2609,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         )
                         view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     }
+
+                    clearTextView.setOnClickListener {
+                        editTextBox.setText("")
+                    }
+
                     applyBtn.setOnClickListener {
                         Constants.hideKeyboar(requireActivity())
                         balloon.dismiss()
@@ -2655,15 +2661,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private var finalPriceText = ""
         //private var CIVType = ""
         private lateinit var quickModeCheckBox: MaterialCheckBox
-        private lateinit var apViewPager: ViewPager
+        private lateinit var apViewPager: MyViewPager
         private lateinit var apFirstLayout:LinearLayout
         private lateinit var apSecondLayout:LinearLayout
+        private lateinit var apNextPreviousButtons:LinearLayout
+        private lateinit var apPreviousBtn:MaterialTextView
+        private lateinit var apNextBtn:MaterialTextView
+        private lateinit var apBackArrowBtn:AppCompatImageView
 
         var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action != null && intent.action == "dialog-dismiss") {
-                    val intent = Intent("update-products")
-                    LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+                    val intentV = Intent("update-products")
+                    LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intentV)
                     dismiss()
                 }
             }
@@ -2671,8 +2681,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         override fun onResume() {
             super.onResume()
+            val intentFilter = IntentFilter()
+            intentFilter.addAction("dialog-dismiss")
             LocalBroadcastManager.getInstance(
-                requireActivity()).registerReceiver(broadcastReceiver, IntentFilter("dialog-dismiss"));
+                requireActivity()).registerReceiver(broadcastReceiver, intentFilter)
         }
 
         override fun onPause() {
@@ -2721,6 +2733,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apViewPager = view.findViewById(R.id.ap_viewpager)
             apFirstLayout = view.findViewById(R.id.ap_first_layout)
             apSecondLayout = view.findViewById(R.id.ap_second_layout)
+            apPreviousBtn = view.findViewById(R.id.ap_previous_btn)
+            apNextBtn = view.findViewById(R.id.ap_next_btn)
+            apBackArrowBtn = view.findViewById(R.id.ap_back_arrow)
+            apNextPreviousButtons = view.findViewById(R.id.ap_next_previous_buttons)
             val apAddDescriptionView =
                     view.findViewById<MaterialTextView>(R.id.ap_add_description_text_view)
             val apQuantityView = view.findViewById<TextInputEditText>(R.id.ap_quantity)
@@ -2754,14 +2770,44 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
 
             quickModeCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                 if (isChecked){
-                    apFirstLayout.visibility = View.GONE
-                    apSecondLayout.visibility = View.VISIBLE
+                    if (userCurrentCredits.toFloat() > 0){
+                        quickModeCheckBox.isChecked = true
+                        apFirstLayout.visibility = View.GONE
+                        apSecondLayout.visibility = View.VISIBLE
+                        apNextPreviousButtons.visibility = View.VISIBLE
+                    }
+                    else{
+                        quickModeCheckBox.isChecked = false
+                        MaterialAlertDialogBuilder(requireActivity())
+                            .setMessage(getString(R.string.low_credites_error_message))
+                            .setCancelable(false)
+                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                                dialog.dismiss()
+                                startActivity(
+                                    Intent(
+                                        requireActivity(),
+                                        UserScreenActivity::class.java
+                                    )
+                                )
+                            }
+                            .create().show()
+                    }
+
                 }
                 else{
                     apSecondLayout.visibility = View.GONE
+                    apNextPreviousButtons.visibility = View.GONE
                     apFirstLayout.visibility = View.VISIBLE
                 }
+            }
+
+            apBackArrowBtn.setOnClickListener {
+                dismiss()
             }
 
             val fragmentAdapter = ViewPagerAdapter(childFragmentManager)
@@ -2772,6 +2818,42 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             fragmentAdapter.addFragment(ApPriceInputFragment(), "ap_price_fr")
             fragmentAdapter.addFragment(ApImageUploadFragment(), "ap_image_fr")
             apViewPager.adapter = fragmentAdapter
+
+            apViewPager.addOnPageChangeListener(object :ViewPager.OnPageChangeListener{
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) {
+
+                }
+
+                override fun onPageSelected(position: Int) {
+                    if(position==0) {
+                        apPreviousBtn.visibility = View.INVISIBLE
+                    }else  {
+                        apPreviousBtn.visibility = View.VISIBLE
+                    }
+                    if(position < apViewPager.adapter!!.count -1 ) {
+                        apNextBtn.visibility = View.VISIBLE
+                    }else  {
+                        apNextBtn.visibility = View.INVISIBLE
+                    }
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {
+
+                }
+
+            })
+
+            apPreviousBtn.setOnClickListener {
+                apViewPager.setCurrentItem(apViewPager.currentItem -1, true)
+            }
+
+            apNextBtn.setOnClickListener {
+                apViewPager.setCurrentItem(apViewPager.currentItem +1, true)
+            }
 
 
             apTitleCameraRecView.setOnClickListener {
@@ -4285,11 +4367,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
         private fun getCategories(adapter: ArrayAdapter<Category>) {
-            BaseActivity.startLoading(requireActivity())
+
+//            BaseActivity.startLoading(requireActivity())
             viewModel.callCategories(requireActivity(), shopName, email, password)
             viewModel.getCategoriesResponse().observe(this, Observer { response ->
                 if (response != null) {
-                    BaseActivity.dismiss()
+//                    BaseActivity.dismiss()
                     if (response.get("status").asString == "200") {
                         val categories = response.get("categories").asJsonArray
                         if (categories.size() > 0) {
@@ -4309,10 +4392,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             }
                         }
                     } else {
-                        BaseActivity.dismiss()
+//                        BaseActivity.dismiss()
                     }
                 } else {
-                    BaseActivity.dismiss()
+//                    BaseActivity.dismiss()
                 }
             })
         }

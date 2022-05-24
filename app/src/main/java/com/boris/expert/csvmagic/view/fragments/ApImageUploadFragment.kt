@@ -204,8 +204,7 @@ class ApImageUploadFragment : Fragment() {
                                     .getValue(Int::class.java) as Int
                                 creditChargePrice = creditPrice.toFloat() / images
 
-                                userCurrentCredits =
-                                    appSettings.getString(Constants.userCreditsValue) as String
+                                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 
                                 if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
                                     BaseActivity.hideSoftKeyboard(
@@ -393,6 +392,7 @@ class ApImageUploadFragment : Fragment() {
                                                         Handler(Looper.myLooper()!!).postDelayed(
                                                             {
                                                                 BaseActivity.dismiss()
+                                                                creditCharged()
                                                                 val intent = Intent("dialog-dismiss")
                                                                 LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
                                                                 },
@@ -416,6 +416,7 @@ class ApImageUploadFragment : Fragment() {
                                 } else {
                                     Handler(Looper.myLooper()!!).postDelayed({
                                         BaseActivity.dismiss()
+                                        creditCharged()
                                         val intent = Intent("dialog-dismiss")
                                         LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
 
@@ -436,6 +437,26 @@ class ApImageUploadFragment : Fragment() {
             }
         }
 
+    }
+
+    private fun creditCharged(){
+        userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+        val firebaseDatabase = FirebaseDatabase.getInstance().reference
+        val hashMap = HashMap<String, Any>()
+        val remaining = userCurrentCredits.toFloat() - 0.1
+        userCurrentCredits = remaining.toString()
+        hashMap["credits"] = userCurrentCredits
+        firebaseDatabase.child(Constants.firebaseUserCredits)
+            .child(Constants.firebaseUserId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                BaseActivity.getUserCredits(
+                    requireActivity()
+                )
+            }
+            .addOnFailureListener {
+
+            }
     }
 
     private var cameraResultLauncher =

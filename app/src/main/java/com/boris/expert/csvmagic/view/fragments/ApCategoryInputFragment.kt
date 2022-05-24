@@ -54,7 +54,7 @@ class ApCategoryInputFragment : Fragment() {
     }
 
 
-    private fun initViews(view:View){
+    private fun initViews(view: View) {
         categoriesSpinner =
             view.findViewById(R.id.ap_cate_spinner)
 
@@ -75,7 +75,7 @@ class ApCategoryInputFragment : Fragment() {
             ) {
                 val selectedItem = originalCategoriesList[position]
                 selectedCategoryId = selectedItem.id
-                appSettings.putInt("AP_PRODUCT_CATEGORY",selectedCategoryId)
+                appSettings.putInt("AP_PRODUCT_CATEGORY", selectedCategoryId)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -83,7 +83,7 @@ class ApCategoryInputFragment : Fragment() {
             }
 
         }
-        if (originalCategoriesList.isEmpty()){
+        if (originalCategoriesList.isEmpty()) {
             getCategories(cateSpinnerAdapter)
         }
 
@@ -111,18 +111,40 @@ class ApCategoryInputFragment : Fragment() {
                         }
                         adapter.notifyDataSetChanged()
                         if (originalCategoriesList.size > 0) {
-                            selectedCategoryId = originalCategoriesList[0].id
-                            appSettings.putInt("AP_PRODUCT_CATEGORY",selectedCategoryId)
+                            setDefaultValue(originalCategoriesList)
                         }
                     }
-                }
-                else {
+                } else {
                     BaseActivity.dismiss()
                 }
-            }
-            else {
+            } else {
                 BaseActivity.dismiss()
             }
         })
+    }
+
+    private fun setDefaultValue(originalCategoriesList: MutableList<Category>) {
+       var itemFound = false
+       var foundItem : Category?=null
+       var foundItemPosition = 0
+        for (i in 0 until originalCategoriesList.size) {
+            val item = originalCategoriesList[i]
+            if (item.id == appSettings.getInt("AP_PRODUCT_CATEGORY")) {
+                foundItemPosition = i
+                foundItem = item
+                itemFound = true
+                break
+            }
+        }
+        if (itemFound){
+            categoriesSpinner.setSelection(foundItemPosition)
+            selectedCategoryId = foundItem!!.id
+            appSettings.putInt("AP_PRODUCT_CATEGORY", selectedCategoryId)
+        }
+        else{
+            categoriesSpinner.setSelection(0)
+            selectedCategoryId = originalCategoriesList[0].id
+            appSettings.putInt("AP_PRODUCT_CATEGORY", selectedCategoryId)
+        }
     }
 }

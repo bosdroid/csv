@@ -27,13 +27,22 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_back_arrow"
+                    app:tint="@color/black"
+                    android:id="@+id/ap_back_arrow"
+                    />
+
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/add_product_text"
+                    android:layout_marginLeft="@dimen/eightDpMargin"
                     android:textColor="@color/black"
-                    android:textSize="@dimen/xxlargeText" />
+                    android:textSize="@dimen/xlargeText" />
 
                 <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/ap_quick_product_mode"
@@ -721,9 +730,10 @@
 
         </LinearLayout>
 
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -733,14 +743,47 @@
             android:id="@+id/ap_second_layout"
             android:visibility="gone"
             >
-            <androidx.viewpager.widget.ViewPager
+
+            <com.boris.expert.csvmagic.utils.MyViewPager
                 android:id="@+id/ap_viewpager"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 />
 
         </LinearLayout>
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/ap_next_previous_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ap_second_layout"
+            android:visibility="gone"
+            >
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Previous"
+                android:textSize="@dimen/largeText"
+                android:textColor="@color/primary_positive_color"
+                android:id="@+id/ap_previous_btn"
+                android:layout_margin="@dimen/eightDpMargin"
+                android:visibility="invisible"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Next"
+                android:gravity="end"
+                android:textSize="@dimen/largeText"
+                android:textColor="@color/primary_positive_color"
+                android:id="@+id/ap_next_btn"
+                android:layout_margin="@dimen/eightDpMargin"
+                />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
