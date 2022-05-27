@@ -41,6 +41,7 @@ import java.io.IOException
 
 class ApTitleInputFragment : Fragment() {
 
+    private lateinit var apTitleListSpinner: AppCompatSpinner
     private lateinit var appSettings: AppSettings
     private lateinit var apTitleView: TextInputEditText
     private lateinit var tableGenerator: TableGenerator
@@ -71,7 +72,9 @@ class ApTitleInputFragment : Fragment() {
         val apTitleListBtn = view.findViewById<MaterialButton>(R.id.ap_title_list_with_fields_btn)
         val apTitleDefaultInputBox =
             view.findViewById<TextInputEditText>(R.id.ap_title_non_changeable_default_text_input)
-        val apTitleListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_list_spinner)
+        val apTitleDefaultValueMessage =
+            view.findViewById<MaterialTextView>(R.id.ap_title_default_value_message)
+        apTitleListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_list_spinner)
 
         val apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
         val apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
@@ -108,6 +111,7 @@ class ApTitleInputFragment : Fragment() {
             }
         }
         apTitleImageRecView.setOnClickListener {
+            Constants.hint = "ap_title"
             if (RuntimePermissionHelper.checkCameraPermission(
                     requireActivity(),
                     Constants.READ_STORAGE_PERMISSION
@@ -132,87 +136,104 @@ class ApTitleInputFragment : Fragment() {
             openListWithFieldsDialog("ap_title")
         }
 
-        if (apTitleSpinnerSelectedPosition == 1) {
-            apTitleVoiceRecView.visibility = View.GONE
-            apTitleCameraRecView.visibility = View.GONE
-            apTitleImageRecView.visibility = View.GONE
-            apTitleListBtn.visibility = View.GONE
-            apTitleListSpinner.visibility = View.GONE
-            apTitleDefaultInputBox.visibility = View.VISIBLE
-            apTitleView.visibility = View.VISIBLE
-            apTitleDefaultInputBox.setText(apTitleDefaultValue)
-            apTitleView.setText(apTitleDefaultValue)
-        } else if (apTitleSpinnerSelectedPosition == 2) {
-            apTitleVoiceRecView.visibility = View.GONE
-            apTitleCameraRecView.visibility = View.GONE
-            apTitleImageRecView.visibility = View.GONE
-            apTitleDefaultInputBox.visibility = View.GONE
-            apTitleListBtn.visibility = View.VISIBLE
-            apTitleView.visibility = View.GONE
-            apTitleListSpinner.visibility = View.VISIBLE
-            val listOptions: String = tableGenerator.getListValues(apTitleListId)
-            val listValues = listOptions.split(",")
-            if (listValues.isNotEmpty()){
-                appSettings.putString("AP_PRODUCT_TITLE",listValues[0])
+        when (apTitleSpinnerSelectedPosition) {
+            1 -> {
+                BaseActivity.showSoftKeyboard(requireActivity(),apTitleDefaultInputBox)
+                apTitleVoiceRecView.visibility = View.GONE
+                apTitleCameraRecView.visibility = View.GONE
+                apTitleImageRecView.visibility = View.GONE
+                apTitleListBtn.visibility = View.GONE
+                apTitleListSpinner.visibility = View.GONE
+                apTitleDefaultInputBox.visibility = View.VISIBLE
+                apTitleDefaultValueMessage.visibility = View.VISIBLE
+                apTitleView.visibility = View.VISIBLE
+                apTitleDefaultInputBox.setText(apTitleDefaultValue)
+                apTitleView.setText(apTitleDefaultValue)
+
             }
-            val apTitleSpinnerAdapter = ArrayAdapter(
-                requireActivity(),
-                android.R.layout.simple_spinner_item,
-                listValues
-            )
-            apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            apTitleListSpinner.adapter = apTitleSpinnerAdapter
-
-            apTitleListSpinner.onItemSelectedListener =
-                object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        appSettings.putString("AP_PRODUCT_TITLE",parent!!.selectedItem.toString())
-
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                    }
-
+            2 -> {
+                apTitleVoiceRecView.visibility = View.GONE
+                apTitleCameraRecView.visibility = View.GONE
+                apTitleImageRecView.visibility = View.GONE
+                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultValueMessage.visibility = View.GONE
+                apTitleListBtn.visibility = View.VISIBLE
+                apTitleView.visibility = View.GONE
+                apTitleListSpinner.visibility = View.VISIBLE
+                val listOptions: String = tableGenerator.getListValues(apTitleListId)
+                val listValues = listOptions.split(",")
+                if (listValues.isNotEmpty()){
+                    appSettings.putString("AP_PRODUCT_TITLE",listValues[0])
                 }
+                val apTitleSpinnerAdapter = ArrayAdapter(
+                    requireActivity(),
+                    android.R.layout.simple_spinner_item,
+                    listValues
+                )
+                apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                apTitleListSpinner.adapter = apTitleSpinnerAdapter
 
-        } else if (apTitleSpinnerSelectedPosition == 3) {
-            apTitleListBtn.visibility = View.GONE
-            apTitleListSpinner.visibility = View.GONE
-            apTitleDefaultInputBox.visibility = View.GONE
-            apTitleCameraRecView.visibility = View.GONE
-            apTitleImageRecView.visibility = View.GONE
-            apTitleView.visibility = View.VISIBLE
-            apTitleVoiceRecView.visibility = View.VISIBLE
-        } else if (apTitleSpinnerSelectedPosition == 4) {
-            apTitleListBtn.visibility = View.GONE
-            apTitleListSpinner.visibility = View.GONE
-            apTitleDefaultInputBox.visibility = View.GONE
-            apTitleVoiceRecView.visibility = View.GONE
-            apTitleImageRecView.visibility = View.GONE
-            apTitleView.visibility = View.VISIBLE
-            apTitleCameraRecView.visibility = View.VISIBLE
-        } else if (apTitleSpinnerSelectedPosition == 5) {
-            apTitleListBtn.visibility = View.GONE
-            apTitleListSpinner.visibility = View.GONE
-            apTitleDefaultInputBox.visibility = View.GONE
-            apTitleVoiceRecView.visibility = View.GONE
-            apTitleCameraRecView.visibility = View.GONE
-            apTitleView.visibility = View.VISIBLE
-            apTitleImageRecView.visibility = View.VISIBLE
-        } else {
-            apTitleVoiceRecView.visibility = View.GONE
-            apTitleCameraRecView.visibility = View.GONE
-            apTitleImageRecView.visibility = View.GONE
-            apTitleListBtn.visibility = View.GONE
-            apTitleDefaultInputBox.visibility = View.GONE
-            apTitleListSpinner.visibility = View.GONE
-            apTitleView.visibility = View.VISIBLE
+                apTitleListSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            appSettings.putString("AP_PRODUCT_TITLE",parent!!.selectedItem.toString())
+
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
+
+                    }
+
+            }
+            3 -> {
+                apTitleListBtn.visibility = View.GONE
+                apTitleListSpinner.visibility = View.GONE
+                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultValueMessage.visibility = View.GONE
+                apTitleCameraRecView.visibility = View.GONE
+                apTitleImageRecView.visibility = View.GONE
+                apTitleView.visibility = View.VISIBLE
+                apTitleVoiceRecView.visibility = View.VISIBLE
+            }
+            4 -> {
+                apTitleListBtn.visibility = View.GONE
+                apTitleListSpinner.visibility = View.GONE
+                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultValueMessage.visibility = View.GONE
+                apTitleVoiceRecView.visibility = View.GONE
+                apTitleImageRecView.visibility = View.GONE
+                apTitleView.visibility = View.VISIBLE
+                apTitleCameraRecView.visibility = View.VISIBLE
+            }
+            5 -> {
+                apTitleListBtn.visibility = View.GONE
+                apTitleListSpinner.visibility = View.GONE
+                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultValueMessage.visibility = View.GONE
+                apTitleVoiceRecView.visibility = View.GONE
+                apTitleCameraRecView.visibility = View.GONE
+                apTitleView.visibility = View.VISIBLE
+                apTitleImageRecView.visibility = View.VISIBLE
+            }
+            else -> {
+                BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+                apTitleVoiceRecView.visibility = View.GONE
+                apTitleCameraRecView.visibility = View.GONE
+                apTitleImageRecView.visibility = View.GONE
+                apTitleListBtn.visibility = View.GONE
+                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultValueMessage.visibility = View.GONE
+                apTitleListSpinner.visibility = View.GONE
+                apTitleView.visibility = View.VISIBLE
+
+            }
         }
 
         apTitleDefaultInputBox.addTextChangedListener(object : TextWatcher {
@@ -226,12 +247,12 @@ class ApTitleInputFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+                appSettings.putString("AP_TITLE_DEFAULT_VALUE", s.toString())
+                appSettings.putString("AP_PRODUCT_TITLE",s.toString())
             }
 
             override fun afterTextChanged(s: Editable?) {
-                appSettings.putString("AP_TITLE_DEFAULT_VALUE", s.toString())
-                appSettings.putString("AP_PRODUCT_TITLE",s.toString())
+
             }
 
         })
@@ -244,86 +265,103 @@ class ApTitleInputFragment : Fragment() {
                 id: Long
             ) {
                 appSettings.putInt("AP_TITLE_SPINNER_SELECTED_POSITION", position)
-                if (position == 1) {
-                    apTitleVoiceRecView.visibility = View.GONE
-                    apTitleCameraRecView.visibility = View.GONE
-                    apTitleImageRecView.visibility = View.GONE
-                    apTitleListBtn.visibility = View.GONE
-                    apTitleListSpinner.visibility = View.GONE
-                    apTitleDefaultInputBox.visibility = View.VISIBLE
-                    apTitleView.visibility = View.VISIBLE
-                    apTitleDefaultInputBox.setText(apTitleDefaultValue)
-                    apTitleView.setText(apTitleDefaultValue)
-                } else if (position == 2) {
-                    apTitleVoiceRecView.visibility = View.GONE
-                    apTitleCameraRecView.visibility = View.GONE
-                    apTitleImageRecView.visibility = View.GONE
-                    apTitleDefaultInputBox.visibility = View.GONE
-                    apTitleListBtn.visibility = View.VISIBLE
-                    apTitleView.visibility = View.GONE
-                    apTitleListSpinner.visibility = View.VISIBLE
-                    val listOptions: String = tableGenerator.getListValues(apTitleListId)
-                    val listValues = listOptions.split(",")
-                    if (listValues.isNotEmpty()){
-                        appSettings.putString("AP_PRODUCT_TITLE",listValues[0])
+                when (position) {
+                    1 -> {
+                        BaseActivity.showSoftKeyboard(requireActivity(),apTitleDefaultInputBox)
+                        apTitleVoiceRecView.visibility = View.GONE
+                        apTitleCameraRecView.visibility = View.GONE
+                        apTitleImageRecView.visibility = View.GONE
+                        apTitleListBtn.visibility = View.GONE
+                        apTitleListSpinner.visibility = View.GONE
+                        apTitleDefaultInputBox.visibility = View.VISIBLE
+                        apTitleDefaultValueMessage.visibility = View.VISIBLE
+                        apTitleView.visibility = View.VISIBLE
+                        apTitleDefaultInputBox.setText(apTitleDefaultValue)
+                        apTitleView.setText(apTitleDefaultValue)
+
                     }
-                    val apTitleSpinnerAdapter = ArrayAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_item,
-                        listValues
-                    )
-                    apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    apTitleListSpinner.adapter = apTitleSpinnerAdapter
-
-                    apTitleListSpinner.onItemSelectedListener =
-                        object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                            ) {
-                                appSettings.putString("AP_PRODUCT_TITLE",parent!!.selectedItem.toString())
-                            }
-
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
-
+                    2 -> {
+                        apTitleVoiceRecView.visibility = View.GONE
+                        apTitleCameraRecView.visibility = View.GONE
+                        apTitleImageRecView.visibility = View.GONE
+                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultValueMessage.visibility = View.GONE
+                        apTitleListBtn.visibility = View.VISIBLE
+                        apTitleView.visibility = View.GONE
+                        apTitleListSpinner.visibility = View.VISIBLE
+                        val listOptions: String = tableGenerator.getListValues(apTitleListId)
+                        val listValues = listOptions.split(",")
+                        if (listValues.isNotEmpty()){
+                            appSettings.putString("AP_PRODUCT_TITLE",listValues[0])
                         }
+                        val apTitleSpinnerAdapter = ArrayAdapter(
+                            requireActivity(),
+                            android.R.layout.simple_spinner_item,
+                            listValues
+                        )
+                        apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        apTitleListSpinner.adapter = apTitleSpinnerAdapter
 
-                } else if (position == 3) {
-                    apTitleListBtn.visibility = View.GONE
-                    apTitleListSpinner.visibility = View.GONE
-                    apTitleDefaultInputBox.visibility = View.GONE
-                    apTitleCameraRecView.visibility = View.GONE
-                    apTitleImageRecView.visibility = View.GONE
-                    apTitleView.visibility = View.VISIBLE
-                    apTitleVoiceRecView.visibility = View.VISIBLE
-                } else if (position == 4) {
-                    apTitleListBtn.visibility = View.GONE
-                    apTitleListSpinner.visibility = View.GONE
-                    apTitleDefaultInputBox.visibility = View.GONE
-                    apTitleVoiceRecView.visibility = View.GONE
-                    apTitleImageRecView.visibility = View.GONE
-                    apTitleView.visibility = View.VISIBLE
-                    apTitleCameraRecView.visibility = View.VISIBLE
-                } else if (position == 5) {
-                    apTitleListBtn.visibility = View.GONE
-                    apTitleListSpinner.visibility = View.GONE
-                    apTitleDefaultInputBox.visibility = View.GONE
-                    apTitleVoiceRecView.visibility = View.GONE
-                    apTitleCameraRecView.visibility = View.GONE
-                    apTitleView.visibility = View.VISIBLE
-                    apTitleImageRecView.visibility = View.VISIBLE
-                } else {
-                    apTitleVoiceRecView.visibility = View.GONE
-                    apTitleCameraRecView.visibility = View.GONE
-                    apTitleImageRecView.visibility = View.GONE
-                    apTitleListBtn.visibility = View.GONE
-                    apTitleDefaultInputBox.visibility = View.GONE
-                    apTitleListSpinner.visibility = View.GONE
-                    apTitleView.visibility = View.VISIBLE
+                        apTitleListSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    appSettings.putString("AP_PRODUCT_TITLE",parent!!.selectedItem.toString())
+                                }
+
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                }
+
+                            }
+
+                    }
+                    3 -> {
+                        apTitleListBtn.visibility = View.GONE
+                        apTitleListSpinner.visibility = View.GONE
+                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultValueMessage.visibility = View.GONE
+                        apTitleCameraRecView.visibility = View.GONE
+                        apTitleImageRecView.visibility = View.GONE
+                        apTitleView.visibility = View.VISIBLE
+                        apTitleVoiceRecView.visibility = View.VISIBLE
+                    }
+                    4 -> {
+                        apTitleListBtn.visibility = View.GONE
+                        apTitleListSpinner.visibility = View.GONE
+                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultValueMessage.visibility = View.GONE
+                        apTitleVoiceRecView.visibility = View.GONE
+                        apTitleImageRecView.visibility = View.GONE
+                        apTitleView.visibility = View.VISIBLE
+                        apTitleCameraRecView.visibility = View.VISIBLE
+                    }
+                    5 -> {
+                        apTitleListBtn.visibility = View.GONE
+                        apTitleListSpinner.visibility = View.GONE
+                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultValueMessage.visibility = View.GONE
+                        apTitleVoiceRecView.visibility = View.GONE
+                        apTitleCameraRecView.visibility = View.GONE
+                        apTitleView.visibility = View.VISIBLE
+                        apTitleImageRecView.visibility = View.VISIBLE
+                    }
+                    else -> {
+                        BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+                        apTitleVoiceRecView.visibility = View.GONE
+                        apTitleCameraRecView.visibility = View.GONE
+                        apTitleImageRecView.visibility = View.GONE
+                        apTitleListBtn.visibility = View.GONE
+                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultValueMessage.visibility = View.GONE
+                        apTitleListSpinner.visibility = View.GONE
+                        apTitleView.visibility = View.VISIBLE
+
+                    }
                 }
             }
 
@@ -374,7 +412,36 @@ class ApTitleInputFragment : Fragment() {
                 if (list.isNotEmpty()) {
                     //selectedListTextView.text = listValue.value
                         appSettings.putInt("AP_TITLE_LIST_ID", listId!!)
-                        appSettings.putString("AP_PRODUCT_TITLE",list.split(",")[0])
+                    val listOptions: String = tableGenerator.getListValues(listId!!)
+                    val listValues = listOptions.split(",")
+                    if (listValues.isNotEmpty()){
+                        appSettings.putString("AP_PRODUCT_TITLE",listValues[0])
+                    }
+                    val apTitleSpinnerAdapter = ArrayAdapter(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_item,
+                        listValues
+                    )
+                    apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    apTitleListSpinner.adapter = apTitleSpinnerAdapter
+
+                    apTitleListSpinner.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                appSettings.putString("AP_PRODUCT_TITLE",parent!!.selectedItem.toString())
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
+
+                        }
+                        //appSettings.putString("AP_PRODUCT_TITLE",list.split(",")[0])
                     alert.dismiss()
                 } else {
                     MaterialAlertDialogBuilder(requireActivity())
@@ -477,7 +544,7 @@ class ApTitleInputFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
+        if (Constants.hint == "ap_title" && requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
             val result = CropImage.getActivityResult(data)
             val imgUri = result.uri
             try {
@@ -485,6 +552,7 @@ class ApTitleInputFragment : Fragment() {
                 Handler(Looper.myLooper()!!).postDelayed({
                     appSettings.putString("AP_PRODUCT_TITLE",apTitleView.text.toString().trim())
                 },2000)
+                Constants.hint = "default"
             } catch (e: IOException) {
                 e.printStackTrace()
             }

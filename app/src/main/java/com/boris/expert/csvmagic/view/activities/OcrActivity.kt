@@ -25,6 +25,7 @@ class OcrActivity : BaseActivity() {
     private lateinit var scanner: Scanner
     private lateinit var surfaceView: SurfaceView
     private lateinit var textCaptureButton:MaterialButton
+    private lateinit var closeButton:MaterialButton
     private var extractText = ""
     private var capturedBitmap:Bitmap?=null
 
@@ -36,6 +37,7 @@ class OcrActivity : BaseActivity() {
 
         surfaceView = findViewById(R.id.surface)
         textCaptureButton = findViewById(R.id.text_capture_button)
+        closeButton = findViewById(R.id.close_button)
         scanner = Scanner(this, surfaceView, object : ScannerListener {
             override fun onDetected(detections: String) {
                 extractText = detections
@@ -55,6 +57,9 @@ class OcrActivity : BaseActivity() {
             finish()
         }
 
+        closeButton.setOnClickListener {
+            finish()
+        }
 
     }
 

@@ -556,6 +556,7 @@
     <string name="set_product_quantity">Set the product quantity</string>
     <string name="set_product_price">Set the product price</string>
     <string name="attach_product_image">Attach the product image</string>
+    <string name="default_value_message">This value will not change after create a product</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

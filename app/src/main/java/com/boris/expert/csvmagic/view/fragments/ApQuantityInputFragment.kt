@@ -34,6 +34,7 @@ class ApQuantityInputFragment : Fragment() {
     private lateinit var tableGenerator: TableGenerator
     private var listId: Int? = null
     private lateinit var adapter: FieldListsAdapter
+    private lateinit var apQuantityListSpinner:AppCompatSpinner
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -58,7 +59,9 @@ class ApQuantityInputFragment : Fragment() {
         val apQuantitySpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_options_spinner)
         val apQuantityListBtn = view.findViewById<MaterialButton>(R.id.ap_quantity_list_with_fields_btn)
         val apQuantityDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_quantity_non_changeable_default_text_input)
-        val apQuantityListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
+        val apQuantityDefaultValueMessage =
+            view.findViewById<MaterialTextView>(R.id.ap_quantity_default_value_message)
+        apQuantityListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
 
         val apQuantitySpinnerSelectedPosition = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
         val apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
@@ -67,51 +70,60 @@ class ApQuantityInputFragment : Fragment() {
         apQuantityListBtn.setOnClickListener {
             openListWithFieldsDialog("ap_quantity")
         }
-        if (apQuantitySpinnerSelectedPosition == 1) {
-            apQuantityListSpinner.visibility = View.GONE
-            apQuantityListBtn.visibility = View.GONE
-            apQuantityDefaultInputBox.visibility = View.VISIBLE
-            apQuantityView.visibility = View.VISIBLE
-            apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-            apQuantityView.setText(apQuantityDefaultValue)
-        } else if (apQuantitySpinnerSelectedPosition == 2) {
-            apQuantityDefaultInputBox.visibility = View.GONE
-            apQuantityListBtn.visibility = View.VISIBLE
-            apQuantityView.visibility = View.GONE
-            apQuantityListSpinner.visibility = View.VISIBLE
-            val listOptions: String = tableGenerator.getListValues(apQuantityListId)
-            val listValues = listOptions.split(",")
-            if (listValues.isNotEmpty()){
-                appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
+        when (apQuantitySpinnerSelectedPosition) {
+            1 -> {
+                apQuantityListSpinner.visibility = View.GONE
+                apQuantityListBtn.visibility = View.GONE
+                apQuantityDefaultInputBox.visibility = View.VISIBLE
+                apQuantityDefaultValueMessage.visibility = View.VISIBLE
+                apQuantityView.visibility = View.VISIBLE
+                apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                apQuantityView.setText(apQuantityDefaultValue)
+                BaseActivity.showSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
             }
-            val apQuantitySpinnerAdapter = ArrayAdapter(
-                requireActivity(),
-                android.R.layout.simple_spinner_item,
-                listValues
-            )
-            apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
-
-            apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    appSettings.putString("AP_PRODUCT_QUANTITY",parent!!.selectedItem.toString())
+            2 -> {
+                apQuantityDefaultValueMessage.visibility = View.GONE
+                apQuantityDefaultInputBox.visibility = View.GONE
+                apQuantityListBtn.visibility = View.VISIBLE
+                apQuantityView.visibility = View.GONE
+                apQuantityListSpinner.visibility = View.VISIBLE
+                val listOptions: String = tableGenerator.getListValues(apQuantityListId)
+                val listValues = listOptions.split(",")
+                if (listValues.isNotEmpty()){
+                    appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
                 }
+                val apQuantitySpinnerAdapter = ArrayAdapter(
+                    requireActivity(),
+                    android.R.layout.simple_spinner_item,
+                    listValues
+                )
+                apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {
+                apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        appSettings.putString("AP_PRODUCT_QUANTITY",parent!!.selectedItem.toString())
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
 
                 }
-
             }
-        } else {
-            apQuantityView.visibility = View.VISIBLE
-            apQuantityListBtn.visibility = View.GONE
-            apQuantityDefaultInputBox.visibility = View.GONE
-            apQuantityListSpinner.visibility = View.GONE
+            else -> {
+                apQuantityView.visibility = View.VISIBLE
+                apQuantityListBtn.visibility = View.GONE
+                apQuantityDefaultInputBox.visibility = View.GONE
+                apQuantityDefaultValueMessage.visibility = View.GONE
+                apQuantityListSpinner.visibility = View.GONE
+                BaseActivity.showSoftKeyboard(requireActivity(),apQuantityView)
+            }
         }
 
         apQuantityDefaultInputBox.addTextChangedListener(object : TextWatcher {
@@ -125,12 +137,12 @@ class ApQuantityInputFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+                appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
+                appSettings.putString("AP_PRODUCT_QUANTITY",s.toString())
             }
 
             override fun afterTextChanged(s: Editable?) {
-                appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
-                appSettings.putString("AP_PRODUCT_QUANTITY",s.toString())
+
             }
 
         })
@@ -143,51 +155,60 @@ class ApQuantityInputFragment : Fragment() {
                 id: Long
             ) {
                 appSettings.putInt("AP_QUANTITY_SPINNER_SELECTED_POSITION", position)
-                if (position == 1) {
-                    apQuantityListSpinner.visibility = View.GONE
-                    apQuantityListBtn.visibility = View.GONE
-                    apQuantityDefaultInputBox.visibility = View.VISIBLE
-                    apQuantityView.visibility = View.VISIBLE
-                    apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                    apQuantityView.setText(apQuantityDefaultValue)
-                } else if (position == 2) {
-                    apQuantityDefaultInputBox.visibility = View.GONE
-                    apQuantityListBtn.visibility = View.VISIBLE
-                    apQuantityView.visibility = View.GONE
-                    apQuantityListSpinner.visibility = View.VISIBLE
-                    val listOptions: String = tableGenerator.getListValues(apQuantityListId)
-                    val listValues = listOptions.split(",")
-                    if (listValues.isNotEmpty()){
-                        appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
+                when (position) {
+                    1 -> {
+                        apQuantityListSpinner.visibility = View.GONE
+                        apQuantityListBtn.visibility = View.GONE
+                        apQuantityDefaultInputBox.visibility = View.VISIBLE
+                        apQuantityDefaultValueMessage.visibility = View.VISIBLE
+                        apQuantityView.visibility = View.VISIBLE
+                        apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                        apQuantityView.setText(apQuantityDefaultValue)
+                        BaseActivity.showSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
                     }
-                    val apQuantitySpinnerAdapter = ArrayAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_item,
-                        listValues
-                    )
-                    apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
+                    2 -> {
+                        apQuantityDefaultValueMessage.visibility = View.GONE
+                        apQuantityDefaultInputBox.visibility = View.GONE
+                        apQuantityListBtn.visibility = View.VISIBLE
+                        apQuantityView.visibility = View.GONE
+                        apQuantityListSpinner.visibility = View.VISIBLE
+                        val listOptions: String = tableGenerator.getListValues(apQuantityListId)
+                        val listValues = listOptions.split(",")
+                        if (listValues.isNotEmpty()){
+                            appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
+                        }
+                        val apQuantitySpinnerAdapter = ArrayAdapter(
+                            requireActivity(),
+                            android.R.layout.simple_spinner_item,
+                            listValues
+                        )
+                        apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
 
-                    apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                            parent: AdapterView<*>?,
-                            view: View?,
-                            position: Int,
-                            id: Long
-                        ) {
+                        apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
 
                         }
-
-                        override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                        }
-
                     }
-                } else {
-                    apQuantityView.visibility = View.VISIBLE
-                    apQuantityListBtn.visibility = View.GONE
-                    apQuantityDefaultInputBox.visibility = View.GONE
-                    apQuantityListSpinner.visibility = View.GONE
+                    else -> {
+                        apQuantityView.visibility = View.VISIBLE
+                        apQuantityListBtn.visibility = View.GONE
+                        apQuantityDefaultInputBox.visibility = View.GONE
+                        apQuantityDefaultValueMessage.visibility = View.GONE
+                        apQuantityListSpinner.visibility = View.GONE
+                        BaseActivity.showSoftKeyboard(requireActivity(),apQuantityView)
+                    }
                 }
             }
 
@@ -238,7 +259,35 @@ class ApQuantityInputFragment : Fragment() {
                 if (list.isNotEmpty()) {
                     //selectedListTextView.text = listValue.value
                     appSettings.putInt("AP_QUANTITY_LIST_ID", listId!!)
-                    appSettings.putString("AP_PRODUCT_QUANTITY",list.split(",")[0])
+                    //appSettings.putString("AP_PRODUCT_QUANTITY",list.split(",")[0])
+                    val listOptions: String = tableGenerator.getListValues(listId!!)
+                    val listValues = listOptions.split(",")
+                    if (listValues.isNotEmpty()){
+                        appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
+                    }
+                    val apQuantitySpinnerAdapter = ArrayAdapter(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_item,
+                        listValues
+                    )
+                    apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
+
+                    apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            appSettings.putString("AP_PRODUCT_QUANTITY",parent!!.selectedItem.toString())
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
+
+                    }
                     alert.dismiss()
                 } else {
                     MaterialAlertDialogBuilder(requireActivity())

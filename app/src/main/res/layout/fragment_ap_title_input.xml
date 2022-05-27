@@ -19,7 +19,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="350dp"
         android:layout_margin="@dimen/eightDpMargin"
         app:cardCornerRadius="15dp"
         app:cardElevation="5dp"
@@ -28,9 +28,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="350dp"
             android:layout_margin="@dimen/eightDpMargin"
-            android:layout_gravity="center"
+            android:gravity="bottom"
+            android:paddingBottom="10dp"
             android:orientation="vertical">
 
             <com.google.android.material.textview.MaterialTextView
@@ -54,7 +55,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ap_title"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/radius_text_input_field"
                 android:hint="@string/title_text"
                 android:inputType="textMultiLine" />
@@ -63,6 +64,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/eightDpMargin"
+                android:layout_marginBottom="@dimen/eightDpMargin"
                 android:background="@drawable/border"
                 android:orientation="vertical">
 
@@ -117,16 +119,27 @@
             android:visibility="gone"
             app:backgroundTint="@color/primary_positive_color" />
 
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/default_value_message"
+            android:layout_marginTop="@dimen/eightDpMargin"
+            android:textColor="@color/primary_positive_color"
+            android:layout_gravity="start"
+            android:id="@+id/ap_title_default_value_message"
+            android:visibility="gone"
+            />
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/ap_title_non_changeable_default_text_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/eightDpMargin"
             android:background="@drawable/radius_text_input_field"
             android:hint="@string/set_the_default_value"
             android:imeOptions="actionDone"
             android:inputType="text"
-            android:visibility="gone" />
+            android:visibility="gone"
+             />
 
 
         <LinearLayout

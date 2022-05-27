@@ -34,6 +34,7 @@ class ApPriceInputFragment : Fragment() {
     private lateinit var tableGenerator: TableGenerator
     private var listId: Int? = null
     private lateinit var adapter: FieldListsAdapter
+    private lateinit var apPriceListSpinner:AppCompatSpinner
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -58,7 +59,9 @@ class ApPriceInputFragment : Fragment() {
         val apPriceSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_options_spinner)
         val apPriceListBtn = view.findViewById<MaterialButton>(R.id.ap_price_list_with_fields_btn)
         val apPriceDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_price_non_changeable_default_text_input)
-        val apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
+        val apPriceDefaultValueMessage =
+            view.findViewById<MaterialTextView>(R.id.ap_price_default_value_message)
+        apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
 
         val apPriceSpinnerSelectedPosition = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
         val apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
@@ -67,51 +70,60 @@ class ApPriceInputFragment : Fragment() {
         apPriceListBtn.setOnClickListener {
             openListWithFieldsDialog("ap_price")
         }
-        if (apPriceSpinnerSelectedPosition == 1) {
-            apPriceListSpinner.visibility = View.GONE
-            apPriceListBtn.visibility = View.GONE
-            apPriceDefaultInputBox.visibility = View.VISIBLE
-            apPriceView.visibility = View.VISIBLE
-            apPriceDefaultInputBox.setText(apPriceDefaultValue)
-            apPriceView.setText(apPriceDefaultValue)
-        } else if (apPriceSpinnerSelectedPosition == 2) {
-            apPriceDefaultInputBox.visibility = View.GONE
-            apPriceListBtn.visibility = View.VISIBLE
-            apPriceView.visibility = View.GONE
-            apPriceListSpinner.visibility = View.VISIBLE
-            val listOptions: String = tableGenerator.getListValues(apPriceListId)
-            val listValues = listOptions.split(",")
-            if (listValues.isNotEmpty()){
-                appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
+        when (apPriceSpinnerSelectedPosition) {
+            1 -> {
+                apPriceListSpinner.visibility = View.GONE
+                apPriceListBtn.visibility = View.GONE
+                apPriceDefaultInputBox.visibility = View.VISIBLE
+                apPriceDefaultValueMessage.visibility = View.VISIBLE
+                apPriceView.visibility = View.VISIBLE
+                apPriceDefaultInputBox.setText(apPriceDefaultValue)
+                apPriceView.setText(apPriceDefaultValue)
+                BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
             }
-            val apPriceSpinnerAdapter = ArrayAdapter(
-                requireActivity(),
-                android.R.layout.simple_spinner_item,
-                listValues
-            )
-            apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            apPriceListSpinner.adapter = apPriceSpinnerAdapter
-
-            apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    appSettings.putString("AP_PRODUCT_PRICE",parent!!.selectedItem.toString())
+            2 -> {
+                apPriceDefaultInputBox.visibility = View.GONE
+                apPriceDefaultValueMessage.visibility = View.GONE
+                apPriceListBtn.visibility = View.VISIBLE
+                apPriceView.visibility = View.GONE
+                apPriceListSpinner.visibility = View.VISIBLE
+                val listOptions: String = tableGenerator.getListValues(apPriceListId)
+                val listValues = listOptions.split(",")
+                if (listValues.isNotEmpty()){
+                    appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
                 }
+                val apPriceSpinnerAdapter = ArrayAdapter(
+                    requireActivity(),
+                    android.R.layout.simple_spinner_item,
+                    listValues
+                )
+                apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                apPriceListSpinner.adapter = apPriceSpinnerAdapter
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {
+                apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        appSettings.putString("AP_PRODUCT_PRICE",parent!!.selectedItem.toString())
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
 
                 }
-
             }
-        } else {
-            apPriceView.visibility = View.VISIBLE
-            apPriceListBtn.visibility = View.GONE
-            apPriceDefaultInputBox.visibility = View.GONE
-            apPriceListSpinner.visibility = View.GONE
+            else -> {
+                apPriceView.visibility = View.VISIBLE
+                apPriceListBtn.visibility = View.GONE
+                apPriceDefaultInputBox.visibility = View.GONE
+                apPriceDefaultValueMessage.visibility = View.VISIBLE
+                apPriceListSpinner.visibility = View.GONE
+                BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
+            }
         }
 
         apPriceDefaultInputBox.addTextChangedListener(object : TextWatcher {
@@ -125,12 +137,12 @@ class ApPriceInputFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
+                appSettings.putString("AP_PRICE_DEFAULT_VALUE", s.toString())
+                appSettings.putString("AP_PRODUCT_PRICE",s.toString())
             }
 
             override fun afterTextChanged(s: Editable?) {
-                appSettings.putString("AP_PRICE_DEFAULT_VALUE", s.toString())
-                appSettings.putString("AP_PRODUCT_PRICE",s.toString())
+
             }
 
         })
@@ -143,51 +155,60 @@ class ApPriceInputFragment : Fragment() {
                 id: Long
             ) {
                 appSettings.putInt("AP_PRICE_SPINNER_SELECTED_POSITION", position)
-                if (position == 1) {
-                    apPriceListSpinner.visibility = View.GONE
-                    apPriceListBtn.visibility = View.GONE
-                    apPriceDefaultInputBox.visibility = View.VISIBLE
-                    apPriceView.visibility = View.VISIBLE
-                    apPriceDefaultInputBox.setText(apPriceDefaultValue)
-                    apPriceView.setText(apPriceDefaultValue)
-                } else if (position == 2) {
-                    apPriceDefaultInputBox.visibility = View.GONE
-                    apPriceListBtn.visibility = View.VISIBLE
-                    apPriceView.visibility = View.GONE
-                    apPriceListSpinner.visibility = View.VISIBLE
-                    val listOptions: String = tableGenerator.getListValues(apPriceListId)
-                    val listValues = listOptions.split(",")
-                    if (listValues.isNotEmpty()){
-                        appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
+                when (position) {
+                    1 -> {
+                        apPriceListSpinner.visibility = View.GONE
+                        apPriceListBtn.visibility = View.GONE
+                        apPriceDefaultInputBox.visibility = View.VISIBLE
+                        apPriceDefaultValueMessage.visibility = View.VISIBLE
+                        apPriceView.visibility = View.VISIBLE
+                        apPriceDefaultInputBox.setText(apPriceDefaultValue)
+                        apPriceView.setText(apPriceDefaultValue)
+                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
                     }
-                    val apPriceSpinnerAdapter = ArrayAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_item,
-                        listValues
-                    )
-                    apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    apPriceListSpinner.adapter = apPriceSpinnerAdapter
-
-                    apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                            parent: AdapterView<*>?,
-                            view: View?,
-                            position: Int,
-                            id: Long
-                        ) {
-                            appSettings.putString("AP_PRODUCT_PRICE",parent!!.selectedItem.toString())
+                    2 -> {
+                        apPriceDefaultValueMessage.visibility = View.GONE
+                        apPriceDefaultInputBox.visibility = View.GONE
+                        apPriceListBtn.visibility = View.VISIBLE
+                        apPriceView.visibility = View.GONE
+                        apPriceListSpinner.visibility = View.VISIBLE
+                        val listOptions: String = tableGenerator.getListValues(apPriceListId)
+                        val listValues = listOptions.split(",")
+                        if (listValues.isNotEmpty()){
+                            appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
                         }
+                        val apPriceSpinnerAdapter = ArrayAdapter(
+                            requireActivity(),
+                            android.R.layout.simple_spinner_item,
+                            listValues
+                        )
+                        apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        apPriceListSpinner.adapter = apPriceSpinnerAdapter
 
-                        override fun onNothingSelected(parent: AdapterView<*>?) {
+                        apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                appSettings.putString("AP_PRODUCT_PRICE",parent!!.selectedItem.toString())
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
 
                         }
-
                     }
-                } else {
-                    apPriceView.visibility = View.VISIBLE
-                    apPriceListBtn.visibility = View.GONE
-                    apPriceDefaultInputBox.visibility = View.GONE
-                    apPriceListSpinner.visibility = View.GONE
+                    else -> {
+                        apPriceView.visibility = View.VISIBLE
+                        apPriceListBtn.visibility = View.GONE
+                        apPriceDefaultValueMessage.visibility = View.GONE
+                        apPriceDefaultInputBox.visibility = View.GONE
+                        apPriceListSpinner.visibility = View.GONE
+                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
+                    }
                 }
             }
 
@@ -237,7 +258,35 @@ class ApPriceInputFragment : Fragment() {
                 if (list.isNotEmpty()) {
                     //selectedListTextView.text = listValue.value
                     appSettings.putInt("AP_PRICE_LIST_ID", listId!!)
-                    appSettings.putString("AP_PRODUCT_PRICE",list.split(",")[0])
+                    //appSettings.putString("AP_PRODUCT_PRICE",list.split(",")[0])
+                    val listOptions: String = tableGenerator.getListValues(listId!!)
+                    val listValues = listOptions.split(",")
+                    if (listValues.isNotEmpty()){
+                        appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
+                    }
+                    val apPriceSpinnerAdapter = ArrayAdapter(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_item,
+                        listValues
+                    )
+                    apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    apPriceListSpinner.adapter = apPriceSpinnerAdapter
+
+                    apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            appSettings.putString("AP_PRODUCT_PRICE",parent!!.selectedItem.toString())
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
+
+                    }
                     alert.dismiss()
                 } else {
                     MaterialAlertDialogBuilder(requireActivity())

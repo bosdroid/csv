@@ -103,6 +103,8 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 
             collapseExpandImg.setOnClickListener {
                 if (collapseExpandLayout.visibility == View.VISIBLE) {
+                    productTitle.isExpanded = false
+                    productDescription.isExpanded = false
                     collapseExpandLayout.visibility = View.GONE
                     collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
                 } else {

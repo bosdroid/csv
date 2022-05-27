@@ -330,110 +330,131 @@ class ApImageUploadFragment : Fragment() {
             val finalDescriptionText = appSettings.getString("AP_PRODUCT_DESCRIPTION") as String
             val finalQuantityText = appSettings.getString("AP_PRODUCT_QUANTITY") as String
             val finalPriceText = appSettings.getString("AP_PRODUCT_PRICE") as String
-            Log.d("TEST199PRODUCT", "$selectedCategoryId")
-            Log.d("TEST199PRODUCT", finalTitleText)
-            Log.d("TEST199PRODUCT", finalDescriptionText)
-            Log.d("TEST199PRODUCT", finalQuantityText)
-            Log.d("TEST199PRODUCT", finalPriceText)
 
-            if (selectedCategoryId == 0 || finalTitleText.isEmpty() || finalDescriptionText.isEmpty() || finalQuantityText.isEmpty() || finalPriceText.isEmpty()){
-                 BaseActivity.showAlert(
-                     requireActivity(),
-                     requireActivity().resources.getString(R.string.ap_missing_data_error)
-                 )
-            }
-            else {
-                BaseActivity.startLoading(requireActivity())
-                viewModel.callAddProduct(
-                    requireActivity(),
-                    shopName,
-                    email,
-                    password,
-                    selectedCategoryId,
-                    finalTitleText,
-                    finalDescriptionText,
-                    finalQuantityText,
-                    finalPriceText
-                )
-                viewModel.getAddProductResponse()
-                    .observe(requireActivity(), Observer { response ->
-                        if (response != null) {
-                            if (response.get("status").asString == "200") {
-                                val details = response.getAsJsonObject("details")
-                                val productId = details.get("id").asInt
+            when {
+                selectedCategoryId == 0 -> {
+                    BaseActivity.showAlert(
+                        requireActivity(),
+                        "Product category is missing!"
+                    )
+                }
+                finalTitleText.isEmpty() -> {
+                    BaseActivity.showAlert(
+                        requireActivity(),
+                        "Product title is missing!"
+                    )
+                }
+                finalDescriptionText.isEmpty() -> {
+                    BaseActivity.showAlert(
+                        requireActivity(),
+                        "Product description is missing!"
+                    )
+                }
+                finalQuantityText.isEmpty() -> {
+                    BaseActivity.showAlert(
+                        requireActivity(),
+                        "Product quantity is missing!"
+                    )
+                }
+                finalPriceText.isEmpty() -> {
+                    BaseActivity.showAlert(
+                        requireActivity(),
+                        "Product price is missing!"
+                    )
+                }
+                else -> {
+                    BaseActivity.startLoading(requireActivity())
+                    viewModel.callAddProduct(
+                        requireActivity(),
+                        shopName,
+                        email,
+                        password,
+                        selectedCategoryId,
+                        finalTitleText,
+                        finalDescriptionText,
+                        finalQuantityText,
+                        finalPriceText
+                    )
+                    viewModel.getAddProductResponse()
+                        .observe(requireActivity(), Observer { response ->
+                            if (response != null) {
+                                if (response.get("status").asString == "200") {
+                                    val details = response.getAsJsonObject("details")
+                                    val productId = details.get("id").asInt
 
-                                if (selectedImageBase64String.isNotEmpty()) {
-                                    BaseActivity.dismiss()
-                                    BaseActivity.startLoading(requireActivity())
+                                    if (selectedImageBase64String.isNotEmpty()) {
+                                        BaseActivity.dismiss()
+                                        BaseActivity.startLoading(requireActivity())
 
-                                    viewModel.callAddProductImage(
-                                        requireActivity(),
-                                        shopName,
-                                        email,
-                                        password,
-                                        selectedImageBase64String,
-                                        productId,
-                                        "${System.currentTimeMillis()}.jpg",
-                                        if (intentType != 3) {
-                                            ""
-                                        } else {
-                                            selectedInternetImage
-                                        }
-                                    )
-                                    viewModel.getAddProductImageResponse()
-                                        .observe(
+                                        viewModel.callAddProductImage(
                                             requireActivity(),
-                                            Observer { response ->
+                                            shopName,
+                                            email,
+                                            password,
+                                            selectedImageBase64String,
+                                            productId,
+                                            "${System.currentTimeMillis()}.jpg",
+                                            if (intentType != 3) {
+                                                ""
+                                            } else {
+                                                selectedInternetImage
+                                            }
+                                        )
+                                        viewModel.getAddProductImageResponse()
+                                            .observe(
+                                                requireActivity(),
+                                                Observer { response ->
 
-                                                if (response != null) {
-                                                    if (response.get("status").asString == "200") {
-                                                        selectedImageBase64String = ""
-                                                        selectedInternetImage = ""
-                                                        Handler(Looper.myLooper()!!).postDelayed(
-                                                            {
-                                                                BaseActivity.dismiss()
-                                                                creditCharged()
-                                                                val intent = Intent("dialog-dismiss")
-                                                                LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+                                                    if (response != null) {
+                                                        if (response.get("status").asString == "200") {
+                                                            selectedImageBase64String = ""
+                                                            selectedInternetImage = ""
+                                                            Handler(Looper.myLooper()!!).postDelayed(
+                                                                {
+                                                                    BaseActivity.dismiss()
+                                                                    creditCharged()
+                                                                    val intent = Intent("dialog-dismiss")
+                                                                    LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
                                                                 },
-                                                            2000
-                                                        )
+                                                                2000
+                                                            )
+                                                        } else {
+                                                            BaseActivity.dismiss()
+                                                            BaseActivity.showAlert(
+                                                                requireActivity(),
+                                                                response.get("message").asString
+                                                            )
+                                                        }
                                                     } else {
                                                         BaseActivity.dismiss()
                                                         BaseActivity.showAlert(
                                                             requireActivity(),
-                                                            response.get("message").asString
+                                                            getString(R.string.something_wrong_error)
                                                         )
                                                     }
-                                                } else {
-                                                    BaseActivity.dismiss()
-                                                    BaseActivity.showAlert(
-                                                        requireActivity(),
-                                                        getString(R.string.something_wrong_error)
-                                                    )
-                                                }
-                                            })
+                                                })
+                                    } else {
+                                        Handler(Looper.myLooper()!!).postDelayed({
+                                            BaseActivity.dismiss()
+                                            creditCharged()
+                                            val intent = Intent("dialog-dismiss")
+                                            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+
+                                        }, 2000)
+                                    }
+
                                 } else {
-                                    Handler(Looper.myLooper()!!).postDelayed({
-                                        BaseActivity.dismiss()
-                                        creditCharged()
-                                        val intent = Intent("dialog-dismiss")
-                                        LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-
-                                    }, 2000)
+                                    BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        response.get("message").asString
+                                    )
                                 }
-
                             } else {
                                 BaseActivity.dismiss()
-                                BaseActivity.showAlert(
-                                    requireActivity(),
-                                    response.get("message").asString
-                                )
                             }
-                        } else {
-                            BaseActivity.dismiss()
-                        }
-                    })
+                        })
+                }
             }
         }
 
@@ -450,9 +471,7 @@ class ApImageUploadFragment : Fragment() {
             .child(Constants.firebaseUserId)
             .updateChildren(hashMap)
             .addOnSuccessListener {
-                BaseActivity.getUserCredits(
-                    requireActivity()
-                )
+
             }
             .addOnFailureListener {
 

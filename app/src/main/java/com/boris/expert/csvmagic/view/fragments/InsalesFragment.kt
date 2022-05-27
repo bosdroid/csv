@@ -2061,6 +2061,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     private fun addProduct() {
 
+//        appSettings.remove("AP_PRODUCT_CATEGORY")
+//        appSettings.remove("AP_PRODUCT_TITLE")
+//        appSettings.remove("AP_PRODUCT_DESCRIPTION")
+//        appSettings.remove("AP_PRODUCT_QUANTITY")
+//        appSettings.remove("AP_PRODUCT_PRICE")
+
         AddProductCustomDialog(
             originalCategoriesList,
             shopName,
@@ -2768,11 +2774,24 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
             val apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
             val apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
-
+            val quickModeStatus =  appSettings.getInt("QUICK_MODE_STATUS")
+            if(quickModeStatus == 1){
+                quickModeCheckBox.isChecked = true
+                apFirstLayout.visibility = View.GONE
+                apSecondLayout.visibility = View.VISIBLE
+                apNextPreviousButtons.visibility = View.VISIBLE
+            }
+            else{
+                apSecondLayout.visibility = View.GONE
+                apNextPreviousButtons.visibility = View.GONE
+                apFirstLayout.visibility = View.VISIBLE
+            }
             quickModeCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
                 userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                 if (isChecked){
+
                     if (userCurrentCredits.toFloat() > 0){
+                        appSettings.putInt("QUICK_MODE_STATUS",1)
                         quickModeCheckBox.isChecked = true
                         apFirstLayout.visibility = View.GONE
                         apSecondLayout.visibility = View.VISIBLE
@@ -2800,6 +2819,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 }
                 else{
+                    appSettings.putInt("QUICK_MODE_STATUS",0)
                     apSecondLayout.visibility = View.GONE
                     apNextPreviousButtons.visibility = View.GONE
                     apFirstLayout.visibility = View.VISIBLE
@@ -4110,7 +4130,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
+            if (!quickModeCheckBox.isChecked && requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
                 val result = CropImage.getActivityResult(data)
                 val imgUri = result.uri
                 try {
@@ -4124,6 +4144,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                   Constants.hint = "default"
                 } catch (e: IOException) {
                     e.printStackTrace()
+                }
+            }
+            else{
+                super.onActivityResult(requestCode, resultCode, data)
+                for (fragment in childFragmentManager.fragments) {
+                    fragment.onActivityResult(requestCode, resultCode, data)
                 }
             }
 
