@@ -29,6 +29,7 @@ import com.google.android.material.textview.MaterialTextView
 
 class ApPriceInputFragment : Fragment() {
 
+    private lateinit var apPriceActiveListNameView: MaterialTextView
     private lateinit var appSettings: AppSettings
     private lateinit var apPriceView: TextInputEditText
     private lateinit var tableGenerator: TableGenerator
@@ -55,6 +56,7 @@ class ApPriceInputFragment : Fragment() {
     }
 
     private fun initViews(view: View){
+
         apPriceView = view.findViewById(R.id.ap_price)
         val apPriceSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_options_spinner)
         val apPriceListBtn = view.findViewById<MaterialButton>(R.id.ap_price_list_with_fields_btn)
@@ -62,10 +64,17 @@ class ApPriceInputFragment : Fragment() {
         val apPriceDefaultValueMessage =
             view.findViewById<MaterialTextView>(R.id.ap_price_default_value_message)
         apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
-
+        apPriceActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
         val apPriceSpinnerSelectedPosition = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
         val apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
         val apPriceListId = appSettings.getInt("AP_PRICE_LIST_ID")
+        val apPriceActiveListName = appSettings.getString("AP_PRICE_LIST_NAME")
+        if (apPriceActiveListName!!.isEmpty()){
+            apPriceActiveListNameView.text = "Active List: None"
+        }
+        else{
+            apPriceActiveListNameView.text = "Active List: $apPriceActiveListName"
+        }
         apPriceSpinner.setSelection(apPriceSpinnerSelectedPosition)
         apPriceListBtn.setOnClickListener {
             openListWithFieldsDialog("ap_price")
@@ -74,17 +83,19 @@ class ApPriceInputFragment : Fragment() {
             1 -> {
                 apPriceListSpinner.visibility = View.GONE
                 apPriceListBtn.visibility = View.GONE
+                apPriceActiveListNameView.visibility = View.GONE
                 apPriceDefaultInputBox.visibility = View.VISIBLE
                 apPriceDefaultValueMessage.visibility = View.VISIBLE
                 apPriceView.visibility = View.VISIBLE
                 apPriceDefaultInputBox.setText(apPriceDefaultValue)
                 apPriceView.setText(apPriceDefaultValue)
-                BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
+//                BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
             }
             2 -> {
                 apPriceDefaultInputBox.visibility = View.GONE
                 apPriceDefaultValueMessage.visibility = View.GONE
                 apPriceListBtn.visibility = View.VISIBLE
+                apPriceActiveListNameView.visibility = View.VISIBLE
                 apPriceView.visibility = View.GONE
                 apPriceListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apPriceListId)
@@ -119,10 +130,11 @@ class ApPriceInputFragment : Fragment() {
             else -> {
                 apPriceView.visibility = View.VISIBLE
                 apPriceListBtn.visibility = View.GONE
+                apPriceActiveListNameView.visibility = View.GONE
                 apPriceDefaultInputBox.visibility = View.GONE
                 apPriceDefaultValueMessage.visibility = View.VISIBLE
                 apPriceListSpinner.visibility = View.GONE
-                BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
+//                BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
             }
         }
 
@@ -137,6 +149,7 @@ class ApPriceInputFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                apPriceView.setText(s.toString())
                 appSettings.putString("AP_PRICE_DEFAULT_VALUE", s.toString())
                 appSettings.putString("AP_PRODUCT_PRICE",s.toString())
             }
@@ -159,17 +172,19 @@ class ApPriceInputFragment : Fragment() {
                     1 -> {
                         apPriceListSpinner.visibility = View.GONE
                         apPriceListBtn.visibility = View.GONE
+                        apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultInputBox.visibility = View.VISIBLE
                         apPriceDefaultValueMessage.visibility = View.VISIBLE
                         apPriceView.visibility = View.VISIBLE
                         apPriceDefaultInputBox.setText(apPriceDefaultValue)
                         apPriceView.setText(apPriceDefaultValue)
-                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
+//                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
                     }
                     2 -> {
                         apPriceDefaultValueMessage.visibility = View.GONE
                         apPriceDefaultInputBox.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
+                        apPriceActiveListNameView.visibility = View.VISIBLE
                         apPriceView.visibility = View.GONE
                         apPriceListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apPriceListId)
@@ -204,10 +219,11 @@ class ApPriceInputFragment : Fragment() {
                     else -> {
                         apPriceView.visibility = View.VISIBLE
                         apPriceListBtn.visibility = View.GONE
+                        apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultValueMessage.visibility = View.GONE
                         apPriceDefaultInputBox.visibility = View.GONE
                         apPriceListSpinner.visibility = View.GONE
-                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
+//                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
                     }
                 }
             }
@@ -258,6 +274,8 @@ class ApPriceInputFragment : Fragment() {
                 if (list.isNotEmpty()) {
                     //selectedListTextView.text = listValue.value
                     appSettings.putInt("AP_PRICE_LIST_ID", listId!!)
+                    appSettings.putString("AP_PRICE_LIST_NAME",listValue.value)
+                    apPriceActiveListNameView.text = "Active List: ${listValue.value}"
                     //appSettings.putString("AP_PRODUCT_PRICE",list.split(",")[0])
                     val listOptions: String = tableGenerator.getListValues(listId!!)
                     val listValues = listOptions.split(",")

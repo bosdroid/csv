@@ -18,7 +18,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/card_top_layout"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="wrap_content"
         android:layout_margin="@dimen/eightDpMargin"
         app:cardCornerRadius="15dp"
         app:cardElevation="5dp"
@@ -26,8 +26,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="350dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:minHeight="350dp"
             android:layout_margin="@dimen/eightDpMargin"
             android:gravity="bottom"
             android:paddingBottom="10dp"
@@ -37,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/sixtyFourDpMargin"
+                android:layout_marginBottom="@dimen/sixtyDpMargin"
                 android:text="@string/set_product_price"
                 android:textColor="@color/black"
                 android:textSize="@dimen/xlargeText" />
@@ -116,6 +117,15 @@
                 android:text="@string/choose_the_list_of_values"
                 android:visibility="gone"
                 app:backgroundTint="@color/primary_positive_color" />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Active List:"
+                android:textColor="@color/black"
+                android:textSize="@dimen/largeText"
+                android:id="@+id/ap_price_active_list_name"
+                android:visibility="gone"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

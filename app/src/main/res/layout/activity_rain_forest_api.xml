@@ -24,7 +24,18 @@
             android:gravity="center_vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_voice"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/sixtyDpMargin"
+                android:id="@+id/rain_forest_voice_search_icon"
+                />
+
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -49,6 +60,7 @@
             android:id="@+id/rainforest_products_search_box"
             android:hint="@string/search_hint_text"
             android:inputType="text"
+            android:imeOptions="actionSearch"
             />
         <ImageButton
             android:layout_width="wrap_content"

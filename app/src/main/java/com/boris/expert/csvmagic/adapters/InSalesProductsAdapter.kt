@@ -59,7 +59,8 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
         val descriptionSizeView: MaterialTextView
         val totalImagesView: MaterialTextView
         val collapseExpandImg: AppCompatImageView
-        val collapseExpandLayout: LinearLayout
+        val collapseExpandDescriptionImg: AppCompatImageView
+//        val collapseExpandLayout: LinearLayout
         val insalesItemEditTextview:MaterialTextView
 
         //        val sliderView:SliderView
@@ -80,8 +81,9 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
             titleSizeView = itemView.findViewById(R.id.total_title_size_textview)
             descriptionSizeView = itemView.findViewById(R.id.total_description_size_textview)
             totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
-            collapseExpandLayout = itemView.findViewById(R.id.collapse_expand_layout)
+//            collapseExpandLayout = itemView.findViewById(R.id.collapse_expand_layout)
             collapseExpandImg = itemView.findViewById(R.id.collapse_expand_img)
+            collapseExpandDescriptionImg = itemView.findViewById(R.id.collapse_expand_description_img)
 //            sliderView = itemView.findViewById(R.id.imageSlider)
 //            addProductCard = itemView.findViewById(R.id.add_product_card)
             getDescriptionBtn = itemView.findViewById(R.id.get_description_text_view)
@@ -102,16 +104,47 @@ class InSalesProductsAdapter(val context: Context, val productsItems: ArrayList<
 //            }
 
             collapseExpandImg.setOnClickListener {
-                if (collapseExpandLayout.visibility == View.VISIBLE) {
+                if (productTitle.isExpanded) {
                     productTitle.isExpanded = false
-                    productDescription.isExpanded = false
-                    collapseExpandLayout.visibility = View.GONE
+//                    collapseExpandLayout.visibility = View.GONE
                     collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
                 } else {
-                    collapseExpandLayout.visibility = View.VISIBLE
+                    productTitle.isExpanded = true
+//                    collapseExpandLayout.visibility = View.VISIBLE
                     collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
                 }
             }
+
+            collapseExpandDescriptionImg.setOnClickListener {
+                if (productDescription.isExpanded) {
+                    productDescription.isExpanded = false
+//                    collapseExpandLayout.visibility = View.GONE
+                    collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_down)
+                } else {
+                    productDescription.isExpanded = true
+//                    collapseExpandLayout.visibility = View.VISIBLE
+                    collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_up)
+                }
+            }
+
+            productTitle.setOnExpandableClickListener(
+                    onExpand = { // Expand action
+                        collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
+                        },
+                        onCollapse = { // Collapse action
+                            collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
+                             }
+            )
+
+            productDescription.setOnExpandableClickListener(
+                    onExpand = { // Expand action
+                        collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_up)
+                    },
+                    onCollapse = { // Collapse action
+                        collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_down)
+                    }
+            )
+
 
 //            addProductCard.setOnClickListener {
 //                Listener.onItemAddImageClick(layoutPosition)

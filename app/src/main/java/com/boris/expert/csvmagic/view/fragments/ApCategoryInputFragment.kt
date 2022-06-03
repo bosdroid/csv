@@ -55,6 +55,7 @@ class ApCategoryInputFragment : Fragment() {
 
 
     private fun initViews(view: View) {
+
         categoriesSpinner =
             view.findViewById(R.id.ap_cate_spinner)
 

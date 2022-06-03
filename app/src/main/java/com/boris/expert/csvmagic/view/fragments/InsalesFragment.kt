@@ -2732,7 +2732,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             categoriesSpinner =
                     view.findViewById(R.id.ap_cate_spinner)
             apTitleView = view.findViewById(R.id.ap_title)
-            val apTestDataView = view.findViewById<MaterialTextView>(R.id.test_data_button)
+            val apTestDataView = view.findViewById<AppCompatImageView>(R.id.test_data_button)
             apDescriptionView =
                     view.findViewById(R.id.ap_description)
             quickModeCheckBox = view.findViewById(R.id.ap_quick_product_mode)
@@ -2744,7 +2744,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apBackArrowBtn = view.findViewById(R.id.ap_back_arrow)
             apNextPreviousButtons = view.findViewById(R.id.ap_next_previous_buttons)
             val apAddDescriptionView =
-                    view.findViewById<MaterialTextView>(R.id.ap_add_description_text_view)
+                    view.findViewById<AppCompatImageView>(R.id.ap_add_description_text_view)
             val apQuantityView = view.findViewById<TextInputEditText>(R.id.ap_quantity)
             val apPriceView = view.findViewById<TextInputEditText>(R.id.ap_price)
             val apSubmitBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
@@ -2829,7 +2829,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apBackArrowBtn.setOnClickListener {
                 dismiss()
             }
-
+            apViewPager.offscreenPageLimit = 6
             val fragmentAdapter = ViewPagerAdapter(childFragmentManager)
             fragmentAdapter.addFragment(ApCategoryInputFragment(), "ap_category_fr")
             fragmentAdapter.addFragment(ApTitleInputFragment(), "ap_title_fr")

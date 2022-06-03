@@ -31,4 +31,9 @@
         <item>Shop</item>
         <item>Custom</item>
     </string-array>
+
+    <string-array name="voice_languages">
+        <item>English (Default)</item>
+        <item>Russian</item>
+    </string-array>
 </resources>
