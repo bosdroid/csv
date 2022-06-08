@@ -41,34 +41,56 @@
           android:layout_height="wrap_content"
           android:orientation="horizontal"
           android:gravity="center_vertical"
+          android:layout_marginTop="@dimen/defaultDpMargin"
           >
 
-          <com.google.android.material.textfield.TextInputEditText
+          <androidx.appcompat.widget.AppCompatImageView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:src="@drawable/ic_voice"
+              android:id="@+id/voice_search_internet_images"
+              android:layout_margin="@dimen/defaultDpMargin"
+              />
+          <com.google.android.material.textfield.TextInputLayout
               android:layout_width="0dp"
               android:layout_height="wrap_content"
               android:layout_weight="1"
-              android:id="@+id/text_input_field"
-              app:layout_constraintStart_toStartOf="parent"
-              app:layout_constraintEnd_toEndOf="parent"
-              app:layout_constraintTop_toBottomOf="@id/dialog_heading"
-              android:background="@drawable/input_text_field_design"
-              android:padding="5dp"
-              android:inputType="text"
-              android:imeOptions="actionDone"
-              android:layout_margin="@dimen/eightDpMargin"
+              style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
               android:hint="@string/search_hint_text"
-              android:gravity="start"
-              />
+              app:endIconMode="clear_text"
+              >
+              <com.google.android.material.textfield.TextInputEditText
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/text_input_field"
+                  android:padding="5dp"
+                  android:inputType="text"
+                  android:imeOptions="actionSearch"
+                  android:layout_margin="@dimen/eightDpMargin"
+                  android:gravity="start"
+                  />
 
-         <com.google.android.material.button.MaterialButton
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_margin="@dimen/eightDpMargin"
-             android:id="@+id/internet_image_search_btn"
-             android:text="@string/search_text"
-             android:textSize="@dimen/mediumText"
-             android:textStyle="bold"
-             />
+          </com.google.android.material.textfield.TextInputLayout>
+
+<!--         <com.google.android.material.button.MaterialButton-->
+<!--             android:layout_width="wrap_content"-->
+<!--             android:layout_height="wrap_content"-->
+<!--             android:layout_margin="@dimen/eightDpMargin"-->
+<!--             android:id="@+id/internet_image_search_btn"-->
+<!--             android:text="@string/search_text"-->
+<!--             android:textSize="@dimen/mediumText"-->
+<!--             android:textStyle="bold"-->
+<!--             />-->
+          <ImageButton
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:src="@drawable/ic_search"
+              android:padding="10dp"
+              android:background="@drawable/search_btn_background_design"
+              android:id="@+id/internet_image_search_btn"
+              android:layout_marginEnd="@dimen/defaultDpMargin"
+              android:layout_marginStart="@dimen/defaultDpMargin"
+              />
       </LinearLayout>
 
 

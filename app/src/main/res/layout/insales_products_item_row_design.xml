@@ -220,8 +220,17 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:text="@string/product_title_text"
+                        android:textSize="@dimen/mediumText"
+                        android:layout_marginTop="@dimen/defaultDpMargin"
+                        android:layout_marginStart="@dimen/defaultDpMargin"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -256,7 +265,17 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:text="@string/description_text"
+                        android:textSize="@dimen/mediumText"
+                        android:layout_marginTop="@dimen/defaultDpMargin"
+                        android:layout_marginStart="@dimen/defaultDpMargin"
+                        />
 
                     <LinearLayout
                         android:layout_width="match_parent"

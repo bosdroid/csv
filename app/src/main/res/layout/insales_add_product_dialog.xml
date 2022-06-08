@@ -122,16 +122,31 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/eightDpMargin"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
 
+                        >
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/title_text"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText"
+                            />
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:hint="@string/title_text"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/title_text"
                             android:inputType="textMultiLine" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -169,18 +184,35 @@
                             android:text="@string/choose_the_list_of_values"
                             android:visibility="gone"
                             app:backgroundTint="@color/primary_positive_color" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Active List:"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText"
+                            android:id="@+id/ap_title_active_list_name"
+                            android:layout_gravity="center_horizontal"
+                            android:visibility="gone"
+                            />
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:layout_marginTop="@dimen/eightDpMargin"
+                            android:hint="@string/set_the_default_value"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_title_non_changeable_default_text_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/eightDpMargin"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/set_the_default_value"
                             android:imeOptions="actionDone"
                             android:inputType="text"
                             android:visibility="gone" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <LinearLayout
                             android:id="@+id/ap_title_sources_layout"
@@ -260,17 +292,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/eightDpMargin"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        >
 
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/description_text"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText"
+                            />
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:hint="@string/description_text"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_description"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/radius_text_input_field"
                             android:gravity="start"
                             android:hint="@string/description_text"
                             android:inputType="textMultiLine" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -307,18 +354,35 @@
                             android:text="@string/choose_the_list_of_values"
                             android:visibility="gone"
                             app:backgroundTint="@color/primary_positive_color" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Active List:"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/ap_description_active_list_name"
+                            android:visibility="gone"
+                            />
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:layout_marginTop="@dimen/eightDpMargin"
+                            android:hint="@string/set_the_default_value"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_description_non_changeable_default_text_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/eightDpMargin"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/set_the_default_value"
                             android:imeOptions="actionDone"
                             android:inputType="text"
                             android:visibility="gone" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
                         <LinearLayout
                             android:id="@+id/ap_description_sources_layout"
                             android:layout_width="match_parent"
@@ -393,16 +457,30 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/eightDpMargin"
-                        android:orientation="vertical">
-
+                        android:orientation="vertical"
+                        >
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/quantity_text"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText"
+                            />
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:hint="@string/quantity_text"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_quantity"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/quantity_text"
                             android:inputType="number" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -439,18 +517,35 @@
                             android:text="@string/choose_the_list_of_values"
                             android:visibility="gone"
                             app:backgroundTint="@color/primary_positive_color" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Active List:"
+                            android:textColor="@color/black"
+                            android:layout_gravity="center_horizontal"
+                            android:textSize="@dimen/largeText"
+                            android:id="@+id/ap_quantity_active_list_name"
+                            android:visibility="gone"
+                            />
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:layout_marginTop="@dimen/eightDpMargin"
+                            android:hint="@string/set_the_default_value"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_quantity_non_changeable_default_text_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/eightDpMargin"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/set_the_default_value"
                             android:imeOptions="actionDone"
                             android:inputType="text"
                             android:visibility="gone" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <LinearLayout
                             android:id="@+id/ap_quantity_sources_layout"
@@ -526,16 +621,30 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/eightDpMargin"
-                        android:orientation="vertical">
-
+                        android:orientation="vertical"
+                        >
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/price_text"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/largeText"
+                            />
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:hint="@string/price_text"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_price"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/price_text"
                             android:inputType="number" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -572,18 +681,34 @@
                             android:text="@string/choose_the_list_of_values"
                             android:visibility="gone"
                             app:backgroundTint="@color/primary_positive_color" />
-
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Active List:"
+                            android:textColor="@color/black"
+                            android:layout_gravity="center_horizontal"
+                            android:textSize="@dimen/largeText"
+                            android:id="@+id/ap_price_active_list_name"
+                            android:visibility="gone"
+                            />
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:hintEnabled="false"
+                            app:endIconMode="clear_text"
+                            android:layout_marginTop="@dimen/eightDpMargin"
+                            android:hint="@string/set_the_default_value"
+                            >
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/ap_price_non_changeable_default_text_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/eightDpMargin"
-                            android:background="@drawable/radius_text_input_field"
                             android:hint="@string/set_the_default_value"
                             android:imeOptions="actionDone"
                             android:inputType="text"
                             android:visibility="gone" />
-
+                        </com.google.android.material.textfield.TextInputLayout>
                         <LinearLayout
                             android:id="@+id/ap_price_sources_layout"
                             android:layout_width="match_parent"
@@ -752,6 +877,14 @@
             android:id="@+id/ap_second_layout"
             android:visibility="gone"
             >
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/test_data_button1"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="end"
+                android:visibility="gone"
+                android:src="@drawable/test" />
 
             <com.boris.expert.csvmagic.utils.MyViewPager
                 android:id="@+id/ap_viewpager"

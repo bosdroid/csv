@@ -46,30 +46,38 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
-        android:padding="@dimen/small"
+        android:padding="10dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="@color/light_gray"
         >
 
-        <com.google.android.material.textfield.TextInputEditText
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/text_input_field"
-            android:id="@+id/rainforest_products_search_box"
+            app:endIconMode="clear_text"
             android:hint="@string/search_hint_text"
-            android:inputType="text"
-            android:imeOptions="actionSearch"
-            />
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rainforest_products_search_box"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:src="@drawable/ic_search"
             android:padding="@dimen/small"
             android:background="@drawable/search_btn_background_design"
             android:id="@+id/rainforest_products_search_btn"
             android:layout_marginEnd="@dimen/defaultDpMargin"
+            android:layout_marginStart="@dimen/defaultDpMargin"
             />
 
     </LinearLayout>

@@ -549,7 +549,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     val response = JSONObject(it)
                     if (response.has("product")) {
                         val productResults = response.getJSONObject("product")
-                        val description = if (productResults.isNull("description")) {
+                        val description = if (!productResults.has("description")) {
                             ""
                         } else {
                             productResults.getString("description")

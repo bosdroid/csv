@@ -357,4 +357,8 @@ class ApPriceInputFragment : Fragment() {
             }
         }
     }
+
+    fun updateTestData(text:String){
+        apPriceView.setText(text)
+    }
 }

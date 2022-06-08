@@ -695,4 +695,8 @@ class ApDescriptionInputFragment : Fragment() {
             }
         }
 
+    fun updateTestData(text:String){
+        apDescriptionView.setText(text)
+    }
+
 }

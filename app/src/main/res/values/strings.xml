@@ -559,6 +559,7 @@
     <string name="default_value_message">This value will not change after create a product</string>
     <string name="quantity_list_string_error">You have selected the list contains characters, try another list.</string>
     <string name="voice_language_text">Voice Language</string>
+    <string name="get_title_text">GET TITLE</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

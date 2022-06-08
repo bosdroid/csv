@@ -30,10 +30,7 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.FieldListsAdapter
 import com.boris.expert.csvmagic.model.ListItem
 import com.boris.expert.csvmagic.utils.*
-import com.boris.expert.csvmagic.view.activities.BaseActivity
-import com.boris.expert.csvmagic.view.activities.FieldListsActivity
-import com.boris.expert.csvmagic.view.activities.MainActivity
-import com.boris.expert.csvmagic.view.activities.OcrActivity
+import com.boris.expert.csvmagic.view.activities.*
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodel.SharedViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
@@ -58,7 +55,9 @@ class ApTitleInputFragment : Fragment() {
     private var listId: Int? = null
     private lateinit var adapter: FieldListsAdapter
     private lateinit var sharedViewModel: SharedViewModel
+    private var userCurrentCredits = ""
     private var voiceLanguageCode = "en"
+    private lateinit var getTitleBtn:MaterialTextView
     override fun onAttach(context: Context) {
         super.onAttach(context)
         appSettings = AppSettings(requireActivity())
@@ -85,6 +84,7 @@ class ApTitleInputFragment : Fragment() {
     private fun initViews(view: View) {
 
         apTitleView = view.findViewById(R.id.ap_title)
+        getTitleBtn  = view.findViewById(R.id.get_title_text_view)
         val apTitleSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_options_spinner)
         val apTitleListBtn = view.findViewById<MaterialButton>(R.id.ap_title_list_with_fields_btn)
         val apTitleDefaultInputBox =
@@ -128,6 +128,32 @@ class ApTitleInputFragment : Fragment() {
         sharedViewModel.getTitleValue().observe(viewLifecycleOwner, Observer { updateTitle ->
             apTitleView.setText(updateTitle)
         })
+
+        getTitleBtn.setOnClickListener {
+            userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+            if (userCurrentCredits.toFloat() >= 1.0) {
+
+                launchActivity.launch(
+                        Intent(
+                                requireActivity(),
+                                RainForestApiActivity::class.java
+                        )
+                )
+            } else {
+                MaterialAlertDialogBuilder(requireActivity())
+                        .setMessage(getString(R.string.low_credites_error_message2))
+                        .setCancelable(false)
+                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                            dialog.dismiss()
+                            startActivity(Intent(context, UserScreenActivity::class.java))
+                        }
+                        .create().show()
+            }
+        }
 
         apTitleCameraRecView.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
@@ -577,6 +603,27 @@ class ApTitleInputFragment : Fragment() {
         }
     }
 
+    var launchActivity =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+
+                    if (data != null && data.hasExtra("TITLE")) {
+                        val title = data.getStringExtra("TITLE") as String
+                        if (title.isNotEmpty()) {
+
+                            val currentPItemDescription = apTitleView.text.toString().trim()
+                            val stringBuilder = java.lang.StringBuilder()
+                            stringBuilder.append(currentPItemDescription)
+                            stringBuilder.append(title)
+                            apTitleView.setText(stringBuilder.toString())
+                            appSettings.putString("AP_PRODUCT_TITLE",apTitleView.text.toString().trim())
+
+                        }
+                    }
+                }
+            }
+
     private var voiceResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
@@ -662,4 +709,8 @@ class ApTitleInputFragment : Fragment() {
                     appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString().trim())
                 }
             }
+
+    fun updateTestData(text:String){
+        apTitleView.setText(text)
+    }
 }

@@ -45,22 +45,52 @@
                 android:layout_marginBottom="@dimen/sixtyDpMargin"
                 />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/title_text"
-                android:textColor="@color/black"
-                android:textSize="@dimen/largeText"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_marginBottom="@dimen/defaultDpMargin"
-                />
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/ap_title"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/title_text"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/largeText"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/get_title_text_view"
+                    android:textColor="@color/primary_positive_color"
+                    android:text="@string/get_title_text"
+                    android:textSize="@dimen/mediumText"
+                    />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxHeight="350dp"
-                android:background="@drawable/radius_text_input_field"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="false"
+                app:endIconMode="clear_text"
                 android:hint="@string/title_text"
-                android:inputType="textMultiLine" />
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ap_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="textMultiLine"
+                    android:hint="@string/title_text"
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -141,17 +171,24 @@
             android:visibility="gone"
             />
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintEnabled="false"
+            app:endIconMode="clear_text"
+            android:hint="@string/set_the_default_value"
+            >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/ap_title_non_changeable_default_text_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/radius_text_input_field"
             android:hint="@string/set_the_default_value"
             android:imeOptions="actionDone"
             android:inputType="text"
             android:visibility="gone"
              />
-
+        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:id="@+id/ap_title_sources_layout"

@@ -382,4 +382,8 @@ class ApQuantityInputFragment : Fragment() {
         }
     }
 
+    fun updateTestData(text:String){
+        apQuantityView.setText(text)
+    }
+
 }

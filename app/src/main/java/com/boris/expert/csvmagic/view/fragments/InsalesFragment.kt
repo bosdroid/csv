@@ -19,6 +19,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +33,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,6 +49,7 @@ import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.*
 import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.activities.*
+import com.boris.expert.csvmagic.viewmodel.AddProductViewModel
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.bumptech.glide.Glide
@@ -122,6 +125,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var selectedCategoryId: Int = 0
     private var apTitleView:TextInputEditText?=null
     private var apDescriptionView:TextInputEditText?=null
+    private lateinit var internetImageAdapter: InternetImageAdapter
+    private lateinit var searchBtnView: ImageButton
+    private lateinit var searchBoxView: TextInputEditText
+    private lateinit var loader: ProgressBar
+    private lateinit var voiceSearchIcon:AppCompatImageView
+    private var voiceLanguageCode = "en"
+    val searchedImagesList = mutableListOf<String>()
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -410,7 +420,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged") {
 
             LocalBroadcastManager.getInstance(
-                requireActivity()).registerReceiver(broadcastReceiver, IntentFilter("update-products"))
+                requireActivity()
+            ).registerReceiver(broadcastReceiver, IntentFilter("update-products"))
 
             insalesLoginWrapperLayout.visibility = View.GONE
             insalesSearchWrapperLayout.visibility = View.VISIBLE
@@ -524,20 +535,23 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 internetImageView.setOnClickListener {
                     intentType = 3
-                    val searchedImagesList = mutableListOf<String>()
                     val tempImageList = mutableListOf<String>()
                     val internetSearchLayout = LayoutInflater.from(context)
                         .inflate(R.layout.internet_image_search_dialog_layout, null)
-                    val loader =
+                    loader =
                         internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
-                    val searchBoxView =
+                    searchBoxView =
                         internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
-                    val searchBtnView =
-                        internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
+                    searchBtnView =
+                        internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
                     val internetImageRecyclerView =
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                    voiceSearchIcon = internetSearchLayout.findViewById(
+                        R.id
+                            .voice_search_internet_images
+                    )
                     val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
@@ -553,7 +567,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         LinearLayoutManager.VERTICAL
                     )//GridLayoutManager(context, 2)
                     internetImageRecyclerView.hasFixedSize()
-                    val internetImageAdapter = InternetImageAdapter(
+                    internetImageAdapter = InternetImageAdapter(
                         requireActivity(),
                         searchedImagesList as java.util.ArrayList<String>
                     )
@@ -620,143 +634,228 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         }
 
                     })
+                    voiceSearchIcon.setOnClickListener {
+                        voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+                        val voiceLayout = LayoutInflater.from(context).inflate(
+                            R.layout.voice_language_setting_layout,
+                            null
+                        )
+                        val voiceLanguageSpinner =
+                            voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                        val voiceLanguageSaveBtn =
+                            voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
-
-                    searchBtnView.setOnClickListener {
-                        var creditChargePrice: Float = 0F
-                        if (searchBoxView.text.toString().trim().isNotEmpty()) {
-
-
-                            val firebaseDatabase = FirebaseDatabase.getInstance().reference
-                            firebaseDatabase.child("SearchImagesLimit")
-                                .addListenerForSingleValueEvent(object :
-                                    ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        val creditPrice = snapshot.child("credits")
-                                            .getValue(Int::class.java) as Int
-                                        val images = snapshot.child("images")
-                                            .getValue(Int::class.java) as Int
-                                        creditChargePrice = creditPrice.toFloat() / images
-
-                                        userCurrentCredits =
-                                            appSettings.getString(Constants.userCreditsValue) as String
-
-                                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
-                                            BaseActivity.hideSoftKeyboard(
-                                                requireActivity(),
-                                                searchBtnView
-                                            )
-                                            //Constants.hideKeyboar(requireActivity())
-                                            val query = searchBoxView.text.toString().trim()
-                                            requireActivity().runOnUiThread {
-                                                loader.visibility = View.VISIBLE
-                                            }
-
-                                            BaseActivity.searchInternetImages(
-                                                requireActivity(),
-                                                query,
-                                                object : APICallback {
-                                                    override fun onSuccess(response: JSONObject) {
-                                                        if (loader.visibility == View.VISIBLE) {
-                                                            loader.visibility =
-                                                                View.INVISIBLE
-                                                        }
-
-                                                        val items =
-                                                            response.getJSONArray("items")
-                                                        if (items.length() > 0) {
-                                                            searchedImagesList.clear()
-                                                            for (i in 0 until items.length()) {
-                                                                val item =
-                                                                    items.getJSONObject(
-                                                                        i
-                                                                    )
-                                                                if (item.has("link")) {
-                                                                    searchedImagesList.add(
-                                                                        item.getString(
-                                                                            "link"
-                                                                        )
-                                                                    )
-                                                                }
-                                                            }
-                                                            internetImageAdapter.notifyItemRangeChanged(
-                                                                0,
-                                                                searchedImagesList.size
-                                                            )
-
-                                                        }
-                                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-                                                        val hashMap = HashMap<String, Any>()
-                                                        val remaining =
-                                                            userCurrentCredits.toFloat() - creditChargePrice
-                                                        Log.d("TEST199", "$remaining")
-                                                        hashMap["credits"] =
-                                                            remaining.toString()
-                                                        firebaseDatabase.child(Constants.firebaseUserCredits)
-                                                            .child(Constants.firebaseUserId)
-                                                            .updateChildren(hashMap)
-                                                            .addOnSuccessListener {
-                                                                BaseActivity.getUserCredits(
-                                                                    requireActivity()
-                                                                )
-                                                            }
-                                                            .addOnFailureListener {
-
-                                                            }
-                                                    }
-
-                                                    override fun onError(error: VolleyError) {
-                                                        if (loader.visibility == View.VISIBLE) {
-                                                            loader.visibility =
-                                                                View.INVISIBLE
-                                                        }
-
-                                                        BaseActivity.showAlert(
-                                                            requireActivity(),
-                                                            error.localizedMessage!!
-                                                        )
-                                                    }
-
-                                                })
-                                        } else {
-                                            MaterialAlertDialogBuilder(requireActivity())
-                                                .setMessage(getString(R.string.low_credites_error_message))
-                                                .setCancelable(false)
-                                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                                                    dialog.dismiss()
-                                                }
-                                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                                                    dialog.dismiss()
-                                                    startActivity(
-                                                        Intent(
-                                                            requireActivity(),
-                                                            UserScreenActivity::class.java
-                                                        )
-                                                    )
-                                                }
-                                                .create().show()
-                                        }
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-
-                                    }
-
-                                })
-
-
+                        if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                            voiceLanguageSpinner.setSelection(0, false)
                         } else {
-                            if (loader.visibility == View.VISIBLE) {
-                                loader.visibility = View.INVISIBLE
-                            }
+                            voiceLanguageSpinner.setSelection(1, false)
+                        }
 
-                            BaseActivity.showAlert(
-                                requireActivity(),
-                                getString(R.string.empty_text_error)
-                            )
+                        voiceLanguageSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    voiceLanguageCode =
+                                        if (parent!!.selectedItem.toString().toLowerCase(
+                                                Locale.ENGLISH
+                                            ).contains("english")
+                                        ) {
+                                            "en"
+                                        } else {
+                                            "ru"
+                                        }
+                                    appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                                }
+
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                }
+
+                            }
+                        val builder = MaterialAlertDialogBuilder(requireActivity())
+                        builder.setView(voiceLayout)
+                        val alert = builder.create();
+                        alert.show()
+                        voiceLanguageSaveBtn.setOnClickListener {
+                            alert.dismiss()
+                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                putExtra(
+                                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                )
+                                putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                            }
+                            voiceResultLauncher.launch(intent)
                         }
                     }
 
+                    searchBtnView.setOnClickListener {
+//                        var creditChargePrice: Float = 0F
+//                        if (searchBoxView.text.toString().trim().isNotEmpty()) {
+//
+//
+//                            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+//                            firebaseDatabase.child("SearchImagesLimit")
+//                                .addListenerForSingleValueEvent(object :
+//                                    ValueEventListener {
+//                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                        val creditPrice = snapshot.child("credits")
+//                                            .getValue(Int::class.java) as Int
+//                                        val images = snapshot.child("images")
+//                                            .getValue(Int::class.java) as Int
+//                                        creditChargePrice = creditPrice.toFloat() / images
+//
+//                                        userCurrentCredits =
+//                                            appSettings.getString(Constants.userCreditsValue) as String
+//
+//                                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+//                                            BaseActivity.hideSoftKeyboard(
+//                                                requireActivity(),
+//                                                searchBtnView
+//                                            )
+//                                            //Constants.hideKeyboar(requireActivity())
+//                                            val query = searchBoxView.text.toString().trim()
+//                                            requireActivity().runOnUiThread {
+//                                                loader.visibility = View.VISIBLE
+//                                            }
+//
+//                                            BaseActivity.searchInternetImages(
+//                                                requireActivity(),
+//                                                query,
+//                                                object : APICallback {
+//                                                    override fun onSuccess(response: JSONObject) {
+//                                                        if (loader.visibility == View.VISIBLE) {
+//                                                            loader.visibility =
+//                                                                View.INVISIBLE
+//                                                        }
+//
+//                                                        val items =
+//                                                            response.getJSONArray("items")
+//                                                        if (items.length() > 0) {
+//                                                            searchedImagesList.clear()
+//                                                            for (i in 0 until items.length()) {
+//                                                                val item =
+//                                                                    items.getJSONObject(
+//                                                                        i
+//                                                                    )
+//                                                                if (item.has("link")) {
+//                                                                    searchedImagesList.add(
+//                                                                        item.getString(
+//                                                                            "link"
+//                                                                        )
+//                                                                    )
+//                                                                }
+//                                                            }
+//                                                            internetImageAdapter.notifyItemRangeChanged(
+//                                                                0,
+//                                                                searchedImagesList.size
+//                                                            )
+//
+//                                                        }
+//                                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//                                                        val hashMap = HashMap<String, Any>()
+//                                                        val remaining =
+//                                                            userCurrentCredits.toFloat() - creditChargePrice
+//                                                        Log.d("TEST199", "$remaining")
+//                                                        hashMap["credits"] =
+//                                                            remaining.toString()
+//                                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+//                                                            .child(Constants.firebaseUserId)
+//                                                            .updateChildren(hashMap)
+//                                                            .addOnSuccessListener {
+//                                                                BaseActivity.getUserCredits(
+//                                                                    requireActivity()
+//                                                                )
+//                                                            }
+//                                                            .addOnFailureListener {
+//
+//                                                            }
+//                                                    }
+//
+//                                                    override fun onError(error: VolleyError) {
+//                                                        if (loader.visibility == View.VISIBLE) {
+//                                                            loader.visibility =
+//                                                                View.INVISIBLE
+//                                                        }
+//
+//                                                        BaseActivity.showAlert(
+//                                                            requireActivity(),
+//                                                            error.localizedMessage!!
+//                                                        )
+//                                                    }
+//
+//                                                })
+//                                        } else {
+//                                            MaterialAlertDialogBuilder(requireActivity())
+//                                                .setMessage(getString(R.string.low_credites_error_message))
+//                                                .setCancelable(false)
+//                                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                                                    dialog.dismiss()
+//                                                }
+//                                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                                                    dialog.dismiss()
+//                                                    startActivity(
+//                                                        Intent(
+//                                                            requireActivity(),
+//                                                            UserScreenActivity::class.java
+//                                                        )
+//                                                    )
+//                                                }
+//                                                .create().show()
+//                                        }
+//                                    }
+//
+//                                    override fun onCancelled(error: DatabaseError) {
+//
+//                                    }
+//
+//                                })
+//
+//
+//                        } else {
+//                            if (loader.visibility == View.VISIBLE) {
+//                                loader.visibility = View.INVISIBLE
+//                            }
+//
+//                            BaseActivity.showAlert(
+//                                requireActivity(),
+//                                getString(R.string.empty_text_error)
+//                            )
+//                        }
+                        startSearch(
+                            searchBoxView,
+                            searchBtnView,
+                            loader,
+                            searchedImagesList,
+                            internetImageAdapter
+                        )
+                    }
+                    searchBoxView.setOnEditorActionListener(object :
+                        TextView.OnEditorActionListener {
+                        override fun onEditorAction(
+                            v: TextView?,
+                            actionId: Int,
+                            event: KeyEvent?
+                        ): Boolean {
+                            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                                startSearch(
+                                    searchBoxView,
+                                    searchBtnView,
+                                    loader,
+                                    searchedImagesList,
+                                    internetImageAdapter
+                                )
+                            }
+                            return false
+                        }
+
+                    })
                 }
 
 
@@ -880,16 +979,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     val tempImageList = mutableListOf<String>()
                     val internetSearchLayout = LayoutInflater.from(context)
                         .inflate(R.layout.internet_image_search_dialog_layout, null)
-                    val loader =
+                    loader =
                         internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
-                    val searchBoxView =
+                    searchBoxView =
                         internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
-                    val searchBtnView =
-                        internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
+                    searchBtnView =
+                        internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
                     val internetImageRecyclerView =
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                    voiceSearchIcon =
+                        internetSearchLayout.findViewById(R.id.voice_search_internet_images)
                     val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
@@ -905,7 +1006,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         LinearLayoutManager.VERTICAL
                     )//GridLayoutManager(context, 2)
                     internetImageRecyclerView.hasFixedSize()
-                    val internetImageAdapter = InternetImageAdapter(
+                    internetImageAdapter = InternetImageAdapter(
                         requireActivity(),
                         searchedImagesList as java.util.ArrayList<String>
                     )
@@ -931,142 +1032,228 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     })
 
+                    voiceSearchIcon.setOnClickListener {
+                        voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+                        val voiceLayout = LayoutInflater.from(context).inflate(
+                            R.layout.voice_language_setting_layout,
+                            null
+                        )
+                        val voiceLanguageSpinner =
+                            voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                        val voiceLanguageSaveBtn =
+                            voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
-                    searchBtnView.setOnClickListener {
-                        var creditChargePrice: Float = 0F
-                        if (searchBoxView.text.toString().trim().isNotEmpty()) {
-
-
-                            val firebaseDatabase = FirebaseDatabase.getInstance().reference
-                            firebaseDatabase.child("SearchImagesLimit")
-                                .addListenerForSingleValueEvent(object :
-                                    ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        val creditPrice = snapshot.child("credits")
-                                            .getValue(Int::class.java) as Int
-                                        val images = snapshot.child("images")
-                                            .getValue(Int::class.java) as Int
-                                        creditChargePrice = creditPrice.toFloat() / images
-
-                                        userCurrentCredits =
-                                            appSettings.getString(Constants.userCreditsValue) as String
-
-                                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
-                                            BaseActivity.hideSoftKeyboard(
-                                                requireActivity(),
-                                                searchBtnView
-                                            )
-                                            //Constants.hideKeyboar(requireActivity())
-                                            val query = searchBoxView.text.toString().trim()
-                                            requireActivity().runOnUiThread {
-                                                loader.visibility = View.VISIBLE
-                                            }
-
-                                            BaseActivity.searchInternetImages(
-                                                requireActivity(),
-                                                query,
-                                                object : APICallback {
-                                                    override fun onSuccess(response: JSONObject) {
-                                                        if (loader.visibility == View.VISIBLE) {
-                                                            loader.visibility =
-                                                                View.INVISIBLE
-                                                        }
-
-                                                        val items =
-                                                            response.getJSONArray("items")
-                                                        if (items.length() > 0) {
-                                                            searchedImagesList.clear()
-                                                            for (i in 0 until items.length()) {
-                                                                val item =
-                                                                    items.getJSONObject(
-                                                                        i
-                                                                    )
-                                                                if (item.has("link")) {
-                                                                    searchedImagesList.add(
-                                                                        item.getString(
-                                                                            "link"
-                                                                        )
-                                                                    )
-                                                                }
-                                                            }
-                                                            internetImageAdapter.notifyItemRangeChanged(
-                                                                0,
-                                                                searchedImagesList.size
-                                                            )
-
-                                                        }
-                                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-                                                        val hashMap = HashMap<String, Any>()
-                                                        val remaining =
-                                                            userCurrentCredits.toFloat() - creditChargePrice
-                                                        Log.d("TEST199", "$remaining")
-                                                        hashMap["credits"] =
-                                                            remaining.toString()
-                                                        firebaseDatabase.child(Constants.firebaseUserCredits)
-                                                            .child(Constants.firebaseUserId)
-                                                            .updateChildren(hashMap)
-                                                            .addOnSuccessListener {
-                                                                BaseActivity.getUserCredits(
-                                                                    requireActivity()
-                                                                )
-                                                            }
-                                                            .addOnFailureListener {
-
-                                                            }
-                                                    }
-
-                                                    override fun onError(error: VolleyError) {
-                                                        if (loader.visibility == View.VISIBLE) {
-                                                            loader.visibility =
-                                                                View.INVISIBLE
-                                                        }
-
-                                                        BaseActivity.showAlert(
-                                                            requireActivity(),
-                                                            error.localizedMessage!!
-                                                        )
-                                                    }
-
-                                                })
-                                        } else {
-                                            MaterialAlertDialogBuilder(requireActivity())
-                                                .setMessage(getString(R.string.low_credites_error_message))
-                                                .setCancelable(false)
-                                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                                                    dialog.dismiss()
-                                                }
-                                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                                                    dialog.dismiss()
-                                                    startActivity(
-                                                        Intent(
-                                                            requireActivity(),
-                                                            UserScreenActivity::class.java
-                                                        )
-                                                    )
-                                                }
-                                                .create().show()
-                                        }
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-
-                                    }
-
-                                })
-
-
+                        if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                            voiceLanguageSpinner.setSelection(0, false)
                         } else {
-                            if (loader.visibility == View.VISIBLE) {
-                                loader.visibility = View.INVISIBLE
-                            }
+                            voiceLanguageSpinner.setSelection(1, false)
+                        }
 
-                            BaseActivity.showAlert(
-                                requireActivity(),
-                                getString(R.string.empty_text_error)
-                            )
+                        voiceLanguageSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    voiceLanguageCode =
+                                        if (parent!!.selectedItem.toString().toLowerCase(
+                                                Locale.ENGLISH
+                                            ).contains("english")
+                                        ) {
+                                            "en"
+                                        } else {
+                                            "ru"
+                                        }
+                                    appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                                }
+
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                }
+
+                            }
+                        val builder = MaterialAlertDialogBuilder(requireActivity())
+                        builder.setView(voiceLayout)
+                        val alert = builder.create();
+                        alert.show()
+                        voiceLanguageSaveBtn.setOnClickListener {
+                            alert.dismiss()
+                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                putExtra(
+                                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                )
+                                putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                            }
+                            voiceResultLauncher.launch(intent)
                         }
                     }
 
+                    searchBtnView.setOnClickListener {
+//                        var creditChargePrice: Float = 0F
+//                        if (searchBoxView.text.toString().trim().isNotEmpty()) {
+//
+//
+//                            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+//                            firebaseDatabase.child("SearchImagesLimit")
+//                                .addListenerForSingleValueEvent(object :
+//                                    ValueEventListener {
+//                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                        val creditPrice = snapshot.child("credits")
+//                                            .getValue(Int::class.java) as Int
+//                                        val images = snapshot.child("images")
+//                                            .getValue(Int::class.java) as Int
+//                                        creditChargePrice = creditPrice.toFloat() / images
+//
+//                                        userCurrentCredits =
+//                                            appSettings.getString(Constants.userCreditsValue) as String
+//
+//                                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+//                                            BaseActivity.hideSoftKeyboard(
+//                                                requireActivity(),
+//                                                searchBtnView
+//                                            )
+//                                            //Constants.hideKeyboar(requireActivity())
+//                                            val query = searchBoxView.text.toString().trim()
+//                                            requireActivity().runOnUiThread {
+//                                                loader.visibility = View.VISIBLE
+//                                            }
+//
+//                                            BaseActivity.searchInternetImages(
+//                                                requireActivity(),
+//                                                query,
+//                                                object : APICallback {
+//                                                    override fun onSuccess(response: JSONObject) {
+//                                                        if (loader.visibility == View.VISIBLE) {
+//                                                            loader.visibility =
+//                                                                View.INVISIBLE
+//                                                        }
+//
+//                                                        val items =
+//                                                            response.getJSONArray("items")
+//                                                        if (items.length() > 0) {
+//                                                            searchedImagesList.clear()
+//                                                            for (i in 0 until items.length()) {
+//                                                                val item =
+//                                                                    items.getJSONObject(
+//                                                                        i
+//                                                                    )
+//                                                                if (item.has("link")) {
+//                                                                    searchedImagesList.add(
+//                                                                        item.getString(
+//                                                                            "link"
+//                                                                        )
+//                                                                    )
+//                                                                }
+//                                                            }
+//                                                            internetImageAdapter.notifyItemRangeChanged(
+//                                                                0,
+//                                                                searchedImagesList.size
+//                                                            )
+//
+//                                                        }
+//                                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//                                                        val hashMap = HashMap<String, Any>()
+//                                                        val remaining =
+//                                                            userCurrentCredits.toFloat() - creditChargePrice
+//                                                        Log.d("TEST199", "$remaining")
+//                                                        hashMap["credits"] =
+//                                                            remaining.toString()
+//                                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+//                                                            .child(Constants.firebaseUserId)
+//                                                            .updateChildren(hashMap)
+//                                                            .addOnSuccessListener {
+//                                                                BaseActivity.getUserCredits(
+//                                                                    requireActivity()
+//                                                                )
+//                                                            }
+//                                                            .addOnFailureListener {
+//
+//                                                            }
+//                                                    }
+//
+//                                                    override fun onError(error: VolleyError) {
+//                                                        if (loader.visibility == View.VISIBLE) {
+//                                                            loader.visibility =
+//                                                                View.INVISIBLE
+//                                                        }
+//
+//                                                        BaseActivity.showAlert(
+//                                                            requireActivity(),
+//                                                            error.localizedMessage!!
+//                                                        )
+//                                                    }
+//
+//                                                })
+//                                        } else {
+//                                            MaterialAlertDialogBuilder(requireActivity())
+//                                                .setMessage(getString(R.string.low_credites_error_message))
+//                                                .setCancelable(false)
+//                                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                                                    dialog.dismiss()
+//                                                }
+//                                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                                                    dialog.dismiss()
+//                                                    startActivity(
+//                                                        Intent(
+//                                                            requireActivity(),
+//                                                            UserScreenActivity::class.java
+//                                                        )
+//                                                    )
+//                                                }
+//                                                .create().show()
+//                                        }
+//                                    }
+//
+//                                    override fun onCancelled(error: DatabaseError) {
+//
+//                                    }
+//
+//                                })
+//
+//
+//                        } else {
+//                            if (loader.visibility == View.VISIBLE) {
+//                                loader.visibility = View.INVISIBLE
+//                            }
+//
+//                            BaseActivity.showAlert(
+//                                requireActivity(),
+//                                getString(R.string.empty_text_error)
+//                            )
+//                        }
+                        startSearch(
+                            searchBoxView,
+                            searchBtnView,
+                            loader,
+                            searchedImagesList,
+                            internetImageAdapter
+                        )
+                    }
+                    searchBoxView.setOnEditorActionListener(object :
+                        TextView.OnEditorActionListener {
+                        override fun onEditorAction(
+                            v: TextView?,
+                            actionId: Int,
+                            event: KeyEvent?
+                        ): Boolean {
+                            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                                startSearch(
+                                    searchBoxView,
+                                    searchBtnView,
+                                    loader,
+                                    searchedImagesList,
+                                    internetImageAdapter
+                                )
+                            }
+                            return false
+                        }
+
+                    })
                 }
 
                 Glide.with(requireActivity())
@@ -1426,6 +1613,161 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
     }
+
+    private var voiceResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                val spokenText: String =
+                    result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                        .let { results ->
+                            results!![0]
+                        }
+
+                searchBoxView.setText(spokenText)
+                Constants.hideKeyboar(requireActivity())
+                startSearch(
+                    searchBoxView, searchBtnView, loader,
+                    searchedImagesList as java.util.ArrayList<String>, internetImageAdapter
+                )
+            }
+        }
+
+    private fun startSearch(
+        searchBoxView: TextInputEditText,
+        searchBtnView: ImageButton,
+        loader: ProgressBar,
+        searchedImagesList: java.util.ArrayList<String>,
+        internetImageAdapter: InternetImageAdapter
+    ){
+        var creditChargePrice: Float = 0F
+        if (searchBoxView.text.toString().trim().isNotEmpty()) {
+
+
+            val firebaseDatabase = FirebaseDatabase.getInstance().reference
+            firebaseDatabase.child("SearchImagesLimit")
+                .addListenerForSingleValueEvent(object :
+                    ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val creditPrice = snapshot.child("credits")
+                            .getValue(Int::class.java) as Int
+                        val images = snapshot.child("images")
+                            .getValue(Int::class.java) as Int
+                        creditChargePrice = creditPrice.toFloat() / images
+
+                        userCurrentCredits =
+                            appSettings.getString(Constants.userCreditsValue) as String
+
+                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+                            BaseActivity.hideSoftKeyboard(
+                                requireActivity(),
+                                searchBtnView
+                            )
+                            //Constants.hideKeyboar(requireActivity())
+                            val query = searchBoxView.text.toString().trim()
+                            requireActivity().runOnUiThread {
+                                loader.visibility = View.VISIBLE
+                            }
+
+                            BaseActivity.searchInternetImages(
+                                requireActivity(),
+                                query,
+                                object : APICallback {
+                                    override fun onSuccess(response: JSONObject) {
+                                        if (loader.visibility == View.VISIBLE) {
+                                            loader.visibility =
+                                                View.INVISIBLE
+                                        }
+
+                                        val items =
+                                            response.getJSONArray("items")
+                                        if (items.length() > 0) {
+                                            searchedImagesList.clear()
+                                            for (i in 0 until items.length()) {
+                                                val item =
+                                                    items.getJSONObject(i)
+                                                if (item.has("link")) {
+                                                    searchedImagesList.add(
+                                                        item.getString(
+                                                            "link"
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                            internetImageAdapter.notifyItemRangeChanged(
+                                                0,
+                                                searchedImagesList.size
+                                            )
+
+                                        }
+                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                                        val hashMap = HashMap<String, Any>()
+                                        val remaining =
+                                            userCurrentCredits.toFloat() - creditChargePrice
+                                        Log.d("TEST199", "$remaining")
+                                        hashMap["credits"] =
+                                            remaining.toString()
+                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+                                            .child(Constants.firebaseUserId)
+                                            .updateChildren(hashMap)
+                                            .addOnSuccessListener {
+                                                BaseActivity.getUserCredits(
+                                                    requireActivity()
+                                                )
+                                            }
+                                            .addOnFailureListener {
+
+                                            }
+                                    }
+
+                                    override fun onError(error: VolleyError) {
+                                        if (loader.visibility == View.VISIBLE) {
+                                            loader.visibility =
+                                                View.INVISIBLE
+                                        }
+
+                                        BaseActivity.showAlert(
+                                            requireActivity(),
+                                            error.localizedMessage!!
+                                        )
+                                    }
+
+                                })
+                        } else {
+                            MaterialAlertDialogBuilder(requireActivity())
+                                .setMessage(getString(R.string.low_credites_error_message))
+                                .setCancelable(false)
+                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                    dialog.dismiss()
+                                }
+                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                                    dialog.dismiss()
+                                    startActivity(Intent(context, UserScreenActivity::class.java))
+                                }
+                                .create().show()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+
+                    }
+
+                })
+
+
+        } else {
+            if (loader.visibility == View.VISIBLE) {
+                loader.visibility = View.INVISIBLE
+            }
+
+            BaseActivity.showAlert(
+                requireActivity(),
+                getString(R.string.empty_text_error)
+            )
+        }
+    }
+
 
     private fun pickImageFromGallery() {
         val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -2649,6 +2991,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val listener: ResponseListener
     ) : DialogFragment() {
 
+        private lateinit var apTitleActiveListNameView: MaterialTextView
+        private lateinit var apDescriptionActiveListNameView: MaterialTextView
+        private lateinit var apQuantityActiveListNameView: MaterialTextView
+        private lateinit var apPriceActiveListNameView: MaterialTextView
         private var insalesFragment: InsalesFragment? = null
         private var selectedCategoryId = 0
         private var selectedInternetImage = ""
@@ -2674,6 +3020,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private lateinit var apPreviousBtn:MaterialTextView
         private lateinit var apNextBtn:MaterialTextView
         private lateinit var apBackArrowBtn:AppCompatImageView
+        private lateinit var internetImageAdapter: InternetImageAdapter
+        private lateinit var searchBtnView: ImageButton
+        private lateinit var searchBoxView: TextInputEditText
+        private lateinit var loader: ProgressBar
+        private lateinit var voiceSearchIcon:AppCompatImageView
+        private var voiceLanguageCode = "en"
+        val searchedImagesList = mutableListOf<String>()
+        private lateinit var addProdcutViewModel:AddProductViewModel
+        private lateinit var testDataBtn:AppCompatImageView
 
         var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -2685,17 +3040,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
         }
 
+
         override fun onResume() {
             super.onResume()
             val intentFilter = IntentFilter()
             intentFilter.addAction("dialog-dismiss")
             LocalBroadcastManager.getInstance(
-                requireActivity()).registerReceiver(broadcastReceiver, intentFilter)
+                requireActivity()
+            ).registerReceiver(broadcastReceiver, intentFilter)
         }
 
         override fun onPause() {
             super.onPause()
-            LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(broadcastReceiver);
+            LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(
+                broadcastReceiver
+            );
         }
 
         override fun onCreate(savedInstanceState: Bundle?) {
@@ -2707,6 +3066,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             appSettings = AppSettings(requireActivity())
             insalesFragment = InsalesFragment()
             tableGenerator = TableGenerator(requireActivity())
+            addProdcutViewModel = ViewModelProvider(this)[AddProductViewModel::class.java]
         }
 
         override fun onCreateView(
@@ -2735,6 +3095,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val apTestDataView = view.findViewById<AppCompatImageView>(R.id.test_data_button)
             apDescriptionView =
                     view.findViewById(R.id.ap_description)
+            testDataBtn = view.findViewById(R.id.test_data_button1)
             quickModeCheckBox = view.findViewById(R.id.ap_quick_product_mode)
             apViewPager = view.findViewById(R.id.ap_viewpager)
             apFirstLayout = view.findViewById(R.id.ap_first_layout)
@@ -2771,6 +3132,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val apQuantityListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
             val apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
 
+            apTitleActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_title_active_list_name)
+            apDescriptionActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_description_active_list_name)
+            apQuantityActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_quantity_active_list_name)
+            apPriceActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
+
             val apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
             val apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
             val apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
@@ -2791,7 +3157,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 if (isChecked){
 
                     if (userCurrentCredits.toFloat() > 0){
-                        appSettings.putInt("QUICK_MODE_STATUS",1)
+                        appSettings.putInt("QUICK_MODE_STATUS", 1)
                         quickModeCheckBox.isChecked = true
                         apFirstLayout.visibility = View.GONE
                         apSecondLayout.visibility = View.VISIBLE
@@ -2819,12 +3185,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 }
                 else{
-                    appSettings.putInt("QUICK_MODE_STATUS",0)
+                    appSettings.putInt("QUICK_MODE_STATUS", 0)
                     apSecondLayout.visibility = View.GONE
                     apNextPreviousButtons.visibility = View.GONE
                     apFirstLayout.visibility = View.VISIBLE
                 }
             }
+
+
 
             apBackArrowBtn.setOnClickListener {
                 dismiss()
@@ -2839,7 +3207,23 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             fragmentAdapter.addFragment(ApImageUploadFragment(), "ap_image_fr")
             apViewPager.adapter = fragmentAdapter
 
-            apViewPager.addOnPageChangeListener(object :ViewPager.OnPageChangeListener{
+            testDataBtn.setOnClickListener {
+               val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
+                if (currentFragment is ApTitleInputFragment){
+                    currentFragment.updateTestData("Test Title")
+                }
+                else if (currentFragment is ApDescriptionInputFragment){
+                    currentFragment.updateTestData("Test Description")
+                }
+                else if (currentFragment is ApQuantityInputFragment){
+                    currentFragment.updateTestData("1")
+                }
+                else if (currentFragment is ApPriceInputFragment){
+                    currentFragment.updateTestData("1")
+                }
+            }
+
+            apViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrolled(
                     position: Int,
                     positionOffset: Float,
@@ -2849,14 +3233,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun onPageSelected(position: Int) {
-                    if(position==0) {
+                    if (position == 0 || position == 5){
+                        testDataBtn.visibility = View.GONE
+                    }
+                    else{
+                        testDataBtn.visibility = View.VISIBLE
+                    }
+                    if (position == 0) {
                         apPreviousBtn.visibility = View.INVISIBLE
-                    }else  {
+                    } else {
                         apPreviousBtn.visibility = View.VISIBLE
                     }
-                    if(position < apViewPager.adapter!!.count -1 ) {
+                    if (position < apViewPager.adapter!!.count - 1) {
                         apNextBtn.visibility = View.VISIBLE
-                    }else  {
+                    } else {
                         apNextBtn.visibility = View.INVISIBLE
                     }
                 }
@@ -2868,11 +3258,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             })
 
             apPreviousBtn.setOnClickListener {
-                apViewPager.setCurrentItem(apViewPager.currentItem -1, true)
+                apViewPager.setCurrentItem(apViewPager.currentItem - 1, true)
             }
 
             apNextBtn.setOnClickListener {
-                apViewPager.setCurrentItem(apViewPager.currentItem +1, true)
+                apViewPager.setCurrentItem(apViewPager.currentItem + 1, true)
             }
 
 
@@ -2900,13 +3290,56 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
             apTitleVoiceRecView.setOnClickListener {
                 Constants.CIVType = "ap_title"
-                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                    putExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                    )
+                voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+                val voiceLayout = LayoutInflater.from(context).inflate(
+                        R.layout.voice_language_setting_layout,
+                        null
+                )
+                val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+
+                if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                    voiceLanguageSpinner.setSelection(0, false)
+                } else {
+                    voiceLanguageSpinner.setSelection(1, false)
                 }
-                voiceResultLauncher.launch(intent)
+
+                voiceLanguageSpinner.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                            ) {
+                                voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
+                                                Locale.ENGLISH
+                                        ).contains("english")){"en"}else{"ru"}
+                                appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
+
+                        }
+                val builder = MaterialAlertDialogBuilder(requireActivity())
+                builder.setView(voiceLayout)
+                val alert = builder.create();
+                alert.show()
+                voiceLanguageSaveBtn.setOnClickListener {
+                    alert.dismiss()
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(
+                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                        )
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                    }
+                    voiceResultLauncher.launch(intent)
+                }
             }
 
             val apDescriptionCameraRecView = view.findViewById<LinearLayout>(R.id.ap_description_camera_layout)
@@ -2938,20 +3371,71 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
             apDescriptionVoiceRecView.setOnClickListener {
                 Constants.CIVType = "ap_description"
-                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                    putExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                    )
+                voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+                val voiceLayout = LayoutInflater.from(context).inflate(
+                        R.layout.voice_language_setting_layout,
+                        null
+                )
+                val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+
+                if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                    voiceLanguageSpinner.setSelection(0, false)
+                } else {
+                    voiceLanguageSpinner.setSelection(1, false)
                 }
-                voiceResultLauncher.launch(intent)
+
+                voiceLanguageSpinner.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                            ) {
+                                voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
+                                                Locale.ENGLISH
+                                        ).contains("english")){"en"}else{"ru"}
+                                appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
+
+                        }
+                val builder = MaterialAlertDialogBuilder(requireActivity())
+                builder.setView(voiceLayout)
+                val alert = builder.create();
+                alert.show()
+                voiceLanguageSaveBtn.setOnClickListener {
+                    alert.dismiss()
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(
+                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                        )
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                    }
+                    voiceResultLauncher.launch(intent)
+                }
             }
+
 
 
             val apTitleSpinnerSelectedPosition = appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
             val apTitleDefaultValue = appSettings.getString("AP_TITLE_DEFAULT_VALUE")
             val apTitleListId = appSettings.getInt("AP_TITLE_LIST_ID")
+            val apTitleActiveListName = appSettings.getString("AP_TITLE_LIST_NAME")
+            if (apTitleActiveListName!!.isEmpty()) {
+                apTitleActiveListNameView.text = "Active List: None"
+            } else {
+                apTitleActiveListNameView.text = "Active List: $apTitleActiveListName"
+            }
             apTitleSpinner.setSelection(apTitleSpinnerSelectedPosition)
+
 
             apTitleListBtn.setOnClickListener {
                 openListWithFieldsDialog("ap_title")
@@ -2962,6 +3446,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
                 apTitleListBtn.visibility = View.GONE
+                apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
                 apTitleDefaultInputBox.visibility = View.VISIBLE
                 apTitleView.visibility = View.VISIBLE
@@ -2974,6 +3459,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apTitleImageRecView.visibility = View.GONE
                 apTitleDefaultInputBox.visibility = View.GONE
                 apTitleListBtn.visibility = View.VISIBLE
+                apTitleActiveListNameView.visibility = View.VISIBLE
                 apTitleView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apTitleListId)
@@ -3006,6 +3492,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             else if (apTitleSpinnerSelectedPosition == 3)
             {
                 apTitleListBtn.visibility = View.GONE
+                apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
                 apTitleDefaultInputBox.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
@@ -3016,6 +3503,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             else if (apTitleSpinnerSelectedPosition == 4)
             {
                 apTitleListBtn.visibility = View.GONE
+                apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
                 apTitleDefaultInputBox.visibility = View.GONE
                 apTitleVoiceRecView.visibility = View.GONE
@@ -3025,6 +3513,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else if (apTitleSpinnerSelectedPosition == 5)
             {
                 apTitleListBtn.visibility = View.GONE
+                apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
                 apTitleDefaultInputBox.visibility = View.GONE
                 apTitleVoiceRecView.visibility = View.GONE
@@ -3037,10 +3526,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
                 apTitleListBtn.visibility = View.GONE
+                apTitleActiveListNameView.visibility = View.GONE
                 apTitleDefaultInputBox.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
                 apTitleView.visibility = View.VISIBLE
             }
+
+
 
             apTitleDefaultInputBox.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
@@ -3057,6 +3549,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
+                    apTitleView.setText(s.toString())
                     appSettings.putString("AP_TITLE_DEFAULT_VALUE", s.toString())
                 }
 
@@ -3070,23 +3563,36 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     id: Long
                 ) {
                     appSettings.putInt("AP_TITLE_SPINNER_SELECTED_POSITION", position)
+
                     if (position == 1) {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleListBtn.visibility = View.GONE
+                        apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
                         apTitleDefaultInputBox.visibility = View.VISIBLE
                         apTitleView.visibility = View.VISIBLE
-                        apTitleDefaultInputBox.setText(apTitleDefaultValue)
-                        apTitleView.setText(apTitleDefaultValue)
-                    } else if (position == 2) {
+                        if (apTitleDefaultValue!!.isNotEmpty()) {
+                            apTitleDefaultInputBox.setText(apTitleDefaultValue)
+                            apTitleView.setText(apTitleDefaultValue)
+                        }
+                        else{
+                            apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                            apTitleView.setSelection(apTitleView.text.toString().length)
+                        }
+                    }
+                    else if (position == 2)
+                    {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleDefaultInputBox.visibility = View.GONE
                         apTitleListBtn.visibility = View.VISIBLE
+                        apTitleActiveListNameView.visibility = View.VISIBLE
                         apTitleView.visibility = View.GONE
+                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apTitleListId)
                         val listValues = listOptions.split(",")
@@ -3114,38 +3620,55 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                         }
 
-                    } else if (position == 3) {
+                    }
+                    else if (position == 3)
+                    {
                         apTitleListBtn.visibility = View.GONE
+                        apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
                         apTitleDefaultInputBox.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleView.visibility = View.VISIBLE
+                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleVoiceRecView.visibility = View.VISIBLE
-                    } else if (position == 4) {
+                    } else if (position == 4)
+                    {
                         apTitleListBtn.visibility = View.GONE
+                        apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
                         apTitleDefaultInputBox.visibility = View.GONE
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleView.visibility = View.VISIBLE
+                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleCameraRecView.visibility = View.VISIBLE
-                    } else if (position == 5) {
+                    } else if (position == 5)
+                    {
                         apTitleListBtn.visibility = View.GONE
+                        apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
                         apTitleDefaultInputBox.visibility = View.GONE
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleView.visibility = View.VISIBLE
+                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleImageRecView.visibility = View.VISIBLE
-                    } else {
+                    } else
+                    {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleListBtn.visibility = View.GONE
+                        apTitleActiveListNameView.visibility = View.GONE
                         apTitleDefaultInputBox.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
                         apTitleView.visibility = View.VISIBLE
+                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setSelection(apTitleView.text.toString().length)
                     }
                 }
 
@@ -3155,9 +3678,36 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             }
 
+            apTitleView.addTextChangedListener(object:TextWatcher{
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                   appSettings.putString("AP_TITLE_VALUE",s.toString())
+                }
+
+            })
+
             val apDescriptionSpinnerSelectedPosition = appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
             val apDescriptionDefaultValue = appSettings.getString("AP_DESCRIPTION_DEFAULT_VALUE")
             val apDescriptionListId = appSettings.getInt("AP_DESCRIPTION_LIST_ID")
+            val apDescriptionActiveListName = appSettings.getString("AP_DESCRIPTION_LIST_NAME")
+            if (apDescriptionActiveListName!!.isEmpty()){
+                apDescriptionActiveListNameView.text = "Active List: None"
+            }
+            else{
+                apDescriptionActiveListNameView.text = "Active List: $apDescriptionActiveListName"
+            }
             apDescriptionSpinner.setSelection(apDescriptionSpinnerSelectedPosition)
             apDescriptionListBtn.setOnClickListener {
                 openListWithFieldsDialog("ap_description")
@@ -3167,17 +3717,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.GONE
+                apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionDefaultInputBox.visibility = View.VISIBLE
                 apDescriptionView.visibility = View.VISIBLE
                 apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
                 apDescriptionView.setText(apDescriptionDefaultValue)
-            } else if (apDescriptionSpinnerSelectedPosition == 2) {
+            }
+            else if (apDescriptionSpinnerSelectedPosition == 2) {
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionDefaultInputBox.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.VISIBLE
+                apDescriptionActiveListNameView.visibility = View.VISIBLE
                 apDescriptionView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apDescriptionListId)
@@ -3206,35 +3759,43 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 }
 
-            } else if (apDescriptionSpinnerSelectedPosition == 3) {
+            }
+            else if (apDescriptionSpinnerSelectedPosition == 3) {
                 apDescriptionListBtn.visibility = View.GONE
+                apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionDefaultInputBox.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionView.visibility = View.VISIBLE
                 apDescriptionVoiceRecView.visibility = View.VISIBLE
-            } else if (apDescriptionSpinnerSelectedPosition == 4) {
+            }
+            else if (apDescriptionSpinnerSelectedPosition == 4) {
                 apDescriptionListBtn.visibility = View.GONE
+                apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionDefaultInputBox.visibility = View.GONE
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionView.visibility = View.VISIBLE
                 apDescriptionCameraRecView.visibility = View.VISIBLE
-            } else if (apDescriptionSpinnerSelectedPosition == 5) {
+            }
+            else if (apDescriptionSpinnerSelectedPosition == 5) {
                 apDescriptionListBtn.visibility = View.GONE
+                apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionDefaultInputBox.visibility = View.GONE
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionView.visibility = View.VISIBLE
                 apDescriptionImageRecView.visibility = View.VISIBLE
-            } else {
+            }
+            else {
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.GONE
+                apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionDefaultInputBox.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionView.visibility = View.VISIBLE
@@ -3255,6 +3816,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
+                    apDescriptionView.setText(s.toString())
                     appSettings.putString("AP_DESCRIPTION_DEFAULT_VALUE", s.toString())
                 }
 
@@ -3273,19 +3835,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
                         apDescriptionListBtn.visibility = View.GONE
+                        apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
                         apDescriptionDefaultInputBox.visibility = View.VISIBLE
                         apDescriptionView.visibility = View.VISIBLE
-                        apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
-                        apDescriptionView.setText(apDescriptionDefaultValue)
-                    } else if (position == 2) {
+                        if (apDescriptionDefaultValue!!.isNotEmpty()) {
+                            apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
+                            apDescriptionView.setText(apDescriptionDefaultValue)
+                        }
+                        else{
+                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                        }
+                    }
+                    else if (position == 2) {
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
                         apDescriptionDefaultInputBox.visibility = View.GONE
                         apDescriptionListBtn.visibility = View.VISIBLE
+                        apDescriptionActiveListNameView.visibility = View.VISIBLE
                         apDescriptionView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.VISIBLE
+                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                         val listOptions: String = tableGenerator.getListValues(apDescriptionListId)
                         val listValues = listOptions.split(",")
                         val apDescriptionSpinnerAdapter = ArrayAdapter(
@@ -3312,38 +3885,54 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                         }
 
-                    } else if (position == 3) {
+                    }
+                    else if (position == 3) {
                         apDescriptionListBtn.visibility = View.GONE
+                        apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
                         apDescriptionDefaultInputBox.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
                         apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                         apDescriptionVoiceRecView.visibility = View.VISIBLE
-                    } else if (position == 4) {
+                    }
+                    else if (position == 4) {
                         apDescriptionListBtn.visibility = View.GONE
+                        apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
                         apDescriptionDefaultInputBox.visibility = View.GONE
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
                         apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                         apDescriptionCameraRecView.visibility = View.VISIBLE
-                    } else if (position == 5) {
+                    }
+                    else if (position == 5) {
                         apDescriptionListBtn.visibility = View.GONE
+                        apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
                         apDescriptionDefaultInputBox.visibility = View.GONE
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                         apDescriptionImageRecView.visibility = View.VISIBLE
-                    } else {
+                    }
+                    else {
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
                         apDescriptionListBtn.visibility = View.GONE
+                        apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionDefaultInputBox.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
                         apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                     }
                 }
 
@@ -3353,9 +3942,31 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             }
 
+            apDescriptionView.addTextChangedListener(object:TextWatcher{
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    appSettings.putString("AP_DESCRIPTION_VALUE",s.toString())
+                }
+
+            })
+
             val apQuantitySpinnerSelectedPosition = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
             val apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
             val apQuantityListId = appSettings.getInt("AP_QUANTITY_LIST_ID")
+            val apQuantityActiveListName = appSettings.getString("AP_QUANTITY_LIST_NAME")
+            if (apQuantityActiveListName!!.isEmpty()){
+                apQuantityActiveListNameView.text = "Active List: None"
+            }
+            else{
+                apQuantityActiveListNameView.text = "Active List: $apQuantityActiveListName"
+            }
             apQuantitySpinner.setSelection(apQuantitySpinnerSelectedPosition)
             apQuantityListBtn.setOnClickListener {
                 openListWithFieldsDialog("ap_quantity")
@@ -3363,13 +3974,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             if (apQuantitySpinnerSelectedPosition == 1) {
                 apQuantityListSpinner.visibility = View.GONE
                 apQuantityListBtn.visibility = View.GONE
+                apQuantityActiveListNameView.visibility = View.GONE
                 apQuantityDefaultInputBox.visibility = View.VISIBLE
                 apQuantityView.visibility = View.VISIBLE
-                apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                apQuantityView.setText(apQuantityDefaultValue)
-            } else if (apQuantitySpinnerSelectedPosition == 2) {
+                    apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                    apQuantityView.setText(apQuantityDefaultValue)
+            }
+            else if (apQuantitySpinnerSelectedPosition == 2) {
                 apQuantityDefaultInputBox.visibility = View.GONE
                 apQuantityListBtn.visibility = View.VISIBLE
+                apQuantityActiveListNameView.visibility = View.VISIBLE
                 apQuantityView.visibility = View.GONE
                 apQuantityListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apQuantityListId)
@@ -3400,6 +4014,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 apQuantityView.visibility = View.VISIBLE
                 apQuantityListBtn.visibility = View.GONE
+                apQuantityActiveListNameView.visibility = View.GONE
                 apQuantityDefaultInputBox.visibility = View.GONE
                 apQuantityListSpinner.visibility = View.GONE
             }
@@ -3419,6 +4034,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
+                    apQuantityView.setText(s.toString())
                     appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
                 }
 
@@ -3437,12 +4053,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityDefaultInputBox.visibility = View.VISIBLE
                         apQuantityView.visibility = View.VISIBLE
-                        apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                        apQuantityView.setText(apQuantityDefaultValue)
-                    } else if (position == 2) {
+                        if (apQuantityDefaultValue!!.isNotEmpty()) {
+                            apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                            apQuantityView.setText(apQuantityDefaultValue)
+                        }
+                        else{
+                            apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
+                            apQuantityView.setSelection(apQuantityView.text.toString().length)
+                        }
+                    }
+                    else if (position == 2) {
                         apQuantityDefaultInputBox.visibility = View.GONE
                         apQuantityListBtn.visibility = View.VISIBLE
                         apQuantityView.visibility = View.GONE
+                        apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
+                        apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apQuantityListId)
                         val listValues = listOptions.split(",")
@@ -3471,6 +4096,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         }
                     } else {
                         apQuantityView.visibility = View.VISIBLE
+                        apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
+                        apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityDefaultInputBox.visibility = View.GONE
                         apQuantityListSpinner.visibility = View.GONE
@@ -3483,9 +4110,31 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             }
 
+            apQuantityView.addTextChangedListener(object:TextWatcher{
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    appSettings.putString("AP_QUANTITY_VALUE",s.toString())
+                }
+
+            })
+
             val apPriceSpinnerSelectedPosition = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
             val apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
             val apPriceListId = appSettings.getInt("AP_PRICE_LIST_ID")
+            val apPriceActiveListName = appSettings.getString("AP_PRICE_LIST_NAME")
+            if (apPriceActiveListName!!.isEmpty()){
+                apPriceActiveListNameView.text = "Active List: None"
+            }
+            else{
+                apPriceActiveListNameView.text = "Active List: $apPriceActiveListName"
+            }
             apPriceSpinner.setSelection(apPriceSpinnerSelectedPosition)
             apPriceListBtn.setOnClickListener {
                 openListWithFieldsDialog("ap_price")
@@ -3493,13 +4142,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             if (apPriceSpinnerSelectedPosition == 1) {
                 apPriceListSpinner.visibility = View.GONE
                 apPriceListBtn.visibility = View.GONE
+                apPriceActiveListNameView.visibility = View.GONE
                 apPriceDefaultInputBox.visibility = View.VISIBLE
                 apPriceView.visibility = View.VISIBLE
                 apPriceDefaultInputBox.setText(apPriceDefaultValue)
                 apPriceView.setText(apPriceDefaultValue)
-            } else if (apPriceSpinnerSelectedPosition == 2) {
+            }
+            else if (apPriceSpinnerSelectedPosition == 2) {
                 apPriceDefaultInputBox.visibility = View.GONE
                 apPriceListBtn.visibility = View.VISIBLE
+                apPriceActiveListNameView.visibility = View.VISIBLE
                 apPriceView.visibility = View.GONE
                 apPriceListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apPriceListId)
@@ -3530,6 +4182,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 apPriceView.visibility = View.VISIBLE
                 apPriceListBtn.visibility = View.GONE
+                apPriceActiveListNameView.visibility = View.GONE
                 apPriceDefaultInputBox.visibility = View.GONE
                 apPriceListSpinner.visibility = View.GONE
             }
@@ -3549,6 +4202,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
+                    apPriceView.setText(s.toString())
                     appSettings.putString("AP_PRICE_DEFAULT_VALUE", s.toString())
                 }
 
@@ -3567,12 +4221,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apPriceListBtn.visibility = View.GONE
                         apPriceDefaultInputBox.visibility = View.VISIBLE
                         apPriceView.visibility = View.VISIBLE
-                        apPriceDefaultInputBox.setText(apPriceDefaultValue)
-                        apPriceView.setText(apPriceDefaultValue)
-                    } else if (position == 2) {
+                        if (apPriceDefaultValue!!.isNotEmpty()) {
+                            apPriceDefaultInputBox.setText(apPriceDefaultValue)
+                            apPriceView.setText(apPriceDefaultValue)
+                        }
+                        else{
+                            apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
+                            apPriceView.setSelection(apPriceView.text.toString().length)
+                        }
+                    }
+                    else if (position == 2) {
                         apPriceDefaultInputBox.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
                         apPriceView.visibility = View.GONE
+                        apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
+                        apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apPriceListId)
                         val listValues = listOptions.split(",")
@@ -3601,6 +4264,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         }
                     } else {
                         apPriceView.visibility = View.VISIBLE
+                        apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
+                        apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListBtn.visibility = View.GONE
                         apPriceDefaultInputBox.visibility = View.GONE
                         apPriceListSpinner.visibility = View.GONE
@@ -3612,6 +4277,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
             }
+
+            apPriceView.addTextChangedListener(object:TextWatcher{
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    appSettings.putString("AP_PRICE_VALUE",s.toString())
+                }
+
+            })
 
 
             selectedImageView =
@@ -3656,20 +4336,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             internetImageView.setOnClickListener {
                 intentType = 3
-                val searchedImagesList = mutableListOf<String>()
                 val tempImageList = mutableListOf<String>()
                 val internetSearchLayout = LayoutInflater.from(context)
                         .inflate(R.layout.internet_image_search_dialog_layout, null)
-                val loader =
+                loader =
                         internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
-                val searchBoxView =
+                searchBoxView =
                         internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
-                val searchBtnView =
-                        internetSearchLayout.findViewById<MaterialButton>(R.id.internet_image_search_btn)
+                searchBtnView =
+                        internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
                 val internetImageRecyclerView =
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                 val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
                 val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setCancelable(false)
                 builder.setView(internetSearchLayout)
@@ -3685,7 +4365,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     LinearLayoutManager.VERTICAL
                 )//GridLayoutManager(context, 2)
                 internetImageRecyclerView.hasFixedSize()
-                val internetImageAdapter = InternetImageAdapter(
+                internetImageAdapter = InternetImageAdapter(
                     requireActivity(),
                     searchedImagesList as java.util.ArrayList<String>
                 )
@@ -3711,138 +4391,215 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 })
 
+                voiceSearchIcon.setOnClickListener {
+                    voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+                    val voiceLayout = LayoutInflater.from(context).inflate(
+                        R.layout.voice_language_setting_layout,
+                        null
+                    )
+                    val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                    val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+
+                    if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                        voiceLanguageSpinner.setSelection(0, false)
+                    } else {
+                        voiceLanguageSpinner.setSelection(1, false)
+                    }
+
+                    voiceLanguageSpinner.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
+                                        Locale.ENGLISH
+                                    ).contains("english")){"en"}else{"ru"}
+                                appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                            }
+
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
+
+                        }
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
+                    builder.setView(voiceLayout)
+                    val alert = builder.create();
+                    alert.show()
+                    voiceLanguageSaveBtn.setOnClickListener {
+                        alert.dismiss()
+                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                            putExtra(
+                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                            )
+                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                        }
+                        voiceResultLauncher1.launch(intent)
+                    }
+                }
+
+                searchBoxView.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+                    override fun onEditorAction(
+                        v: TextView?,
+                        actionId: Int,
+                        event: KeyEvent?
+                    ): Boolean {
+                        startSearch(
+                            searchBoxView,
+                            searchBtnView,
+                            loader,
+                            searchedImagesList,
+                            internetImageAdapter
+                        )
+                        return false
+                    }
+
+                })
 
                 searchBtnView.setOnClickListener {
-                    var creditChargePrice: Float = 0F
-                    if (searchBoxView.text.toString().trim().isNotEmpty()) {
-
-
-                        val firebaseDatabase = FirebaseDatabase.getInstance().reference
-                        firebaseDatabase.child("SearchImagesLimit")
-                                .addListenerForSingleValueEvent(object :
-                                    ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        val creditPrice = snapshot.child("credits")
-                                            .getValue(Int::class.java) as Int
-                                        val images = snapshot.child("images")
-                                            .getValue(Int::class.java) as Int
-                                        creditChargePrice = creditPrice.toFloat() / images
-
-                                        userCurrentCredits =
-                                            appSettings.getString(Constants.userCreditsValue) as String
-
-                                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
-                                            BaseActivity.hideSoftKeyboard(
-                                                requireActivity(),
-                                                searchBtnView
-                                            )
-                                            //Constants.hideKeyboar(requireActivity())
-                                            val query = searchBoxView.text.toString().trim()
-                                            requireActivity().runOnUiThread {
-                                                loader.visibility = View.VISIBLE
-                                            }
-
-                                            BaseActivity.searchInternetImages(
-                                                requireActivity(),
-                                                query,
-                                                object : APICallback {
-                                                    override fun onSuccess(response: JSONObject) {
-                                                        if (loader.visibility == View.VISIBLE) {
-                                                            loader.visibility =
-                                                                View.INVISIBLE
-                                                        }
-
-                                                        val items =
-                                                            response.getJSONArray("items")
-                                                        if (items.length() > 0) {
-                                                            searchedImagesList.clear()
-                                                            for (i in 0 until items.length()) {
-                                                                val item =
-                                                                    items.getJSONObject(i)
-                                                                if (item.has("link")) {
-                                                                    searchedImagesList.add(
-                                                                        item.getString(
-                                                                            "link"
-                                                                        )
-                                                                    )
-                                                                }
-                                                            }
-                                                            internetImageAdapter.notifyItemRangeChanged(
-                                                                0,
-                                                                searchedImagesList.size
-                                                            )
-
-                                                        }
-                                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-                                                        val hashMap = HashMap<String, Any>()
-                                                        val remaining =
-                                                            userCurrentCredits.toFloat() - creditChargePrice
-                                                        Log.d("TEST199", "$remaining")
-                                                        hashMap["credits"] =
-                                                            remaining.toString()
-                                                        firebaseDatabase.child(Constants.firebaseUserCredits)
-                                                            .child(Constants.firebaseUserId)
-                                                            .updateChildren(hashMap)
-                                                            .addOnSuccessListener {
-                                                                BaseActivity.getUserCredits(
-                                                                    requireActivity()
-                                                                )
-                                                            }
-                                                            .addOnFailureListener {
-
-                                                            }
-                                                    }
-
-                                                    override fun onError(error: VolleyError) {
-                                                        if (loader.visibility == View.VISIBLE) {
-                                                            loader.visibility =
-                                                                View.INVISIBLE
-                                                        }
-
-                                                        BaseActivity.showAlert(
-                                                            requireActivity(),
-                                                            error.localizedMessage!!
-                                                        )
-                                                    }
-
-                                                })
-                                        } else {
-                                            MaterialAlertDialogBuilder(requireActivity())
-                                                .setMessage(getString(R.string.low_credites_error_message))
-                                                .setCancelable(false)
-                                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                                                    dialog.dismiss()
-                                                }
-                                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                                                    dialog.dismiss()
-                                                    startActivity(
-                                                        Intent(
-                                                            requireActivity(),
-                                                            UserScreenActivity::class.java
-                                                        )
-                                                    )
-                                                }
-                                                .create().show()
-                                        }
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-
-                                    }
-
-                                })
-
-
-                    } else {
-                        if (loader.visibility == View.VISIBLE) {
-                            loader.visibility = View.INVISIBLE
-                        }
-
-                        BaseActivity.showAlert(
-                            requireActivity(),
-                            getString(R.string.empty_text_error)
-                        )
-                    }
+//                    var creditChargePrice: Float = 0F
+//                    if (searchBoxView.text.toString().trim().isNotEmpty()) {
+//
+//
+//                        val firebaseDatabase = FirebaseDatabase.getInstance().reference
+//                        firebaseDatabase.child("SearchImagesLimit")
+//                                .addListenerForSingleValueEvent(object :
+//                                    ValueEventListener {
+//                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                        val creditPrice = snapshot.child("credits")
+//                                            .getValue(Int::class.java) as Int
+//                                        val images = snapshot.child("images")
+//                                            .getValue(Int::class.java) as Int
+//                                        creditChargePrice = creditPrice.toFloat() / images
+//
+//                                        userCurrentCredits =
+//                                            appSettings.getString(Constants.userCreditsValue) as String
+//
+//                                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+//                                            BaseActivity.hideSoftKeyboard(
+//                                                requireActivity(),
+//                                                searchBtnView
+//                                            )
+//                                            //Constants.hideKeyboar(requireActivity())
+//                                            val query = searchBoxView.text.toString().trim()
+//                                            requireActivity().runOnUiThread {
+//                                                loader.visibility = View.VISIBLE
+//                                            }
+//
+//                                            BaseActivity.searchInternetImages(
+//                                                requireActivity(),
+//                                                query,
+//                                                object : APICallback {
+//                                                    override fun onSuccess(response: JSONObject) {
+//                                                        if (loader.visibility == View.VISIBLE) {
+//                                                            loader.visibility =
+//                                                                View.INVISIBLE
+//                                                        }
+//
+//                                                        val items =
+//                                                            response.getJSONArray("items")
+//                                                        if (items.length() > 0) {
+//                                                            searchedImagesList.clear()
+//                                                            for (i in 0 until items.length()) {
+//                                                                val item =
+//                                                                    items.getJSONObject(i)
+//                                                                if (item.has("link")) {
+//                                                                    searchedImagesList.add(
+//                                                                        item.getString(
+//                                                                            "link"
+//                                                                        )
+//                                                                    )
+//                                                                }
+//                                                            }
+//                                                            internetImageAdapter.notifyItemRangeChanged(
+//                                                                0,
+//                                                                searchedImagesList.size
+//                                                            )
+//
+//                                                        }
+//                                                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//                                                        val hashMap = HashMap<String, Any>()
+//                                                        val remaining =
+//                                                            userCurrentCredits.toFloat() - creditChargePrice
+//                                                        Log.d("TEST199", "$remaining")
+//                                                        hashMap["credits"] =
+//                                                            remaining.toString()
+//                                                        firebaseDatabase.child(Constants.firebaseUserCredits)
+//                                                            .child(Constants.firebaseUserId)
+//                                                            .updateChildren(hashMap)
+//                                                            .addOnSuccessListener {
+//                                                                BaseActivity.getUserCredits(
+//                                                                    requireActivity()
+//                                                                )
+//                                                            }
+//                                                            .addOnFailureListener {
+//
+//                                                            }
+//                                                    }
+//
+//                                                    override fun onError(error: VolleyError) {
+//                                                        if (loader.visibility == View.VISIBLE) {
+//                                                            loader.visibility =
+//                                                                View.INVISIBLE
+//                                                        }
+//
+//                                                        BaseActivity.showAlert(
+//                                                            requireActivity(),
+//                                                            error.localizedMessage!!
+//                                                        )
+//                                                    }
+//
+//                                                })
+//                                        } else {
+//                                            MaterialAlertDialogBuilder(requireActivity())
+//                                                .setMessage(getString(R.string.low_credites_error_message))
+//                                                .setCancelable(false)
+//                                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                                                    dialog.dismiss()
+//                                                }
+//                                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                                                    dialog.dismiss()
+//                                                    startActivity(
+//                                                        Intent(
+//                                                            requireActivity(),
+//                                                            UserScreenActivity::class.java
+//                                                        )
+//                                                    )
+//                                                }
+//                                                .create().show()
+//                                        }
+//                                    }
+//
+//                                    override fun onCancelled(error: DatabaseError) {
+//
+//                                    }
+//
+//                                })
+//
+//
+//                    } else {
+//                        if (loader.visibility == View.VISIBLE) {
+//                            loader.visibility = View.INVISIBLE
+//                        }
+//
+//                        BaseActivity.showAlert(
+//                            requireActivity(),
+//                            getString(R.string.empty_text_error)
+//                        )
+//                    }
+                    startSearch(
+                        searchBoxView,
+                        searchBtnView,
+                        loader,
+                        searchedImagesList,
+                        internetImageAdapter
+                    )
                 }
 
             }
@@ -4128,6 +4885,166 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     .start(requireActivity())
         }
 
+        private var voiceResultLauncher1 =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val spokenText: String =
+                        result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                            .let { results ->
+                                results!![0]
+                            }
+
+                    searchBoxView.setText(spokenText)
+                    Constants.hideKeyboar(requireActivity())
+                    startSearch(
+                        searchBoxView, searchBtnView, loader,
+                        searchedImagesList as java.util.ArrayList<String>, internetImageAdapter
+                    )
+                }
+            }
+
+        private fun startSearch(
+            searchBoxView: TextInputEditText,
+            searchBtnView: ImageButton,
+            loader: ProgressBar,
+            searchedImagesList: java.util.ArrayList<String>,
+            internetImageAdapter: InternetImageAdapter
+        ){
+            var creditChargePrice: Float = 0F
+            if (searchBoxView.text.toString().trim().isNotEmpty()) {
+
+
+                val firebaseDatabase = FirebaseDatabase.getInstance().reference
+                firebaseDatabase.child("SearchImagesLimit")
+                    .addListenerForSingleValueEvent(object :
+                        ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val creditPrice = snapshot.child("credits")
+                                .getValue(Int::class.java) as Int
+                            val images = snapshot.child("images")
+                                .getValue(Int::class.java) as Int
+                            creditChargePrice = creditPrice.toFloat() / images
+
+                            userCurrentCredits =
+                                appSettings.getString(Constants.userCreditsValue) as String
+
+                            if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
+                                BaseActivity.hideSoftKeyboard(
+                                    requireActivity(),
+                                    searchBtnView
+                                )
+                                //Constants.hideKeyboar(requireActivity())
+                                val query = searchBoxView.text.toString().trim()
+                                requireActivity().runOnUiThread {
+                                    loader.visibility = View.VISIBLE
+                                }
+
+                                BaseActivity.searchInternetImages(
+                                    requireActivity(),
+                                    query,
+                                    object : APICallback {
+                                        override fun onSuccess(response: JSONObject) {
+                                            if (loader.visibility == View.VISIBLE) {
+                                                loader.visibility =
+                                                    View.INVISIBLE
+                                            }
+
+                                            val items =
+                                                response.getJSONArray("items")
+                                            if (items.length() > 0) {
+                                                searchedImagesList.clear()
+                                                for (i in 0 until items.length()) {
+                                                    val item =
+                                                        items.getJSONObject(i)
+                                                    if (item.has("link")) {
+                                                        searchedImagesList.add(
+                                                            item.getString(
+                                                                "link"
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                                internetImageAdapter.notifyItemRangeChanged(
+                                                    0,
+                                                    searchedImagesList.size
+                                                )
+
+                                            }
+                                            //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                                            val hashMap = HashMap<String, Any>()
+                                            val remaining =
+                                                userCurrentCredits.toFloat() - creditChargePrice
+                                            Log.d("TEST199", "$remaining")
+                                            hashMap["credits"] =
+                                                remaining.toString()
+                                            firebaseDatabase.child(Constants.firebaseUserCredits)
+                                                .child(Constants.firebaseUserId)
+                                                .updateChildren(hashMap)
+                                                .addOnSuccessListener {
+                                                    BaseActivity.getUserCredits(
+                                                        requireActivity()
+                                                    )
+                                                }
+                                                .addOnFailureListener {
+
+                                                }
+                                        }
+
+                                        override fun onError(error: VolleyError) {
+                                            if (loader.visibility == View.VISIBLE) {
+                                                loader.visibility =
+                                                    View.INVISIBLE
+                                            }
+
+                                            BaseActivity.showAlert(
+                                                requireActivity(),
+                                                error.localizedMessage!!
+                                            )
+                                        }
+
+                                    })
+                            } else {
+                                MaterialAlertDialogBuilder(requireActivity())
+                                    .setMessage(getString(R.string.low_credites_error_message))
+                                    .setCancelable(false)
+                                    .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                                        dialog.dismiss()
+                                    }
+                                    .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                                        dialog.dismiss()
+                                        startActivity(
+                                            Intent(
+                                                context,
+                                                UserScreenActivity::class.java
+                                            )
+                                        )
+                                    }
+                                    .create().show()
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                        }
+
+                    })
+
+
+            } else {
+                if (loader.visibility == View.VISIBLE) {
+                    loader.visibility = View.INVISIBLE
+                }
+
+                BaseActivity.showAlert(
+                    requireActivity(),
+                    getString(R.string.empty_text_error)
+                )
+            }
+        }
+
+
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
             if (!quickModeCheckBox.isChecked && requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
@@ -4199,12 +5116,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         //selectedListTextView.text = listValue.value
                         if (fieldType == "ap_title") {
                             appSettings.putInt("AP_TITLE_LIST_ID", listId!!)
+                            appSettings.putString("AP_TITLE_LIST_NAME", listValue.value)
+                            apTitleActiveListNameView.text = "Active List: ${listValue.value}"
                         } else if (fieldType == "ap_description") {
                             appSettings.putInt("AP_DESCRIPTION_LIST_ID", listId!!)
+                            appSettings.putString("AP_DESCRIPTION_LIST_NAME",listValue.value)
+                            apDescriptionActiveListNameView.text = "Active List: ${listValue.value}"
                         } else if (fieldType == "ap_quantity") {
                             appSettings.putInt("AP_QUANTITY_LIST_ID", listId!!)
+                            appSettings.putString("AP_QUANTITY_LIST_NAME", listValue.value)
+                            apQuantityActiveListNameView.text = "Active Lis: ${listValue.value}"
                         } else if (fieldType == "ap_price") {
                             appSettings.putInt("AP_PRICE_LIST_ID", listId!!)
+                            appSettings.putString("AP_PRICE_LIST_NAME",listValue.value)
+                            apPriceActiveListNameView.text = "Active List: ${listValue.value}"
                         }
                         alert.dismiss()
                     } else {
