@@ -58,6 +58,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -123,13 +124,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private lateinit var fabAddProduct: FloatingActionButton
     private var categoryList = mutableListOf<Category>()
     private var selectedCategoryId: Int = 0
-    private var apTitleView:TextInputEditText?=null
-    private var apDescriptionView:TextInputEditText?=null
+    private var apTitleView: TextInputEditText? = null
+    private var apDescriptionView: TextInputEditText? = null
     private lateinit var internetImageAdapter: InternetImageAdapter
     private lateinit var searchBtnView: ImageButton
     private lateinit var searchBoxView: TextInputEditText
     private lateinit var loader: ProgressBar
-    private lateinit var voiceSearchIcon:AppCompatImageView
+    private lateinit var voiceSearchIcon: AppCompatImageView
     private var voiceLanguageCode = "en"
     val searchedImagesList = mutableListOf<String>()
 
@@ -162,25 +163,25 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == R.id.insales_logout) {
             MaterialAlertDialogBuilder(requireActivity())
-                    .setTitle(getString(R.string.logout))
-                    .setMessage(getString(R.string.logout_insales_warning_text))
-                    .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton(getString(R.string.logout)) { dialog, which ->
-                        dialog.dismiss()
-                        appSettings.remove("INSALES_STATUS")
-                        appSettings.remove("INSALES_SHOP_NAME")
-                        appSettings.remove("INSALES_EMAIL")
-                        appSettings.remove("INSALES_PASSWORD")
-                        originalProductsList.clear()
-                        productsList.clear()
-                        Paper.book().delete(Constants.cacheProducts)
+                .setTitle(getString(R.string.logout))
+                .setMessage(getString(R.string.logout_insales_warning_text))
+                .setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                    dialog.dismiss()
+                }
+                .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                    dialog.dismiss()
+                    appSettings.remove("INSALES_STATUS")
+                    appSettings.remove("INSALES_SHOP_NAME")
+                    appSettings.remove("INSALES_EMAIL")
+                    appSettings.remove("INSALES_PASSWORD")
+                    originalProductsList.clear()
+                    productsList.clear()
+                    Paper.book().delete(Constants.cacheProducts)
 //                    startActivity(Intent(context, SalesCustomersActivity::class.java))
-                        checkInsalesAccount()
+                    checkInsalesAccount()
 
-                    }
-                    .create().show()
+                }
+                .create().show()
             true
         } else if (item.itemId == R.id.insales_data_filter) {
             if (originalCategoriesList.size == 0) {
@@ -221,11 +222,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
             val arrayAdapter =
-                    ArrayAdapter(
-                        requireActivity(),
-                        android.R.layout.select_dialog_item,
-                        BaseActivity.getSortingList(requireActivity())
-                    )
+                ArrayAdapter(
+                    requireActivity(),
+                    android.R.layout.select_dialog_item,
+                    BaseActivity.getSortingList(requireActivity())
+                )
             builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     dialog!!.dismiss()
@@ -313,11 +314,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
         val arrayAdapter =
-                ArrayAdapter(
-                    requireActivity(),
-                    android.R.layout.select_dialog_singlechoice,
-                    categoriesList
-                )
+            ArrayAdapter(
+                requireActivity(),
+                android.R.layout.select_dialog_singlechoice,
+                categoriesList
+            )
         builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
             override fun onClick(dialog: DialogInterface?, which: Int) {
                 dialog!!.dismiss()
@@ -1640,7 +1641,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         loader: ProgressBar,
         searchedImagesList: java.util.ArrayList<String>,
         internetImageAdapter: InternetImageAdapter
-    ){
+    ) {
         var creditChargePrice: Float = 0F
         if (searchBoxView.text.toString().trim().isNotEmpty()) {
 
@@ -1781,21 +1782,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
 
     private var resultLauncher1 =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val data: Intent? = result.data
-                    val cropPicUri = CropImage.getPickImageResultUri(requireActivity(), data)
-                    cropImage(cropPicUri)
-                }
-
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val cropPicUri = CropImage.getPickImageResultUri(requireActivity(), data)
+                cropImage(cropPicUri)
             }
+
+        }
 
     private fun cropImage(imageUri: Uri) {
 
         CropImage.activity(imageUri)
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .setMultiTouchEnabled(true)
-                .start(requireActivity())
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setMultiTouchEnabled(true)
+            .start(requireActivity())
     }
 
     private fun pickImageFromCamera() {
@@ -1805,104 +1806,104 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
     private var cameraResultLauncher1 =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
 
 //                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val text = result.data!!.getStringExtra("SCAN_TEXT")
-                    if (text!!.isNotEmpty()) {
-                        val builder = MaterialAlertDialogBuilder(requireActivity())
-                        val options = arrayOf(
-                            requireActivity().resources.getString(R.string.plus_add_title_text),
-                            requireActivity().resources.getString(R.string.plus_add_description_text)
-                        )
-                        var isTitleChecked = false
-                        var isDescriptionChecked = false
-                        val checkedItems = booleanArrayOf(false, false)
-                        builder.setMultiChoiceItems(
-                            options,
-                            checkedItems
-                        ) { dialog, which, isCheck ->
-                            when (which) {
-                                0 -> {
-                                    isTitleChecked = isCheck
-                                    if (isTitleChecked) {
-                                        if (Constants.pTitle != null) {
-                                            val stringBuilder = StringBuilder()
-                                            Constants.pTitle!!.isExpanded = true
-                                            stringBuilder.append(Constants.pTitle!!.text.toString())
-                                            stringBuilder.append(" $text")
-                                            productsList[Constants.pItemPosition!!].title =
-                                                stringBuilder.toString()
-                                            Constants.pItem!!.title = stringBuilder.toString()
+            if (result.resultCode == Activity.RESULT_OK) {
+                val text = result.data!!.getStringExtra("SCAN_TEXT")
+                if (text!!.isNotEmpty()) {
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
+                    val options = arrayOf(
+                        requireActivity().resources.getString(R.string.plus_add_title_text),
+                        requireActivity().resources.getString(R.string.plus_add_description_text)
+                    )
+                    var isTitleChecked = false
+                    var isDescriptionChecked = false
+                    val checkedItems = booleanArrayOf(false, false)
+                    builder.setMultiChoiceItems(
+                        options,
+                        checkedItems
+                    ) { dialog, which, isCheck ->
+                        when (which) {
+                            0 -> {
+                                isTitleChecked = isCheck
+                                if (isTitleChecked) {
+                                    if (Constants.pTitle != null) {
+                                        val stringBuilder = StringBuilder()
+                                        Constants.pTitle!!.isExpanded = true
+                                        stringBuilder.append(Constants.pTitle!!.text.toString())
+                                        stringBuilder.append(" $text")
+                                        productsList[Constants.pItemPosition!!].title =
+                                            stringBuilder.toString()
+                                        Constants.pItem!!.title = stringBuilder.toString()
 //                                        if (Constants.pItemPosition != null){
 //                                            adapter.notifyItemChanged(Constants.pItemPosition!!)
 //                                        }
-                                        }
                                     }
-
                                 }
-                                1 -> {
-                                    isDescriptionChecked = isCheck
-                                    if (isDescriptionChecked) {
-                                        if (Constants.pDescription != null) {
-                                            val stringBuilder = StringBuilder()
-                                            Constants.pDescription!!.isExpanded = true
-                                            stringBuilder.append(Constants.pDescription!!.text.toString())
-                                            stringBuilder.append(" $text")
-                                            productsList[Constants.pItemPosition!!].fullDesc =
-                                                stringBuilder.toString()
-                                            Constants.pItem!!.fullDesc = stringBuilder.toString()
+
+                            }
+                            1 -> {
+                                isDescriptionChecked = isCheck
+                                if (isDescriptionChecked) {
+                                    if (Constants.pDescription != null) {
+                                        val stringBuilder = StringBuilder()
+                                        Constants.pDescription!!.isExpanded = true
+                                        stringBuilder.append(Constants.pDescription!!.text.toString())
+                                        stringBuilder.append(" $text")
+                                        productsList[Constants.pItemPosition!!].fullDesc =
+                                            stringBuilder.toString()
+                                        Constants.pItem!!.fullDesc = stringBuilder.toString()
 //                                        if (Constants.pItemPosition != null){
 //                                            adapter.notifyItemChanged(Constants.pItemPosition!!)
 //                                        }
-                                        }
                                     }
                                 }
-                                else -> {
+                            }
+                            else -> {
 
-                                }
                             }
                         }
-                        builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
-
-
-                            dialog.dismiss()
-                            if (isTitleChecked || isDescriptionChecked) {
-                                //updateInsalesProductDetail(Constants.pItem!!)
-                                CustomDialog(
-                                    shopName,
-                                    email,
-                                    password,
-                                    productsList[Constants.pItemPosition!!],
-                                    Constants.pItemPosition!!,
-                                    adapter,
-                                    viewModel,
-                                    object : ResponseListener {
-                                        override fun onSuccess(result: String) {
-                                            fetchProducts()
-                                        }
-
-                                    }).show(childFragmentManager, "dialog")
-                            }
-
-                        }
-                        builder.setNegativeButton(
-                            requireActivity().resources.getString(R.string.cancel_text),
-                            null
-                        )
-                        val alert = builder.create()
-                        alert.show()
                     }
+                    builder.setPositiveButton(requireActivity().resources.getString(R.string.ok_text)) { dialog, which ->
+
+
+                        dialog.dismiss()
+                        if (isTitleChecked || isDescriptionChecked) {
+                            //updateInsalesProductDetail(Constants.pItem!!)
+                            CustomDialog(
+                                shopName,
+                                email,
+                                password,
+                                productsList[Constants.pItemPosition!!],
+                                Constants.pItemPosition!!,
+                                adapter,
+                                viewModel,
+                                object : ResponseListener {
+                                    override fun onSuccess(result: String) {
+                                        fetchProducts()
+                                    }
+
+                                }).show(childFragmentManager, "dialog")
+                        }
+
+                    }
+                    builder.setNegativeButton(
+                        requireActivity().resources.getString(R.string.cancel_text),
+                        null
+                    )
+                    val alert = builder.create()
+                    alert.show()
+                }
 //                updateInputBox.setText(text)
 //                updateInputBox.setSelection(updateInputBox.text.toString().length)
 //                val data: Intent? = result.data
 //                val bitmap = data!!.extras!!.get("data") as Bitmap
 //                val file = ImageManager.readWriteImage(context,bitmap)
 //                cropImage(Uri.fromFile(file))
-                }
             }
+        }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // super.onActivityResult(requestCode, resultCode, data)
@@ -1998,8 +1999,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     )
                     val alert = builder.create()
                     alert.show()
-                }
-                else{
+                } else {
                     super.onActivityResult(requestCode, resultCode, data)
                     for (fragment in childFragmentManager.fragments) {
                         fragment.onActivityResult(requestCode, resultCode, data)
@@ -2018,17 +2018,17 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         userCurrentCredits = remaining.toString()
         hashMap["credits"] = userCurrentCredits
         firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(Constants.firebaseUserId)
-                .updateChildren(hashMap)
-                .addOnSuccessListener {
-                    howMuchChargeCredits = 0F
-                    BaseActivity.getUserCredits(
-                        requireActivity()
-                    )
-                }
-                .addOnFailureListener {
+            .child(Constants.firebaseUserId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                howMuchChargeCredits = 0F
+                BaseActivity.getUserCredits(
+                    requireActivity()
+                )
+            }
+            .addOnFailureListener {
 
-                }
+            }
     }
 
     private fun fetchProducts() {
@@ -2038,50 +2038,50 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
     var launchActivity =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK && Constants.pItem != null) {
-                    val data: Intent? = result.data
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && Constants.pItem != null) {
+                val data: Intent? = result.data
 
-                    if (data != null && data.hasExtra("TITLE")) {
-                        val title = data.getStringExtra("TITLE") as String
-                        if (title.isNotEmpty()) {
-                            val currentPItemTitle = Constants.pItem!!.title
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(title)
-                            Constants.pItem!!.title = stringBuilder.toString()
-                        }
+                if (data != null && data.hasExtra("TITLE")) {
+                    val title = data.getStringExtra("TITLE") as String
+                    if (title.isNotEmpty()) {
+                        val currentPItemTitle = Constants.pItem!!.title
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemTitle)
+                        stringBuilder.append(title)
+                        Constants.pItem!!.title = stringBuilder.toString()
                     }
-
-                    if (data != null && data.hasExtra("DESCRIPTION")) {
-                        val description = data.getStringExtra("DESCRIPTION") as String
-                        if (description.isNotEmpty()) {
-
-                            val currentPItemDescription = Constants.pItem!!.fullDesc
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemDescription)
-                            stringBuilder.append(description)
-                            Constants.pItem!!.fullDesc = stringBuilder.toString()
-
-                        }
-                    }
-                    CustomDialog(
-                        shopName,
-                        email,
-                        password,
-                        Constants.pItem!!,
-                        Constants.pItemPosition!!,
-                        adapter,
-                        viewModel, object : ResponseListener {
-                            override fun onSuccess(result: String) {
-                                fetchProducts()
-                            }
-
-                        }
-                    ).show(childFragmentManager, "dialog")
-                    adapter.notifyItemChanged(Constants.pItemPosition!!)
                 }
+
+                if (data != null && data.hasExtra("DESCRIPTION")) {
+                    val description = data.getStringExtra("DESCRIPTION") as String
+                    if (description.isNotEmpty()) {
+
+                        val currentPItemDescription = Constants.pItem!!.fullDesc
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemDescription)
+                        stringBuilder.append(description)
+                        Constants.pItem!!.fullDesc = stringBuilder.toString()
+
+                    }
+                }
+                CustomDialog(
+                    shopName,
+                    email,
+                    password,
+                    Constants.pItem!!,
+                    Constants.pItemPosition!!,
+                    adapter,
+                    viewModel, object : ResponseListener {
+                        override fun onSuccess(result: String) {
+                            fetchProducts()
+                        }
+
+                    }
+                ).show(childFragmentManager, "dialog")
+                adapter.notifyItemChanged(Constants.pItemPosition!!)
             }
+        }
 
     private fun fetchProducts(page: Int) {
         if (dialogStatus == 1) {
@@ -2213,51 +2213,51 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
     private var resultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    if (result.data != null) {
-                        val imageUri = result.data!!
-                        currentPhotoPath = ImageManager.getRealPathFromUri(
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                if (result.data != null) {
+                    val imageUri = result.data!!
+                    currentPhotoPath = ImageManager.getRealPathFromUri(
+                        requireActivity(),
+                        imageUri.data
+                    )
+                    selectedImageBase64String =
+                        ImageManager.convertImageToBase64(
                             requireActivity(),
-                            imageUri.data
+                            currentPhotoPath!!
                         )
-                        selectedImageBase64String =
-                                ImageManager.convertImageToBase64(
-                                    requireActivity(),
-                                    currentPhotoPath!!
-                                )
-                        Log.d("TEST199", selectedImageBase64String)
-                        Glide.with(requireActivity())
-                                .load(currentPhotoPath)
-                                .placeholder(R.drawable.placeholder)
-                                .centerInside()
-                                .into(selectedImageView)
-                    }
-
+                    Log.d("TEST199", selectedImageBase64String)
+                    Glide.with(requireActivity())
+                        .load(currentPhotoPath)
+                        .placeholder(R.drawable.placeholder)
+                        .centerInside()
+                        .into(selectedImageView)
                 }
+
             }
+        }
 
     // THIS RESULT LAUNCHER WILL CALL THE ACTION PICK FROM FILES FOR BACKGROUND AND LOGO IMAGE
     private var cameraResultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val data: Intent? = result.data
-                    val bitmap = data!!.extras!!.get("data") as Bitmap
-                    createImageFile(bitmap)
-                    selectedImageBase64String =
-                            ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
-                    Log.d("TEST199", selectedImageBase64String)
-                    Glide.with(requireActivity())
-                            .load(currentPhotoPath)
-                            .placeholder(R.drawable.placeholder)
-                            .centerInside()
-                            .into(selectedImageView)
-                }
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val bitmap = data!!.extras!!.get("data") as Bitmap
+                createImageFile(bitmap)
+                selectedImageBase64String =
+                    ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
+                Log.d("TEST199", selectedImageBase64String)
+                Glide.with(requireActivity())
+                    .load(currentPhotoPath)
+                    .placeholder(R.drawable.placeholder)
+                    .centerInside()
+                    .into(selectedImageView)
             }
+        }
 
     private fun createImageFile(bitmap: Bitmap) {
         currentPhotoPath = ImageManager.readWriteImage(requireActivity(), bitmap).absolutePath
@@ -2465,8 +2465,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
             return false
         } else if (!Pattern.compile(Constants.emailPattern)
-                        .matcher(insalesEmailBox.text.toString().trim())
-                        .matches()
+                .matcher(insalesEmailBox.text.toString().trim())
+                .matches()
         ) {
             BaseActivity.showAlert(requireActivity(), getString(R.string.email_valid_error))
             return false
@@ -2556,10 +2556,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             savedInstanceState: Bundle?
         ): View? {
             val v =
-                    inflater.inflate(
-                        R.layout.insales_product_detail_update_dialog_layout,
-                        container
-                    )
+                inflater.inflate(
+                    R.layout.insales_product_detail_update_dialog_layout,
+                    container
+                )
 
             initViews(v)
 
@@ -2570,35 +2570,35 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val dialogHeading = dialogLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
             val swapLayoutBtn = dialogLayout.findViewById<MaterialCheckBox>(R.id.layout_swap)
             val firstLinearLayout =
-                    dialogLayout.findViewById<LinearLayout>(R.id.first_linear_layout)
+                dialogLayout.findViewById<LinearLayout>(R.id.first_linear_layout)
             val secondLinearLayout =
-                    dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
+                dialogLayout.findViewById<LinearLayout>(R.id.second_linear_layout)
             dynamicTitleTextViewWrapper =
-                    dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
+                dialogLayout.findViewById(R.id.dynamic_insales_title_textview_wrapper)
 //                dynamicTitleTextViewWrapper.setOnDragListener(MyDragListener())
             val dynamicShortDescTextViewWrapper =
-                    dialogLayout.findViewById<FlowLayout>(R.id.dynamic_insales_short_description_textview_wrapper)
+                dialogLayout.findViewById<FlowLayout>(R.id.dynamic_insales_short_description_textview_wrapper)
             dynamicFullDescTextViewWrapper =
-                    dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
+                dialogLayout.findViewById(R.id.dynamic_insales_full_description_textview_wrapper)
 
             secondLinearLayout.visibility = View.VISIBLE
             insalesFragment!!.titleBox =
-                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
+                dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_title_input_field)
             val productShortDescriptionBox =
-                    dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
+                dialogLayout.findViewById<TextInputEditText>(R.id.insales_product_short_desc_input_field)
             insalesFragment!!.fullDescriptionBox =
-                    dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
+                dialogLayout.findViewById(R.id.insales_product_full_desc_input_field)
             val getDescriptionView =
-                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
+                dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view)
             val getDescriptionView1 =
-                    dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
+                dialogLayout.findViewById<MaterialTextView>(R.id.get_description_text_view1)
 
             val titleClearBrush =
-                    dialogLayout.findViewById<AppCompatImageView>(R.id.title_clear_brush_view)
+                dialogLayout.findViewById<AppCompatImageView>(R.id.title_clear_brush_view)
             val shortDescClearBrush =
-                    dialogLayout.findViewById<AppCompatImageView>(R.id.short_desc_clear_brush_view)
+                dialogLayout.findViewById<AppCompatImageView>(R.id.short_desc_clear_brush_view)
             val fullDescClearBrush =
-                    dialogLayout.findViewById<AppCompatImageView>(R.id.full_desc_clear_brush_view)
+                dialogLayout.findViewById<AppCompatImageView>(R.id.full_desc_clear_brush_view)
 
             if (pItem.title.length > 10) {
                 insalesFragment!!.titleBox.setBackgroundColor(
@@ -2701,9 +2701,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             productShortDescriptionBox.setText(pItem.shortDesc)
             insalesFragment!!.fullDescriptionBox.setText(pItem.fullDesc)
             val dialogCancelBtn =
-                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
+                dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_cancel_btn)
             val dialogUpdateBtn =
-                    dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_update_btn)
+                dialogLayout.findViewById<MaterialButton>(R.id.insales_product_detail_dialog_update_btn)
 
             insalesFragment!!.titleTextViewList.clear()
             insalesFragment!!.shortDescTextViewList.clear()
@@ -2820,7 +2820,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     for (i in 0 until (dynamicShortDescTextViewWrapper as ViewGroup).childCount) {
                         val nextChild =
-                                (dynamicShortDescTextViewWrapper as ViewGroup).getChildAt(i)
+                            (dynamicShortDescTextViewWrapper as ViewGroup).getChildAt(i)
                         val text = (nextChild as MaterialTextView).text.toString()
                         stringBuilder.append(text)
                         stringBuilder.append(" ")
@@ -2832,7 +2832,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     for (i in 0 until (dynamicFullDescTextViewWrapper as ViewGroup).childCount) {
                         val nextChild =
-                                (dynamicFullDescTextViewWrapper as ViewGroup).getChildAt(i)
+                            (dynamicFullDescTextViewWrapper as ViewGroup).getChildAt(i)
                         val text = (nextChild as MaterialTextView).text.toString()
                         stringBuilder.append(text)
                         stringBuilder.append(" ")
@@ -2853,7 +2853,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     Paper.book().delete(Constants.cacheProducts)
                     Paper.book()
-                            .write(Constants.cacheProducts, insalesFragment!!.originalProductsList)
+                        .write(Constants.cacheProducts, insalesFragment!!.originalProductsList)
                     insalesAdapter.notifyItemChanged(position)
 
                     viewModel.callUpdateProductDetail(
@@ -2867,30 +2867,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         pItem.fullDesc
                     )
                     viewModel.getUpdateProductDetailResponse()
-                            .observe(requireActivity(), Observer { response ->
-                                if (response != null) {
-                                    if (response.get("status").asString == "200") {
-                                        BaseActivity.dismiss()
-                                        Constants.pItem = null
-                                        Constants.pItemPosition = null
-                                        Toast.makeText(
-                                            requireContext(),
-                                            getString(R.string.product_updated_successfully),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        dismiss()
-                                        listener.onSuccess("")
-                                    } else {
-                                        BaseActivity.dismiss()
-                                        BaseActivity.showAlert(
-                                            requireActivity(),
-                                            response.get("message").asString
-                                        )
-                                    }
+                        .observe(requireActivity(), Observer { response ->
+                            if (response != null) {
+                                if (response.get("status").asString == "200") {
+                                    BaseActivity.dismiss()
+                                    Constants.pItem = null
+                                    Constants.pItemPosition = null
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.product_updated_successfully),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    dismiss()
+                                    listener.onSuccess("")
                                 } else {
                                     BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        response.get("message").asString
+                                    )
                                 }
-                            })
+                            } else {
+                                BaseActivity.dismiss()
+                            }
+                        })
                 } else {
                     BaseActivity.showAlert(
                         requireActivity(),
@@ -2920,29 +2920,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     )
                     view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
                     val balloon = Balloon.Builder(requireActivity())
-                            .setLayout(R.layout.ballon_layout_design)
-                            .setArrowSize(10)
-                            .setArrowOrientation(ArrowOrientation.TOP)
-                            .setArrowPosition(0.5f)
-                            .setWidthRatio(0.55f)
-                            .setCornerRadius(4f)
-                            .setBackgroundColor(
-                                ContextCompat.getColor(
-                                    requireActivity(),
-                                    R.color.light_gray
-                                )
+                        .setLayout(R.layout.ballon_layout_design)
+                        .setArrowSize(10)
+                        .setArrowOrientation(ArrowOrientation.TOP)
+                        .setArrowPosition(0.5f)
+                        .setWidthRatio(0.55f)
+                        .setCornerRadius(4f)
+                        .setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.light_gray
                             )
-                            .setBalloonAnimation(BalloonAnimation.ELASTIC)
-                            .setLifecycleOwner(this)
-                            .build()
+                        )
+                        .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                        .setLifecycleOwner(this)
+                        .build()
                     val editTextBox = balloon.getContentView()
-                            .findViewById<TextInputEditText>(R.id.balloon_edit_text)
+                        .findViewById<TextInputEditText>(R.id.balloon_edit_text)
                     editTextBox.setText(textView.text.toString().trim())
-                    val clearTextView = balloon.getContentView().findViewById<AppCompatImageView>(R.id.balloon_brush_clear_view)
+                    val clearTextView = balloon.getContentView()
+                        .findViewById<AppCompatImageView>(R.id.balloon_brush_clear_view)
                     val closeBtn = balloon.getContentView()
-                            .findViewById<AppCompatButton>(R.id.balloon_close_btn)
+                        .findViewById<AppCompatButton>(R.id.balloon_close_btn)
                     val applyBtn = balloon.getContentView()
-                            .findViewById<AppCompatButton>(R.id.balloon_apply_btn)
+                        .findViewById<AppCompatButton>(R.id.balloon_apply_btn)
                     balloon.showAlignTop(textView)
                     editTextBox.requestFocus()
                     Constants.openKeyboar(requireActivity())
@@ -3011,24 +3012,26 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private var finalDescriptionText = ""
         private var finalQuantityText = ""
         private var finalPriceText = ""
+
         //private var CIVType = ""
         private lateinit var quickModeCheckBox: MaterialCheckBox
         private lateinit var apViewPager: MyViewPager
-        private lateinit var apFirstLayout:LinearLayout
-        private lateinit var apSecondLayout:LinearLayout
-        private lateinit var apNextPreviousButtons:LinearLayout
-        private lateinit var apPreviousBtn:MaterialTextView
-        private lateinit var apNextBtn:MaterialTextView
-        private lateinit var apBackArrowBtn:AppCompatImageView
+        private lateinit var apFirstLayout: LinearLayout
+        private lateinit var apSecondLayout: LinearLayout
+        private lateinit var apNextPreviousButtons: LinearLayout
+        private lateinit var apPreviousBtn: MaterialTextView
+        private lateinit var apNextBtn: MaterialTextView
+        private lateinit var apBackArrowBtn: AppCompatImageView
         private lateinit var internetImageAdapter: InternetImageAdapter
         private lateinit var searchBtnView: ImageButton
         private lateinit var searchBoxView: TextInputEditText
         private lateinit var loader: ProgressBar
-        private lateinit var voiceSearchIcon:AppCompatImageView
+        private lateinit var voiceSearchIcon: AppCompatImageView
         private var voiceLanguageCode = "en"
         val searchedImagesList = mutableListOf<String>()
-        private lateinit var addProdcutViewModel:AddProductViewModel
-        private lateinit var testDataBtn:AppCompatImageView
+        private lateinit var addProdcutViewModel: AddProductViewModel
+        private lateinit var testDataBtn: AppCompatImageView
+        private lateinit var getTitleBtn: MaterialTextView
 
         var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -3075,7 +3078,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             savedInstanceState: Bundle?
         ): View? {
             val v =
-                    inflater.inflate(R.layout.insales_add_product_dialog, container)
+                inflater.inflate(R.layout.insales_add_product_dialog, container)
 
             initViews(v)
 
@@ -3090,11 +3093,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         private fun initViews(view: View) {
             categoriesSpinner =
-                    view.findViewById(R.id.ap_cate_spinner)
+                view.findViewById(R.id.ap_cate_spinner)
             apTitleView = view.findViewById(R.id.ap_title)
             val apTestDataView = view.findViewById<AppCompatImageView>(R.id.test_data_button)
             apDescriptionView =
-                    view.findViewById(R.id.ap_description)
+                view.findViewById(R.id.ap_description)
             testDataBtn = view.findViewById(R.id.test_data_button1)
             quickModeCheckBox = view.findViewById(R.id.ap_quick_product_mode)
             apViewPager = view.findViewById(R.id.ap_viewpager)
@@ -3104,66 +3107,122 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apNextBtn = view.findViewById(R.id.ap_next_btn)
             apBackArrowBtn = view.findViewById(R.id.ap_back_arrow)
             apNextPreviousButtons = view.findViewById(R.id.ap_next_previous_buttons)
+            getTitleBtn = view.findViewById(R.id.get_title_text_view)
+
+            getTitleBtn.setOnClickListener {
+                userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+
+                if (userCurrentCredits.toFloat() >= 1.0) {
+
+                    launchActivity1.launch(
+                        Intent(
+                            requireActivity(),
+                            RainForestApiActivity::class.java
+                        )
+                    )
+                } else {
+                    MaterialAlertDialogBuilder(requireActivity())
+                        .setMessage(getString(R.string.low_credites_error_message2))
+                        .setCancelable(false)
+                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                            dialog.dismiss()
+                            startActivity(Intent(context, UserScreenActivity::class.java))
+                        }
+                        .create().show()
+                }
+            }
+
+            val apTitleViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_title_wrapper)
+            val apTitleDefaultInputWrapper =
+                view.findViewById<TextInputLayout>(R.id.ap_title_non_changeable_default_text_input_wrapper)
+            val apDescriptionViewWrapper =
+                view.findViewById<TextInputLayout>(R.id.ap_description_wrapper)
+            val apDescriptionDefaultInputWrapper =
+                view.findViewById<TextInputLayout>(R.id.ap_description_non_changeable_default_text_input_wrapper)
+            val apQuantityViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_quantity_wrapper)
+            val apQuantityDefaultInputWrapper =
+                view.findViewById<TextInputLayout>(R.id.ap_quantity_non_changeable_default_text_input_wrapper)
+            val apPriceViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_price_wrapper)
+            val apPriceDefaultInputWrapper = view.findViewById<TextInputLayout>(R.id.ap_price_non_changeable_default_text_input_wrapper)
+
+
             val apAddDescriptionView =
-                    view.findViewById<AppCompatImageView>(R.id.ap_add_description_text_view)
+                view.findViewById<AppCompatImageView>(R.id.ap_add_description_text_view)
             val apQuantityView = view.findViewById<TextInputEditText>(R.id.ap_quantity)
             val apPriceView = view.findViewById<TextInputEditText>(R.id.ap_price)
             val apSubmitBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
             val apCancelBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_cancel_btn)
 
             val apTitleSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_options_spinner)
-            val apDescriptionSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_description_options_spinner)
-            val apQuantitySpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_options_spinner)
+            val apDescriptionSpinner =
+                view.findViewById<AppCompatSpinner>(R.id.ap_description_options_spinner)
+            val apQuantitySpinner =
+                view.findViewById<AppCompatSpinner>(R.id.ap_quantity_options_spinner)
             val apPriceSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_options_spinner)
 
-            val apTitleListBtn = view.findViewById<MaterialButton>(R.id.ap_title_list_with_fields_btn)
-            val apDescriptionListBtn = view.findViewById<MaterialButton>(R.id.ap_description_list_with_fields_btn)
-            val apQuantityListBtn = view.findViewById<MaterialButton>(R.id.ap_quantity_list_with_fields_btn)
-            val apPriceListBtn = view.findViewById<MaterialButton>(R.id.ap_price_list_with_fields_btn)
+            val apTitleListBtn =
+                view.findViewById<MaterialButton>(R.id.ap_title_list_with_fields_btn)
+            val apDescriptionListBtn =
+                view.findViewById<MaterialButton>(R.id.ap_description_list_with_fields_btn)
+            val apQuantityListBtn =
+                view.findViewById<MaterialButton>(R.id.ap_quantity_list_with_fields_btn)
+            val apPriceListBtn =
+                view.findViewById<MaterialButton>(R.id.ap_price_list_with_fields_btn)
 
-            val apTitleDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_title_non_changeable_default_text_input)
-            val apDescriptionDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_description_non_changeable_default_text_input)
-            val apQuantityDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_quantity_non_changeable_default_text_input)
-            val apPriceDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_price_non_changeable_default_text_input)
+            val apTitleDefaultInputBox =
+                view.findViewById<TextInputEditText>(R.id.ap_title_non_changeable_default_text_input)
+            val apDescriptionDefaultInputBox =
+                view.findViewById<TextInputEditText>(R.id.ap_description_non_changeable_default_text_input)
+            val apQuantityDefaultInputBox =
+                view.findViewById<TextInputEditText>(R.id.ap_quantity_non_changeable_default_text_input)
+            val apPriceDefaultInputBox =
+                view.findViewById<TextInputEditText>(R.id.ap_price_non_changeable_default_text_input)
 
 
             val apTitleListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_list_spinner)
-            val apDescriptionListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_description_list_spinner)
-            val apQuantityListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
+            val apDescriptionListSpinner =
+                view.findViewById<AppCompatSpinner>(R.id.ap_description_list_spinner)
+            val apQuantityListSpinner =
+                view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
             val apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
 
-            apTitleActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_title_active_list_name)
-            apDescriptionActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_description_active_list_name)
-            apQuantityActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_quantity_active_list_name)
-            apPriceActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
+            apTitleActiveListNameView =
+                view.findViewById<MaterialTextView>(R.id.ap_title_active_list_name)
+            apDescriptionActiveListNameView =
+                view.findViewById<MaterialTextView>(R.id.ap_description_active_list_name)
+            apQuantityActiveListNameView =
+                view.findViewById<MaterialTextView>(R.id.ap_quantity_active_list_name)
+            apPriceActiveListNameView =
+                view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
 
             val apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
             val apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
             val apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
-            val quickModeStatus =  appSettings.getInt("QUICK_MODE_STATUS")
-            if(quickModeStatus == 1){
+            val quickModeStatus = appSettings.getInt("QUICK_MODE_STATUS")
+            if (quickModeStatus == 1) {
                 quickModeCheckBox.isChecked = true
                 apFirstLayout.visibility = View.GONE
                 apSecondLayout.visibility = View.VISIBLE
                 apNextPreviousButtons.visibility = View.VISIBLE
-            }
-            else{
+            } else {
                 apSecondLayout.visibility = View.GONE
                 apNextPreviousButtons.visibility = View.GONE
                 apFirstLayout.visibility = View.VISIBLE
             }
             quickModeCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
                 userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-                if (isChecked){
+                if (isChecked) {
 
-                    if (userCurrentCredits.toFloat() > 0){
+                    if (userCurrentCredits.toFloat() > 0) {
                         appSettings.putInt("QUICK_MODE_STATUS", 1)
                         quickModeCheckBox.isChecked = true
                         apFirstLayout.visibility = View.GONE
                         apSecondLayout.visibility = View.VISIBLE
                         apNextPreviousButtons.visibility = View.VISIBLE
-                    }
-                    else{
+                    } else {
                         quickModeCheckBox.isChecked = false
                         MaterialAlertDialogBuilder(requireActivity())
                             .setMessage(getString(R.string.low_credites_error_message))
@@ -3183,8 +3242,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             .create().show()
                     }
 
-                }
-                else{
+                } else {
                     appSettings.putInt("QUICK_MODE_STATUS", 0)
                     apSecondLayout.visibility = View.GONE
                     apNextPreviousButtons.visibility = View.GONE
@@ -3208,17 +3266,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apViewPager.adapter = fragmentAdapter
 
             testDataBtn.setOnClickListener {
-               val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
-                if (currentFragment is ApTitleInputFragment){
+                val currentFragment =
+                    childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
+                if (currentFragment is ApTitleInputFragment) {
                     currentFragment.updateTestData("Test Title")
-                }
-                else if (currentFragment is ApDescriptionInputFragment){
+                } else if (currentFragment is ApDescriptionInputFragment) {
                     currentFragment.updateTestData("Test Description")
-                }
-                else if (currentFragment is ApQuantityInputFragment){
+                } else if (currentFragment is ApQuantityInputFragment) {
                     currentFragment.updateTestData("1")
-                }
-                else if (currentFragment is ApPriceInputFragment){
+                } else if (currentFragment is ApPriceInputFragment) {
                     currentFragment.updateTestData("1")
                 }
             }
@@ -3233,10 +3289,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun onPageSelected(position: Int) {
-                    if (position == 0 || position == 5){
+
+                    if (position == 0 || position == 5) {
                         testDataBtn.visibility = View.GONE
-                    }
-                    else{
+                    } else {
                         testDataBtn.visibility = View.VISIBLE
                     }
                     if (position == 0) {
@@ -3292,11 +3348,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 Constants.CIVType = "ap_title"
                 voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
                 val voiceLayout = LayoutInflater.from(context).inflate(
-                        R.layout.voice_language_setting_layout,
-                        null
+                    R.layout.voice_language_setting_layout,
+                    null
                 )
-                val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
-                val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+                val voiceLanguageSpinner =
+                    voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                val voiceLanguageSaveBtn =
+                    voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
                 if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
                     voiceLanguageSpinner.setSelection(0, false)
@@ -3305,25 +3363,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 voiceLanguageSpinner.onItemSelectedListener =
-                        object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                    parent: AdapterView<*>?,
-                                    view: View?,
-                                    position: Int,
-                                    id: Long
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
+                                    Locale.ENGLISH
+                                ).contains("english")
                             ) {
-                                voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
-                                                Locale.ENGLISH
-                                        ).contains("english")){"en"}else{"ru"}
-                                appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
-
+                                "en"
+                            } else {
+                                "ru"
                             }
-
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
+                            appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
 
                         }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
+
+                    }
                 val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setView(voiceLayout)
                 val alert = builder.create();
@@ -3332,8 +3395,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     alert.dismiss()
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                         putExtra(
-                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
                         )
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
 
@@ -3342,9 +3405,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
             }
 
-            val apDescriptionCameraRecView = view.findViewById<LinearLayout>(R.id.ap_description_camera_layout)
-            val apDescriptionImageRecView = view.findViewById<LinearLayout>(R.id.ap_description_images_layout)
-            val apDescriptionVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_description_voice_layout)
+            val apDescriptionCameraRecView =
+                view.findViewById<LinearLayout>(R.id.ap_description_camera_layout)
+            val apDescriptionImageRecView =
+                view.findViewById<LinearLayout>(R.id.ap_description_images_layout)
+            val apDescriptionVoiceRecView =
+                view.findViewById<LinearLayout>(R.id.ap_description_voice_layout)
 
             apDescriptionCameraRecView.setOnClickListener {
                 Constants.CIVType = "ap_description"
@@ -3373,11 +3439,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 Constants.CIVType = "ap_description"
                 voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
                 val voiceLayout = LayoutInflater.from(context).inflate(
-                        R.layout.voice_language_setting_layout,
-                        null
+                    R.layout.voice_language_setting_layout,
+                    null
                 )
-                val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
-                val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+                val voiceLanguageSpinner =
+                    voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                val voiceLanguageSaveBtn =
+                    voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
                 if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
                     voiceLanguageSpinner.setSelection(0, false)
@@ -3386,25 +3454,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 voiceLanguageSpinner.onItemSelectedListener =
-                        object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                    parent: AdapterView<*>?,
-                                    view: View?,
-                                    position: Int,
-                                    id: Long
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
+                                    Locale.ENGLISH
+                                ).contains("english")
                             ) {
-                                voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
-                                                Locale.ENGLISH
-                                        ).contains("english")){"en"}else{"ru"}
-                                appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
-
+                                "en"
+                            } else {
+                                "ru"
                             }
-
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
+                            appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
 
                         }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
+
+                    }
                 val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setView(voiceLayout)
                 val alert = builder.create();
@@ -3413,8 +3486,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     alert.dismiss()
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                         putExtra(
-                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
                         )
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
 
@@ -3424,8 +3497,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
 
-
-            val apTitleSpinnerSelectedPosition = appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
+            val apTitleSpinnerSelectedPosition =
+                appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
             val apTitleDefaultValue = appSettings.getString("AP_TITLE_DEFAULT_VALUE")
             val apTitleListId = appSettings.getInt("AP_TITLE_LIST_ID")
             val apTitleActiveListName = appSettings.getString("AP_TITLE_LIST_NAME")
@@ -3448,19 +3521,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.VISIBLE
-                apTitleView.visibility = View.VISIBLE
+                apTitleDefaultInputWrapper.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleDefaultInputBox.setText(apTitleDefaultValue)
                 apTitleView.setText(apTitleDefaultValue)
-            }
-            else if (apTitleSpinnerSelectedPosition == 2) {
+            } else if (apTitleSpinnerSelectedPosition == 2) {
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleListBtn.visibility = View.VISIBLE
                 apTitleActiveListNameView.visibility = View.VISIBLE
-                apTitleView.visibility = View.GONE
+                apTitleViewWrapper.visibility = View.GONE
                 apTitleListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apTitleListId)
                 val listValues = listOptions.split(",")
@@ -3472,64 +3544,59 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 apTitleListSpinner.adapter = apTitleSpinnerAdapter
 
-                apTitleListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
+                apTitleListSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
 
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                    }
-
-                }
-
-            }
-            else if (apTitleSpinnerSelectedPosition == 3)
-            {
+            } else if (apTitleSpinnerSelectedPosition == 3) {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleVoiceRecView.visibility = View.VISIBLE
-            }
-            else if (apTitleSpinnerSelectedPosition == 4)
-            {
+            } else if (apTitleSpinnerSelectedPosition == 4) {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleCameraRecView.visibility = View.VISIBLE
-            } else if (apTitleSpinnerSelectedPosition == 5)
-            {
+            } else if (apTitleSpinnerSelectedPosition == 5) {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleImageRecView.visibility = View.VISIBLE
-            } else
-            {
+            } else {
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
             }
 
 
@@ -3571,26 +3638,23 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.VISIBLE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleDefaultInputWrapper.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         if (apTitleDefaultValue!!.isNotEmpty()) {
                             apTitleDefaultInputBox.setText(apTitleDefaultValue)
                             apTitleView.setText(apTitleDefaultValue)
-                        }
-                        else{
+                        } else {
                             apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
                             apTitleView.setSelection(apTitleView.text.toString().length)
                         }
-                    }
-                    else if (position == 2)
-                    {
+                    } else if (position == 2) {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleListBtn.visibility = View.VISIBLE
                         apTitleActiveListNameView.visibility = View.VISIBLE
-                        apTitleView.visibility = View.GONE
+                        apTitleViewWrapper.visibility = View.GONE
                         apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleListSpinner.visibility = View.VISIBLE
@@ -3604,61 +3668,57 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         apTitleListSpinner.adapter = apTitleSpinnerAdapter
 
-                        apTitleListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                            ) {
+                        apTitleListSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+
+                                }
+
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                }
 
                             }
 
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
-
-                        }
-
-                    }
-                    else if (position == 3)
-                    {
+                    } else if (position == 3) {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleVoiceRecView.visibility = View.VISIBLE
-                    } else if (position == 4)
-                    {
+                    } else if (position == 4) {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleCameraRecView.visibility = View.VISIBLE
-                    } else if (position == 5)
-                    {
+                    } else if (position == 5) {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleImageRecView.visibility = View.VISIBLE
-                    } else
-                    {
+                    } else {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
@@ -3678,7 +3738,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             }
 
-            apTitleView.addTextChangedListener(object:TextWatcher{
+            apTitleView.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
                     s: CharSequence?,
                     start: Int,
@@ -3693,19 +3753,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                   appSettings.putString("AP_TITLE_VALUE",s.toString())
+                    appSettings.putString("AP_TITLE_VALUE", s.toString())
                 }
 
             })
 
-            val apDescriptionSpinnerSelectedPosition = appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
+            val apDescriptionSpinnerSelectedPosition =
+                appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
             val apDescriptionDefaultValue = appSettings.getString("AP_DESCRIPTION_DEFAULT_VALUE")
             val apDescriptionListId = appSettings.getInt("AP_DESCRIPTION_LIST_ID")
             val apDescriptionActiveListName = appSettings.getString("AP_DESCRIPTION_LIST_NAME")
-            if (apDescriptionActiveListName!!.isEmpty()){
+            if (apDescriptionActiveListName!!.isEmpty()) {
                 apDescriptionActiveListNameView.text = "Active List: None"
-            }
-            else{
+            } else {
                 apDescriptionActiveListNameView.text = "Active List: $apDescriptionActiveListName"
             }
             apDescriptionSpinner.setSelection(apDescriptionSpinnerSelectedPosition)
@@ -3719,19 +3779,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.VISIBLE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionDefaultInputWrapper.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
                 apDescriptionView.setText(apDescriptionDefaultValue)
-            }
-            else if (apDescriptionSpinnerSelectedPosition == 2) {
+            } else if (apDescriptionSpinnerSelectedPosition == 2) {
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.VISIBLE
                 apDescriptionActiveListNameView.visibility = View.VISIBLE
-                apDescriptionView.visibility = View.GONE
+                apDescriptionViewWrapper.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apDescriptionListId)
                 val listValues = listOptions.split(",")
@@ -3743,62 +3802,59 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apDescriptionSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 apDescriptionListSpinner.adapter = apDescriptionSpinnerAdapter
 
-                apDescriptionListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
+                apDescriptionListSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
 
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                    }
-
-                }
-
-            }
-            else if (apDescriptionSpinnerSelectedPosition == 3) {
+            } else if (apDescriptionSpinnerSelectedPosition == 3) {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionVoiceRecView.visibility = View.VISIBLE
-            }
-            else if (apDescriptionSpinnerSelectedPosition == 4) {
+            } else if (apDescriptionSpinnerSelectedPosition == 4) {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionCameraRecView.visibility = View.VISIBLE
-            }
-            else if (apDescriptionSpinnerSelectedPosition == 5) {
+            } else if (apDescriptionSpinnerSelectedPosition == 5) {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionImageRecView.visibility = View.VISIBLE
-            }
-            else {
+            } else {
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
             }
 
             apDescriptionDefaultInputBox.addTextChangedListener(object : TextWatcher {
@@ -3822,128 +3878,130 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             })
 
-            apDescriptionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    appSettings.putInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION", position)
-                    if (position == 1) {
-                        apDescriptionVoiceRecView.visibility = View.GONE
-                        apDescriptionCameraRecView.visibility = View.GONE
-                        apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionListBtn.visibility = View.GONE
-                        apDescriptionActiveListNameView.visibility = View.GONE
-                        apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.VISIBLE
-                        apDescriptionView.visibility = View.VISIBLE
-                        if (apDescriptionDefaultValue!!.isNotEmpty()) {
-                            apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
-                            apDescriptionView.setText(apDescriptionDefaultValue)
-                        }
-                        else{
+            apDescriptionSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        appSettings.putInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION", position)
+                        if (position == 1) {
+                            apDescriptionVoiceRecView.visibility = View.GONE
+                            apDescriptionCameraRecView.visibility = View.GONE
+                            apDescriptionImageRecView.visibility = View.GONE
+                            apDescriptionListBtn.visibility = View.GONE
+                            apDescriptionActiveListNameView.visibility = View.GONE
+                            apDescriptionListSpinner.visibility = View.GONE
+                            apDescriptionDefaultInputWrapper.visibility = View.VISIBLE
+                            apDescriptionViewWrapper.visibility = View.VISIBLE
+                            if (apDescriptionDefaultValue!!.isNotEmpty()) {
+                                apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
+                                apDescriptionView.setText(apDescriptionDefaultValue)
+                            } else {
+                                apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                                apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                            }
+                        } else if (position == 2) {
+                            apDescriptionVoiceRecView.visibility = View.GONE
+                            apDescriptionCameraRecView.visibility = View.GONE
+                            apDescriptionImageRecView.visibility = View.GONE
+                            apDescriptionDefaultInputWrapper.visibility = View.GONE
+                            apDescriptionListBtn.visibility = View.VISIBLE
+                            apDescriptionActiveListNameView.visibility = View.VISIBLE
+                            apDescriptionViewWrapper.visibility = View.GONE
+                            apDescriptionListSpinner.visibility = View.VISIBLE
+                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                            val listOptions: String =
+                                tableGenerator.getListValues(apDescriptionListId)
+                            val listValues = listOptions.split(",")
+                            val apDescriptionSpinnerAdapter = ArrayAdapter(
+                                requireActivity(),
+                                android.R.layout.simple_spinner_item,
+                                listValues
+                            )
+                            apDescriptionSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                            apDescriptionListSpinner.adapter = apDescriptionSpinnerAdapter
+
+                            apDescriptionListSpinner.onItemSelectedListener =
+                                object : AdapterView.OnItemSelectedListener {
+                                    override fun onItemSelected(
+                                        parent: AdapterView<*>?,
+                                        view: View?,
+                                        position: Int,
+                                        id: Long
+                                    ) {
+
+                                    }
+
+                                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                    }
+
+                                }
+
+                        } else if (position == 3) {
+                            apDescriptionListBtn.visibility = View.GONE
+                            apDescriptionActiveListNameView.visibility = View.GONE
+                            apDescriptionListSpinner.visibility = View.GONE
+                            apDescriptionDefaultInputWrapper.visibility = View.GONE
+                            apDescriptionCameraRecView.visibility = View.GONE
+                            apDescriptionImageRecView.visibility = View.GONE
+                            apDescriptionViewWrapper.visibility = View.VISIBLE
+                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                            apDescriptionVoiceRecView.visibility = View.VISIBLE
+                        } else if (position == 4) {
+                            apDescriptionListBtn.visibility = View.GONE
+                            apDescriptionActiveListNameView.visibility = View.GONE
+                            apDescriptionListSpinner.visibility = View.GONE
+                            apDescriptionDefaultInputWrapper.visibility = View.GONE
+                            apDescriptionVoiceRecView.visibility = View.GONE
+                            apDescriptionImageRecView.visibility = View.GONE
+                            apDescriptionViewWrapper.visibility = View.VISIBLE
+                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                            apDescriptionCameraRecView.visibility = View.VISIBLE
+                        } else if (position == 5) {
+                            apDescriptionListBtn.visibility = View.GONE
+                            apDescriptionActiveListNameView.visibility = View.GONE
+                            apDescriptionListSpinner.visibility = View.GONE
+                            apDescriptionDefaultInputWrapper.visibility = View.GONE
+                            apDescriptionVoiceRecView.visibility = View.GONE
+                            apDescriptionCameraRecView.visibility = View.GONE
+                            apDescriptionViewWrapper.visibility = View.VISIBLE
+                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                            apDescriptionImageRecView.visibility = View.VISIBLE
+                        } else {
+                            apDescriptionVoiceRecView.visibility = View.GONE
+                            apDescriptionCameraRecView.visibility = View.GONE
+                            apDescriptionImageRecView.visibility = View.GONE
+                            apDescriptionListBtn.visibility = View.GONE
+                            apDescriptionActiveListNameView.visibility = View.GONE
+                            apDescriptionDefaultInputWrapper.visibility = View.GONE
+                            apDescriptionListSpinner.visibility = View.GONE
+                            apDescriptionViewWrapper.visibility = View.VISIBLE
                             apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
                             apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                         }
                     }
-                    else if (position == 2) {
-                        apDescriptionVoiceRecView.visibility = View.GONE
-                        apDescriptionCameraRecView.visibility = View.GONE
-                        apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
-                        apDescriptionListBtn.visibility = View.VISIBLE
-                        apDescriptionActiveListNameView.visibility = View.VISIBLE
-                        apDescriptionView.visibility = View.GONE
-                        apDescriptionListSpinner.visibility = View.VISIBLE
-                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
-                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-                        val listOptions: String = tableGenerator.getListValues(apDescriptionListId)
-                        val listValues = listOptions.split(",")
-                        val apDescriptionSpinnerAdapter = ArrayAdapter(
-                            requireActivity(),
-                            android.R.layout.simple_spinner_item,
-                            listValues
-                        )
-                        apDescriptionSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        apDescriptionListSpinner.adapter = apDescriptionSpinnerAdapter
 
-                        apDescriptionListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                            ) {
-
-                            }
-
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
-
-                        }
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
 
                     }
-                    else if (position == 3) {
-                        apDescriptionListBtn.visibility = View.GONE
-                        apDescriptionActiveListNameView.visibility = View.GONE
-                        apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
-                        apDescriptionCameraRecView.visibility = View.GONE
-                        apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
-                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
-                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-                        apDescriptionVoiceRecView.visibility = View.VISIBLE
-                    }
-                    else if (position == 4) {
-                        apDescriptionListBtn.visibility = View.GONE
-                        apDescriptionActiveListNameView.visibility = View.GONE
-                        apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
-                        apDescriptionVoiceRecView.visibility = View.GONE
-                        apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
-                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
-                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-                        apDescriptionCameraRecView.visibility = View.VISIBLE
-                    }
-                    else if (position == 5) {
-                        apDescriptionListBtn.visibility = View.GONE
-                        apDescriptionActiveListNameView.visibility = View.GONE
-                        apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
-                        apDescriptionVoiceRecView.visibility = View.GONE
-                        apDescriptionCameraRecView.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
-                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
-                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-                        apDescriptionImageRecView.visibility = View.VISIBLE
-                    }
-                    else {
-                        apDescriptionVoiceRecView.visibility = View.GONE
-                        apDescriptionCameraRecView.visibility = View.GONE
-                        apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionListBtn.visibility = View.GONE
-                        apDescriptionActiveListNameView.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
-                        apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
-                        apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
-                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-                    }
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
 
                 }
 
-            }
-
-            apDescriptionView.addTextChangedListener(object:TextWatcher{
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            apDescriptionView.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
 
                 }
 
@@ -3952,19 +4010,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_DESCRIPTION_VALUE",s.toString())
+                    appSettings.putString("AP_DESCRIPTION_VALUE", s.toString())
                 }
 
             })
 
-            val apQuantitySpinnerSelectedPosition = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
+            val apQuantitySpinnerSelectedPosition =
+                appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
             val apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
             val apQuantityListId = appSettings.getInt("AP_QUANTITY_LIST_ID")
             val apQuantityActiveListName = appSettings.getString("AP_QUANTITY_LIST_NAME")
-            if (apQuantityActiveListName!!.isEmpty()){
+            if (apQuantityActiveListName!!.isEmpty()) {
                 apQuantityActiveListNameView.text = "Active List: None"
-            }
-            else{
+            } else {
                 apQuantityActiveListNameView.text = "Active List: $apQuantityActiveListName"
             }
             apQuantitySpinner.setSelection(apQuantitySpinnerSelectedPosition)
@@ -3975,16 +4033,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apQuantityListSpinner.visibility = View.GONE
                 apQuantityListBtn.visibility = View.GONE
                 apQuantityActiveListNameView.visibility = View.GONE
-                apQuantityDefaultInputBox.visibility = View.VISIBLE
-                apQuantityView.visibility = View.VISIBLE
-                    apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                    apQuantityView.setText(apQuantityDefaultValue)
-            }
-            else if (apQuantitySpinnerSelectedPosition == 2) {
-                apQuantityDefaultInputBox.visibility = View.GONE
+                apQuantityDefaultInputWrapper.visibility = View.VISIBLE
+                apQuantityViewWrapper.visibility = View.VISIBLE
+                apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                apQuantityView.setText(apQuantityDefaultValue)
+            } else if (apQuantitySpinnerSelectedPosition == 2) {
+                apQuantityDefaultInputWrapper.visibility = View.GONE
                 apQuantityListBtn.visibility = View.VISIBLE
                 apQuantityActiveListNameView.visibility = View.VISIBLE
-                apQuantityView.visibility = View.GONE
+                apQuantityViewWrapper.visibility = View.GONE
                 apQuantityListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apQuantityListId)
                 val listValues = listOptions.split(",")
@@ -3996,26 +4053,27 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
 
-                apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
+                apQuantityListSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
 
                     }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                    }
-
-                }
             } else {
-                apQuantityView.visibility = View.VISIBLE
+                apQuantityViewWrapper.visibility = View.VISIBLE
                 apQuantityListBtn.visibility = View.GONE
                 apQuantityActiveListNameView.visibility = View.GONE
-                apQuantityDefaultInputBox.visibility = View.GONE
+                apQuantityDefaultInputWrapper.visibility = View.GONE
                 apQuantityListSpinner.visibility = View.GONE
             }
 
@@ -4051,21 +4109,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (position == 1) {
                         apQuantityListSpinner.visibility = View.GONE
                         apQuantityListBtn.visibility = View.GONE
-                        apQuantityDefaultInputBox.visibility = View.VISIBLE
-                        apQuantityView.visibility = View.VISIBLE
+                        apQuantityDefaultInputWrapper.visibility = View.VISIBLE
+                        apQuantityViewWrapper.visibility = View.VISIBLE
                         if (apQuantityDefaultValue!!.isNotEmpty()) {
                             apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
                             apQuantityView.setText(apQuantityDefaultValue)
-                        }
-                        else{
+                        } else {
                             apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
                             apQuantityView.setSelection(apQuantityView.text.toString().length)
                         }
-                    }
-                    else if (position == 2) {
-                        apQuantityDefaultInputBox.visibility = View.GONE
+                    } else if (position == 2) {
+                        apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListBtn.visibility = View.VISIBLE
-                        apQuantityView.visibility = View.GONE
+                        apQuantityViewWrapper.visibility = View.GONE
                         apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
                         apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListSpinner.visibility = View.VISIBLE
@@ -4079,27 +4135,28 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
 
-                        apQuantityListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                            ) {
+                        apQuantityListSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+
+                                }
+
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                }
 
                             }
-
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
-
-                        }
                     } else {
-                        apQuantityView.visibility = View.VISIBLE
+                        apQuantityViewWrapper.visibility = View.VISIBLE
                         apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
                         apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListBtn.visibility = View.GONE
-                        apQuantityDefaultInputBox.visibility = View.GONE
+                        apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListSpinner.visibility = View.GONE
                     }
                 }
@@ -4110,8 +4167,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             }
 
-            apQuantityView.addTextChangedListener(object:TextWatcher{
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            apQuantityView.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
 
                 }
 
@@ -4120,19 +4182,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_QUANTITY_VALUE",s.toString())
+                    appSettings.putString("AP_QUANTITY_VALUE", s.toString())
                 }
 
             })
 
-            val apPriceSpinnerSelectedPosition = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
+            val apPriceSpinnerSelectedPosition =
+                appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
             val apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
             val apPriceListId = appSettings.getInt("AP_PRICE_LIST_ID")
             val apPriceActiveListName = appSettings.getString("AP_PRICE_LIST_NAME")
-            if (apPriceActiveListName!!.isEmpty()){
+            if (apPriceActiveListName!!.isEmpty()) {
                 apPriceActiveListNameView.text = "Active List: None"
-            }
-            else{
+            } else {
                 apPriceActiveListNameView.text = "Active List: $apPriceActiveListName"
             }
             apPriceSpinner.setSelection(apPriceSpinnerSelectedPosition)
@@ -4143,16 +4205,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apPriceListSpinner.visibility = View.GONE
                 apPriceListBtn.visibility = View.GONE
                 apPriceActiveListNameView.visibility = View.GONE
-                apPriceDefaultInputBox.visibility = View.VISIBLE
-                apPriceView.visibility = View.VISIBLE
+                apPriceDefaultInputWrapper.visibility = View.VISIBLE
+                apPriceViewWrapper.visibility = View.VISIBLE
                 apPriceDefaultInputBox.setText(apPriceDefaultValue)
                 apPriceView.setText(apPriceDefaultValue)
-            }
-            else if (apPriceSpinnerSelectedPosition == 2) {
-                apPriceDefaultInputBox.visibility = View.GONE
+            } else if (apPriceSpinnerSelectedPosition == 2) {
+                apPriceDefaultInputWrapper.visibility = View.GONE
                 apPriceListBtn.visibility = View.VISIBLE
                 apPriceActiveListNameView.visibility = View.VISIBLE
-                apPriceView.visibility = View.GONE
+                apPriceViewWrapper.visibility = View.GONE
                 apPriceListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apPriceListId)
                 val listValues = listOptions.split(",")
@@ -4164,26 +4225,27 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 apPriceListSpinner.adapter = apPriceSpinnerAdapter
 
-                apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
+                apPriceListSpinner.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
 
                     }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                    }
-
-                }
             } else {
-                apPriceView.visibility = View.VISIBLE
+                apPriceViewWrapper.visibility = View.VISIBLE
                 apPriceListBtn.visibility = View.GONE
                 apPriceActiveListNameView.visibility = View.GONE
-                apPriceDefaultInputBox.visibility = View.GONE
+                apPriceDefaultInputWrapper.visibility = View.GONE
                 apPriceListSpinner.visibility = View.GONE
             }
 
@@ -4219,21 +4281,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (position == 1) {
                         apPriceListSpinner.visibility = View.GONE
                         apPriceListBtn.visibility = View.GONE
-                        apPriceDefaultInputBox.visibility = View.VISIBLE
-                        apPriceView.visibility = View.VISIBLE
+                        apPriceDefaultInputWrapper.visibility = View.VISIBLE
+                        apPriceViewWrapper.visibility = View.VISIBLE
                         if (apPriceDefaultValue!!.isNotEmpty()) {
                             apPriceDefaultInputBox.setText(apPriceDefaultValue)
                             apPriceView.setText(apPriceDefaultValue)
-                        }
-                        else{
+                        } else {
                             apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
                             apPriceView.setSelection(apPriceView.text.toString().length)
                         }
-                    }
-                    else if (position == 2) {
-                        apPriceDefaultInputBox.visibility = View.GONE
+                    } else if (position == 2) {
+                        apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
-                        apPriceView.visibility = View.GONE
+                        apPriceViewWrapper.visibility = View.GONE
                         apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
                         apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListSpinner.visibility = View.VISIBLE
@@ -4247,27 +4307,28 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         apPriceListSpinner.adapter = apPriceSpinnerAdapter
 
-                        apPriceListSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                            override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                            ) {
+                        apPriceListSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+
+                                }
+
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                                }
 
                             }
-
-                            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                            }
-
-                        }
                     } else {
-                        apPriceView.visibility = View.VISIBLE
+                        apPriceViewWrapper.visibility = View.VISIBLE
                         apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
                         apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListBtn.visibility = View.GONE
-                        apPriceDefaultInputBox.visibility = View.GONE
+                        apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListSpinner.visibility = View.GONE
                     }
                 }
@@ -4278,8 +4339,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             }
 
-            apPriceView.addTextChangedListener(object:TextWatcher{
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            apPriceView.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
 
                 }
 
@@ -4288,20 +4354,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_PRICE_VALUE",s.toString())
+                    appSettings.putString("AP_PRICE_VALUE", s.toString())
                 }
 
             })
 
 
             selectedImageView =
-                    view.findViewById(R.id.selected_insales_add_product_image_view)
+                view.findViewById(R.id.selected_insales_add_product_image_view)
             val cameraImageView =
-                    view.findViewById<AppCompatImageView>(R.id.camera_image_view)
+                view.findViewById<AppCompatImageView>(R.id.camera_image_view)
             val imagesImageView =
-                    view.findViewById<AppCompatImageView>(R.id.images_image_view)
+                view.findViewById<AppCompatImageView>(R.id.images_image_view)
             val internetImageView =
-                    view.findViewById<AppCompatImageView>(R.id.internet_image_view)
+                view.findViewById<AppCompatImageView>(R.id.internet_image_view)
 
             cameraImageView.setOnClickListener {
                 intentType = 1
@@ -4312,7 +4378,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 ) {
                     //dispatchTakePictureIntent()
                     val cameraIntent =
-                            Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                     cameraResultLauncher.launch(cameraIntent)
                 }
             }
@@ -4338,18 +4404,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 intentType = 3
                 val tempImageList = mutableListOf<String>()
                 val internetSearchLayout = LayoutInflater.from(context)
-                        .inflate(R.layout.internet_image_search_dialog_layout, null)
+                    .inflate(R.layout.internet_image_search_dialog_layout, null)
                 loader =
-                        internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
+                    internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
                 searchBoxView =
-                        internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
+                    internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
                 searchBtnView =
-                        internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
+                    internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
                 val internetImageRecyclerView =
-                        internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
+                    internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                 val closeBtn =
-                        internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
-                voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+                    internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
+                voiceSearchIcon =
+                    internetSearchLayout.findViewById(R.id.voice_search_internet_images)
                 val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setCancelable(false)
                 builder.setView(internetSearchLayout)
@@ -4397,8 +4464,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         R.layout.voice_language_setting_layout,
                         null
                     )
-                    val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
-                    val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+                    val voiceLanguageSpinner =
+                        voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                    val voiceLanguageSaveBtn =
+                        voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
                     if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
                         voiceLanguageSpinner.setSelection(0, false)
@@ -4414,9 +4483,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 position: Int,
                                 id: Long
                             ) {
-                                voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(
-                                        Locale.ENGLISH
-                                    ).contains("english")){"en"}else{"ru"}
+                                voiceLanguageCode =
+                                    if (parent!!.selectedItem.toString().toLowerCase(
+                                            Locale.ENGLISH
+                                        ).contains("english")
+                                    ) {
+                                        "en"
+                                    } else {
+                                        "ru"
+                                    }
                                 appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
 
                             }
@@ -4617,16 +4692,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     )
                 } else {
                     MaterialAlertDialogBuilder(requireActivity())
-                            .setMessage(getString(R.string.low_credites_error_message2))
-                            .setCancelable(false)
-                            .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                                dialog.dismiss()
-                                startActivity(Intent(context, UserScreenActivity::class.java))
-                            }
-                            .create().show()
+                        .setMessage(getString(R.string.low_credites_error_message2))
+                        .setCancelable(false)
+                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+                            dialog.dismiss()
+                            startActivity(Intent(context, UserScreenActivity::class.java))
+                        }
+                        .create().show()
                 }
             }
 
@@ -4725,81 +4800,81 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         finalPriceText
                     )
                     viewModel.getAddProductResponse()
-                            .observe(requireActivity(), Observer { response ->
-                                if (response != null) {
-                                    if (response.get("status").asString == "200") {
-                                        val details = response.getAsJsonObject("details")
-                                        val productId = details.get("id").asInt
+                        .observe(requireActivity(), Observer { response ->
+                            if (response != null) {
+                                if (response.get("status").asString == "200") {
+                                    val details = response.getAsJsonObject("details")
+                                    val productId = details.get("id").asInt
 
-                                        if (selectedImageBase64String.isNotEmpty()) {
-                                            BaseActivity.dismiss()
-                                            BaseActivity.startLoading(requireActivity())
+                                    if (selectedImageBase64String.isNotEmpty()) {
+                                        BaseActivity.dismiss()
+                                        BaseActivity.startLoading(requireActivity())
 
-                                            viewModel.callAddProductImage(
+                                        viewModel.callAddProductImage(
+                                            requireActivity(),
+                                            shopName,
+                                            email,
+                                            password,
+                                            selectedImageBase64String,
+                                            productId,
+                                            "${System.currentTimeMillis()}.jpg",
+                                            if (intentType != 3) {
+                                                ""
+                                            } else {
+                                                selectedInternetImage
+                                            }
+                                        )
+                                        viewModel.getAddProductImageResponse()
+                                            .observe(
                                                 requireActivity(),
-                                                shopName,
-                                                email,
-                                                password,
-                                                selectedImageBase64String,
-                                                productId,
-                                                "${System.currentTimeMillis()}.jpg",
-                                                if (intentType != 3) {
-                                                    ""
-                                                } else {
-                                                    selectedInternetImage
-                                                }
-                                            )
-                                            viewModel.getAddProductImageResponse()
-                                                .observe(
-                                                    requireActivity(),
-                                                    Observer { response ->
+                                                Observer { response ->
 
-                                                        if (response != null) {
-                                                            if (response.get("status").asString == "200") {
-                                                                selectedImageBase64String = ""
-                                                                selectedInternetImage = ""
-                                                                Handler(Looper.myLooper()!!).postDelayed(
-                                                                    {
-                                                                        BaseActivity.dismiss()
-                                                                        dismiss()
-                                                                        listener.onSuccess("")
-                                                                    },
-                                                                    6000
-                                                                )
-                                                            } else {
-                                                                BaseActivity.dismiss()
-                                                                BaseActivity.showAlert(
-                                                                    requireActivity(),
-                                                                    response.get("message").asString
-                                                                )
-                                                            }
+                                                    if (response != null) {
+                                                        if (response.get("status").asString == "200") {
+                                                            selectedImageBase64String = ""
+                                                            selectedInternetImage = ""
+                                                            Handler(Looper.myLooper()!!).postDelayed(
+                                                                {
+                                                                    BaseActivity.dismiss()
+                                                                    dismiss()
+                                                                    listener.onSuccess("")
+                                                                },
+                                                                6000
+                                                            )
                                                         } else {
                                                             BaseActivity.dismiss()
                                                             BaseActivity.showAlert(
                                                                 requireActivity(),
-                                                                getString(R.string.something_wrong_error)
+                                                                response.get("message").asString
                                                             )
                                                         }
-                                                    })
-                                        } else {
-                                            Handler(Looper.myLooper()!!).postDelayed({
-                                                BaseActivity.dismiss()
-                                                dismiss()
-                                                listener.onSuccess("")
-                                            }, 3000)
-                                        }
-
+                                                    } else {
+                                                        BaseActivity.dismiss()
+                                                        BaseActivity.showAlert(
+                                                            requireActivity(),
+                                                            getString(R.string.something_wrong_error)
+                                                        )
+                                                    }
+                                                })
                                     } else {
-                                        BaseActivity.dismiss()
-                                        BaseActivity.showAlert(
-                                            requireActivity(),
-                                            response.get("message").asString
-                                        )
+                                        Handler(Looper.myLooper()!!).postDelayed({
+                                            BaseActivity.dismiss()
+                                            dismiss()
+                                            listener.onSuccess("")
+                                        }, 3000)
                                     }
+
                                 } else {
                                     BaseActivity.dismiss()
+                                    BaseActivity.showAlert(
+                                        requireActivity(),
+                                        response.get("message").asString
+                                    )
                                 }
-                            })
+                            } else {
+                                BaseActivity.dismiss()
+                            }
+                        })
                 }
             }
 
@@ -4816,60 +4891,61 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
         private var resultLauncher1 =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        val data: Intent? = result.data
-                        val cropPicUri = CropImage.getPickImageResultUri(requireActivity(), data)
-                        cropImage(cropPicUri)
-                    }
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+                    val cropPicUri = CropImage.getPickImageResultUri(requireActivity(), data)
+                    cropImage(cropPicUri)
                 }
+            }
 
         private var cameraResultLauncher1 =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                    // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        val text = result.data!!.getStringExtra("SCAN_TEXT")
-                        if (Constants.CIVType == "ap_title") {
-                            val currentPItemTitle = apTitleView.text.toString().trim()
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(text)
-                            apTitleView.setText(stringBuilder.toString())
-                        } else {
-                            val currentPItemTitle = apDescriptionView.text.toString().trim()
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(text)
-                            apDescriptionView.setText(stringBuilder.toString())
-                        }
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val text = result.data!!.getStringExtra("SCAN_TEXT")
+                    if (Constants.CIVType == "ap_title") {
+                        val currentPItemTitle = apTitleView.text.toString().trim()
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemTitle)
+                        stringBuilder.append(text)
+                        apTitleView.setText(stringBuilder.toString())
+                    } else {
+                        val currentPItemTitle = apDescriptionView.text.toString().trim()
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemTitle)
+                        stringBuilder.append(text)
+                        apDescriptionView.setText(stringBuilder.toString())
                     }
                 }
+            }
 
         private var voiceResultLauncher =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                    // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        val spokenText: String =
-                                result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).let { results ->
-                                    results!!.get(0)
-                                }
-                        if (Constants.CIVType == "ap_title") {
-                            val currentPItemTitle = apTitleView.text.toString().trim()
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(spokenText)
-                            apTitleView.setText(stringBuilder.toString())
-                        } else {
-                            val currentPItemTitle = apDescriptionView.text.toString().trim()
-                            val stringBuilder = java.lang.StringBuilder()
-                            stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(spokenText)
-                            apDescriptionView.setText(stringBuilder.toString())
-                        }
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val spokenText: String =
+                        result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                            .let { results ->
+                                results!!.get(0)
+                            }
+                    if (Constants.CIVType == "ap_title") {
+                        val currentPItemTitle = apTitleView.text.toString().trim()
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemTitle)
+                        stringBuilder.append(spokenText)
+                        apTitleView.setText(stringBuilder.toString())
+                    } else {
+                        val currentPItemTitle = apDescriptionView.text.toString().trim()
+                        val stringBuilder = java.lang.StringBuilder()
+                        stringBuilder.append(currentPItemTitle)
+                        stringBuilder.append(spokenText)
+                        apDescriptionView.setText(stringBuilder.toString())
                     }
                 }
+            }
 
         fun pickImageFromCamera() {
             //        startActivity(Intent(context,OcrActivity::class.java))
@@ -4880,9 +4956,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private fun cropImage(imageUri: Uri) {
 
             CropImage.activity(imageUri)
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .setMultiTouchEnabled(true)
-                    .start(requireActivity())
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setMultiTouchEnabled(true)
+                .start(requireActivity())
         }
 
         private var voiceResultLauncher1 =
@@ -4911,7 +4987,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             loader: ProgressBar,
             searchedImagesList: java.util.ArrayList<String>,
             internetImageAdapter: InternetImageAdapter
-        ){
+        ) {
             var creditChargePrice: Float = 0F
             if (searchBoxView.text.toString().trim().isNotEmpty()) {
 
@@ -5058,12 +5134,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apDescriptionView
                         }, imgUri
                     )
-                  Constants.hint = "default"
+                    Constants.hint = "default"
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-            }
-            else{
+            } else {
                 super.onActivityResult(requestCode, resultCode, data)
                 for (fragment in childFragmentManager.fragments) {
                     fragment.onActivityResult(requestCode, resultCode, data)
@@ -5080,12 +5155,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             val listItems = mutableListOf<ListItem>()
             val layout =
-                    LayoutInflater.from(context).inflate(
-                        R.layout.list_with_fields_value_layout,
-                        null
-                    )
+                LayoutInflater.from(context).inflate(
+                    R.layout.list_with_fields_value_layout,
+                    null
+                )
             val listWithFieldsValueRecyclerView =
-                    layout.findViewById<RecyclerView>(R.id.list_with_fields_recycler_view)
+                layout.findViewById<RecyclerView>(R.id.list_with_fields_recycler_view)
             listWithFieldsValueRecyclerView.layoutManager = LinearLayoutManager(context)
             listWithFieldsValueRecyclerView.hasFixedSize()
             adapter = FieldListsAdapter(requireActivity(), listItems as ArrayList<ListItem>)
@@ -5120,7 +5195,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apTitleActiveListNameView.text = "Active List: ${listValue.value}"
                         } else if (fieldType == "ap_description") {
                             appSettings.putInt("AP_DESCRIPTION_LIST_ID", listId!!)
-                            appSettings.putString("AP_DESCRIPTION_LIST_NAME",listValue.value)
+                            appSettings.putString("AP_DESCRIPTION_LIST_NAME", listValue.value)
                             apDescriptionActiveListNameView.text = "Active List: ${listValue.value}"
                         } else if (fieldType == "ap_quantity") {
                             appSettings.putInt("AP_QUANTITY_LIST_ID", listId!!)
@@ -5128,7 +5203,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apQuantityActiveListNameView.text = "Active Lis: ${listValue.value}"
                         } else if (fieldType == "ap_price") {
                             appSettings.putInt("AP_PRICE_LIST_ID", listId!!)
-                            appSettings.putString("AP_PRICE_LIST_NAME",listValue.value)
+                            appSettings.putString("AP_PRICE_LIST_NAME", listValue.value)
                             apPriceActiveListNameView.text = "Active List: ${listValue.value}"
                         }
                         alert.dismiss()
@@ -5164,8 +5239,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             )
             val heading = listValueLayout.findViewById<MaterialTextView>(R.id.dialog_heading)
             heading.text = getString(R.string.list_value_hint_text)
-            val listValueInputBox = listValueLayout.findViewById<TextInputEditText>(R.id.add_list_value_input_field)
-            val listValueAddBtn = listValueLayout.findViewById<MaterialButton>(R.id.add_list_value_btn)
+            val listValueInputBox =
+                listValueLayout.findViewById<TextInputEditText>(R.id.add_list_value_input_field)
+            val listValueAddBtn =
+                listValueLayout.findViewById<MaterialButton>(R.id.add_list_value_btn)
             val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setView(listValueLayout)
             val alert = builder.create()
@@ -5185,40 +5262,78 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
         var launchActivity =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        val data: Intent? = result.data
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
 
-                        if (data != null && data.hasExtra("TITLE")) {
-                            val title = data.getStringExtra("TITLE") as String
-                            if (title.isNotEmpty()) {
-                                val currentPItemTitle = apTitleView.text.toString().trim()
-                                val stringBuilder = java.lang.StringBuilder()
-                                stringBuilder.append(currentPItemTitle)
-                                stringBuilder.append(title)
-                                apTitleView.setText(stringBuilder.toString())
-                            }
-                        }
-
-                        if (data != null && data.hasExtra("DESCRIPTION")) {
-                            val description = data.getStringExtra("DESCRIPTION") as String
-                            if (description.isNotEmpty()) {
-
-                                val currentPItemDescription = apDescriptionView.text.toString().trim()
-                                val stringBuilder = java.lang.StringBuilder()
-                                stringBuilder.append(currentPItemDescription)
-                                stringBuilder.append(description)
-                                apDescriptionView.setText(stringBuilder.toString())
-
-                            }
-                        }
-                        if (apDescriptionView.text.toString().isNotEmpty()) {
-                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-                            apDescriptionView.requestFocus()
-                            Constants.openKeyboar(requireActivity())
+                    if (data != null && data.hasExtra("TITLE")) {
+                        val title = data.getStringExtra("TITLE") as String
+                        if (title.isNotEmpty()) {
+                            val currentPItemTitle = apTitleView.text.toString().trim()
+                            val stringBuilder = java.lang.StringBuilder()
+                            stringBuilder.append(currentPItemTitle)
+                            stringBuilder.append(title)
+                            apTitleView.setText(stringBuilder.toString())
                         }
                     }
+
+                    if (data != null && data.hasExtra("DESCRIPTION")) {
+                        val description = data.getStringExtra("DESCRIPTION") as String
+                        if (description.isNotEmpty()) {
+
+                            val currentPItemDescription = apDescriptionView.text.toString().trim()
+                            val stringBuilder = java.lang.StringBuilder()
+                            stringBuilder.append(currentPItemDescription)
+                            stringBuilder.append(description)
+                            apDescriptionView.setText(stringBuilder.toString())
+
+                        }
+                    }
+                    if (apDescriptionView.text.toString().isNotEmpty()) {
+                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                        apDescriptionView.requestFocus()
+                        Constants.openKeyboar(requireActivity())
+                    }
                 }
+            }
+
+        var launchActivity1 =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+
+                    if (data != null && data.hasExtra("TITLE")) {
+                        val title = data.getStringExtra("TITLE") as String
+                        if (title.isNotEmpty()) {
+//                            val currentPItemTitle = apTitleView.text.toString().trim()
+//                            val stringBuilder = java.lang.StringBuilder()
+//                            stringBuilder.append(currentPItemTitle)
+//                            stringBuilder.append(title)
+//                            apTitleView.setText(stringBuilder.toString())
+                            appSettings.putString("AP_PRODUCT_TITLE", title)
+                        }
+                    }
+
+                    if (data != null && data.hasExtra("DESCRIPTION")) {
+                        val description = data.getStringExtra("DESCRIPTION") as String
+                        if (description.isNotEmpty()) {
+                            appSettings.putString("AP_PRODUCT_DESCRIPTION",description)
+//                            val currentPItemDescription = apDescriptionView.text.toString().trim()
+//                            val stringBuilder = java.lang.StringBuilder()
+//                            stringBuilder.append(currentPItemDescription)
+//                            stringBuilder.append(description)
+//                            apDescriptionView.setText(stringBuilder.toString())
+
+                        }
+                    }
+//                    if (apDescriptionView.text.toString().isNotEmpty()) {
+//                        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+//                        apDescriptionView.requestFocus()
+//                        Constants.openKeyboar(requireActivity())
+//                    }
+                }
+            }
+
 
         private fun addProductValidation(
             categoriesSpinner: AppCompatSpinner?,
@@ -5241,7 +5356,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     requireActivity().resources.getString(R.string.empty_text_error)
                 )
                 return false
-            } else if (apQuantitySelectedPosition == 1 && apQuantityView!!.text.toString().isEmpty()) {
+            } else if (apQuantitySelectedPosition == 1 && apQuantityView!!.text.toString()
+                    .isEmpty()
+            ) {
                 BaseActivity.showAlert(
                     requireActivity(),
                     requireActivity().resources.getString(R.string.empty_text_error)
@@ -5264,54 +5381,54 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
         private var resultLauncher =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                    // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        if (result.data != null) {
-                            val imageUri = result.data!!
-                            currentPhotoPath = ImageManager.getRealPathFromUri(
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    if (result.data != null) {
+                        val imageUri = result.data!!
+                        currentPhotoPath = ImageManager.getRealPathFromUri(
+                            requireActivity(),
+                            imageUri.data
+                        )
+                        selectedImageBase64String =
+                            ImageManager.convertImageToBase64(
                                 requireActivity(),
-                                imageUri.data
+                                currentPhotoPath!!
                             )
-                            selectedImageBase64String =
-                                    ImageManager.convertImageToBase64(
-                                        requireActivity(),
-                                        currentPhotoPath!!
-                                    )
-                            Log.d("TEST199DIALOG", selectedImageBase64String)
-                            Glide.with(requireActivity())
-                                    .load(currentPhotoPath)
-                                    .placeholder(R.drawable.placeholder)
-                                    .centerInside()
-                                    .into(selectedImageView)
-                        }
-
+                        Log.d("TEST199DIALOG", selectedImageBase64String)
+                        Glide.with(requireActivity())
+                            .load(currentPhotoPath)
+                            .placeholder(R.drawable.placeholder)
+                            .centerInside()
+                            .into(selectedImageView)
                     }
+
                 }
+            }
 
         // THIS RESULT LAUNCHER WILL CALL THE ACTION PICK FROM FILES FOR BACKGROUND AND LOGO IMAGE
         private var cameraResultLauncher =
-                registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                    // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        val data: Intent? = result.data
-                        val bitmap = data!!.extras!!.get("data") as Bitmap
-                        createImageFile(bitmap)
-                        selectedImageBase64String =
-                                ImageManager.convertImageToBase64(
-                                    requireActivity(),
-                                    currentPhotoPath!!
-                                )
-                        Log.d("TEST199DIALOG", selectedImageBase64String)
-                        Glide.with(requireActivity())
-                                .load(currentPhotoPath)
-                                .placeholder(R.drawable.placeholder)
-                                .centerInside()
-                                .into(selectedImageView)
-                    }
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val data: Intent? = result.data
+                    val bitmap = data!!.extras!!.get("data") as Bitmap
+                    createImageFile(bitmap)
+                    selectedImageBase64String =
+                        ImageManager.convertImageToBase64(
+                            requireActivity(),
+                            currentPhotoPath!!
+                        )
+                    Log.d("TEST199DIALOG", selectedImageBase64String)
+                    Glide.with(requireActivity())
+                        .load(currentPhotoPath)
+                        .placeholder(R.drawable.placeholder)
+                        .centerInside()
+                        .into(selectedImageView)
                 }
+            }
 
         private fun createImageFile(bitmap: Bitmap) {
             currentPhotoPath = ImageManager.readWriteImage(requireActivity(), bitmap).absolutePath

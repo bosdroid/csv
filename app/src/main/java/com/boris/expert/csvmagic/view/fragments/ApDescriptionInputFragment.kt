@@ -37,6 +37,7 @@ import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
@@ -47,6 +48,13 @@ import kotlin.collections.ArrayList
 
 class ApDescriptionInputFragment : Fragment() {
 
+    private lateinit var apDescriptionVoiceRecView: LinearLayout
+    private lateinit var apDescriptionImageRecView: LinearLayout
+    private lateinit var apDescriptionCameraRecView: LinearLayout
+    private lateinit var apDescriptionDefaultValueMessage: MaterialTextView
+    private lateinit var apDescriptionDefaultInputWrapper: TextInputLayout
+    private lateinit var apDescriptionListBtn: MaterialButton
+    private lateinit var apDescriptionViewWrapper: TextInputLayout
     private lateinit var apDescriptionActiveListNameView: MaterialTextView
     private lateinit var apDescriptionListSpinner:AppCompatSpinner
     private lateinit var appSettings: AppSettings
@@ -83,17 +91,19 @@ class ApDescriptionInputFragment : Fragment() {
     private fun initViews(view: View){
 
         apDescriptionView  = view.findViewById(R.id.ap_description)
+        apDescriptionViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_description_wrapper)
         getDescriptionBtn  = view.findViewById(R.id.get_description_text_view)
         val apDescriptionSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_description_options_spinner)
-        val apDescriptionListBtn = view.findViewById<MaterialButton>(R.id.ap_description_list_with_fields_btn)
+        apDescriptionListBtn = view.findViewById<MaterialButton>(R.id.ap_description_list_with_fields_btn)
         val apDescriptionDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_description_non_changeable_default_text_input)
-        val apDescriptionDefaultValueMessage =
+        apDescriptionDefaultInputWrapper = view.findViewById<TextInputLayout>(R.id.ap_description_non_changeable_default_text_input_wrapper)
+        apDescriptionDefaultValueMessage =
             view.findViewById<MaterialTextView>(R.id.ap_description_default_value_message)
         apDescriptionListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_description_list_spinner)
         apDescriptionActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_description_active_list_name)
-        val apDescriptionCameraRecView = view.findViewById<LinearLayout>(R.id.ap_description_camera_layout)
-        val apDescriptionImageRecView = view.findViewById<LinearLayout>(R.id.ap_description_images_layout)
-        val apDescriptionVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_description_voice_layout)
+        apDescriptionCameraRecView = view.findViewById<LinearLayout>(R.id.ap_description_camera_layout)
+        apDescriptionImageRecView = view.findViewById<LinearLayout>(R.id.ap_description_images_layout)
+        apDescriptionVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_description_voice_layout)
 
         getDescriptionBtn.setOnClickListener {
             userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
@@ -233,8 +243,8 @@ class ApDescriptionInputFragment : Fragment() {
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionDefaultValueMessage.visibility = View.VISIBLE
-                apDescriptionDefaultInputBox.visibility = View.VISIBLE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionDefaultInputWrapper.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
                 apDescriptionView.setText(apDescriptionDefaultValue)
 //                BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionDefaultInputBox)
@@ -244,10 +254,10 @@ class ApDescriptionInputFragment : Fragment() {
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionDefaultValueMessage.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.VISIBLE
                 apDescriptionActiveListNameView.visibility = View.VISIBLE
-                apDescriptionView.visibility = View.GONE
+                apDescriptionViewWrapper.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apDescriptionListId)
                 val listValues = listOptions.split(",")
@@ -283,33 +293,33 @@ class ApDescriptionInputFragment : Fragment() {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionDefaultValueMessage.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionVoiceRecView.visibility = View.VISIBLE
             }
             4 -> {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionDefaultValueMessage.visibility = View.GONE
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionImageRecView.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionCameraRecView.visibility = View.VISIBLE
             }
             5 -> {
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionDefaultValueMessage.visibility = View.GONE
                 apDescriptionVoiceRecView.visibility = View.GONE
                 apDescriptionCameraRecView.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
                 apDescriptionImageRecView.visibility = View.VISIBLE
             }
             else -> {
@@ -318,10 +328,10 @@ class ApDescriptionInputFragment : Fragment() {
                 apDescriptionImageRecView.visibility = View.GONE
                 apDescriptionListBtn.visibility = View.GONE
                 apDescriptionActiveListNameView.visibility = View.GONE
-                apDescriptionDefaultInputBox.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
                 apDescriptionDefaultValueMessage.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
-                apDescriptionView.visibility = View.VISIBLE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
 //                BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
             }
         }
@@ -364,9 +374,9 @@ class ApDescriptionInputFragment : Fragment() {
                         apDescriptionListBtn.visibility = View.GONE
                         apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.VISIBLE
+                        apDescriptionDefaultInputWrapper.visibility = View.VISIBLE
                         apDescriptionDefaultValueMessage.visibility = View.VISIBLE
-                        apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionViewWrapper.visibility = View.VISIBLE
                         apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
                         apDescriptionView.setText(apDescriptionDefaultValue)
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionDefaultInputBox)
@@ -375,11 +385,11 @@ class ApDescriptionInputFragment : Fragment() {
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
+                        apDescriptionDefaultInputWrapper.visibility = View.GONE
                         apDescriptionDefaultValueMessage.visibility = View.GONE
                         apDescriptionListBtn.visibility = View.VISIBLE
                         apDescriptionActiveListNameView.visibility = View.VISIBLE
-                        apDescriptionView.visibility = View.GONE
+                        apDescriptionViewWrapper.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apDescriptionListId)
                         val listValues = listOptions.split(",")
@@ -415,33 +425,33 @@ class ApDescriptionInputFragment : Fragment() {
                         apDescriptionListBtn.visibility = View.GONE
                         apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
+                        apDescriptionDefaultInputWrapper.visibility = View.GONE
                         apDescriptionDefaultValueMessage.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionViewWrapper.visibility = View.VISIBLE
                         apDescriptionVoiceRecView.visibility = View.VISIBLE
                     }
                     4 -> {
                         apDescriptionListBtn.visibility = View.GONE
                         apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
+                        apDescriptionDefaultInputWrapper.visibility = View.GONE
                         apDescriptionDefaultValueMessage.visibility = View.GONE
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionImageRecView.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionViewWrapper.visibility = View.VISIBLE
                         apDescriptionCameraRecView.visibility = View.VISIBLE
                     }
                     5 -> {
                         apDescriptionListBtn.visibility = View.GONE
                         apDescriptionActiveListNameView.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
+                        apDescriptionDefaultInputWrapper.visibility = View.GONE
                         apDescriptionDefaultValueMessage.visibility = View.GONE
                         apDescriptionVoiceRecView.visibility = View.GONE
                         apDescriptionCameraRecView.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionViewWrapper.visibility = View.VISIBLE
                         apDescriptionImageRecView.visibility = View.VISIBLE
                     }
                     else -> {
@@ -450,10 +460,10 @@ class ApDescriptionInputFragment : Fragment() {
                         apDescriptionImageRecView.visibility = View.GONE
                         apDescriptionListBtn.visibility = View.GONE
                         apDescriptionActiveListNameView.visibility = View.GONE
-                        apDescriptionDefaultInputBox.visibility = View.GONE
+                        apDescriptionDefaultInputWrapper.visibility = View.GONE
                         apDescriptionDefaultValueMessage.visibility = View.GONE
                         apDescriptionListSpinner.visibility = View.GONE
-                        apDescriptionView.visibility = View.VISIBLE
+                        apDescriptionViewWrapper.visibility = View.VISIBLE
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
                     }
                 }
@@ -464,6 +474,12 @@ class ApDescriptionInputFragment : Fragment() {
             }
 
         }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
     }
 
     private fun openListWithFieldsDialog(fieldType: String) {
@@ -697,6 +713,15 @@ class ApDescriptionInputFragment : Fragment() {
 
     fun updateTestData(text:String){
         apDescriptionView.setText(text)
+        apDescriptionVoiceRecView.visibility = View.GONE
+        apDescriptionCameraRecView.visibility = View.GONE
+        apDescriptionImageRecView.visibility = View.GONE
+        apDescriptionListBtn.visibility = View.GONE
+        apDescriptionActiveListNameView.visibility = View.GONE
+        apDescriptionDefaultInputWrapper.visibility = View.GONE
+        apDescriptionDefaultValueMessage.visibility = View.GONE
+        apDescriptionListSpinner.visibility = View.GONE
+        apDescriptionViewWrapper.visibility = View.VISIBLE
     }
 
 }

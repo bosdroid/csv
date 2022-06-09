@@ -58,7 +58,7 @@
                     android:layout_weight="1"
                     android:text="@string/description_text"
                     android:textColor="@color/black"
-                    android:textSize="@dimen/largeText"
+                    android:textSize="@dimen/mediumText"
                     />
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"
@@ -75,17 +75,19 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxHeight="350dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="false"
                 app:endIconMode="clear_text"
                 android:hint="@string/description_text"
+                android:id="@+id/ap_description_wrapper"
                 >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ap_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:maxHeight="300dp"
                 android:gravity="start"
+                android:textSize="@dimen/largeText"
                 android:hint="@string/description_text"
                 android:inputType="textMultiLine" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -174,6 +176,8 @@
                 app:hintEnabled="false"
                 app:endIconMode="clear_text"
                 android:hint="@string/set_the_default_value"
+                android:id="@+id/ap_description_non_changeable_default_text_input_wrapper"
+                android:visibility="gone"
                 >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ap_description_non_changeable_default_text_input"
@@ -181,8 +185,9 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/set_the_default_value"
                 android:imeOptions="actionDone"
+                android:textSize="@dimen/largeText"
                 android:inputType="text"
-                android:visibility="gone" />
+                />
             </com.google.android.material.textfield.TextInputLayout>
             <LinearLayout
                 android:id="@+id/ap_description_sources_layout"

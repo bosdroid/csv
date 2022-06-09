@@ -37,6 +37,7 @@ import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
@@ -47,6 +48,15 @@ import kotlin.collections.ArrayList
 
 class ApTitleInputFragment : Fragment() {
 
+    private lateinit var apTitleVoiceRecView: LinearLayout
+    private lateinit var apTitleImageRecView: LinearLayout
+    private lateinit var apTitleCameraRecView: LinearLayout
+    private lateinit var apTitleDefaultValueMessage: MaterialTextView
+    private lateinit var apTitleDefaultInputWrapper: TextInputLayout
+    private lateinit var apTitleDefaultInputBox: TextInputEditText
+    private lateinit var apTitleListBtn: MaterialButton
+    private lateinit var apTitleSpinner: AppCompatSpinner
+    private lateinit var apTitleViewWrapper: TextInputLayout
     private lateinit var apTitleActiveListNameView: MaterialTextView
     private lateinit var apTitleListSpinner: AppCompatSpinner
     private lateinit var appSettings: AppSettings
@@ -57,7 +67,7 @@ class ApTitleInputFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
     private var userCurrentCredits = ""
     private var voiceLanguageCode = "en"
-    private lateinit var getTitleBtn:MaterialTextView
+//    private lateinit var getTitleBtn:MaterialTextView
     override fun onAttach(context: Context) {
         super.onAttach(context)
         appSettings = AppSettings(requireActivity())
@@ -80,23 +90,30 @@ class ApTitleInputFragment : Fragment() {
         return v
     }
 
+    override fun onResume() {
+        super.onResume()
+        apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
+    }
 
     private fun initViews(view: View) {
 
         apTitleView = view.findViewById(R.id.ap_title)
-        getTitleBtn  = view.findViewById(R.id.get_title_text_view)
-        val apTitleSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_options_spinner)
-        val apTitleListBtn = view.findViewById<MaterialButton>(R.id.ap_title_list_with_fields_btn)
-        val apTitleDefaultInputBox =
+        apTitleViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_title_wrapper)
+//        getTitleBtn  = view.findViewById(R.id.get_title_text_view)
+        apTitleSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_options_spinner)
+        apTitleListBtn = view.findViewById<MaterialButton>(R.id.ap_title_list_with_fields_btn)
+        apTitleDefaultInputBox =
                 view.findViewById<TextInputEditText>(R.id.ap_title_non_changeable_default_text_input)
-        val apTitleDefaultValueMessage =
+        apTitleDefaultInputWrapper =
+            view.findViewById<TextInputLayout>(R.id.ap_title_non_changeable_default_text_input_wrapper)
+        apTitleDefaultValueMessage =
                 view.findViewById<MaterialTextView>(R.id.ap_title_default_value_message)
         apTitleListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_title_list_spinner)
         apTitleActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_title_active_list_name)
 
-        val apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
-        val apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
-        val apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
+        apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
+        apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
+        apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
 
         val apTitleSpinnerSelectedPosition =
                 appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
@@ -129,31 +146,31 @@ class ApTitleInputFragment : Fragment() {
             apTitleView.setText(updateTitle)
         })
 
-        getTitleBtn.setOnClickListener {
-            userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
-
-            if (userCurrentCredits.toFloat() >= 1.0) {
-
-                launchActivity.launch(
-                        Intent(
-                                requireActivity(),
-                                RainForestApiActivity::class.java
-                        )
-                )
-            } else {
-                MaterialAlertDialogBuilder(requireActivity())
-                        .setMessage(getString(R.string.low_credites_error_message2))
-                        .setCancelable(false)
-                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
-                            dialog.dismiss()
-                        }
-                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
-                            dialog.dismiss()
-                            startActivity(Intent(context, UserScreenActivity::class.java))
-                        }
-                        .create().show()
-            }
-        }
+//        getTitleBtn.setOnClickListener {
+//            userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+//
+//            if (userCurrentCredits.toFloat() >= 1.0) {
+//
+//                launchActivity.launch(
+//                        Intent(
+//                                requireActivity(),
+//                                RainForestApiActivity::class.java
+//                        )
+//                )
+//            } else {
+//                MaterialAlertDialogBuilder(requireActivity())
+//                        .setMessage(getString(R.string.low_credites_error_message2))
+//                        .setCancelable(false)
+//                        .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+//                            dialog.dismiss()
+//                        }
+//                        .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
+//                            dialog.dismiss()
+//                            startActivity(Intent(context, UserScreenActivity::class.java))
+//                        }
+//                        .create().show()
+//            }
+//        }
 
         apTitleCameraRecView.setOnClickListener {
             if (RuntimePermissionHelper.checkCameraPermission(
@@ -237,9 +254,9 @@ class ApTitleInputFragment : Fragment() {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.VISIBLE
+                apTitleDefaultInputWrapper.visibility = View.VISIBLE
                 apTitleDefaultValueMessage.visibility = View.VISIBLE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleDefaultInputBox.setText(apTitleDefaultValue)
                 apTitleView.setText(apTitleDefaultValue)
 
@@ -248,11 +265,11 @@ class ApTitleInputFragment : Fragment() {
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleDefaultValueMessage.visibility = View.GONE
                 apTitleListBtn.visibility = View.VISIBLE
                 apTitleActiveListNameView.visibility = View.VISIBLE
-                apTitleView.visibility = View.GONE
+                apTitleViewWrapper.visibility = View.GONE
                 apTitleListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apTitleListId)
                 val listValues = listOptions.split(",")
@@ -290,33 +307,33 @@ class ApTitleInputFragment : Fragment() {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleDefaultValueMessage.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleVoiceRecView.visibility = View.VISIBLE
             }
             4 -> {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleDefaultValueMessage.visibility = View.GONE
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleImageRecView.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleCameraRecView.visibility = View.VISIBLE
             }
             5 -> {
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleDefaultValueMessage.visibility = View.GONE
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
                 apTitleImageRecView.visibility = View.VISIBLE
             }
             else -> {
@@ -326,10 +343,10 @@ class ApTitleInputFragment : Fragment() {
                 apTitleImageRecView.visibility = View.GONE
                 apTitleListBtn.visibility = View.GONE
                 apTitleActiveListNameView.visibility = View.GONE
-                apTitleDefaultInputBox.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
                 apTitleDefaultValueMessage.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
-                apTitleView.visibility = View.VISIBLE
+                apTitleViewWrapper.visibility = View.VISIBLE
 
             }
         }
@@ -373,9 +390,9 @@ class ApTitleInputFragment : Fragment() {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.VISIBLE
+                        apTitleDefaultInputWrapper.visibility = View.VISIBLE
                         apTitleDefaultValueMessage.visibility = View.VISIBLE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleDefaultInputBox.setText(apTitleDefaultValue)
                         apTitleView.setText(apTitleDefaultValue)
 
@@ -384,11 +401,11 @@ class ApTitleInputFragment : Fragment() {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleDefaultValueMessage.visibility = View.GONE
                         apTitleListBtn.visibility = View.VISIBLE
                         apTitleActiveListNameView.visibility = View.VISIBLE
-                        apTitleView.visibility = View.GONE
+                        apTitleViewWrapper.visibility = View.GONE
                         apTitleListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apTitleListId)
                         val listValues = listOptions.split(",")
@@ -425,33 +442,33 @@ class ApTitleInputFragment : Fragment() {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleDefaultValueMessage.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleVoiceRecView.visibility = View.VISIBLE
                     }
                     4 -> {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleDefaultValueMessage.visibility = View.GONE
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleCameraRecView.visibility = View.VISIBLE
                     }
                     5 -> {
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleDefaultValueMessage.visibility = View.GONE
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleImageRecView.visibility = View.VISIBLE
                     }
                     else -> {
@@ -461,10 +478,10 @@ class ApTitleInputFragment : Fragment() {
                         apTitleImageRecView.visibility = View.GONE
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleDefaultValueMessage.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
 
                     }
                 }
@@ -712,5 +729,14 @@ class ApTitleInputFragment : Fragment() {
 
     fun updateTestData(text:String){
         apTitleView.setText(text)
+        apTitleVoiceRecView.visibility = View.GONE
+        apTitleCameraRecView.visibility = View.GONE
+        apTitleImageRecView.visibility = View.GONE
+        apTitleListBtn.visibility = View.GONE
+        apTitleActiveListNameView.visibility = View.GONE
+        apTitleDefaultInputWrapper.visibility = View.GONE
+        apTitleDefaultValueMessage.visibility = View.GONE
+        apTitleListSpinner.visibility = View.GONE
+        apTitleViewWrapper.visibility = View.VISIBLE
     }
 }

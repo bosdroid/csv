@@ -24,11 +24,16 @@ import com.boris.expert.csvmagic.view.activities.FieldListsActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 
 
 class ApPriceInputFragment : Fragment() {
 
+    private lateinit var apPriceDefaultValueMessage: MaterialTextView
+    private lateinit var apPriceDefaultInputWrapper: TextInputLayout
+    private lateinit var apPriceListBtn: MaterialButton
+    private lateinit var apPriceViewWrapper: TextInputLayout
     private lateinit var apPriceActiveListNameView: MaterialTextView
     private lateinit var appSettings: AppSettings
     private lateinit var apPriceView: TextInputEditText
@@ -58,10 +63,12 @@ class ApPriceInputFragment : Fragment() {
     private fun initViews(view: View){
 
         apPriceView = view.findViewById(R.id.ap_price)
+        apPriceViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_price_wrapper)
         val apPriceSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_options_spinner)
-        val apPriceListBtn = view.findViewById<MaterialButton>(R.id.ap_price_list_with_fields_btn)
+        apPriceListBtn = view.findViewById<MaterialButton>(R.id.ap_price_list_with_fields_btn)
         val apPriceDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_price_non_changeable_default_text_input)
-        val apPriceDefaultValueMessage =
+        apPriceDefaultInputWrapper = view.findViewById<TextInputLayout>(R.id.ap_price_non_changeable_default_text_input_wrapper)
+        apPriceDefaultValueMessage =
             view.findViewById<MaterialTextView>(R.id.ap_price_default_value_message)
         apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
         apPriceActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
@@ -84,19 +91,19 @@ class ApPriceInputFragment : Fragment() {
                 apPriceListSpinner.visibility = View.GONE
                 apPriceListBtn.visibility = View.GONE
                 apPriceActiveListNameView.visibility = View.GONE
-                apPriceDefaultInputBox.visibility = View.VISIBLE
+                apPriceDefaultInputWrapper.visibility = View.VISIBLE
                 apPriceDefaultValueMessage.visibility = View.VISIBLE
-                apPriceView.visibility = View.VISIBLE
+                apPriceViewWrapper.visibility = View.VISIBLE
                 apPriceDefaultInputBox.setText(apPriceDefaultValue)
                 apPriceView.setText(apPriceDefaultValue)
 //                BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
             }
             2 -> {
-                apPriceDefaultInputBox.visibility = View.GONE
+                apPriceDefaultInputWrapper.visibility = View.GONE
                 apPriceDefaultValueMessage.visibility = View.GONE
                 apPriceListBtn.visibility = View.VISIBLE
                 apPriceActiveListNameView.visibility = View.VISIBLE
-                apPriceView.visibility = View.GONE
+                apPriceViewWrapper.visibility = View.GONE
                 apPriceListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apPriceListId)
                 val listValues = listOptions.split(",")
@@ -128,10 +135,10 @@ class ApPriceInputFragment : Fragment() {
                 }
             }
             else -> {
-                apPriceView.visibility = View.VISIBLE
+                apPriceViewWrapper.visibility = View.VISIBLE
                 apPriceListBtn.visibility = View.GONE
                 apPriceActiveListNameView.visibility = View.GONE
-                apPriceDefaultInputBox.visibility = View.GONE
+                apPriceDefaultInputWrapper.visibility = View.GONE
                 apPriceDefaultValueMessage.visibility = View.VISIBLE
                 apPriceListSpinner.visibility = View.GONE
 //                BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
@@ -173,7 +180,7 @@ class ApPriceInputFragment : Fragment() {
                         apPriceListSpinner.visibility = View.GONE
                         apPriceListBtn.visibility = View.GONE
                         apPriceActiveListNameView.visibility = View.GONE
-                        apPriceDefaultInputBox.visibility = View.VISIBLE
+                        apPriceDefaultInputWrapper.visibility = View.VISIBLE
                         apPriceDefaultValueMessage.visibility = View.VISIBLE
                         apPriceView.visibility = View.VISIBLE
                         apPriceDefaultInputBox.setText(apPriceDefaultValue)
@@ -182,7 +189,7 @@ class ApPriceInputFragment : Fragment() {
                     }
                     2 -> {
                         apPriceDefaultValueMessage.visibility = View.GONE
-                        apPriceDefaultInputBox.visibility = View.GONE
+                        apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
                         apPriceActiveListNameView.visibility = View.VISIBLE
                         apPriceView.visibility = View.GONE
@@ -221,7 +228,7 @@ class ApPriceInputFragment : Fragment() {
                         apPriceListBtn.visibility = View.GONE
                         apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultValueMessage.visibility = View.GONE
-                        apPriceDefaultInputBox.visibility = View.GONE
+                        apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListSpinner.visibility = View.GONE
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
                     }
@@ -360,5 +367,11 @@ class ApPriceInputFragment : Fragment() {
 
     fun updateTestData(text:String){
         apPriceView.setText(text)
+        apPriceViewWrapper.visibility = View.VISIBLE
+        apPriceListBtn.visibility = View.GONE
+        apPriceActiveListNameView.visibility = View.GONE
+        apPriceDefaultInputWrapper.visibility = View.GONE
+        apPriceDefaultValueMessage.visibility = View.VISIBLE
+        apPriceListSpinner.visibility = View.GONE
     }
 }

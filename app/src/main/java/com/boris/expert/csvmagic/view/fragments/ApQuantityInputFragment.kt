@@ -25,11 +25,16 @@ import com.boris.expert.csvmagic.view.activities.FieldListsActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 
 
 class ApQuantityInputFragment : Fragment() {
 
+    private lateinit var apQuantityListBtn: MaterialButton
+    private lateinit var apQuantityDefaultValueMessage: MaterialTextView
+    private lateinit var apQuantityDefaultInputWrapper: TextInputLayout
+    private lateinit var apQuantityViewWrapper: TextInputLayout
     private lateinit var apQuantityActiveListNameView: MaterialTextView
     private lateinit var appSettings: AppSettings
     private lateinit var apQuantityView: TextInputEditText
@@ -59,10 +64,12 @@ class ApQuantityInputFragment : Fragment() {
     private fun initViews(view: View){
 
         apQuantityView = view.findViewById(R.id.ap_quantity)
+        apQuantityViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_quantity_wrapper)
         val apQuantitySpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_options_spinner)
-        val apQuantityListBtn = view.findViewById<MaterialButton>(R.id.ap_quantity_list_with_fields_btn)
+        apQuantityListBtn = view.findViewById<MaterialButton>(R.id.ap_quantity_list_with_fields_btn)
         val apQuantityDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_quantity_non_changeable_default_text_input)
-        val apQuantityDefaultValueMessage =
+        apQuantityDefaultInputWrapper = view.findViewById<TextInputLayout>(R.id.ap_quantity_non_changeable_default_text_input_wrapper)
+        apQuantityDefaultValueMessage =
             view.findViewById<MaterialTextView>(R.id.ap_quantity_default_value_message)
         apQuantityListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
         apQuantityActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_quantity_active_list_name)
@@ -85,19 +92,19 @@ class ApQuantityInputFragment : Fragment() {
                 apQuantityListSpinner.visibility = View.GONE
                 apQuantityListBtn.visibility = View.GONE
                 apQuantityActiveListNameView.visibility = View.GONE
-                apQuantityDefaultInputBox.visibility = View.VISIBLE
+                apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                 apQuantityDefaultValueMessage.visibility = View.VISIBLE
-                apQuantityView.visibility = View.VISIBLE
+                apQuantityViewWrapper.visibility = View.VISIBLE
                 apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
                 apQuantityView.setText(apQuantityDefaultValue)
 //                BaseActivity.showSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
             }
             2 -> {
                 apQuantityDefaultValueMessage.visibility = View.GONE
-                apQuantityDefaultInputBox.visibility = View.GONE
+                apQuantityDefaultInputWrapper.visibility = View.GONE
                 apQuantityListBtn.visibility = View.VISIBLE
                 apQuantityActiveListNameView.visibility = View.VISIBLE
-                apQuantityView.visibility = View.GONE
+                apQuantityViewWrapper.visibility = View.GONE
                 apQuantityListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apQuantityListId)
                 val listValues = listOptions.split(",")
@@ -129,10 +136,10 @@ class ApQuantityInputFragment : Fragment() {
                 }
             }
             else -> {
-                apQuantityView.visibility = View.VISIBLE
+                apQuantityViewWrapper.visibility = View.VISIBLE
                 apQuantityListBtn.visibility = View.GONE
                 apQuantityActiveListNameView.visibility = View.GONE
-                apQuantityDefaultInputBox.visibility = View.GONE
+                apQuantityDefaultInputWrapper.visibility = View.GONE
                 apQuantityDefaultValueMessage.visibility = View.GONE
                 apQuantityListSpinner.visibility = View.GONE
 //                BaseActivity.showSoftKeyboard(requireActivity(),apQuantityView)
@@ -174,7 +181,7 @@ class ApQuantityInputFragment : Fragment() {
                         apQuantityListSpinner.visibility = View.GONE
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityActiveListNameView.visibility = View.GONE
-                        apQuantityDefaultInputBox.visibility = View.VISIBLE
+                        apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                         apQuantityDefaultValueMessage.visibility = View.VISIBLE
                         apQuantityView.visibility = View.VISIBLE
                         apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
@@ -183,7 +190,7 @@ class ApQuantityInputFragment : Fragment() {
                     }
                     2 -> {
                         apQuantityDefaultValueMessage.visibility = View.GONE
-                        apQuantityDefaultInputBox.visibility = View.GONE
+                        apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListBtn.visibility = View.VISIBLE
                         apQuantityActiveListNameView.visibility = View.VISIBLE
                         apQuantityView.visibility = View.GONE
@@ -221,7 +228,7 @@ class ApQuantityInputFragment : Fragment() {
                         apQuantityView.visibility = View.VISIBLE
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityActiveListNameView.visibility = View.GONE
-                        apQuantityDefaultInputBox.visibility = View.GONE
+                        apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityDefaultValueMessage.visibility = View.GONE
                         apQuantityListSpinner.visibility = View.GONE
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apQuantityView)
@@ -384,6 +391,12 @@ class ApQuantityInputFragment : Fragment() {
 
     fun updateTestData(text:String){
         apQuantityView.setText(text)
+        apQuantityViewWrapper.visibility = View.VISIBLE
+        apQuantityListBtn.visibility = View.GONE
+        apQuantityActiveListNameView.visibility = View.GONE
+        apQuantityDefaultInputWrapper.visibility = View.GONE
+        apQuantityDefaultValueMessage.visibility = View.GONE
+        apQuantityListSpinner.visibility = View.GONE
     }
 
 }
