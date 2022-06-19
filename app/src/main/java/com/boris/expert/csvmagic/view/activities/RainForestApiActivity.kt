@@ -546,15 +546,41 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 url,
                 {
                     dismiss()
+                    val descriptionBuilder = StringBuilder()
                     val response = JSONObject(it)
                     if (response.has("product")) {
                         val productResults = response.getJSONObject("product")
-                        val description = if (!productResults.has("description")) {
+                        val title = productResults.getString("title")
+                        if (productResults.has("specifications_flat"))
+                        {
+                            descriptionBuilder.append(productResults.getString("specifications_flat"))
+                            descriptionBuilder.append("\n\n")
+                        }
+
+                        if (productResults.has("feature_bullets_flat")){
+                            descriptionBuilder.append(productResults.getString("feature_bullets_flat"))
+                            descriptionBuilder.append("\n\n")
+                        }
+
+                        if (productResults.has("feature_bullets")){
+                            val featureBullets = productResults.getJSONArray("feature_bullets")
+                            for (i in 0 until featureBullets.length()){
+                                descriptionBuilder.append(featureBullets[i])
+                                descriptionBuilder.append("\n")
+                            }
+                        }
+
+                        if (productResults.has("description")){
+                            descriptionBuilder.append("\n\n")
+                            descriptionBuilder.append(productResults.getString("description"))
+                        }
+
+
+                        val description = if (descriptionBuilder.toString().isEmpty()) {
                             ""
                         } else {
-                            productResults.getString("description")
+                            descriptionBuilder.toString()
                         }
-                        val title = productResults.getString("title")
 
                         CustomDialog(
                                 title,

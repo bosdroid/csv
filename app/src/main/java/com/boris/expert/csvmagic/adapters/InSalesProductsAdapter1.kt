@@ -7,20 +7,21 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
+import com.boris.expert.csvmagic.utils.ProductDiff
 import com.boris.expert.csvmagic.utils.ProductDiffCallback
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import net.expandable.ExpandableTextView
 import java.util.*
-import kotlin.collections.ArrayList
 
-class InSalesProductsAdapter(val context: Context, var productsItems: List<Product>) :
-    RecyclerView.Adapter<InSalesProductsAdapter.ItemViewHolder>() {
+class InSalesProductsAdapter1(val context: Context) :
+    ListAdapter<Product,InSalesProductsAdapter1.ItemViewHolder>(ProductDiff()) {
 
 
     interface OnItemClickListener {
@@ -192,13 +193,12 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
         }
     }
 
-    fun updateList(list: List<Product>){
+    fun updateList(list: ArrayList<Product>){
 //        val diffCallback = ProductDiffCallback(productsItems, list)
 //        val diffResult = DiffUtil.calculateDiff(diffCallback)
+//        productsItems.clear()
 //        productsItems.addAll(list)
 //        diffResult.dispatchUpdatesTo(this)
-         productsItems = ArrayList(list)
-        notifyDataSetChanged()
 
     }
 
@@ -216,7 +216,7 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
 
-        val item = productsItems[position]
+        val item = getItem(position)
 
         holder.titleSizeView.setText("Title Size: ${item.title.length}")
         holder.descriptionSizeView.setText("Description Size: ${item.fullDesc.length}")
@@ -305,18 +305,18 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
     }
 
-    override fun getItemCount(): Int {
-        return productsItems.size
-    }
-
-
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return position
-    }
+//    override fun getItemCount(): Int {
+//        return productsItems.size
+//    }
+//
+//
+//    override fun getItemId(position: Int): Long {
+//        return position.toLong()
+//    }
+//
+//    override fun getItemViewType(position: Int): Int {
+//        return position
+//    }
 
 
 }

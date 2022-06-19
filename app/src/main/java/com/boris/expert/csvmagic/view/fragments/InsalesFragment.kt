@@ -81,11 +81,12 @@ import kotlin.collections.ArrayList
 
 class InsalesFragment : Fragment(), View.OnClickListener {
 
+    private var barcodeSearchHint = "default"
     private lateinit var appSettings: AppSettings
     private lateinit var viewModel: SalesCustomersViewModel
     private lateinit var insalesLoginWrapperLayout: CardView
     private lateinit var insalesDataWrapperLayout: LinearLayout
-    private lateinit var insalesSearchWrapperLayout: LinearLayout
+    private lateinit var insalesSearchWrapperLayout: CardView
     private lateinit var insalesShopNameBox: TextInputEditText
     private lateinit var insalesEmailBox: TextInputEditText
     private lateinit var insalesPasswordBox: TextInputEditText
@@ -93,7 +94,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var productsList = mutableListOf<Product>()
     private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
-    private lateinit var adapter: InSalesProductsAdapter
+    private lateinit var productAdapter: InSalesProductsAdapter
     private var galleryIntentType = 0
     private var currentPhotoPath: String? = null
     private var selectedImageBase64String: String = ""
@@ -133,6 +134,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private lateinit var voiceSearchIcon: AppCompatImageView
     private var voiceLanguageCode = "en"
     val searchedImagesList = mutableListOf<String>()
+    private lateinit var voiceSearchView: AppCompatImageView
+    private lateinit var barcodeSearchFragmentInsales: AppCompatImageView
+    private var voiceSearchHint = "default"
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -260,7 +264,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun resetProductList() {
         productsList.clear()
         productsList.addAll(originalProductsList)
-        adapter.notifyItemRangeChanged(0, productsList.size)
+        productAdapter.notifyItemRangeChanged(0, productsList.size)
+
     }
 
     private fun displayErrorItems() {
@@ -280,7 +285,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         } else {
             productsList.clear()
             productsList.addAll(matchedProducts)
-            adapter.notifyDataSetChanged()
+            productAdapter.notifyDataSetChanged()
+
         }
 
     }
@@ -299,7 +305,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
             })
-            adapter.notifyDataSetChanged()
+            productAdapter.notifyDataSetChanged()
+
         } else {
             BaseActivity.showAlert(requireActivity(), getString(R.string.empty_list_error_message))
         }
@@ -350,7 +357,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                adapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
+
             }
         }
     }
@@ -389,7 +397,76 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         searchImageBtn.setOnClickListener(this)
         fabAddProduct = view.findViewById(R.id.fab)
         fabAddProduct.setOnClickListener(this)
+        voiceSearchView = view.findViewById(R.id.voice_search_fragment_insales)
+        barcodeSearchFragmentInsales = view.findViewById(R.id.barcode_img_fragment_insales)
 
+        voiceSearchView.setOnClickListener {
+            voiceSearchHint = "voice_mode"
+            voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+            val voiceLayout = LayoutInflater.from(context).inflate(
+                R.layout.voice_language_setting_layout,
+                null
+            )
+            val voiceLanguageSpinner =
+                voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+            val voiceLanguageSaveBtn =
+                voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+
+            if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                voiceLanguageSpinner.setSelection(0, false)
+            } else {
+                voiceLanguageSpinner.setSelection(1, false)
+            }
+
+            voiceLanguageSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        voiceLanguageCode =
+                            if (parent!!.selectedItem.toString().toLowerCase(
+                                    Locale.ENGLISH
+                                ).contains("english")
+                            ) {
+                                "en"
+                            } else {
+                                "ru"
+                            }
+                        appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
+
+                }
+            val builder = MaterialAlertDialogBuilder(requireActivity())
+            builder.setView(voiceLayout)
+            val alert = builder.create();
+            alert.show()
+            voiceLanguageSaveBtn.setOnClickListener {
+                alert.dismiss()
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(
+                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                    )
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                }
+                voiceResultLauncher.launch(intent)
+            }
+        }
+
+        barcodeSearchFragmentInsales.setOnClickListener {
+            barcodeSearchHint = "default"
+            val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
+            barcodeImageResultLauncher.launch(intent)
+        }
 
         searchBox.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -403,8 +480,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                val query = s.toString()
-                search(query)
+
+            }
+
+        })
+
+        searchBox.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                val query = searchBox.text.toString()
+                search(query, "default")
+                return false
             }
 
         })
@@ -467,6 +552,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var unitCharacterPrice = 0F
     private var howMuchChargeCredits = 0F
     private fun showProducts() {
+
         linearLayoutManager = WrapContentLinearLayoutManager(
             requireActivity(),
             RecyclerView.VERTICAL,
@@ -474,13 +560,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         )
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
-        adapter = InSalesProductsAdapter(
+        productAdapter = InSalesProductsAdapter(
             requireActivity(),
-            productsList as ArrayList<Product>
+            productsList
         )
-
-        productsRecyclerView.adapter = adapter
-        adapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
+        productsRecyclerView.adapter = productAdapter
+        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
 
             }
@@ -553,11 +638,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         R.id
                             .voice_search_internet_images
                     )
+                    val barcodeImage = internetSearchLayout.findViewById<AppCompatImageView>(
+                        R.id
+                            .barcode_img_search_internet_images
+                    )
                     val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
                     iAlert.show()
+
+                    barcodeImage.setOnClickListener {
+                        barcodeSearchHint = "image"
+                        val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
+                        barcodeImageResultLauncher.launch(intent)
+                    }
 
                     closeBtn.setOnClickListener {
                         iAlert.dismiss()
@@ -577,7 +672,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         InternetImageAdapter.OnItemClickListener {
                         override fun onItemClick(position: Int) {
                             val selectedImage = searchedImagesList[position]
-
+                            FullImageFragment(selectedImage).show(
+                                childFragmentManager,
+                                "full-image-dialog"
+                            )
                         }
 
                         override fun onItemAttachClick(btn: MaterialButton, position: Int) {
@@ -992,11 +1090,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                     voiceSearchIcon =
                         internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+                    val barcodeImage = internetSearchLayout.findViewById<AppCompatImageView>(
+                        R.id
+                            .barcode_img_search_internet_images
+                    )
                     val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
                     iAlert.show()
+
+                    barcodeImage.setOnClickListener {
+                        barcodeSearchHint = "image"
+                        val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
+                        barcodeImageResultLauncher.launch(intent)
+                    }
 
                     closeBtn.setOnClickListener {
                         iAlert.dismiss()
@@ -1384,7 +1492,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     password,
                     pItem,
                     position,
-                    adapter,
+                    productAdapter,
                     viewModel,
                     object : ResponseListener {
                         override fun onSuccess(result: String) {
@@ -1600,7 +1708,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             originalProductsList.addAll(cacheList)
             originalProductsList.sortByDescending { it.id }
             productsList.addAll(originalProductsList)
-            adapter.notifyItemRangeChanged(0, productsList.size)
+            productAdapter.notifyItemRangeChanged(0, productsList.size)
+
             Handler(Looper.myLooper()!!).postDelayed({
                 if (menu != null) {
                     menu!!.findItem(R.id.insales_logout).isVisible = true
@@ -1615,6 +1724,35 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     }
 
+    private var barcodeImageResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                if (result.data != null && result.data!!.hasExtra("SCANNED_BARCODE_VALUE")) {
+                    val barcodeId = result.data!!.getStringExtra("SCANNED_BARCODE_VALUE") as String
+                    if (barcodeId.isNotEmpty()) {
+                        if (barcodeSearchHint == "default") {
+                            search(barcodeId, "sku")
+                        } else {
+                            searchBoxView.setText(barcodeId)
+                            Constants.hideKeyboar(requireActivity())
+                            startSearch(
+                                searchBoxView,
+                                searchBtnView,
+                                loader,
+                                searchedImagesList as java.util.ArrayList<String>,
+                                internetImageAdapter
+                            )
+                        }
+
+                    }
+                }
+
+
+            }
+        }
+
     private var voiceResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
@@ -1626,12 +1764,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             results!![0]
                         }
 
-                searchBoxView.setText(spokenText)
-                Constants.hideKeyboar(requireActivity())
-                startSearch(
-                    searchBoxView, searchBtnView, loader,
-                    searchedImagesList as java.util.ArrayList<String>, internetImageAdapter
-                )
+                if (voiceSearchHint == "default") {
+                    searchBoxView.setText(spokenText)
+                    Constants.hideKeyboar(requireActivity())
+                    startSearch(
+                        searchBoxView, searchBtnView, loader,
+                        searchedImagesList as java.util.ArrayList<String>, internetImageAdapter
+                    )
+                } else {
+                    searchBox.setText(spokenText)
+                    search(spokenText, "default")
+                    voiceSearchHint = "default"
+                }
             }
         }
 
@@ -1878,7 +2022,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 password,
                                 productsList[Constants.pItemPosition!!],
                                 Constants.pItemPosition!!,
-                                adapter,
+                                productAdapter,
                                 viewModel,
                                 object : ResponseListener {
                                     override fun onSuccess(result: String) {
@@ -1983,7 +2127,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 password,
                                 productsList[Constants.pItemPosition!!],
                                 Constants.pItemPosition!!,
-                                adapter,
+                                productAdapter,
                                 viewModel,
                                 object : ResponseListener {
                                     override fun onSuccess(result: String) {
@@ -2071,7 +2215,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     password,
                     Constants.pItem!!,
                     Constants.pItemPosition!!,
-                    adapter,
+                    productAdapter,
                     viewModel, object : ResponseListener {
                         override fun onSuccess(result: String) {
                             fetchProducts()
@@ -2079,7 +2223,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     }
                 ).show(childFragmentManager, "dialog")
-                adapter.notifyItemChanged(Constants.pItemPosition!!)
+                productAdapter.notifyItemChanged(Constants.pItemPosition!!)
+
             }
         }
 
@@ -2110,6 +2255,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         for (i in 0 until products.size()) {
                             val product = products.get(i).asJsonObject
                             val imagesArray = product.getAsJsonArray("images")
+                            val variants = product.getAsJsonArray("variants")
+                            val variantsItem = variants[0].asJsonObject
                             val imagesList = mutableListOf<ProductImages>()
                             if (imagesArray.size() > 0) {
                                 for (j in 0 until imagesArray.size()) {
@@ -2139,6 +2286,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     } else {
                                         product.get("description").asString
                                     },
+                                    if (variantsItem.get("sku").isJsonNull) {
+                                        ""
+                                    } else {
+                                        variantsItem.get("sku").asString
+                                    },
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )
@@ -2153,7 +2305,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             originalProductsList.clear()
                             originalProductsList.addAll(cacheList)
                             productsList.addAll(originalProductsList)
-                            adapter.notifyItemRangeChanged(0, productsList.size)
+                            productAdapter.notifyItemRangeChanged(0, productsList.size)
+
                         }
 //                            if (originalProductsList.size > 0) {
 //                                productsList.addAll(originalProductsList)
@@ -2283,14 +2436,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     productsList.clear()
                 }
                 productsList.addAll(originalProductsList)
-                adapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
 
             }
             R.id.insales_products_search_btn -> {
                 val query = searchBox.text.toString().trim()
                 if (query.isNotEmpty()) {
                     Constants.hideKeyboar(requireActivity())
-                    search(query)
+                    search(query, "default")
                 } else {
                     BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
                 }
@@ -2425,13 +2578,24 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     }
 
 
-    private fun search(text: String?) {
+    private fun search(text: String?, type: String) {
+
         val matchedProducts = mutableListOf<Product>()
 
+
         text?.let {
-            productsList.forEach { item ->
-                if (item.title.contains(text, true)) {
-                    matchedProducts.add(item)
+
+            if (type == "default") {
+                productsList.forEach { item ->
+                    if (item.title.contains(text, true)) {
+                        matchedProducts.add(item)
+                    }
+                }
+            } else {
+                productsList.forEach { item ->
+                    if (item.sku.contains(text, true)) {
+                        matchedProducts.add(item)
+                    }
                 }
             }
 
@@ -2444,10 +2608,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                adapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.notifyItemRangeChanged(0,productsList.size)
+                //productAdapter.notifyDataSetChanged()
+
             }
         }
     }
+
 
     var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -2780,15 +2947,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (insalesFragment!!.titleBox.text.toString().isNotEmpty()) {
                         insalesFragment!!.titleBox.setSelection(pItem.title.length)
                     }
-                    insalesFragment!!.titleBox.requestFocus()
                     Constants.openKeyboar(requireContext())
+                    insalesFragment!!.titleBox.requestFocus()
                 } else {
                     Constants.hideKeyboar(requireContext())
-                    BaseActivity.startLoading(requireContext())
+                    //BaseActivity.startLoading(requireContext())
                     firstLinearLayout.visibility = View.GONE
                     secondLinearLayout.visibility = View.VISIBLE
                     defaultLayout = 0
-                    BaseActivity.dismiss()
+                    //BaseActivity.dismiss()
                 }
             }
 
@@ -3030,7 +3197,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private var voiceLanguageCode = "en"
         val searchedImagesList = mutableListOf<String>()
         private lateinit var addProdcutViewModel: AddProductViewModel
-        private lateinit var testDataBtn: AppCompatImageView
+        private lateinit var testDataBtn: MaterialTextView
         private lateinit var getTitleBtn: MaterialTextView
 
         var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -3095,7 +3262,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             categoriesSpinner =
                 view.findViewById(R.id.ap_cate_spinner)
             apTitleView = view.findViewById(R.id.ap_title)
-            val apTestDataView = view.findViewById<AppCompatImageView>(R.id.test_data_button)
+            val apTestDataView = view.findViewById<MaterialTextView>(R.id.test_data_button)
             apDescriptionView =
                 view.findViewById(R.id.ap_description)
             testDataBtn = view.findViewById(R.id.test_data_button1)
@@ -3146,11 +3313,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             val apQuantityDefaultInputWrapper =
                 view.findViewById<TextInputLayout>(R.id.ap_quantity_non_changeable_default_text_input_wrapper)
             val apPriceViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_price_wrapper)
-            val apPriceDefaultInputWrapper = view.findViewById<TextInputLayout>(R.id.ap_price_non_changeable_default_text_input_wrapper)
+            val apPriceDefaultInputWrapper =
+                view.findViewById<TextInputLayout>(R.id.ap_price_non_changeable_default_text_input_wrapper)
 
 
             val apAddDescriptionView =
-                view.findViewById<AppCompatImageView>(R.id.ap_add_description_text_view)
+                view.findViewById<MaterialTextView>(R.id.ap_add_description_text_view)
             val apQuantityView = view.findViewById<TextInputEditText>(R.id.ap_quantity)
             val apPriceView = view.findViewById<TextInputEditText>(R.id.ap_price)
             val apSubmitBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
@@ -3255,8 +3423,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apBackArrowBtn.setOnClickListener {
                 dismiss()
             }
-            apViewPager.offscreenPageLimit = 6
+            apViewPager.offscreenPageLimit = 7
             val fragmentAdapter = ViewPagerAdapter(childFragmentManager)
+            fragmentAdapter.addFragment(ApScannerFragment(), "ap_scanner_fr")
             fragmentAdapter.addFragment(ApCategoryInputFragment(), "ap_category_fr")
             fragmentAdapter.addFragment(ApTitleInputFragment(), "ap_title_fr")
             fragmentAdapter.addFragment(ApDescriptionInputFragment(), "ap_description_fr")
@@ -3290,7 +3459,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 override fun onPageSelected(position: Int) {
 
-                    if (position == 0 || position == 5) {
+                    if (position == 2 || position == 3) {
+                        getTitleBtn.visibility = View.VISIBLE
+                    } else {
+                        getTitleBtn.visibility = View.GONE
+                    }
+
+                    if (position == 0 || position == 1 || position == 6) {
                         testDataBtn.visibility = View.GONE
                     } else {
                         testDataBtn.visibility = View.VISIBLE
@@ -3724,9 +3899,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleImageRecView.visibility = View.GONE
                         apTitleListBtn.visibility = View.GONE
                         apTitleActiveListNameView.visibility = View.GONE
-                        apTitleDefaultInputBox.visibility = View.GONE
+                        apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
-                        apTitleView.visibility = View.VISIBLE
+                        apTitleViewWrapper.visibility = View.VISIBLE
                         apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                     }
@@ -4417,11 +4592,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                 voiceSearchIcon =
                     internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+                val barcodeImage = internetSearchLayout.findViewById<AppCompatImageView>(
+                    R.id
+                        .barcode_img_search_internet_images
+                )
                 val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setCancelable(false)
                 builder.setView(internetSearchLayout)
                 val iAlert = builder.create()
                 iAlert.show()
+
+                barcodeImage.setOnClickListener {
+                    val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
+                    barcodeImageResultLauncher.launch(intent)
+                }
 
                 closeBtn.setOnClickListener {
                     iAlert.dismiss()
@@ -4441,7 +4625,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     InternetImageAdapter.OnItemClickListener {
                     override fun onItemClick(position: Int) {
                         val selectedImage = searchedImagesList[position]
-
+                        FullImageFragment(selectedImage).show(
+                            childFragmentManager,
+                            "full-image-dialog"
+                        )
                     }
 
                     override fun onItemAttachClick(btn: MaterialButton, position: Int) {
@@ -4797,7 +4984,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         finalTitleText,
                         finalDescriptionText,
                         finalQuantityText,
-                        finalPriceText
+                        finalPriceText,
+                        ""
                     )
                     viewModel.getAddProductResponse()
                         .observe(requireActivity(), Observer { response ->
@@ -4978,6 +5166,31 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         searchBoxView, searchBtnView, loader,
                         searchedImagesList as java.util.ArrayList<String>, internetImageAdapter
                     )
+                }
+            }
+
+        private var barcodeImageResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+                if (result.resultCode == Activity.RESULT_OK) {
+                    if (result.data != null && result.data!!.hasExtra("SCANNED_BARCODE_VALUE")) {
+                        val barcodeId =
+                            result.data!!.getStringExtra("SCANNED_BARCODE_VALUE") as String
+                        if (barcodeId.isNotEmpty()) {
+                            searchBoxView.setText(barcodeId)
+                            Constants.hideKeyboar(requireActivity())
+                            startSearch(
+                                searchBoxView,
+                                searchBtnView,
+                                loader,
+                                searchedImagesList as java.util.ArrayList<String>,
+                                internetImageAdapter
+                            )
+                        }
+                    }
+
+
                 }
             }
 
@@ -5165,13 +5378,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             listWithFieldsValueRecyclerView.hasFixedSize()
             adapter = FieldListsAdapter(requireActivity(), listItems as ArrayList<ListItem>)
             listWithFieldsValueRecyclerView.adapter = adapter
-
+            val closeDialogBtn = layout.findViewById<AppCompatImageView>(R.id.lwfv_dialog_close_btn)
 
             val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setView(layout)
-            builder.setCancelable(true)
+            builder.setCancelable(false)
             val alert = builder.create()
             alert.show()
+            closeDialogBtn.setOnClickListener {
+                alert.dismiss()
+            }
             val tempList = tableGenerator.getList()
             if (tempList.isNotEmpty()) {
                 listItems.clear()
@@ -5317,7 +5533,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (data != null && data.hasExtra("DESCRIPTION")) {
                         val description = data.getStringExtra("DESCRIPTION") as String
                         if (description.isNotEmpty()) {
-                            appSettings.putString("AP_PRODUCT_DESCRIPTION",description)
+                            appSettings.putString("AP_PRODUCT_DESCRIPTION", description)
 //                            val currentPItemDescription = apDescriptionView.text.toString().trim()
 //                            val stringBuilder = java.lang.StringBuilder()
 //                            stringBuilder.append(currentPItemDescription)

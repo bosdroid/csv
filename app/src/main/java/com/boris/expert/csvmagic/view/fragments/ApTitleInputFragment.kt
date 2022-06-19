@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -509,13 +510,17 @@ class ApTitleInputFragment : Fragment() {
         listWithFieldsValueRecyclerView.hasFixedSize()
         adapter = FieldListsAdapter(requireActivity(), listItems as ArrayList<ListItem>)
         listWithFieldsValueRecyclerView.adapter = adapter
+        val closeDialogBtn = layout.findViewById<AppCompatImageView>(R.id.lwfv_dialog_close_btn)
 
 
         val builder = MaterialAlertDialogBuilder(requireActivity())
         builder.setView(layout)
-        builder.setCancelable(true)
+        builder.setCancelable(false)
         val alert = builder.create()
         alert.show()
+        closeDialogBtn.setOnClickListener {
+         alert.dismiss()
+        }
         val tempList = tableGenerator.getList()
         if (tempList.isNotEmpty()) {
             listItems.clear()

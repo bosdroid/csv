@@ -85,8 +85,9 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/ap_title"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="300dp"
                     android:maxHeight="300dp"
+                    android:gravity="start"
                     android:textSize="@dimen/largeText"
                     android:inputType="textMultiLine"
                     android:hint="@string/title_text"

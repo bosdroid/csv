@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -182,7 +183,7 @@ class ApPriceInputFragment : Fragment() {
                         apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultInputWrapper.visibility = View.VISIBLE
                         apPriceDefaultValueMessage.visibility = View.VISIBLE
-                        apPriceView.visibility = View.VISIBLE
+                        apPriceViewWrapper.visibility = View.VISIBLE
                         apPriceDefaultInputBox.setText(apPriceDefaultValue)
                         apPriceView.setText(apPriceDefaultValue)
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
@@ -192,7 +193,7 @@ class ApPriceInputFragment : Fragment() {
                         apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
                         apPriceActiveListNameView.visibility = View.VISIBLE
-                        apPriceView.visibility = View.GONE
+                        apPriceViewWrapper.visibility = View.GONE
                         apPriceListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apPriceListId)
                         val listValues = listOptions.split(",")
@@ -224,7 +225,7 @@ class ApPriceInputFragment : Fragment() {
                         }
                     }
                     else -> {
-                        apPriceView.visibility = View.VISIBLE
+                        apPriceViewWrapper.visibility = View.VISIBLE
                         apPriceListBtn.visibility = View.GONE
                         apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultValueMessage.visibility = View.GONE
@@ -240,6 +241,21 @@ class ApPriceInputFragment : Fragment() {
             }
 
         }
+
+        apPriceView.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                appSettings.putString("AP_PRODUCT_PRICE", s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
     }
 
     private fun openListWithFieldsDialog(fieldType: String) {
@@ -256,13 +272,16 @@ class ApPriceInputFragment : Fragment() {
         listWithFieldsValueRecyclerView.hasFixedSize()
         adapter = FieldListsAdapter(requireActivity(), listItems as ArrayList<ListItem>)
         listWithFieldsValueRecyclerView.adapter = adapter
-
+        val closeDialogBtn = layout.findViewById<AppCompatImageView>(R.id.lwfv_dialog_close_btn)
 
         val builder = MaterialAlertDialogBuilder(requireActivity())
         builder.setView(layout)
-        builder.setCancelable(true)
+        builder.setCancelable(false)
         val alert = builder.create()
         alert.show()
+        closeDialogBtn.setOnClickListener {
+            alert.dismiss()
+        }
         val tempList = tableGenerator.getList()
         if (tempList.isNotEmpty()) {
             listItems.clear()

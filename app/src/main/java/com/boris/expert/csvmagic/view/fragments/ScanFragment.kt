@@ -703,7 +703,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,
                 InternetImageAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedImage = searchedImagesList[position]
-
+                    FullImageFragment(selectedImage).show(childFragmentManager, "full-image-dialog")
                 }
 
                 override fun onItemAttachClick(

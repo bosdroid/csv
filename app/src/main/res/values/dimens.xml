@@ -16,6 +16,7 @@
     <dimen name="defaultDpMargin">5dp</dimen>
     <dimen name="eightDpMargin">8dp</dimen>
     <dimen name="sixtyDpMargin">16dp</dimen>
+    <dimen name="twentyDpMargin">20dp</dimen>
     <dimen name="thirtyTwoDpMargin">32dp</dimen>
     <dimen name="sixtyFourDpMargin">64dp</dimen>
     <dimen name="_100dp">100dp</dimen>

@@ -92,7 +92,7 @@ class ApCategoryInputFragment : Fragment() {
     }
 
     private fun getCategories(adapter: ArrayAdapter<Category>) {
-        BaseActivity.startLoading(requireActivity())
+//        BaseActivity.startLoading(requireActivity())
         viewModel.callCategories(requireActivity(), shopName, email, password)
         viewModel.getCategoriesResponse().observe(requireActivity(), Observer { response ->
             if (response != null) {

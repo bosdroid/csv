@@ -64,6 +64,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatSpinner
 import com.boris.expert.csvmagic.adapters.KeywordsAdapter
 import com.boris.expert.csvmagic.model.KeywordObject
+import com.boris.expert.csvmagic.view.fragments.FullImageFragment
 import net.expandable.ExpandableTextView
 import kotlin.collections.ArrayList
 
@@ -438,7 +439,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         InternetImageAdapter.OnItemClickListener {
                         override fun onItemClick(position: Int) {
                             val selectedImage = searchedImagesList[position]
-
+                            FullImageFragment(selectedImage).show(supportFragmentManager, "full-image-dialog")
                         }
 
                         override fun onItemAttachClick(btn: MaterialButton, position: Int) {
@@ -1939,6 +1940,8 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         for (i in 0 until products.size()) {
                             val product = products.get(i).asJsonObject
                             val imagesArray = product.getAsJsonArray("images")
+                            val variants = product.getAsJsonArray("variants")
+                            val variantsItem = variants[0].asJsonObject
                             val imagesList = mutableListOf<ProductImages>()
                             if (imagesArray.size() > 0) {
                                 for (j in 0 until imagesArray.size()) {
@@ -1968,6 +1971,12 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                     } else {
                                         product.get("description").asString
                                     },
+                                    if (variantsItem.get("sku").isJsonNull) {
+                                        ""
+                                    } else {
+                                        variantsItem.get("sku").asString
+                                    }
+                                    ,
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )

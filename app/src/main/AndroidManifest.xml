@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.boris.expert.csvmagic">
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
@@ -20,7 +19,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="com.android.vending.BILLING" />
-	
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -44,62 +43,113 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QRGenerator"
         tools:replace="android:allowBackup">
-        <activity android:name=".view.activities.StartAppActivity">
+        <activity android:name=".view.activities.BarcodeReaderActivity"></activity>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".view.activities.StartAppActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.activities.RainForestApiActivity" />
+        <activity
+            android:name=".view.activities.RainForestApiActivity"
+            android:exported="true" />
         <activity
             android:name=".view.activities.SalesCustomersActivity"
+            android:exported="true"
             android:launchMode="singleTask" />
-        <activity android:name=".view.activities.SupportChatActivity" />
-        <activity android:name=".view.activities.SupportTicketsActivity" />
+        <activity
+            android:name=".view.activities.SupportChatActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.SupportTicketsActivity"
+            android:exported="true" />
         <activity
             android:name=".view.activities.VideoFullScreenActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="landscape" />
         <activity
             android:name=".view.activities.HelpActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="true" />
         <activity android:name=".view.activities.BarcodeImageListActivity" />
         <activity
             android:name=".view.activities.ScanDataActivity"
             android:configChanges="orientation|screenSize|screenLayout"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysVisible" />
-        <activity android:name=".view.activities.UserScreenActivity" />
-        <activity android:name=".view.activities.PurchaseFeatureActivity" />
-        <activity android:name=".view.activities.OcrActivity" />
-        <activity android:name=".view.activities.CreditActivity" />
+        <activity
+            android:name=".view.activities.UserScreenActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.PurchaseFeatureActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.OcrActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.CreditActivity"
+            android:exported="true" />
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:name=".view.activities.PostSheetDataActivity" />
-        <activity android:name=".view.activities.SocialNetworksQrActivity" />
-        <activity android:name=".view.activities.FieldListValuesActivity" />
-        <activity android:name=".view.activities.SheetsActivity" />
-        <activity android:name=".view.activities.FieldListsActivity" />
-        <activity android:name=".view.activities.TableViewActivity" />
+        <activity
+            android:name=".view.activities.PostSheetDataActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.SocialNetworksQrActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.FieldListValuesActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.SheetsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.FieldListsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.TableViewActivity"
+            android:exported="true" />
         <activity
             android:name=".view.activities.SettingsActivity"
+            android:exported="true"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".view.activities.TablesDataActivity" />
-        <activity android:name=".view.activities.CreateTableActivity" />
-        <activity android:name=".view.activities.TablesActivity" />
-        <activity android:name=".view.activities.ProfileActivity" />
+        <activity
+            android:name=".view.activities.TablesDataActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.CreateTableActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.TablesActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.ProfileActivity"
+            android:exported="true" />
         <activity
             android:name=".view.activities.CodeDetailActivity"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysVisible" />
-        <activity android:name=".view.activities.FeedbackQrActivity" />
-        <activity android:name=".view.activities.ShareActivity" />
-        <activity android:name=".view.activities.DesignActivity" />
+        <activity
+            android:name=".view.activities.FeedbackQrActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.ShareActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.activities.DesignActivity"
+            android:exported="true" />
         <activity
             android:name=".view.activities.CouponQrActivity"
+            android:exported="true"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -107,12 +157,15 @@
         </activity>
         <activity
             android:name=".view.activities.DynamicQrActivity"
+            android:exported="true"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
         </activity>
-        <activity android:name=".view.activities.BarcodeHistoryActivity">
+        <activity
+            android:name=".view.activities.BarcodeHistoryActivity"
+            android:exported="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.boris.expert.csvmagic.view.activities.MainActivity" />
@@ -120,10 +173,8 @@
         <activity
             android:name=".view.activities.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout"
-            android:windowSoftInputMode="stateAlwaysVisible"/>
-
-
-        <!-- File Provider -->
+            android:exported="true"
+            android:windowSoftInputMode="stateAlwaysVisible" /> <!-- File Provider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -140,6 +191,7 @@
 
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:exported="true"
             android:theme="@style/Base.Theme.AppCompat" />
     </application>
 

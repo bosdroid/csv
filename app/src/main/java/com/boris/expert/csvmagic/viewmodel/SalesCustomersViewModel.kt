@@ -81,8 +81,8 @@ class SalesCustomersViewModel : ViewModel() {
         return categoriesResponse
     }
 
-    fun callAddProduct(context: Context,shopName:String,email:String,password:String,cId:Int,title:String,desc:String,quantity:String,price:String){
-        addProductResponse = ApiRepository.getInstance(context).addProduct(shopName,email,password,cId,title,desc,quantity,price)
+    fun callAddProduct(context: Context,shopName:String,email:String,password:String,cId:Int,title:String,desc:String,quantity:String,price:String,barcodeId:String){
+        addProductResponse = ApiRepository.getInstance(context).addProduct(shopName,email,password,cId,title,desc,quantity,price,barcodeId)
     }
 
     fun getAddProductResponse():LiveData<JsonObject?>{

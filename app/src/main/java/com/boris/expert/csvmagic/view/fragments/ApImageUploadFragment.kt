@@ -183,7 +183,7 @@ class ApImageUploadFragment : Fragment() {
                 InternetImageAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedImage = searchedImagesList[position]
-
+                    FullImageFragment(selectedImage).show(childFragmentManager, "full-image-dialog")
                 }
 
                 override fun onItemAttachClick(btn: MaterialButton, position: Int) {
@@ -399,7 +399,7 @@ class ApImageUploadFragment : Fragment() {
 
 
         apSubmitBtn.setOnClickListener {
-
+            val barcodeId = appSettings.getString("AP_BARCODE_ID") as String
             val selectedCategoryId = appSettings.getInt("AP_PRODUCT_CATEGORY")
             val finalTitleText = appSettings.getString("AP_PRODUCT_TITLE") as String
             val finalDescriptionText = appSettings.getString("AP_PRODUCT_DESCRIPTION") as String
@@ -448,12 +448,14 @@ class ApImageUploadFragment : Fragment() {
                         finalTitleText,
                         finalDescriptionText,
                         finalQuantityText,
-                        finalPriceText
+                        finalPriceText,
+                        barcodeId
                     )
                     viewModel.getAddProductResponse()
                         .observe(requireActivity(), Observer { response ->
                             if (response != null) {
                                 if (response.get("status").asString == "200") {
+                                    resetFieldValues()
                                     val details = response.getAsJsonObject("details")
                                     val productId = details.get("id").asInt
 
@@ -512,6 +514,7 @@ class ApImageUploadFragment : Fragment() {
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
                                             creditCharged()
+                                            resetFieldValues()
                                             val intent = Intent("dialog-dismiss")
                                             LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
 
@@ -533,6 +536,15 @@ class ApImageUploadFragment : Fragment() {
             }
         }
 
+    }
+
+    private fun resetFieldValues(){
+        appSettings.remove("AP_BARCODE_ID")
+        appSettings.remove("AP_PRODUCT_CATEGORY")
+        appSettings.remove("AP_PRODUCT_TITLE")
+        appSettings.remove("AP_PRODUCT_DESCRIPTION")
+        appSettings.remove("AP_PRODUCT_QUANTITY")
+        appSettings.remove("AP_PRODUCT_PRICE")
     }
 
     private var voiceResultLauncher =

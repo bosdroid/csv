@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.core.text.isDigitsOnly
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -183,7 +184,7 @@ class ApQuantityInputFragment : Fragment() {
                         apQuantityActiveListNameView.visibility = View.GONE
                         apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                         apQuantityDefaultValueMessage.visibility = View.VISIBLE
-                        apQuantityView.visibility = View.VISIBLE
+                        apQuantityViewWrapper.visibility = View.VISIBLE
                         apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
                         apQuantityView.setText(apQuantityDefaultValue)
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
@@ -193,7 +194,7 @@ class ApQuantityInputFragment : Fragment() {
                         apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListBtn.visibility = View.VISIBLE
                         apQuantityActiveListNameView.visibility = View.VISIBLE
-                        apQuantityView.visibility = View.GONE
+                        apQuantityViewWrapper.visibility = View.GONE
                         apQuantityListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apQuantityListId)
                         val listValues = listOptions.split(",")
@@ -225,7 +226,7 @@ class ApQuantityInputFragment : Fragment() {
                         }
                     }
                     else -> {
-                        apQuantityView.visibility = View.VISIBLE
+                        apQuantityViewWrapper.visibility = View.VISIBLE
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityActiveListNameView.visibility = View.GONE
                         apQuantityDefaultInputWrapper.visibility = View.GONE
@@ -241,6 +242,21 @@ class ApQuantityInputFragment : Fragment() {
             }
 
         }
+
+        apQuantityView.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                appSettings.putString("AP_PRODUCT_QUANTITY", s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
 
     }
 
@@ -258,13 +274,16 @@ class ApQuantityInputFragment : Fragment() {
         listWithFieldsValueRecyclerView.hasFixedSize()
         adapter = FieldListsAdapter(requireActivity(), listItems as ArrayList<ListItem>)
         listWithFieldsValueRecyclerView.adapter = adapter
-
+        val closeDialogBtn = layout.findViewById<AppCompatImageView>(R.id.lwfv_dialog_close_btn)
 
         val builder = MaterialAlertDialogBuilder(requireActivity())
         builder.setView(layout)
-        builder.setCancelable(true)
+        builder.setCancelable(false)
         val alert = builder.create()
         alert.show()
+        closeDialogBtn.setOnClickListener {
+            alert.dismiss()
+        }
         val tempList = tableGenerator.getList()
         if (tempList.isNotEmpty()) {
             listItems.clear()

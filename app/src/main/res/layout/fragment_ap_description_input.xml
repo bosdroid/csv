@@ -65,6 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="end"
+                    android:visibility="gone"
                     android:id="@+id/get_description_text_view"
                     android:textColor="@color/primary_positive_color"
                     android:text="@string/get_description_text"
@@ -84,7 +85,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ap_description"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="300dp"
                 android:maxHeight="300dp"
                 android:gravity="start"
                 android:textSize="@dimen/largeText"

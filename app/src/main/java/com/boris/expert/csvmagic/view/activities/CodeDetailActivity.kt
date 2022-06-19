@@ -63,6 +63,7 @@ import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.TableObject
 import com.boris.expert.csvmagic.room.AppViewModel
 import com.boris.expert.csvmagic.utils.*
+import com.boris.expert.csvmagic.view.fragments.FullImageFragment
 import com.boris.expert.csvmagic.viewmodel.CodeDetailViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.button.MaterialButton
@@ -1230,7 +1231,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 InternetImageAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedImage = searchedImagesList[position]
-
+                    FullImageFragment(selectedImage).show(supportFragmentManager, "full-image-dialog")
                 }
 
                 override fun onItemAttachClick(btn:MaterialButton, position: Int) {

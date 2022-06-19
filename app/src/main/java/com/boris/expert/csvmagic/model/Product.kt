@@ -8,7 +8,8 @@ data class Product (
     var title:String,
     var shortDesc:String,
     var fullDesc:String,
+    var sku:String,
     val productImages:ArrayList<ProductImages>?
         ):Serializable{
-            constructor():this(0,0,"","","",null)
+            constructor():this(0,0,"","","","",null)
         }
