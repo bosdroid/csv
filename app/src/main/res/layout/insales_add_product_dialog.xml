@@ -871,6 +871,12 @@
 
                 </LinearLayout>
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ap_images_recyclerview"
+                    />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/ap_dialog_submit_btn"
                     android:layout_width="match_parent"

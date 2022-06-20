@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -35,8 +36,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.android.volley.VolleyError
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
+import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.ImageManager
@@ -73,9 +76,13 @@ class ApImageUploadFragment : Fragment() {
     private lateinit var searchBtnView: ImageButton
     private lateinit var searchBoxView: TextInputEditText
     private lateinit var loader: ProgressBar
-    private lateinit var voiceSearchIcon:AppCompatImageView
+    private lateinit var voiceSearchIcon: AppCompatImageView
     private var voiceLanguageCode = "en"
     val searchedImagesList = mutableListOf<String>()
+    private lateinit var imagesRecyclerView: RecyclerView
+    private var barcodeImageList = mutableListOf<String>()
+    var multiImagesList = mutableListOf<String>()
+    private lateinit var adapter: BarcodeImageAdapter
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -104,6 +111,7 @@ class ApImageUploadFragment : Fragment() {
 
     private fun initViews(view: View) {
         selectedImageView = view.findViewById(R.id.selected_insales_add_product_image_view)
+        imagesRecyclerView = view.findViewById(R.id.ap_image_fragment_recyclerview)
         val apSubmitBtn = view.findViewById<MaterialButton>(R.id.ap_dialog_submit_btn)
         val cameraImageView =
             view.findViewById<AppCompatImageView>(R.id.camera_image_view)
@@ -187,7 +195,7 @@ class ApImageUploadFragment : Fragment() {
                 }
 
                 override fun onItemAttachClick(btn: MaterialButton, position: Int) {
-                    iAlert.dismiss()
+                    //iAlert.dismiss()
                     selectedInternetImage = searchedImagesList[position]
                     Glide.with(requireActivity())
                         .load(selectedInternetImage)
@@ -196,20 +204,47 @@ class ApImageUploadFragment : Fragment() {
                         )
                         .fitCenter()
                         .into(selectedImageView)
+                    if (btn.text.toString()
+                            .toLowerCase(Locale.ENGLISH) == "attach"
+                    ) {
+                        barcodeImageList.add(selectedInternetImage)
+                        multiImagesList.add(selectedInternetImage)
+                        btn.text = requireActivity().resources.getString(R.string.attached_text)
+                        btn.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.dark_gray
+                            )
+                        )
+                    } else {
+                        btn.text = requireActivity().resources.getString(R.string.attach_text)
+                        btn.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.primary_positive_color
+                            )
+                        )
+                        barcodeImageList.removeAt(position)
+                        multiImagesList.removeAt(position)
+                    }
+                    adapter.notifyDataSetChanged()
                 }
 
             })
 
             voiceSearchIcon.setOnClickListener {
                 voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
-                val voiceLayout = LayoutInflater.from(context).inflate(R.layout.voice_language_setting_layout, null)
-                val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
-                val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+                val voiceLayout = LayoutInflater.from(context)
+                    .inflate(R.layout.voice_language_setting_layout, null)
+                val voiceLanguageSpinner =
+                    voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+                val voiceLanguageSaveBtn =
+                    voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
                 if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
-                    voiceLanguageSpinner.setSelection(0,false)
+                    voiceLanguageSpinner.setSelection(0, false)
                 } else {
-                    voiceLanguageSpinner.setSelection(1,false)
+                    voiceLanguageSpinner.setSelection(1, false)
                 }
 
                 voiceLanguageSpinner.onItemSelectedListener =
@@ -220,7 +255,14 @@ class ApImageUploadFragment : Fragment() {
                             position: Int,
                             id: Long
                         ) {
-                            voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(Locale.ENGLISH).contains("english")){"en"}else{"ru"}
+                            voiceLanguageCode =
+                                if (parent!!.selectedItem.toString().toLowerCase(Locale.ENGLISH)
+                                        .contains("english")
+                                ) {
+                                    "en"
+                                } else {
+                                    "ru"
+                                }
                             appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
 
                         }
@@ -378,17 +420,29 @@ class ApImageUploadFragment : Fragment() {
 //                        getString(R.string.empty_text_error)
 //                    )
 //                }
-                startSearch(searchBoxView,searchBtnView,loader,searchedImagesList,internetImageAdapter)
+                startSearch(
+                    searchBoxView,
+                    searchBtnView,
+                    loader,
+                    searchedImagesList,
+                    internetImageAdapter
+                )
             }
 
-            searchBoxView.setOnEditorActionListener(object : TextView.OnEditorActionListener{
+            searchBoxView.setOnEditorActionListener(object : TextView.OnEditorActionListener {
                 override fun onEditorAction(
                     v: TextView?,
                     actionId: Int,
                     event: KeyEvent?
                 ): Boolean {
-                    if (actionId == EditorInfo.IME_ACTION_SEARCH){
-                        startSearch(searchBoxView,searchBtnView,loader,searchedImagesList,internetImageAdapter)
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                        startSearch(
+                            searchBoxView,
+                            searchBtnView,
+                            loader,
+                            searchedImagesList,
+                            internetImageAdapter
+                        )
                     }
                     return false
                 }
@@ -459,64 +513,86 @@ class ApImageUploadFragment : Fragment() {
                                     val details = response.getAsJsonObject("details")
                                     val productId = details.get("id").asInt
 
-                                    if (selectedImageBase64String.isNotEmpty()) {
+                                    if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
                                         BaseActivity.startLoading(requireActivity())
-
-                                        viewModel.callAddProductImage(
-                                            requireActivity(),
-                                            shopName,
-                                            email,
-                                            password,
-                                            selectedImageBase64String,
+                                        uploadImages(
                                             productId,
-                                            "${System.currentTimeMillis()}.jpg",
-                                            if (intentType != 3) {
-                                                ""
-                                            } else {
-                                                selectedInternetImage
-                                            }
-                                        )
-                                        viewModel.getAddProductImageResponse()
-                                            .observe(
-                                                requireActivity(),
-                                                Observer { response ->
-
-                                                    if (response != null) {
-                                                        if (response.get("status").asString == "200") {
-                                                            selectedImageBase64String = ""
-                                                            selectedInternetImage = ""
-                                                            Handler(Looper.myLooper()!!).postDelayed(
-                                                                {
-                                                                    BaseActivity.dismiss()
-                                                                    creditCharged()
-                                                                    val intent = Intent("dialog-dismiss")
-                                                                    LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
-                                                                },
-                                                                2000
-                                                            )
-                                                        } else {
-                                                            BaseActivity.dismiss()
-                                                            BaseActivity.showAlert(
-                                                                requireActivity(),
-                                                                response.get("message").asString
-                                                            )
-                                                        }
-                                                    } else {
-                                                        BaseActivity.dismiss()
-                                                        BaseActivity.showAlert(
-                                                            requireActivity(),
-                                                            getString(R.string.something_wrong_error)
+                                            multiImagesList,
+                                            object : ResponseListener {
+                                                override fun onSuccess(result: String) {
+                                                    if (result.contains("success")) {
+                                                        Handler(Looper.myLooper()!!).postDelayed(
+                                                            {
+                                                                BaseActivity.dismiss()
+                                                                creditCharged()
+                                                                val intent =
+                                                                    Intent("dialog-dismiss")
+                                                                LocalBroadcastManager.getInstance(
+                                                                    requireActivity()
+                                                                ).sendBroadcast(intent)
+                                                            },
+                                                            2000
                                                         )
                                                     }
-                                                })
+                                                }
+
+                                            })
+//                                        viewModel.callAddProductImage(
+//                                            requireActivity(),
+//                                            shopName,
+//                                            email,
+//                                            password,
+//                                            selectedImageBase64String,
+//                                            productId,
+//                                            "${System.currentTimeMillis()}.jpg",
+//                                            if (intentType != 3) {
+//                                                ""
+//                                            } else {
+//                                                selectedInternetImage
+//                                            }
+//                                        )
+//                                        viewModel.getAddProductImageResponse()
+//                                            .observe(
+//                                                requireActivity(),
+//                                                Observer { response ->
+//
+//                                                    if (response != null) {
+//                                                        if (response.get("status").asString == "200") {
+//                                                            selectedImageBase64String = ""
+//                                                            selectedInternetImage = ""
+//                                                            Handler(Looper.myLooper()!!).postDelayed(
+//                                                                {
+//                                                                    BaseActivity.dismiss()
+//                                                                    creditCharged()
+//                                                                    val intent = Intent("dialog-dismiss")
+//                                                                    LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+//                                                                },
+//                                                                2000
+//                                                            )
+//                                                        } else {
+//                                                            BaseActivity.dismiss()
+//                                                            BaseActivity.showAlert(
+//                                                                requireActivity(),
+//                                                                response.get("message").asString
+//                                                            )
+//                                                        }
+//                                                    } else {
+//                                                        BaseActivity.dismiss()
+//                                                        BaseActivity.showAlert(
+//                                                            requireActivity(),
+//                                                            getString(R.string.something_wrong_error)
+//                                                        )
+//                                                    }
+//                                                })
                                     } else {
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
                                             creditCharged()
                                             resetFieldValues()
                                             val intent = Intent("dialog-dismiss")
-                                            LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intent)
+                                            LocalBroadcastManager.getInstance(requireActivity())
+                                                .sendBroadcast(intent)
 
                                         }, 2000)
                                     }
@@ -536,15 +612,134 @@ class ApImageUploadFragment : Fragment() {
             }
         }
 
+        imagesRecyclerView.layoutManager = LinearLayoutManager(
+            requireActivity(), RecyclerView.HORIZONTAL,
+            false
+        )
+        imagesRecyclerView.hasFixedSize()
+        adapter = BarcodeImageAdapter(
+            requireContext(),
+            barcodeImageList as ArrayList<String>
+        )
+        imagesRecyclerView.adapter = adapter
+        adapter.setOnItemClickListener(object :
+            BarcodeImageAdapter.OnItemClickListener {
+            override fun onItemDeleteClick(position: Int) {
+//                            val image = barcodeImageList[position]
+                val builder = MaterialAlertDialogBuilder(requireActivity())
+                builder.setMessage(getString(R.string.delete_barcode_image_message))
+                builder.setCancelable(false)
+                builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                    dialog.dismiss()
+                }
+                builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                    dialog.dismiss()
+                    barcodeImageList.removeAt(position)
+                    multiImagesList.removeAt(position)
+                    adapter.notifyItemRemoved(position)
+                    if (barcodeImageList.size == 0) {
+                        Glide.with(requireActivity())
+                            .load("")
+                            .placeholder(R.drawable.placeholder)
+                            .centerInside()
+                            .into(selectedImageView)
+                    }
+                }
+                val alert = builder.create()
+                alert.show()
+
+            }
+
+            override fun onAddItemEditClick(position: Int) {
+
+            }
+
+            override fun onImageClick(position: Int) {
+
+            }
+
+        })
+
     }
 
-    private fun resetFieldValues(){
+    var index = 0
+    private fun uploadImages(
+        productId: Int,
+        listImages: List<String>,
+        responseListener: ResponseListener
+    ) {
+
+        var imageType = ""
+        val imageFile = listImages[index]
+        if (imageFile.contains("http")) {
+            imageType = "src"
+            selectedInternetImage = imageFile
+        } else {
+            imageType = "attachment"
+            selectedImageBase64String = ImageManager.convertImageToBase64(
+                requireActivity(),
+                imageFile
+            )
+        }
+
+        viewModel.callAddProductImage(
+            requireActivity(),
+            shopName,
+            email,
+            password,
+            selectedImageBase64String,
+            productId,
+            "${System.currentTimeMillis()}.jpg",
+            if (imageType == "attachment") {
+                ""
+            } else {
+                selectedInternetImage
+            }
+        )
+        viewModel.getAddProductImageResponse()
+            .observe(
+                requireActivity(),
+                Observer { response ->
+
+                    if (response != null) {
+                        if (response.get("status").asString == "200") {
+                            selectedImageBase64String = ""
+                            selectedInternetImage = ""
+
+                            if (index == listImages.size-1){
+                                index = 0
+                                responseListener.onSuccess("success")
+                            }
+                            else{
+                                index++
+                                uploadImages(productId,listImages,responseListener)
+                            }
+                        } else {
+                            BaseActivity.dismiss()
+                            BaseActivity.showAlert(
+                                requireActivity(),
+                                response.get("message").asString
+                            )
+                        }
+                    } else {
+                        BaseActivity.dismiss()
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            getString(R.string.something_wrong_error)
+                        )
+                    }
+                })
+    }
+
+    private fun resetFieldValues() {
         appSettings.remove("AP_BARCODE_ID")
         appSettings.remove("AP_PRODUCT_CATEGORY")
         appSettings.remove("AP_PRODUCT_TITLE")
         appSettings.remove("AP_PRODUCT_DESCRIPTION")
         appSettings.remove("AP_PRODUCT_QUANTITY")
         appSettings.remove("AP_PRODUCT_PRICE")
+        multiImagesList.clear()
+        barcodeImageList.clear()
     }
 
     private var voiceResultLauncher =
@@ -560,12 +755,20 @@ class ApImageUploadFragment : Fragment() {
 
                 searchBoxView.setText(spokenText)
                 Constants.hideKeyboar(requireActivity())
-                startSearch(searchBoxView,searchBtnView,loader,
-                    searchedImagesList as ArrayList<String>,internetImageAdapter)
+                startSearch(
+                    searchBoxView, searchBtnView, loader,
+                    searchedImagesList as ArrayList<String>, internetImageAdapter
+                )
             }
         }
 
-    private fun startSearch(searchBoxView:TextInputEditText,searchBtnView:ImageButton,loader:ProgressBar,searchedImagesList:ArrayList<String>,internetImageAdapter:InternetImageAdapter){
+    private fun startSearch(
+        searchBoxView: TextInputEditText,
+        searchBtnView: ImageButton,
+        loader: ProgressBar,
+        searchedImagesList: ArrayList<String>,
+        internetImageAdapter: InternetImageAdapter
+    ) {
         var creditChargePrice: Float = 0F
         if (searchBoxView.text.toString().trim().isNotEmpty()) {
 
@@ -581,10 +784,10 @@ class ApImageUploadFragment : Fragment() {
                             .getValue(Int::class.java) as Int
                         creditChargePrice = creditPrice.toFloat() / images
 
-                        userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                        userCurrentCredits =
+                            appSettings.getString(Constants.userCreditsValue) as String
 
-                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice)
-                        {
+                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= creditChargePrice) {
                             BaseActivity.hideSoftKeyboard(
                                 requireActivity(),
                                 searchBtnView
@@ -659,17 +862,16 @@ class ApImageUploadFragment : Fragment() {
                                     }
 
                                 })
-                        } else
-                        {
+                        } else {
                             MaterialAlertDialogBuilder(requireActivity())
                                 .setMessage(getString(R.string.low_credites_error_message))
                                 .setCancelable(false)
-                                .setNegativeButton(getString(R.string.no_text)){dialog,which->
+                                .setNegativeButton(getString(R.string.no_text)) { dialog, which ->
                                     dialog.dismiss()
                                 }
-                                .setPositiveButton(getString(R.string.buy_credits)){dialog,which ->
+                                .setPositiveButton(getString(R.string.buy_credits)) { dialog, which ->
                                     dialog.dismiss()
-                                    startActivity(Intent(context,UserScreenActivity::class.java))
+                                    startActivity(Intent(context, UserScreenActivity::class.java))
                                 }
                                 .create().show()
                         }
@@ -695,7 +897,7 @@ class ApImageUploadFragment : Fragment() {
     }
 
 
-    private fun creditCharged(){
+    private fun creditCharged() {
         userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
         val firebaseDatabase = FirebaseDatabase.getInstance().reference
         val hashMap = HashMap<String, Any>()
@@ -721,17 +923,20 @@ class ApImageUploadFragment : Fragment() {
                 val data: Intent? = result.data
                 val bitmap = data!!.extras!!.get("data") as Bitmap
                 createImageFile(bitmap)
-                selectedImageBase64String =
-                    ImageManager.convertImageToBase64(
-                        requireActivity(),
-                        currentPhotoPath!!
-                    )
-                Log.d("TEST199DIALOG", selectedImageBase64String)
+//                selectedImageBase64String =
+//                    ImageManager.convertImageToBase64(
+//                        requireActivity(),
+//                        currentPhotoPath!!
+//                    )
+//                Log.d("TEST199DIALOG", selectedImageBase64String)
                 Glide.with(requireActivity())
                     .load(currentPhotoPath)
                     .placeholder(R.drawable.placeholder)
                     .centerInside()
                     .into(selectedImageView)
+                barcodeImageList.add(currentPhotoPath!!)
+                multiImagesList.add(currentPhotoPath!!)
+                adapter.notifyDataSetChanged()
             }
         }
 
@@ -756,17 +961,20 @@ class ApImageUploadFragment : Fragment() {
                         requireActivity(),
                         imageUri.data
                     )
-                    selectedImageBase64String =
-                        ImageManager.convertImageToBase64(
-                            requireActivity(),
-                            currentPhotoPath!!
-                        )
-                    Log.d("TEST199", selectedImageBase64String)
+//                    selectedImageBase64String =
+//                        ImageManager.convertImageToBase64(
+//                            requireActivity(),
+//                            currentPhotoPath!!
+//                        )
+//                    Log.d("TEST199", selectedImageBase64String)
                     Glide.with(requireActivity())
                         .load(currentPhotoPath)
                         .placeholder(R.drawable.placeholder)
                         .centerInside()
                         .into(selectedImageView)
+                    barcodeImageList.add(currentPhotoPath!!)
+                    multiImagesList.add(currentPhotoPath!!)
+                    adapter.notifyDataSetChanged()
                 }
 
             }

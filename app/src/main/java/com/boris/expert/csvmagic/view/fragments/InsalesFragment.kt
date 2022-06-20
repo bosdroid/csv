@@ -2611,7 +2611,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                productAdapter.notifyItemRangeChanged(0,productsList.size)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
                 //productAdapter.notifyDataSetChanged()
 
             }
@@ -3202,6 +3202,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private lateinit var addProdcutViewModel: AddProductViewModel
         private lateinit var testDataBtn: MaterialTextView
         private lateinit var getTitleBtn: MaterialTextView
+        private lateinit var imagesRecyclerView: RecyclerView
+        private var barcodeImageList = mutableListOf<String>()
+        var multiImagesList = mutableListOf<String>()
+        private lateinit var imagesAdapter: BarcodeImageAdapter
 
         var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -3278,6 +3282,54 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apBackArrowBtn = view.findViewById(R.id.ap_back_arrow)
             apNextPreviousButtons = view.findViewById(R.id.ap_next_previous_buttons)
             getTitleBtn = view.findViewById(R.id.get_title_text_view)
+            imagesRecyclerView = view.findViewById(R.id.ap_images_recyclerview)
+            imagesRecyclerView.layoutManager = LinearLayoutManager(
+                requireActivity(), RecyclerView.HORIZONTAL,
+                false
+            )
+            imagesRecyclerView.hasFixedSize()
+            imagesAdapter = BarcodeImageAdapter(
+                requireContext(),
+                barcodeImageList as java.util.ArrayList<String>
+            )
+            imagesRecyclerView.adapter = imagesAdapter
+            imagesAdapter.setOnItemClickListener(object :
+                BarcodeImageAdapter.OnItemClickListener {
+                override fun onItemDeleteClick(position: Int) {
+//                            val image = barcodeImageList[position]
+                    val builder = MaterialAlertDialogBuilder(requireActivity())
+                    builder.setMessage(getString(R.string.delete_barcode_image_message))
+                    builder.setCancelable(false)
+                    builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                        dialog.dismiss()
+                        barcodeImageList.removeAt(position)
+                        multiImagesList.removeAt(position)
+                        imagesAdapter.notifyItemRemoved(position)
+                        if (barcodeImageList.size == 0) {
+                            Glide.with(requireActivity())
+                                .load("")
+                                .placeholder(R.drawable.placeholder)
+                                .centerInside()
+                                .into(selectedImageView)
+                        }
+                    }
+                    val alert = builder.create()
+                    alert.show()
+
+                }
+
+                override fun onAddItemEditClick(position: Int) {
+
+                }
+
+                override fun onImageClick(position: Int) {
+
+                }
+
+            })
 
             getTitleBtn.setOnClickListener {
                 userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
@@ -4635,7 +4687,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
 
                     override fun onItemAttachClick(btn: MaterialButton, position: Int) {
-                        iAlert.dismiss()
+                        //iAlert.dismiss()
                         selectedInternetImage = searchedImagesList[position]
                         Glide.with(requireActivity())
                             .load(selectedInternetImage)
@@ -4644,6 +4696,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             )
                             .fitCenter()
                             .into(selectedImageView)
+                        if (btn.text.toString()
+                                .toLowerCase(Locale.ENGLISH) == "attach"
+                        ) {
+                            barcodeImageList.add(selectedInternetImage)
+                            multiImagesList.add(selectedInternetImage)
+                            btn.text = requireActivity().resources.getString(R.string.attached_text)
+                            btn.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    requireActivity(),
+                                    R.color.dark_gray
+                                )
+                            )
+                        } else {
+                            btn.text = requireActivity().resources.getString(R.string.attach_text)
+                            btn.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    requireActivity(),
+                                    R.color.primary_positive_color
+                                )
+                            )
+                            barcodeImageList.removeAt(position)
+                            multiImagesList.removeAt(position)
+                        }
+                        imagesAdapter.notifyDataSetChanged()
                     }
 
                 })
@@ -4997,56 +5073,73 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     val details = response.getAsJsonObject("details")
                                     val productId = details.get("id").asInt
 
-                                    if (selectedImageBase64String.isNotEmpty()) {
+                                    if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
                                         BaseActivity.startLoading(requireActivity())
-
-                                        viewModel.callAddProductImage(
-                                            requireActivity(),
-                                            shopName,
-                                            email,
-                                            password,
-                                            selectedImageBase64String,
+                                        uploadImages(
                                             productId,
-                                            "${System.currentTimeMillis()}.jpg",
-                                            if (intentType != 3) {
-                                                ""
-                                            } else {
-                                                selectedInternetImage
-                                            }
-                                        )
-                                        viewModel.getAddProductImageResponse()
-                                            .observe(
-                                                requireActivity(),
-                                                Observer { response ->
-
-                                                    if (response != null) {
-                                                        if (response.get("status").asString == "200") {
-                                                            selectedImageBase64String = ""
-                                                            selectedInternetImage = ""
-                                                            Handler(Looper.myLooper()!!).postDelayed(
-                                                                {
-                                                                    BaseActivity.dismiss()
-                                                                    dismiss()
-                                                                    listener.onSuccess("")
-                                                                },
-                                                                6000
-                                                            )
-                                                        } else {
-                                                            BaseActivity.dismiss()
-                                                            BaseActivity.showAlert(
-                                                                requireActivity(),
-                                                                response.get("message").asString
-                                                            )
-                                                        }
-                                                    } else {
-                                                        BaseActivity.dismiss()
-                                                        BaseActivity.showAlert(
-                                                            requireActivity(),
-                                                            getString(R.string.something_wrong_error)
+                                            multiImagesList,
+                                            object : ResponseListener {
+                                                override fun onSuccess(result: String) {
+                                                    if (result.contains("success")) {
+                                                        Handler(Looper.myLooper()!!).postDelayed(
+                                                            {
+                                                                BaseActivity.dismiss()
+                                                                dismiss()
+                                                                listener.onSuccess("")
+                                                            },
+                                                            2000
                                                         )
                                                     }
-                                                })
+                                                }
+
+                                            })
+//                                        viewModel.callAddProductImage(
+//                                            requireActivity(),
+//                                            shopName,
+//                                            email,
+//                                            password,
+//                                            selectedImageBase64String,
+//                                            productId,
+//                                            "${System.currentTimeMillis()}.jpg",
+//                                            if (intentType != 3) {
+//                                                ""
+//                                            } else {
+//                                                selectedInternetImage
+//                                            }
+//                                        )
+//                                        viewModel.getAddProductImageResponse()
+//                                            .observe(
+//                                                requireActivity(),
+//                                                Observer { response ->
+//
+//                                                    if (response != null) {
+//                                                        if (response.get("status").asString == "200") {
+//                                                            selectedImageBase64String = ""
+//                                                            selectedInternetImage = ""
+//                                                            Handler(Looper.myLooper()!!).postDelayed(
+//                                                                {
+//                                                                    BaseActivity.dismiss()
+//                                                                    dismiss()
+//                                                                    listener.onSuccess("")
+//                                                                },
+//                                                                6000
+//                                                            )
+//                                                        } else {
+//                                                            BaseActivity.dismiss()
+//                                                            BaseActivity.showAlert(
+//                                                                requireActivity(),
+//                                                                response.get("message").asString
+//                                                            )
+//                                                        }
+//                                                    } else {
+//                                                        BaseActivity.dismiss()
+//                                                        BaseActivity.showAlert(
+//                                                            requireActivity(),
+//                                                            getString(R.string.something_wrong_error)
+//                                                        )
+//                                                    }
+//                                                })
                                     } else {
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
@@ -5071,6 +5164,73 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         }
 
+        var index = 0
+        private fun uploadImages(
+            productId: Int,
+            listImages: List<String>,
+            responseListener: ResponseListener
+        ) {
+
+            var imageType = ""
+            val imageFile = listImages[index]
+            if (imageFile.contains("http")) {
+                imageType = "src"
+                selectedInternetImage = imageFile
+            } else {
+                imageType = "attachment"
+                selectedImageBase64String = ImageManager.convertImageToBase64(
+                    requireActivity(),
+                    imageFile
+                )
+            }
+
+            viewModel.callAddProductImage(
+                requireActivity(),
+                shopName,
+                email,
+                password,
+                selectedImageBase64String,
+                productId,
+                "${System.currentTimeMillis()}.jpg",
+                if (imageType == "attachment") {
+                    ""
+                } else {
+                    selectedInternetImage
+                }
+            )
+            viewModel.getAddProductImageResponse()
+                .observe(
+                    requireActivity(),
+                    Observer { response ->
+
+                        if (response != null) {
+                            if (response.get("status").asString == "200") {
+                                selectedImageBase64String = ""
+                                selectedInternetImage = ""
+
+                                if (index == listImages.size - 1) {
+                                    index = 0
+                                    responseListener.onSuccess("success")
+                                } else {
+                                    index++
+                                    uploadImages(productId, listImages, responseListener)
+                                }
+                            } else {
+                                BaseActivity.dismiss()
+                                BaseActivity.showAlert(
+                                    requireActivity(),
+                                    response.get("message").asString
+                                )
+                            }
+                        } else {
+                            BaseActivity.dismiss()
+                            BaseActivity.showAlert(
+                                requireActivity(),
+                                getString(R.string.something_wrong_error)
+                            )
+                        }
+                    })
+        }
 
         fun pickImageFromGallery() {
             val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -5139,7 +5299,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
         fun pickImageFromCamera() {
-            //        startActivity(Intent(context,OcrActivity::class.java))
             val takePictureIntent = Intent(context, OcrActivity::class.java)
             cameraResultLauncher1.launch(takePictureIntent)
         }
@@ -5610,17 +5769,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             requireActivity(),
                             imageUri.data
                         )
-                        selectedImageBase64String =
-                            ImageManager.convertImageToBase64(
-                                requireActivity(),
-                                currentPhotoPath!!
-                            )
-                        Log.d("TEST199DIALOG", selectedImageBase64String)
+//                        selectedImageBase64String =
+//                            ImageManager.convertImageToBase64(
+//                                requireActivity(),
+//                                currentPhotoPath!!
+//                            )
+//                        Log.d("TEST199DIALOG", selectedImageBase64String)
                         Glide.with(requireActivity())
                             .load(currentPhotoPath)
                             .placeholder(R.drawable.placeholder)
                             .centerInside()
                             .into(selectedImageView)
+                        barcodeImageList.add(currentPhotoPath!!)
+                        multiImagesList.add(currentPhotoPath!!)
+                        imagesAdapter.notifyDataSetChanged()
                     }
 
                 }
@@ -5635,17 +5797,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     val data: Intent? = result.data
                     val bitmap = data!!.extras!!.get("data") as Bitmap
                     createImageFile(bitmap)
-                    selectedImageBase64String =
-                        ImageManager.convertImageToBase64(
-                            requireActivity(),
-                            currentPhotoPath!!
-                        )
-                    Log.d("TEST199DIALOG", selectedImageBase64String)
+//                    selectedImageBase64String =
+//                        ImageManager.convertImageToBase64(
+//                            requireActivity(),
+//                            currentPhotoPath!!
+//                        )
+//                    Log.d("TEST199DIALOG", selectedImageBase64String)
                     Glide.with(requireActivity())
                         .load(currentPhotoPath)
                         .placeholder(R.drawable.placeholder)
                         .centerInside()
                         .into(selectedImageView)
+                    barcodeImageList.add(currentPhotoPath!!)
+                    multiImagesList.add(currentPhotoPath!!)
+                    imagesAdapter.notifyDataSetChanged()
                 }
             }
 
