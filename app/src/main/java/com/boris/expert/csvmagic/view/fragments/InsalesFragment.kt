@@ -450,6 +450,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             alert.show()
             voiceLanguageSaveBtn.setOnClickListener {
                 alert.dismiss()
+                Constants.listUpdateFlag = 1
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(
                         RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -464,6 +465,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
         barcodeSearchFragmentInsales.setOnClickListener {
             barcodeSearchHint = "default"
+            Constants.listUpdateFlag = 1
             val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
             barcodeImageResultLauncher.launch(intent)
         }
@@ -1701,27 +1703,28 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //            }
 //        })
         val cacheList: ArrayList<Product>? = Paper.book().read(Constants.cacheProducts)
+        if (Constants.listUpdateFlag == 0) {
+            if (cacheList != null && cacheList.size > 0) {
+                originalProductsList.clear()
+                productsList.clear()
+                originalProductsList.addAll(cacheList)
+                originalProductsList.sortByDescending { it.id }
+                productsList.addAll(originalProductsList)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
 
-        if (cacheList != null && cacheList.size > 0) {
-            originalProductsList.clear()
-            productsList.clear()
-            originalProductsList.addAll(cacheList)
-            originalProductsList.sortByDescending { it.id }
-            productsList.addAll(originalProductsList)
-            productAdapter.notifyItemRangeChanged(0, productsList.size)
-
-            Handler(Looper.myLooper()!!).postDelayed({
-                if (menu != null) {
-                    menu!!.findItem(R.id.insales_logout).isVisible = true
-                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
-                    menu!!.findItem(R.id.insales_data_sync).isVisible = true
-                }
-            }, 1500)
-        } else {
-            dialogStatus = 1
-            fetchProducts(currentPage)
+                Handler(Looper.myLooper()!!).postDelayed({
+                    if (menu != null) {
+                        menu!!.findItem(R.id.insales_logout).isVisible = true
+                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
+                        menu!!.findItem(R.id.insales_data_sync).isVisible = true
+                    }
+                }, 1500)
+            } else {
+                dialogStatus = 1
+                fetchProducts(currentPage)
+            }
         }
-
+        Constants.listUpdateFlag = 0
     }
 
     private var barcodeImageResultLauncher =
