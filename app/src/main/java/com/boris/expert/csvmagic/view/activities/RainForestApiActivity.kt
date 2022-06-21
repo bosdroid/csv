@@ -69,6 +69,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
     private lateinit var searchImageBtn: ImageButton
     private lateinit var appSettings: AppSettings
     private lateinit var voiceSearchIcon:AppCompatImageView
+    private lateinit var barcodeSearchIcon:AppCompatImageView
     private var pDetailsPrice = 0F
     private var pListPrice = 0F
     private var characters = 0
@@ -96,6 +97,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         searchImageBtn = findViewById(R.id.rainforest_products_search_btn)
         searchImageBtn.setOnClickListener(this)
         voiceSearchIcon = findViewById(R.id.rain_forest_voice_search_icon)
+        barcodeSearchIcon = findViewById(R.id.rain_forest_barcode_search_icon)
 
         rainForestRecyclerView.layoutManager = GridLayoutManager(context, 2)
         rainForestRecyclerView.hasFixedSize()
@@ -213,6 +215,11 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 voiceResultLauncher.launch(intent)
             }
         }
+
+        barcodeSearchIcon.setOnClickListener {
+            val intent = Intent(context, BarcodeReaderActivity::class.java)
+            barcodeImageResultLauncher.launch(intent)
+        }
     }
 
     private fun setUpToolbar() {
@@ -231,6 +238,28 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         }
     }
 
+    private var barcodeImageResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                if (result.data != null && result.data!!.hasExtra("SCANNED_BARCODE_VALUE")) {
+                    val barcodeId =
+                        result.data!!.getStringExtra("SCANNED_BARCODE_VALUE") as String
+                    if (barcodeId.isNotEmpty()) {
+                        searchBox.setText(barcodeId)
+                        searchBox.clearFocus()
+                        hideSoftKeyboard(context,searchBox)
+                        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+                        startSearch(barcodeId)
+                    }
+                }
+
+
+            }
+        }
+
+
     private var voiceResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
@@ -243,7 +272,9 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         }
 
                 searchBox.setText(spokenText)
-                Constants.hideKeyboar(context)
+                searchBox.clearFocus()
+                hideSoftKeyboard(context,searchBox)
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                 startSearch(spokenText)
             }
         }
@@ -277,6 +308,9 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                userCurrentCredits = "0"
                 val query = searchBox.text.toString().trim()
                 if (query.isNotEmpty()) {
+                    hideSoftKeyboard(context,searchBox)
+                    searchBox.clearFocus()
+                    window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                     startSearch(query)
                 } else {
                     showAlert(context, getString(R.string.empty_text_error))
@@ -344,7 +378,6 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
 
     private fun startSearch(query: String){
-        Constants.hideKeyboar(context)
         startLoading(context)
         CoroutineScope(Dispatchers.IO).launch {
 //                        System.setProperty("GOOGLE_API_KEY",context.resources.getString(R.string.translation_api_key))

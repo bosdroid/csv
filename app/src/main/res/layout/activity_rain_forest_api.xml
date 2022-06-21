@@ -35,6 +35,15 @@
                 android:id="@+id/rain_forest_voice_search_icon"
                 />
 
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/barcode"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/sixtyDpMargin"
+                android:id="@+id/rain_forest_barcode_search_icon"
+                />
+
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
