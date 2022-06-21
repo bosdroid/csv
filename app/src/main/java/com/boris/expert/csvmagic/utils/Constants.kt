@@ -114,6 +114,8 @@ class Constants {
         var hint = "default"
         var CIVType = ""
         var listUpdateFlag = 0
+        var barcodeImageList = mutableListOf<String>()
+        var multiImagesList = mutableListOf<String>()
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)

@@ -244,6 +244,7 @@ class ApImageUploadFragment : Fragment() {
                         multiImagesList.removeAt(position)
                     }
                     adapter.notifyDataSetChanged()
+                    Log.d("TEST199", multiImagesList.toString())
                 }
 
             })
@@ -525,7 +526,7 @@ class ApImageUploadFragment : Fragment() {
                         .observe(requireActivity(), Observer { response ->
                             if (response != null) {
                                 if (response.get("status").asString == "200") {
-                                    resetFieldValues()
+
                                     val details = response.getAsJsonObject("details")
                                     val productId = details.get("id").asInt
 
@@ -538,6 +539,7 @@ class ApImageUploadFragment : Fragment() {
                                             object : ResponseListener {
                                                 override fun onSuccess(result: String) {
                                                     if (result.contains("success")) {
+                                                        resetFieldValues()
                                                         Handler(Looper.myLooper()!!).postDelayed(
                                                             {
                                                                 BaseActivity.dismiss()
@@ -603,6 +605,7 @@ class ApImageUploadFragment : Fragment() {
 //                                                })
                                     } else {
                                         Handler(Looper.myLooper()!!).postDelayed({
+                                            resetFieldValues()
                                             BaseActivity.dismiss()
                                             creditCharged()
                                             resetFieldValues()
@@ -614,6 +617,7 @@ class ApImageUploadFragment : Fragment() {
                                     }
 
                                 } else {
+                                    resetFieldValues()
                                     BaseActivity.dismiss()
                                     BaseActivity.showAlert(
                                         requireActivity(),
@@ -741,7 +745,6 @@ class ApImageUploadFragment : Fragment() {
             .observe(
                 requireActivity(),
                 Observer { response ->
-
                     if (response != null) {
                         if (response.get("status").asString == "200") {
                             selectedImageBase64String = ""
@@ -978,6 +981,7 @@ class ApImageUploadFragment : Fragment() {
                 barcodeImageList.add(currentPhotoPath!!)
                 multiImagesList.add(currentPhotoPath!!)
                 adapter.notifyDataSetChanged()
+                Log.d("TEST199", multiImagesList.toString())
             }
         }
 
@@ -1016,6 +1020,7 @@ class ApImageUploadFragment : Fragment() {
                     barcodeImageList.add(currentPhotoPath!!)
                     multiImagesList.add(currentPhotoPath!!)
                     adapter.notifyDataSetChanged()
+                    Log.d("TEST199", multiImagesList.toString())
                 }
 
             }
