@@ -548,6 +548,7 @@
     <string name="get_title_text">Get Data</string>
     <string name="dummy_info_text">Dummy Info</string>
     <string name="barcode_reader_text">Barcode Reader</string>
+    <string name="erase">Erase</string>
 
     <string-array name="features_keys">
 		<item>compressor_feature</item>

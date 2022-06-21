@@ -44,6 +44,7 @@ import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.ImageManager
 import com.boris.expert.csvmagic.utils.RuntimePermissionHelper
+import com.boris.expert.csvmagic.view.activities.BarcodeReaderActivity
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.boris.expert.csvmagic.view.activities.UserScreenActivity
 import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
@@ -61,6 +62,7 @@ import java.util.*
 
 class ApImageUploadFragment : Fragment() {
 
+    private lateinit var internetImageDoneBtn: MaterialButton
     private lateinit var selectedImageView: AppCompatImageView
     private var currentPhotoPath: String? = null
     private var selectedImageBase64String: String = ""
@@ -167,11 +169,25 @@ class ApImageUploadFragment : Fragment() {
             val closeBtn =
                 internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
             voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+            val barcodeImage = internetSearchLayout.findViewById<AppCompatImageView>(
+                R.id
+                    .barcode_img_search_internet_images
+            )
+            internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
             val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setCancelable(false)
             builder.setView(internetSearchLayout)
             val iAlert = builder.create()
             iAlert.show()
+
+            internetImageDoneBtn.setOnClickListener {
+                iAlert.dismiss()
+            }
+
+            barcodeImage.setOnClickListener {
+                val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
+                barcodeImageResultLauncher.launch(intent)
+            }
 
             closeBtn.setOnClickListener {
                 iAlert.dismiss()
@@ -662,6 +678,31 @@ class ApImageUploadFragment : Fragment() {
 
     }
 
+    private var barcodeImageResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                if (result.data != null && result.data!!.hasExtra("SCANNED_BARCODE_VALUE")) {
+                    val barcodeId =
+                        result.data!!.getStringExtra("SCANNED_BARCODE_VALUE") as String
+                    if (barcodeId.isNotEmpty()) {
+                        searchBoxView.setText(barcodeId)
+                        Constants.hideKeyboar(requireActivity())
+                        startSearch(
+                            searchBoxView,
+                            searchBtnView,
+                            loader,
+                            searchedImagesList as ArrayList<String>,
+                            internetImageAdapter
+                        )
+                    }
+                }
+
+
+            }
+        }
+
     var index = 0
     private fun uploadImages(
         productId: Int,
@@ -827,7 +868,7 @@ class ApImageUploadFragment : Fragment() {
                                                 0,
                                                 searchedImagesList.size
                                             )
-
+                                            internetImageDoneBtn.visibility = View.VISIBLE
                                         }
                                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                         val hashMap = HashMap<String, Any>()

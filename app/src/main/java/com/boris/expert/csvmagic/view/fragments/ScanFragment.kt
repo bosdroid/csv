@@ -93,6 +93,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,
 //    private var qrCodeHistoryList = mutableListOf<CodeHistory>()
 //    private lateinit var adapter: QrCodeHistoryAdapter
 //    private lateinit var appViewModel: AppViewModel
+    private lateinit var internetImageDoneBtn: MaterialButton
     private lateinit var tableDataRecyclerView: RecyclerView
     private lateinit var tableGenerator: TableGenerator
     private var tableList = mutableListOf<String>()
@@ -668,11 +669,16 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,
             val closeBtn =
                 internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
             voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+            internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
             val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setCancelable(false)
             builder.setView(internetSearchLayout)
             val iAlert = builder.create()
             iAlert.show()
+
+            internetImageDoneBtn.setOnClickListener {
+                iAlert.dismiss()
+            }
 
             closeBtn.setOnClickListener {
                 if (tempImageList.isNotEmpty()) {
@@ -1279,7 +1285,7 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,
                                                 0,
                                                 searchedImagesList.size
                                             )
-
+                                            internetImageDoneBtn.visibility = View.VISIBLE
                                         }
                                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                         val hashMap = HashMap<String, Any>()

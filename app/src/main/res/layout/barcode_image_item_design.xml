@@ -18,7 +18,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:id="@+id/barcode_image_item_view"
-            android:scaleType="fitXY"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
             android:src="@drawable/placeholder"
             />
 

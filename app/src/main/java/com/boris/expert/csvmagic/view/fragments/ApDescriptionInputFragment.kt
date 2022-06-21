@@ -716,16 +716,32 @@ class ApDescriptionInputFragment : Fragment() {
         }
 
     fun updateTestData(text:String){
-        apDescriptionView.setText(text)
-        apDescriptionVoiceRecView.visibility = View.GONE
-        apDescriptionCameraRecView.visibility = View.GONE
-        apDescriptionImageRecView.visibility = View.GONE
-        apDescriptionListBtn.visibility = View.GONE
-        apDescriptionActiveListNameView.visibility = View.GONE
-        apDescriptionDefaultInputWrapper.visibility = View.GONE
-        apDescriptionDefaultValueMessage.visibility = View.GONE
-        apDescriptionListSpinner.visibility = View.GONE
-        apDescriptionViewWrapper.visibility = View.VISIBLE
+
+        if (appSettings.getString("AP_PRODUCT_DESCRIPTION")!!.isNotEmpty()){
+            val builder = MaterialAlertDialogBuilder(requireActivity())
+            builder.setCancelable(false)
+            builder.setNegativeButton(requireActivity().resources.getString(R.string.cancel_text)){dialog,which->
+                dialog.dismiss()
+            }
+            builder.setPositiveButton(requireActivity().resources.getString(R.string.erase)){dialog,which->
+                apDescriptionView.setText(text)
+                apDescriptionVoiceRecView.visibility = View.GONE
+                apDescriptionCameraRecView.visibility = View.GONE
+                apDescriptionImageRecView.visibility = View.GONE
+                apDescriptionListBtn.visibility = View.GONE
+                apDescriptionActiveListNameView.visibility = View.GONE
+                apDescriptionDefaultInputWrapper.visibility = View.GONE
+                apDescriptionDefaultValueMessage.visibility = View.GONE
+                apDescriptionListSpinner.visibility = View.GONE
+                apDescriptionViewWrapper.visibility = View.VISIBLE
+                dialog.dismiss()
+            }
+            builder.setMessage("Description already have data, Are you sure you want to erase data?")
+            val alert = builder.create()
+            alert.show()
+        }
+
+
     }
 
 }

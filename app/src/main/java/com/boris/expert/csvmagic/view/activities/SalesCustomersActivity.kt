@@ -119,6 +119,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
     private var voiceLanguageCode = "en"
     val searchedImagesList = mutableListOf<String>()
     var defaultLayout = 0
+    private lateinit var internetImageDoneBtn: MaterialButton
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -415,11 +416,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                     voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+                    internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                     val builder = MaterialAlertDialogBuilder(context)
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
                     iAlert.show()
+
+                    internetImageDoneBtn.setOnClickListener {
+                        iAlert.dismiss()
+                    }
 
                     closeBtn.setOnClickListener {
                         iAlert.dismiss()
@@ -822,11 +828,16 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                     voiceSearchIcon = internetSearchLayout.findViewById(R.id
                         .voice_search_internet_images)
+                    internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                     val builder = MaterialAlertDialogBuilder(context)
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
                     iAlert.show()
+
+                    internetImageDoneBtn.setOnClickListener {
+                        iAlert.dismiss()
+                    }
 
                     closeBtn.setOnClickListener {
                         iAlert.dismiss()
@@ -1742,7 +1753,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
                                                 0,
                                                 searchedImagesList.size
                                             )
-
+                                            internetImageDoneBtn.visibility = View.VISIBLE
                                         }
                                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                         val hashMap = HashMap<String, Any>()

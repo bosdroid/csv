@@ -81,6 +81,7 @@ import kotlin.collections.ArrayList
 
 class InsalesFragment : Fragment(), View.OnClickListener {
 
+    private lateinit var internetImageDoneBtn: MaterialButton
     private var barcodeSearchHint = "default"
     private lateinit var appSettings: AppSettings
     private lateinit var viewModel: SalesCustomersViewModel
@@ -137,6 +138,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private lateinit var voiceSearchView: AppCompatImageView
     private lateinit var barcodeSearchFragmentInsales: AppCompatImageView
     private var voiceSearchHint = "default"
+    private lateinit var imagesRecyclerView: RecyclerView
+    private var barcodeImageList = mutableListOf<String>()
+    var multiImagesList = mutableListOf<String>()
+    private lateinit var adapter: BarcodeImageAdapter
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -265,7 +270,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         productsList.clear()
         productsList.addAll(originalProductsList)
         productAdapter.notifyItemRangeChanged(0, productsList.size)
-
+        productsRecyclerView.smoothScrollToPosition(0)
     }
 
     private fun displayErrorItems() {
@@ -490,7 +495,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         searchBox.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 val query = searchBox.text.toString()
-                search(query, "default")
+                if (query.isNotEmpty()) {
+                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+                    search(query, "default")
+                }
+
                 return false
             }
 
@@ -644,11 +654,17 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         R.id
                             .barcode_img_search_internet_images
                     )
+                    internetImageDoneBtn =
+                        internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                     val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
                     iAlert.show()
+
+                    internetImageDoneBtn.setOnClickListener {
+                        iAlert.dismiss()
+                    }
 
                     barcodeImage.setOnClickListener {
                         barcodeSearchHint = "image"
@@ -1027,11 +1043,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             override fun onItemAddImageClick(position: Int) {
                 val pItem = productsList[position]
+                multiImagesList.clear()
+                barcodeImageList.clear()
                 val insalesUpdateProductImageLayout = LayoutInflater.from(context).inflate(
                     R.layout.insales_product_image_update_dialog, null
                 )
                 selectedImageView =
                     insalesUpdateProductImageLayout.findViewById(R.id.selected_insales_product_image_view)
+                imagesRecyclerView =
+                    insalesUpdateProductImageLayout.findViewById(R.id.insales_product_images_recyclerview)
                 val cameraImageView =
                     insalesUpdateProductImageLayout.findViewById<AppCompatImageView>(R.id.camera_image_view)
                 val imagesImageView =
@@ -1042,6 +1062,54 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     insalesUpdateProductImageLayout.findViewById<MaterialButton>(R.id.insales_product_dialog_cancel_btn)
                 val updateImageBtn =
                     insalesUpdateProductImageLayout.findViewById<MaterialButton>(R.id.insales_product_dialog_update_btn)
+
+                imagesRecyclerView.layoutManager = LinearLayoutManager(
+                    requireActivity(), RecyclerView.HORIZONTAL,
+                    false
+                )
+                imagesRecyclerView.hasFixedSize()
+                adapter = BarcodeImageAdapter(
+                    requireContext(),
+                    barcodeImageList as java.util.ArrayList<String>
+                )
+                imagesRecyclerView.adapter = adapter
+                adapter.setOnItemClickListener(object :
+                    BarcodeImageAdapter.OnItemClickListener {
+                    override fun onItemDeleteClick(position: Int) {
+//                            val image = barcodeImageList[position]
+                        val builder = MaterialAlertDialogBuilder(requireActivity())
+                        builder.setMessage(getString(R.string.delete_barcode_image_message))
+                        builder.setCancelable(false)
+                        builder.setNegativeButton(getString(R.string.no_text)) { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        builder.setPositiveButton(getString(R.string.yes_text)) { dialog, which ->
+                            dialog.dismiss()
+                            barcodeImageList.removeAt(position)
+                            multiImagesList.removeAt(position)
+                            adapter.notifyItemRemoved(position)
+                            if (barcodeImageList.size == 0) {
+                                Glide.with(requireActivity())
+                                    .load("")
+                                    .placeholder(R.drawable.placeholder)
+                                    .centerInside()
+                                    .into(selectedImageView)
+                            }
+                        }
+                        val alert = builder.create()
+                        alert.show()
+
+                    }
+
+                    override fun onAddItemEditClick(position: Int) {
+
+                    }
+
+                    override fun onImageClick(position: Int) {
+
+                    }
+
+                })
 
                 cameraImageView.setOnClickListener {
                     intentType = 1
@@ -1096,11 +1164,17 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         R.id
                             .barcode_img_search_internet_images
                     )
+                    internetImageDoneBtn =
+                        internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                     val builder = MaterialAlertDialogBuilder(requireActivity())
                     builder.setCancelable(false)
                     builder.setView(internetSearchLayout)
                     val iAlert = builder.create()
                     iAlert.show()
+
+                    internetImageDoneBtn.setOnClickListener {
+                        iAlert.dismiss()
+                    }
 
                     barcodeImage.setOnClickListener {
                         barcodeSearchHint = "image"
@@ -1130,7 +1204,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         }
 
                         override fun onItemAttachClick(btn: MaterialButton, position: Int) {
-                            iAlert.dismiss()
+                            //iAlert.dismiss()
                             selectedInternetImage = searchedImagesList[position]
                             Glide.with(requireActivity())
                                 .load(selectedInternetImage)
@@ -1139,6 +1213,32 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 )
                                 .fitCenter()
                                 .into(selectedImageView)
+                            if (btn.text.toString()
+                                    .toLowerCase(Locale.ENGLISH) == "attach"
+                            ) {
+                                barcodeImageList.add(selectedInternetImage)
+                                multiImagesList.add(selectedInternetImage)
+                                btn.text =
+                                    requireActivity().resources.getString(R.string.attached_text)
+                                btn.setBackgroundColor(
+                                    ContextCompat.getColor(
+                                        requireActivity(),
+                                        R.color.dark_gray
+                                    )
+                                )
+                            } else {
+                                btn.text =
+                                    requireActivity().resources.getString(R.string.attach_text)
+                                btn.setBackgroundColor(
+                                    ContextCompat.getColor(
+                                        requireActivity(),
+                                        R.color.primary_positive_color
+                                    )
+                                )
+                                barcodeImageList.removeAt(position)
+                                multiImagesList.removeAt(position)
+                            }
+                            adapter.notifyDataSetChanged()
                         }
 
                     })
@@ -1385,50 +1485,69 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 updateImageBtn.setOnClickListener {
 
-                    if (selectedImageBase64String.isNotEmpty() || selectedInternetImage.isNotEmpty()) {
+                    if (multiImagesList.isNotEmpty()) {
                         alert.dismiss()
                         BaseActivity.startLoading(requireActivity())
 
-                        viewModel.callAddProductImage(
-                            requireActivity(),
-                            shopName,
-                            email,
-                            password,
-                            selectedImageBase64String,
+                        uploadImages(
                             pItem.id,
-                            "${System.currentTimeMillis()}.jpg",
-                            if (intentType != 3) {
-                                ""
-                            } else {
-                                selectedInternetImage
-                            }
-                        )
-                        viewModel.getAddProductImageResponse()
-                            .observe(requireActivity(), Observer { response ->
-
-                                if (response != null) {
-                                    if (response.get("status").asString == "200") {
-                                        selectedImageBase64String = ""
-                                        selectedInternetImage = ""
-                                        Handler(Looper.myLooper()!!).postDelayed({
-                                            BaseActivity.dismiss()
-                                            fetchProducts()//showProducts()
-                                        }, 6000)
-                                    } else {
-                                        BaseActivity.dismiss()
-                                        BaseActivity.showAlert(
-                                            requireActivity(),
-                                            response.get("message").asString
+                            multiImagesList,
+                            object : ResponseListener {
+                                override fun onSuccess(result: String) {
+                                    if (result.contains("success")) {
+                                        Handler(Looper.myLooper()!!).postDelayed(
+                                            {
+                                                BaseActivity.dismiss()
+                                                fetchProducts()//showProducts()
+                                            },
+                                            2000
                                         )
                                     }
-                                } else {
-                                    BaseActivity.dismiss()
-                                    BaseActivity.showAlert(
-                                        requireActivity(),
-                                        getString(R.string.something_wrong_error)
-                                    )
                                 }
+
                             })
+
+
+//                        viewModel.callAddProductImage(
+//                            requireActivity(),
+//                            shopName,
+//                            email,
+//                            password,
+//                            selectedImageBase64String,
+//                            pItem.id,
+//                            "${System.currentTimeMillis()}.jpg",
+//                            if (intentType != 3) {
+//                                ""
+//                            } else {
+//                                selectedInternetImage
+//                            }
+//                        )
+//                        viewModel.getAddProductImageResponse()
+//                            .observe(requireActivity(), Observer { response ->
+//
+//                                if (response != null) {
+//                                    if (response.get("status").asString == "200") {
+//                                        selectedImageBase64String = ""
+//                                        selectedInternetImage = ""
+//                                        Handler(Looper.myLooper()!!).postDelayed({
+//                                            BaseActivity.dismiss()
+//                                            fetchProducts()//showProducts()
+//                                        }, 6000)
+//                                    } else {
+//                                        BaseActivity.dismiss()
+//                                        BaseActivity.showAlert(
+//                                            requireActivity(),
+//                                            response.get("message").asString
+//                                        )
+//                                    }
+//                                } else {
+//                                    BaseActivity.dismiss()
+//                                    BaseActivity.showAlert(
+//                                        requireActivity(),
+//                                        getString(R.string.something_wrong_error)
+//                                    )
+//                                }
+//                            })
                     } else {
                         BaseActivity.showAlert(
                             requireActivity(),
@@ -1727,6 +1846,76 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         Constants.listUpdateFlag = 0
     }
 
+
+    var index = 0
+    private fun uploadImages(
+        productId: Int,
+        listImages: List<String>,
+        responseListener: ResponseListener
+    ) {
+
+        var imageType = ""
+        val imageFile = listImages[index]
+        if (imageFile.contains("http")) {
+            imageType = "src"
+            selectedInternetImage = imageFile
+        } else {
+            imageType = "attachment"
+            selectedImageBase64String = ImageManager.convertImageToBase64(
+                requireActivity(),
+                imageFile
+            )
+        }
+
+        viewModel.callAddProductImage(
+            requireActivity(),
+            shopName,
+            email,
+            password,
+            selectedImageBase64String,
+            productId,
+            "${System.currentTimeMillis()}.jpg",
+            if (imageType == "attachment") {
+                ""
+            } else {
+                selectedInternetImage
+            }
+        )
+        viewModel.getAddProductImageResponse()
+            .observe(
+                requireActivity(),
+                Observer { response ->
+
+                    if (response != null) {
+                        if (response.get("status").asString == "200") {
+                            selectedImageBase64String = ""
+                            selectedInternetImage = ""
+
+                            if (index == listImages.size - 1) {
+                                index = 0
+                                responseListener.onSuccess("success")
+                            } else {
+                                index++
+                                uploadImages(productId, listImages, responseListener)
+                            }
+                        } else {
+                            BaseActivity.dismiss()
+                            BaseActivity.showAlert(
+                                requireActivity(),
+                                response.get("message").asString
+                            )
+                        }
+                    } else {
+                        BaseActivity.dismiss()
+                        BaseActivity.showAlert(
+                            requireActivity(),
+                            getString(R.string.something_wrong_error)
+                        )
+                    }
+                })
+    }
+
+
     private var barcodeImageResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
@@ -1847,7 +2036,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 0,
                                                 searchedImagesList.size
                                             )
-
+                                            internetImageDoneBtn.visibility = View.VISIBLE
                                         }
                                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                         val hashMap = HashMap<String, Any>()
@@ -2379,17 +2568,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         requireActivity(),
                         imageUri.data
                     )
-                    selectedImageBase64String =
-                        ImageManager.convertImageToBase64(
-                            requireActivity(),
-                            currentPhotoPath!!
-                        )
-                    Log.d("TEST199", selectedImageBase64String)
+//                    selectedImageBase64String =
+//                        ImageManager.convertImageToBase64(
+//                            requireActivity(),
+//                            currentPhotoPath!!
+//                        )
+//                    Log.d("TEST199", selectedImageBase64String)
                     Glide.with(requireActivity())
                         .load(currentPhotoPath)
                         .placeholder(R.drawable.placeholder)
                         .centerInside()
                         .into(selectedImageView)
+                    barcodeImageList.add(currentPhotoPath!!)
+                    multiImagesList.add(currentPhotoPath!!)
+                    adapter.notifyDataSetChanged()
                 }
 
             }
@@ -2404,14 +2596,17 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 val data: Intent? = result.data
                 val bitmap = data!!.extras!!.get("data") as Bitmap
                 createImageFile(bitmap)
-                selectedImageBase64String =
-                    ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
-                Log.d("TEST199", selectedImageBase64String)
+//                selectedImageBase64String =
+//                    ImageManager.convertImageToBase64(requireActivity(), currentPhotoPath!!)
+//                Log.d("TEST199", selectedImageBase64String)
                 Glide.with(requireActivity())
                     .load(currentPhotoPath)
                     .placeholder(R.drawable.placeholder)
                     .centerInside()
                     .into(selectedImageView)
+                barcodeImageList.add(currentPhotoPath!!)
+                multiImagesList.add(currentPhotoPath!!)
+                adapter.notifyDataSetChanged()
             }
         }
 
@@ -2432,6 +2627,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
             R.id.insales_products_search_reset_btn -> {
                 BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+                searchBox.clearFocus()
+                requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                 if (searchBox.text.toString().trim().isNotEmpty()) {
                     searchBox.setText("")
                 }
@@ -2441,11 +2638,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 productsList.addAll(originalProductsList)
                 productAdapter.notifyItemRangeChanged(0, productsList.size)
 
+
             }
             R.id.insales_products_search_btn -> {
                 val query = searchBox.text.toString().trim()
                 if (query.isNotEmpty()) {
-                    Constants.hideKeyboar(requireActivity())
+                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+                    searchBox.clearFocus()
+                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                     search(query, "default")
                 } else {
                     BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
@@ -3162,6 +3362,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val listener: ResponseListener
     ) : DialogFragment() {
 
+        private lateinit var internetImageDoneBtn: MaterialButton
         private lateinit var apTitleActiveListNameView: MaterialTextView
         private lateinit var apDescriptionActiveListNameView: MaterialTextView
         private lateinit var apQuantityActiveListNameView: MaterialTextView
@@ -3213,6 +3414,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     val intentV = Intent("update-products")
                     LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intentV)
                     dismiss()
+                } else if (intent.action != null && intent.action == "move-next") {
+                    apViewPager.currentItem = 1
                 }
             }
         }
@@ -3222,6 +3425,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             super.onResume()
             val intentFilter = IntentFilter()
             intentFilter.addAction("dialog-dismiss")
+            intentFilter.addAction("move-next")
             LocalBroadcastManager.getInstance(
                 requireActivity()
             ).registerReceiver(broadcastReceiver, intentFilter)
@@ -4651,11 +4855,16 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     R.id
                         .barcode_img_search_internet_images
                 )
+                internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                 val builder = MaterialAlertDialogBuilder(requireActivity())
                 builder.setCancelable(false)
                 builder.setView(internetSearchLayout)
                 val iAlert = builder.create()
                 iAlert.show()
+
+                internetImageDoneBtn.setOnClickListener {
+                    iAlert.dismiss()
+                }
 
                 barcodeImage.setOnClickListener {
                     val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
@@ -5421,7 +5630,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                     0,
                                                     searchedImagesList.size
                                                 )
-
+                                                internetImageDoneBtn.visibility = View.VISIBLE
                                             }
                                             //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                             val hashMap = HashMap<String, Any>()
@@ -5875,6 +6084,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 return mFragmentTitleList[position]
             }
         }
+
 
     }
 

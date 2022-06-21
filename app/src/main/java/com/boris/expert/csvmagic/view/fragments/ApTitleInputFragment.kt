@@ -733,15 +733,29 @@ class ApTitleInputFragment : Fragment() {
             }
 
     fun updateTestData(text:String){
-        apTitleView.setText(text)
-        apTitleVoiceRecView.visibility = View.GONE
-        apTitleCameraRecView.visibility = View.GONE
-        apTitleImageRecView.visibility = View.GONE
-        apTitleListBtn.visibility = View.GONE
-        apTitleActiveListNameView.visibility = View.GONE
-        apTitleDefaultInputWrapper.visibility = View.GONE
-        apTitleDefaultValueMessage.visibility = View.GONE
-        apTitleListSpinner.visibility = View.GONE
-        apTitleViewWrapper.visibility = View.VISIBLE
+        if (appSettings.getString("AP_PRODUCT_TITLE")!!.isNotEmpty()){
+            val builder = MaterialAlertDialogBuilder(requireActivity())
+            builder.setCancelable(false)
+            builder.setNegativeButton(requireActivity().resources.getString(R.string.cancel_text)){dialog,which->
+                dialog.dismiss()
+            }
+            builder.setPositiveButton(requireActivity().resources.getString(R.string.erase)){dialog,which->
+                apTitleView.setText(text)
+                apTitleVoiceRecView.visibility = View.GONE
+                apTitleCameraRecView.visibility = View.GONE
+                apTitleImageRecView.visibility = View.GONE
+                apTitleListBtn.visibility = View.GONE
+                apTitleActiveListNameView.visibility = View.GONE
+                apTitleDefaultInputWrapper.visibility = View.GONE
+                apTitleDefaultValueMessage.visibility = View.GONE
+                apTitleListSpinner.visibility = View.GONE
+                apTitleViewWrapper.visibility = View.VISIBLE
+                dialog.dismiss()
+            }
+            builder.setMessage("Title already have data, Are you sure you want to erase data?")
+            val alert = builder.create()
+            alert.show()
+        }
+
     }
 }

@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_close"
+        android:layout_margin="@dimen/eightDpMargin"
+        android:id="@+id/search_image_dialog_close"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,117 +22,137 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         >
 
-<!--        <com.google.android.material.textview.MaterialTextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center_horizontal"-->
-<!--            android:gravity="center"-->
-<!--            android:textSize="@dimen/mediumText"-->
-<!--            android:textColor="@color/black"-->
-<!--            android:layout_margin="@dimen/eightDpMargin"-->
-<!--            />-->
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="0dp"
+           android:layout_weight="1"
+           android:orientation="vertical"
+           >
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:layout_margin="@dimen/eightDpMargin"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintTop_toTopOf="parent"
+               android:id="@+id/layout1"
+               android:gravity="center"
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="@dimen/eightDpMargin"
-            android:gravity="center"
+               >
+               <androidx.appcompat.widget.AppCompatImageView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/ic_voice"
+                   android:id="@+id/voice_search_internet_images"
+                   android:layout_margin="@dimen/defaultDpMargin"
+                   />
 
-            >
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_voice"
-                android:id="@+id/voice_search_internet_images"
-                android:layout_margin="@dimen/defaultDpMargin"
-                />
+               <androidx.appcompat.widget.AppCompatImageView
+                   android:layout_width="80dp"
+                   android:layout_height="40dp"
+                   android:src="@drawable/barcode"
+                   android:id="@+id/barcode_img_search_internet_images"
+                   android:layout_margin="@dimen/defaultDpMargin"
+                   />
+           </LinearLayout>
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:src="@drawable/barcode"
-                android:id="@+id/barcode_img_search_internet_images"
-                android:layout_margin="@dimen/defaultDpMargin"
-                />
-        </LinearLayout>
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="horizontal"
+               android:gravity="center_vertical"
+               android:layout_margin="@dimen/defaultDpMargin"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintTop_toBottomOf="@id/layout1"
+               android:id="@+id/layout2"
+               >
+
+               <com.google.android.material.textfield.TextInputLayout
+                   android:layout_width="0dp"
+                   android:layout_height="wrap_content"
+                   android:layout_weight="1"
+                   style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                   android:hint="@string/search_hint_text"
+                   app:endIconMode="clear_text"
+                   >
+                   <com.google.android.material.textfield.TextInputEditText
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content"
+                       android:id="@+id/text_input_field"
+                       android:inputType="text"
+                       android:imeOptions="actionSearch"
+                       />
+
+               </com.google.android.material.textfield.TextInputLayout>
+
+               <!--         <com.google.android.material.button.MaterialButton-->
+               <!--             android:layout_width="wrap_content"-->
+               <!--             android:layout_height="wrap_content"-->
+               <!--             android:layout_margin="@dimen/eightDpMargin"-->
+               <!--             android:id="@+id/internet_image_search_btn"-->
+               <!--             android:text="@string/search_text"-->
+               <!--             android:textSize="@dimen/mediumText"-->
+               <!--             android:textStyle="bold"-->
+               <!--             />-->
+               <ImageButton
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/ic_search"
+                   android:padding="10dp"
+                   android:background="@drawable/search_btn_background_design"
+                   android:id="@+id/internet_image_search_btn"
+                   android:layout_marginEnd="@dimen/defaultDpMargin"
+                   android:layout_marginStart="@dimen/defaultDpMargin"
+                   />
+           </LinearLayout>
+
+           <ProgressBar
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:id="@+id/image_loader_view"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintTop_toBottomOf="@id/layout2"
+               style="?android:attr/progressBarStyleHorizontal"
+               android:indeterminate="true"
+               android:visibility="invisible"
+               />
+
+           <androidx.recyclerview.widget.RecyclerView
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_margin="@dimen/defaultDpMargin"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintTop_toBottomOf="@id/image_loader_view"
+               android:id="@+id/internet_search_image_recyclerview"
+               tools:listitem="@layout/search_image_item_row_design"
+               app:layout_constraintBottom_toTopOf="@id/iisdl_dialog_done_btn"
+               />
+       </LinearLayout>
+
 
       <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:orientation="horizontal"
-          android:gravity="center_vertical"
-          android:layout_marginTop="@dimen/defaultDpMargin"
+          android:orientation="vertical"
           >
 
-          <androidx.appcompat.widget.AppCompatImageView
-              android:layout_width="wrap_content"
+          <com.google.android.material.button.MaterialButton
+              android:id="@+id/iisdl_dialog_done_btn"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:src="@drawable/ic_close"
-              android:layout_margin="@dimen/defaultDpMargin"
-              android:id="@+id/search_image_dialog_close"
-              />
-
-          <com.google.android.material.textfield.TextInputLayout
-              android:layout_width="0dp"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-              android:hint="@string/search_hint_text"
-              app:endIconMode="clear_text"
-              >
-              <com.google.android.material.textfield.TextInputEditText
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/text_input_field"
-                  android:inputType="text"
-                  android:imeOptions="actionSearch"
-                  />
-
-          </com.google.android.material.textfield.TextInputLayout>
-
-<!--         <com.google.android.material.button.MaterialButton-->
-<!--             android:layout_width="wrap_content"-->
-<!--             android:layout_height="wrap_content"-->
-<!--             android:layout_margin="@dimen/eightDpMargin"-->
-<!--             android:id="@+id/internet_image_search_btn"-->
-<!--             android:text="@string/search_text"-->
-<!--             android:textSize="@dimen/mediumText"-->
-<!--             android:textStyle="bold"-->
-<!--             />-->
-          <ImageButton
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:src="@drawable/ic_search"
-              android:padding="10dp"
-              android:background="@drawable/search_btn_background_design"
-              android:id="@+id/internet_image_search_btn"
-              android:layout_marginEnd="@dimen/defaultDpMargin"
-              android:layout_marginStart="@dimen/defaultDpMargin"
-              />
+              android:layout_margin="@dimen/eightDpMargin"
+              android:visibility="gone"
+              android:text="@string/done_text" />
       </LinearLayout>
 
-
-      <ProgressBar
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:id="@+id/image_loader_view"
-          style="?android:attr/progressBarStyleHorizontal"
-          android:indeterminate="true"
-          android:visibility="invisible"
-          />
-
-      <androidx.recyclerview.widget.RecyclerView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_margin="@dimen/eightDpMargin"
-          android:id="@+id/internet_search_image_recyclerview"
-          tools:listitem="@layout/search_image_item_row_design"
-          />
-
     </LinearLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -94,6 +94,7 @@ import kotlin.collections.ArrayList
 class CodeDetailActivity : BaseActivity(), View.OnClickListener,
     CustomAlertDialog.CustomDialogListener, View.OnFocusChangeListener {
 
+    private lateinit var internetImageDoneBtn: MaterialButton
     private lateinit var internetImageAdapter: InternetImageAdapter
     private lateinit var searchBtnView: ImageButton
     private lateinit var searchBoxView: TextInputEditText
@@ -1149,11 +1150,16 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                 internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
             val closeBtn = internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
             voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+            internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
             val builder = MaterialAlertDialogBuilder(context)
             builder.setCancelable(false)
             builder.setView(internetSearchLayout)
             val iAlert = builder.create()
             iAlert.show()
+
+            internetImageDoneBtn.setOnClickListener {
+                iAlert.dismiss()
+            }
 
             voiceSearchIcon.setOnClickListener {
                 voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
@@ -1708,7 +1714,7 @@ class CodeDetailActivity : BaseActivity(), View.OnClickListener,
                                                 0,
                                                 searchedImagesList.size
                                             )
-
+                                            internetImageDoneBtn.visibility = View.VISIBLE
                                         }
                                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                         val hashMap = HashMap<String, Any>()

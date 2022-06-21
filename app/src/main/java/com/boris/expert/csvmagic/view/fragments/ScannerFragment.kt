@@ -109,6 +109,7 @@ import kotlin.collections.HashMap
 class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
     View.OnFocusChangeListener {
 
+    private lateinit var internetImageDoneBtn: MaterialButton
     private var codeDataTInputView: CustomTextInputEditText? = null
     private var columns = mutableListOf<String>()
     private var availableStorageMemory: Float = 0F
@@ -833,11 +834,16 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         val closeBtn =
                             internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                         voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+                        internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                         val builder = MaterialAlertDialogBuilder(requireActivity())
                         builder.setCancelable(false)
                         builder.setView(internetSearchLayout)
                         val iAlert = builder.create()
                         iAlert.show()
+
+                        internetImageDoneBtn.setOnClickListener {
+                            iAlert.dismiss()
+                        }
 
                         closeBtn.setOnClickListener {
                             if (tempImageList.isNotEmpty()) {
@@ -1582,11 +1588,16 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                         val closeBtn =
                             internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
                         voiceSearchIcon = internetSearchLayout.findViewById(R.id.voice_search_internet_images)
+                        internetImageDoneBtn = internetSearchLayout.findViewById(R.id.iisdl_dialog_done_btn)
                         val builder = MaterialAlertDialogBuilder(requireActivity())
                         builder.setCancelable(false)
                         builder.setView(internetSearchLayout)
                         val iAlert = builder.create()
                         iAlert.show()
+
+                        internetImageDoneBtn.setOnClickListener {
+                            iAlert.dismiss()
+                        }
 
                         closeBtn.setOnClickListener {
                             if (tempImageList.isNotEmpty()) {
@@ -2268,7 +2279,7 @@ class ScannerFragment : Fragment(), CustomAlertDialog.CustomDialogListener,
                                                 0,
                                                 searchedImagesList.size
                                             )
-
+                                            internetImageDoneBtn.visibility = View.VISIBLE
                                         }
                                         //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
                                         val hashMap = java.util.HashMap<String, Any>()

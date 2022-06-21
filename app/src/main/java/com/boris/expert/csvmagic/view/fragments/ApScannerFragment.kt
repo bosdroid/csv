@@ -1,6 +1,7 @@
 package com.boris.expert.csvmagic.view.fragments
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
@@ -86,7 +88,10 @@ class ApScannerFragment : Fragment() {
 
                         if (it.text.isNotEmpty() && it.text.matches(Regex("[0-9]+"))) {
                             appSettings.putString("AP_BARCODE_ID",it.text)
-                            Toast.makeText(requireActivity(),"Barcode ID has been saved!-> ${it.text}",Toast.LENGTH_SHORT).show()
+                            val intent = Intent("move-next")
+                            LocalBroadcastManager.getInstance(requireActivity())
+                                .sendBroadcast(intent)
+                            //Toast.makeText(requireActivity(),"Barcode ID has been saved!-> ${it.text}",Toast.LENGTH_SHORT).show()
                         } else {
                             BaseActivity.showAlert(
                                 requireActivity(),
