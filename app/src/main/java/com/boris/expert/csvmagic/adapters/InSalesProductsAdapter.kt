@@ -6,18 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
-import com.boris.expert.csvmagic.utils.ProductDiffCallback
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import net.expandable.ExpandableTextView
-import java.util.*
-import kotlin.collections.ArrayList
 
 class InSalesProductsAdapter(val context: Context, var productsItems: List<Product>) :
     RecyclerView.Adapter<InSalesProductsAdapter.ItemViewHolder>() {
@@ -310,9 +306,9 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
     }
 
 
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
+//    override fun getItemId(position: Int): Long {
+//        return position.toLong()
+//    }
 
     override fun getItemViewType(position: Int): Int {
         return position

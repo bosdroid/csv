@@ -1,27 +1,30 @@
 package com.boris.expert.csvmagic.adapters
 
 import android.content.Context
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import android.widget.ScrollView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.ProductDiff
-import com.boris.expert.csvmagic.utils.ProductDiffCallback
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import net.expandable.ExpandableTextView
 import java.util.*
 
+
 class InSalesProductsAdapter1(val context: Context) :
-    ListAdapter<Product,InSalesProductsAdapter1.ItemViewHolder>(ProductDiff()) {
+    ListAdapter<Product, InSalesProductsAdapter1.ItemViewHolder>(ProductDiff()) {
 
 
     interface OnItemClickListener {
@@ -59,11 +62,10 @@ class InSalesProductsAdapter1(val context: Context) :
 
     class ItemViewHolder(itemView: View, Listener: OnItemClickListener) :
         RecyclerView.ViewHolder(itemView) {
+
         val productTitle: ExpandableTextView
         val productDescription: ExpandableTextView
         val imagesRecyclerView: RecyclerView
-
-        //        val addImageView:AppCompatImageView
         val editImageView: AppCompatImageView
         val grammarCheckView: AppCompatImageView
         val grammarStatusView: MaterialTextView
@@ -72,20 +74,17 @@ class InSalesProductsAdapter1(val context: Context) :
         val totalImagesView: MaterialTextView
         val collapseExpandImg: AppCompatImageView
         val collapseExpandDescriptionImg: AppCompatImageView
-//        val collapseExpandLayout: LinearLayout
         val insalesItemEditTextview:MaterialTextView
-
-        //        val sliderView:SliderView
-//        val addProductCard: CardView
         val getDescriptionBtn: AppCompatImageView
         val cameraIconView: AppCompatImageView
         val imageIconView: AppCompatImageView
+//        val titleScrollView:ScrollView
+//        val descriptionScrollView:ScrollView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
             productDescription = itemView.findViewById(R.id.insales_p_item_description)
             imagesRecyclerView = itemView.findViewById(R.id.products_images_recyclerview)
-//            addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
             editImageView = itemView.findViewById(R.id.insales_p_item_edit_image)
             insalesItemEditTextview = itemView.findViewById(R.id.insales_item_edit_textview)
             grammarCheckView = itemView.findViewById(R.id.grammar_check_icon_view)
@@ -93,74 +92,44 @@ class InSalesProductsAdapter1(val context: Context) :
             titleSizeView = itemView.findViewById(R.id.total_title_size_textview)
             descriptionSizeView = itemView.findViewById(R.id.total_description_size_textview)
             totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
-//            collapseExpandLayout = itemView.findViewById(R.id.collapse_expand_layout)
             collapseExpandImg = itemView.findViewById(R.id.collapse_expand_img)
             collapseExpandDescriptionImg = itemView.findViewById(R.id.collapse_expand_description_img)
-//            sliderView = itemView.findViewById(R.id.imageSlider)
-//            addProductCard = itemView.findViewById(R.id.add_product_card)
             getDescriptionBtn = itemView.findViewById(R.id.get_description_text_view)
             cameraIconView = itemView.findViewById(R.id.insales_item_photo_icon_view)
             imageIconView = itemView.findViewById(R.id.insales_item_image_icon_view)
+//            titleScrollView = itemView.findViewById(R.id.title_scrollbar)
+//            descriptionScrollView = itemView.findViewById(R.id.description_scrollbar)
+
+//            titleScrollView.setOnTouchListener(OnTouchListener { v, event -> // Disallow the touch request for parent scroll on touch of child view
+//                val isLarger: Boolean
+//                isLarger = (v as ExpandableTextView).lineCount * v.lineHeight > v.getHeight()
+//                if (event.action === MotionEvent.ACTION_MOVE && isLarger) {
+//                    v.getParent().requestDisallowInterceptTouchEvent(true)
+//                } else {
+//                    v.getParent().requestDisallowInterceptTouchEvent(false)
+//                }
+//                return@OnTouchListener false
+//            })
+//
+//            descriptionScrollView.setOnTouchListener(OnTouchListener { v, event -> // Disallow the touch request for parent scroll on touch of child view
+//                val isLarger: Boolean
+//                isLarger = (v as ExpandableTextView).lineCount * v.lineHeight > v.getHeight()
+//                if (event.action === MotionEvent.ACTION_MOVE && isLarger) {
+//                    v.getParent().requestDisallowInterceptTouchEvent(true)
+//                } else {
+//                    v.getParent().requestDisallowInterceptTouchEvent(false)
+//                }
+//                return@OnTouchListener false
+//            })
 
             productTitle.setOnClickListener { v ->
-                //(v as ExpandableTextView).toggle()
                 Listener.onItemClick(layoutPosition)
             }
 
             productDescription.setOnClickListener(View.OnClickListener { v ->
-                //(v as ExpandableTextView).toggle()
+
             })
 
-//            addImageView.setOnClickListener {
-//                Listener.onItemAddImageClick(layoutPosition)
-//            }
-
-            collapseExpandImg.setOnClickListener {
-                if (productTitle.isExpanded) {
-                    productTitle.isExpanded = false
-//                    collapseExpandLayout.visibility = View.GONE
-                    collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
-                } else {
-                    productTitle.isExpanded = true
-//                    collapseExpandLayout.visibility = View.VISIBLE
-                    collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
-                }
-            }
-
-            collapseExpandDescriptionImg.setOnClickListener {
-                if (productDescription.isExpanded) {
-                    productDescription.isExpanded = false
-//                    collapseExpandLayout.visibility = View.GONE
-                    collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_down)
-                } else {
-                    productDescription.isExpanded = true
-//                    collapseExpandLayout.visibility = View.VISIBLE
-                    collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_up)
-                }
-            }
-
-            productTitle.setOnExpandableClickListener(
-                onExpand = { // Expand action
-                    collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
-                },
-                onCollapse = { // Collapse action
-                    collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
-                }
-            )
-
-            productDescription.setOnExpandableClickListener(
-                onExpand = { // Expand action
-                    collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_up)
-                },
-                onCollapse = { // Collapse action
-                    collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_down)
-                }
-            )
-
-
-//            addProductCard.setOnClickListener {
-//                Listener.onItemAddImageClick(layoutPosition)
-//            }
 
             editImageView.setOnClickListener {
                 Listener.onItemEditImageClick(layoutPosition)
@@ -193,14 +162,6 @@ class InSalesProductsAdapter1(val context: Context) :
         }
     }
 
-    fun updateList(list: ArrayList<Product>){
-//        val diffCallback = ProductDiffCallback(productsItems, list)
-//        val diffResult = DiffUtil.calculateDiff(diffCallback)
-//        productsItems.clear()
-//        productsItems.addAll(list)
-//        diffResult.dispatchUpdatesTo(this)
-
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
 
@@ -232,13 +193,10 @@ class InSalesProductsAdapter1(val context: Context) :
                 )
             )
         }
-//        if (item.title.length < 30){
-//            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,1)
-//        }
-//        else{
-//            ReadMoreObject.setReadMore(context,holder.productTitle,item.title,2)
-//        }
-        holder.productTitle.setText(item.title)
+
+        holder.productTitle.text = item.title
+        holder.productTitle.isExpanded = false
+        holder.productTitle.movementMethod = ScrollingMovementMethod.getInstance()
 
         if (item.fullDesc.length > 10) {
             holder.productDescription.setBackgroundColor(
@@ -256,13 +214,10 @@ class InSalesProductsAdapter1(val context: Context) :
                 )
             )
         }
-//        if (item.fullDesc.length < 30){
-//            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,1)
-//        }
-//        else{
-//            ReadMoreObject.setReadMore(context,holder.productDescription,item.fullDesc,5)
-//        }
-        holder.productDescription.setText(item.fullDesc)
+
+        holder.productDescription.text = item.fullDesc
+        holder.productDescription.isExpanded = false
+        holder.productDescription.movementMethod = ScrollingMovementMethod.getInstance()
 
         holder.imagesRecyclerView.layoutManager =
             WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -301,6 +256,48 @@ class InSalesProductsAdapter1(val context: Context) :
             adapter.notifyDataSetChanged()
 //            holder.sliderView.setIndicatorEnabled(false)
         }
+
+        holder.collapseExpandImg.setOnClickListener {
+            if (holder.productTitle.isExpanded) {
+                holder.productTitle.isExpanded = false
+//                    collapseExpandLayout.visibility = View.GONE
+                holder.collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
+            } else {
+                holder.productTitle.isExpanded = true
+//                    collapseExpandLayout.visibility = View.VISIBLE
+                holder.collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
+            }
+        }
+
+        holder.collapseExpandDescriptionImg.setOnClickListener {
+            if (holder.productDescription.isExpanded) {
+                holder.productDescription.isExpanded = false
+//                    collapseExpandLayout.visibility = View.GONE
+                holder.collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_down)
+            } else {
+                holder.productDescription.isExpanded = true
+//                    collapseExpandLayout.visibility = View.VISIBLE
+                holder.collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_up)
+            }
+        }
+
+        holder.productTitle.setOnExpandableClickListener(
+            onExpand = { // Expand action
+                holder.collapseExpandImg.setImageResource(R.drawable.ic_arrow_up)
+            },
+            onCollapse = { // Collapse action
+                holder.collapseExpandImg.setImageResource(R.drawable.ic_arrow_down)
+            }
+        )
+
+        holder.productDescription.setOnExpandableClickListener(
+            onExpand = { // Expand action
+                holder.collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_up)
+            },
+            onCollapse = { // Collapse action
+                holder.collapseExpandDescriptionImg.setImageResource(R.drawable.ic_arrow_down)
+            }
+        )
 
 
     }

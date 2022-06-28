@@ -16,24 +16,20 @@ class ExpandableTextView @JvmOverloads constructor(context: Context,
     private var collapsedHeight = 0
     private var expandedHeight = 0
     private var collapsed = true
-    private var speed = 25
+    private var speed = 55
     private var inited = false
 
     private val textCanvas: Canvas? = null
 
-//    constructor(context: Context, attrs: AttributeSet): this(context) {
-//        inited = false
-//    }
-//
-//    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int): this(context, attrs) {
-//        inited = false
-//    }
 
+    fun isCollapsed():Boolean{
+        return  collapsed
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         if (!inited) {
-            setCollapsedLines(5)
+            setCollapsedLines(1)
             setMeasuredDimension(widthMeasureSpec, collapsedHeight)
         }
     }
@@ -70,12 +66,12 @@ class ExpandableTextView @JvmOverloads constructor(context: Context,
         }
     }
 
-    private fun expand() {
+    fun expand() {
         collapsed = false
         invalidate()
     }
 
-    private fun collapse() {
+    fun collapse() {
         collapsed = true
         invalidate()
     }

@@ -12,7 +12,9 @@ import android.widget.FrameLayout
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
+import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
 import com.boris.expert.csvmagic.model.Product
@@ -116,6 +118,7 @@ class Constants {
         var listUpdateFlag = 0
         var barcodeImageList = mutableListOf<String>()
         var multiImagesList = mutableListOf<String>()
+
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)

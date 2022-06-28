@@ -3,6 +3,7 @@ package com.boris.expert.csvmagic.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.RecyclerView
 
 class SharedViewModel : ViewModel() {
 

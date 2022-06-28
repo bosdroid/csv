@@ -240,15 +240,26 @@
                         android:orientation="horizontal"
                         android:layout_margin="@dimen/defaultDpMargin"
                         >
-                        <net.expandable.ExpandableTextView
-                            android:id="@+id/insales_p_item_title"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_gravity="center"
-                            android:textColor="@color/black"
-                            app:collapse_lines="2"
-                            android:textSize="@dimen/largeText" />
+
+<!--                        <ScrollView-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:id="@+id/title_scrollbar"-->
+<!--                            android:fillViewport="true"-->
+<!--                            >-->
+                            <net.expandable.ExpandableTextView
+                                android:id="@+id/insales_p_item_title"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:maxLines="5"
+                                android:layout_gravity="center"
+                                android:textColor="@color/black"
+                                app:collapse_lines="2"
+                                android:textSize="@dimen/largeText" />
+<!--                        </ScrollView>-->
+
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:layout_width="36dp"
@@ -286,15 +297,25 @@
                         android:orientation="horizontal"
                         android:layout_margin="@dimen/defaultDpMargin"
                         >
+<!--                        <ScrollView-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:id="@+id/description_scrollbar"-->
+<!--                            android:fillViewport="true"-->
+<!--                            >-->
                         <net.expandable.ExpandableTextView
                             android:id="@+id/insales_p_item_description"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             app:collapse_lines="3"
+                            android:scrollbars="vertical"
+                            android:maxHeight="250dp"
                             android:layout_gravity="center"
                             android:textColor="@color/black"
                             android:textSize="@dimen/largeText" />
+<!--                        </ScrollView>-->
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:layout_width="36dp"

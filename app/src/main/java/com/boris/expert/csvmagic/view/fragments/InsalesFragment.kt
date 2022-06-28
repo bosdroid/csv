@@ -81,6 +81,8 @@ import kotlin.collections.ArrayList
 
 class InsalesFragment : Fragment(), View.OnClickListener {
 
+    private lateinit var internetSearchLayout: View
+    private lateinit var internetImageRecyclerView: RecyclerView
     private lateinit var internetImageDoneBtn: MaterialButton
     private var barcodeSearchHint = "default"
     private lateinit var appSettings: AppSettings
@@ -95,7 +97,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var productsList = mutableListOf<Product>()
     private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
-    private lateinit var productAdapter: InSalesProductsAdapter
+    private lateinit var productAdapter: InSalesProductsAdapter1
     private var galleryIntentType = 0
     private var currentPhotoPath: String? = null
     private var selectedImageBase64String: String = ""
@@ -134,7 +136,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private lateinit var loader: ProgressBar
     private lateinit var voiceSearchIcon: AppCompatImageView
     private var voiceLanguageCode = "en"
-    val searchedImagesList = mutableListOf<String>()
+    var searchedImagesList = mutableListOf<String>()
     private lateinit var voiceSearchView: AppCompatImageView
     private lateinit var barcodeSearchFragmentInsales: AppCompatImageView
     private var voiceSearchHint = "default"
@@ -142,6 +144,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var barcodeImageList = mutableListOf<String>()
     var multiImagesList = mutableListOf<String>()
     private lateinit var adapter: BarcodeImageAdapter
+
 
     companion object {
         private lateinit var dynamicTitleTextViewWrapper: FlowLayout
@@ -269,7 +272,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun resetProductList() {
         productsList.clear()
         productsList.addAll(originalProductsList)
-        productAdapter.notifyItemRangeChanged(0, productsList.size)
+        productAdapter.submitList(productsList)
+        //productAdapter.notifyItemRangeChanged(0, productsList.size)
         productsRecyclerView.smoothScrollToPosition(0)
     }
 
@@ -362,8 +366,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-
+                //productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
             }
         }
     }
@@ -507,8 +511,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         })
     }
 
+
     override fun onResume() {
         super.onResume()
+        internetSearchLayout = LayoutInflater.from(context)
+            .inflate(R.layout.internet_image_search_dialog_layout, null)
         checkInsalesAccount()
     }
 
@@ -572,12 +579,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         )
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
-        productAdapter = InSalesProductsAdapter(
-            requireActivity(),
-            productsList
+        productAdapter = InSalesProductsAdapter1(
+            requireActivity()
         )
+        productsRecyclerView.isNestedScrollingEnabled = false
         productsRecyclerView.adapter = productAdapter
-        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
+        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter1.OnItemClickListener {
             override fun onItemClick(position: Int) {
 
             }
@@ -634,15 +641,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 internetImageView.setOnClickListener {
                     intentType = 3
                     val tempImageList = mutableListOf<String>()
-                    val internetSearchLayout = LayoutInflater.from(context)
-                        .inflate(R.layout.internet_image_search_dialog_layout, null)
+                    searchedImagesList.clear()
                     loader =
                         internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
                     searchBoxView =
                         internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
                     searchBtnView =
                         internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
-                    val internetImageRecyclerView =
+                    internetImageRecyclerView =
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
@@ -949,7 +955,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             searchBoxView,
                             searchBtnView,
                             loader,
-                            searchedImagesList,
+                            searchedImagesList as java.util.ArrayList<String>,
                             internetImageAdapter
                         )
                     }
@@ -965,7 +971,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     searchBoxView,
                                     searchBtnView,
                                     loader,
-                                    searchedImagesList,
+                                    searchedImagesList as java.util.ArrayList<String>,
                                     internetImageAdapter
                                 )
                             }
@@ -1144,17 +1150,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                 internetImageView.setOnClickListener {
                     intentType = 3
-                    val searchedImagesList = mutableListOf<String>()
+//                    val searchedImagesList = mutableListOf<String>()
                     val tempImageList = mutableListOf<String>()
-                    val internetSearchLayout = LayoutInflater.from(context)
-                        .inflate(R.layout.internet_image_search_dialog_layout, null)
+//                    val internetSearchLayout = LayoutInflater.from(context)
+//                        .inflate(R.layout.internet_image_search_dialog_layout, null)
+                    searchedImagesList.clear()
                     loader =
                         internetSearchLayout.findViewById<ProgressBar>(R.id.image_loader_view)
                     searchBoxView =
                         internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
                     searchBtnView =
                         internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
-                    val internetImageRecyclerView =
+                    internetImageRecyclerView =
                         internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                     val closeBtn =
                         internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
@@ -1441,7 +1448,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             searchBoxView,
                             searchBtnView,
                             loader,
-                            searchedImagesList,
+                            searchedImagesList as java.util.ArrayList<String>,
                             internetImageAdapter
                         )
                     }
@@ -1457,7 +1464,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     searchBoxView,
                                     searchBtnView,
                                     loader,
-                                    searchedImagesList,
+                                    searchedImagesList as java.util.ArrayList<String>,
                                     internetImageAdapter
                                 )
                             }
@@ -1829,8 +1836,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 originalProductsList.addAll(cacheList)
                 originalProductsList.sortByDescending { it.id }
                 productsList.addAll(originalProductsList)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-
+                //productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
                 Handler(Looper.myLooper()!!).postDelayed({
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
@@ -1943,6 +1950,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
 
             }
+            else{
+                Constants.listUpdateFlag = 0
+            }
         }
 
     private var voiceResultLauncher =
@@ -2032,6 +2042,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                     )
                                                 }
                                             }
+
                                             internetImageAdapter.notifyItemRangeChanged(
                                                 0,
                                                 searchedImagesList.size
@@ -2497,8 +2508,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             originalProductsList.clear()
                             originalProductsList.addAll(cacheList)
                             productsList.addAll(originalProductsList)
-                            productAdapter.notifyItemRangeChanged(0, productsList.size)
-
+                            //productAdapter.notifyItemRangeChanged(0, productsList.size)
+                            productAdapter.submitList(productsList)
                         }
 //                            if (originalProductsList.size > 0) {
 //                                productsList.addAll(originalProductsList)
@@ -2636,8 +2647,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     productsList.clear()
                 }
                 productsList.addAll(originalProductsList)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-
+                //productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
 
             }
             R.id.insales_products_search_btn -> {
@@ -2811,8 +2822,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-                //productAdapter.notifyDataSetChanged()
+                //productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
 
             }
         }
@@ -2899,7 +2910,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val password: String,
         private val pItem: Product,
         private val position: Int,
-        private val insalesAdapter: InSalesProductsAdapter,
+        private val insalesAdapter: InSalesProductsAdapter1,
         private val viewModel: SalesCustomersViewModel,
         private val listener: ResponseListener
     ) : DialogFragment(), View.OnClickListener {
@@ -3146,10 +3157,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     firstLinearLayout.visibility = View.VISIBLE
 
                     defaultLayout = 1
-
-                    if (insalesFragment!!.titleBox.text.toString().isNotEmpty()) {
+                    insalesFragment!!.fullDescriptionBox.setText(pItem.fullDesc)
+//                    if (insalesFragment!!.titleBox.text.toString().isNotEmpty()) {
+                    insalesFragment!!.titleBox.setText(pItem.title)
                         insalesFragment!!.titleBox.setSelection(pItem.title.length)
-                    }
+//                    }
                     Constants.openKeyboar(requireContext())
                     insalesFragment!!.titleBox.requestFocus()
                 } else {
@@ -3163,6 +3175,44 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
 
             insalesFragment!!.titleBox.setSelection(pItem.title.length)
+            insalesFragment!!.titleBox.addTextChangedListener(object :TextWatcher{
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    pItem.title = insalesFragment!!.titleBox.text.toString()
+                }
+
+            })
+            insalesFragment!!.fullDescriptionBox.addTextChangedListener(object :TextWatcher{
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    pItem.fullDesc = insalesFragment!!.fullDescriptionBox.text.toString()
+                }
+
+            })
 
             dialogCancelBtn.setOnClickListener {
                 BaseActivity.hideSoftKeyboard(requireContext(), dialogCancelBtn)
@@ -3289,6 +3339,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         )
                     )
                     view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
+
                     val balloon = Balloon.Builder(requireActivity())
                         .setLayout(R.layout.ballon_layout_design)
                         .setArrowSize(10)
@@ -3305,6 +3356,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         .setBalloonAnimation(BalloonAnimation.ELASTIC)
                         .setLifecycleOwner(this)
                         .build()
+
+
                     val editTextBox = balloon.getContentView()
                         .findViewById<TextInputEditText>(R.id.balloon_edit_text)
                     editTextBox.setText(textView.text.toString().trim())
@@ -3360,8 +3413,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val password: String,
         private val viewModel: SalesCustomersViewModel,
         private val listener: ResponseListener
-    ) : DialogFragment() {
-
+    ) : DialogFragment()
+    {
+        private lateinit var internetImageRecyclerView:RecyclerView
         private lateinit var internetImageDoneBtn: MaterialButton
         private lateinit var apTitleActiveListNameView: MaterialTextView
         private lateinit var apDescriptionActiveListNameView: MaterialTextView
@@ -4837,6 +4891,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             internetImageView.setOnClickListener {
                 intentType = 3
                 val tempImageList = mutableListOf<String>()
+                searchedImagesList.clear()
                 val internetSearchLayout = LayoutInflater.from(context)
                     .inflate(R.layout.internet_image_search_dialog_layout, null)
                 loader =
@@ -4845,7 +4900,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     internetSearchLayout.findViewById<TextInputEditText>(R.id.text_input_field)
                 searchBtnView =
                     internetSearchLayout.findViewById<ImageButton>(R.id.internet_image_search_btn)
-                val internetImageRecyclerView =
+                internetImageRecyclerView =
                     internetSearchLayout.findViewById<RecyclerView>(R.id.internet_search_image_recyclerview)
                 val closeBtn =
                     internetSearchLayout.findViewById<AppCompatImageView>(R.id.search_image_dialog_close)
