@@ -5,14 +5,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
@@ -167,6 +171,18 @@ class ApPriceInputFragment : Fragment() {
             }
 
         })
+        apPriceDefaultInputBox.setOnEditorActionListener(object:TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    BaseActivity.hideSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
+                    val intent = Intent("move-next")
+                    LocalBroadcastManager.getInstance(requireActivity())
+                        .sendBroadcast(intent)
+                }
+                return false
+            }
+
+        })
 
         apPriceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -253,6 +269,18 @@ class ApPriceInputFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
 
+            }
+
+        })
+        apPriceView.setOnEditorActionListener(object:TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_NEXT){
+                    BaseActivity.hideSoftKeyboard(requireActivity(),apPriceView)
+                    val intent = Intent("move-next")
+                    LocalBroadcastManager.getInstance(requireActivity())
+                        .sendBroadcast(intent)
+                }
+                return false
             }
 
         })

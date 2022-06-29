@@ -253,7 +253,6 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:maxLines="5"
                                 android:layout_gravity="center"
                                 android:textColor="@color/black"
                                 app:collapse_lines="2"
@@ -311,7 +310,6 @@
                             android:layout_weight="1"
                             app:collapse_lines="3"
                             android:scrollbars="vertical"
-                            android:maxHeight="250dp"
                             android:layout_gravity="center"
                             android:textColor="@color/black"
                             android:textSize="@dimen/largeText" />
@@ -414,6 +412,15 @@
                             <!--                            android:layout_marginEnd="@dimen/defaultDpMargin"-->
                             <!--                            android:textSize="@dimen/mediumText" />-->
                         </LinearLayout>
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/sku_barcode_textview"
+                            android:textSize="@dimen/mediumText"
+                            android:textColor="@color/black"
+                            android:layout_margin="2dp"
+                            />
                       <LinearLayout
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"

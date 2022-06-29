@@ -97,7 +97,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var productsList = mutableListOf<Product>()
     private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
-    private lateinit var productAdapter: InSalesProductsAdapter1
+    private lateinit var productAdapter: InSalesProductsAdapter
     private var galleryIntentType = 0
     private var currentPhotoPath: String? = null
     private var selectedImageBase64String: String = ""
@@ -272,8 +272,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun resetProductList() {
         productsList.clear()
         productsList.addAll(originalProductsList)
-        productAdapter.submitList(productsList)
-        //productAdapter.notifyItemRangeChanged(0, productsList.size)
+//        productAdapter.submitList(productsList)
+        productAdapter.notifyItemRangeChanged(0, productsList.size)
         productsRecyclerView.smoothScrollToPosition(0)
     }
 
@@ -366,8 +366,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                //productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.submitList(productsList)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                productAdapter.submitList(productsList)
             }
         }
     }
@@ -579,12 +579,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         )
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
-        productAdapter = InSalesProductsAdapter1(
-            requireActivity()
+        productAdapter = InSalesProductsAdapter(
+            requireActivity(),
+            productsList as ArrayList<Product>
         )
         productsRecyclerView.isNestedScrollingEnabled = false
         productsRecyclerView.adapter = productAdapter
-        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter1.OnItemClickListener {
+        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
 
             }
@@ -1836,8 +1837,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 originalProductsList.addAll(cacheList)
                 originalProductsList.sortByDescending { it.id }
                 productsList.addAll(originalProductsList)
-                //productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.submitList(productsList)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                productAdapter.submitList(productsList)
                 Handler(Looper.myLooper()!!).postDelayed({
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
@@ -2508,8 +2509,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             originalProductsList.clear()
                             originalProductsList.addAll(cacheList)
                             productsList.addAll(originalProductsList)
-                            //productAdapter.notifyItemRangeChanged(0, productsList.size)
-                            productAdapter.submitList(productsList)
+                            productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                            productAdapter.submitList(productsList)
                         }
 //                            if (originalProductsList.size > 0) {
 //                                productsList.addAll(originalProductsList)
@@ -2647,8 +2648,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     productsList.clear()
                 }
                 productsList.addAll(originalProductsList)
-                //productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.submitList(productsList)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                productAdapter.submitList(productsList)
 
             }
             R.id.insales_products_search_btn -> {
@@ -2822,8 +2823,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                //productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.submitList(productsList)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                productAdapter.submitList(productsList)
 
             }
         }
@@ -2910,7 +2911,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val password: String,
         private val pItem: Product,
         private val position: Int,
-        private val insalesAdapter: InSalesProductsAdapter1,
+        private val insalesAdapter: InSalesProductsAdapter,
         private val viewModel: SalesCustomersViewModel,
         private val listener: ResponseListener
     ) : DialogFragment(), View.OnClickListener {
@@ -3170,6 +3171,71 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     firstLinearLayout.visibility = View.GONE
                     secondLinearLayout.visibility = View.VISIBLE
                     defaultLayout = 0
+
+                    insalesFragment!!.titleTextViewList.clear()
+                    insalesFragment!!.shortDescTextViewList.clear()
+                    insalesFragment!!.fullDescTextViewList.clear()
+                    dynamicTitleTextViewWrapper.removeAllViews()
+                    dynamicShortDescTextViewWrapper.removeAllViews()
+                    dynamicFullDescTextViewWrapper.removeAllViews()
+
+                    val titleTextList1 = pItem.title.trim().split(" ")
+                    val shortDescTextList1 = pItem.shortDesc.trim().split(" ")
+                    val fullDescTextList1 = pItem.fullDesc.trim().split(" ")
+
+                    for (i in 0 until titleTextList1.size) {
+                        val params = FlowLayout.LayoutParams(
+                            FlowLayout.LayoutParams.WRAP_CONTENT,
+                            FlowLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        params.setMargins(5, 5, 5, 5)
+                        val textView = MaterialTextView(requireActivity())
+                        textView.layoutParams = params
+                        textView.text = titleTextList1[i].trim()
+                        textView.tag = "title"
+                        textView.id = i
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                        textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                        insalesFragment!!.titleTextViewList.add(textView)
+                        textView.setOnClickListener(this)
+                        dynamicTitleTextViewWrapper.addView(textView)
+                    }
+
+                    for (i in 0 until shortDescTextList1.size) {
+                        val params = FlowLayout.LayoutParams(
+                            FlowLayout.LayoutParams.WRAP_CONTENT,
+                            FlowLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        params.setMargins(5, 5, 5, 5)
+                        val textView = MaterialTextView(requireActivity())
+                        textView.layoutParams = params
+                        textView.text = shortDescTextList1[i].trim()
+                        textView.tag = "title"
+                        textView.id = i
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                        textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                        insalesFragment!!.shortDescTextViewList.add(textView)
+                        textView.setOnClickListener(this)
+                        dynamicShortDescTextViewWrapper.addView(textView)
+                    }
+//
+                    for (i in 0 until fullDescTextList1.size) {
+                        val params = FlowLayout.LayoutParams(
+                            FlowLayout.LayoutParams.WRAP_CONTENT,
+                            FlowLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        params.setMargins(5, 5, 5, 5)
+                        val textView = MaterialTextView(requireActivity())
+                        textView.layoutParams = params
+                        textView.text = fullDescTextList1[i].trim()
+                        textView.tag = "title"
+                        textView.id = i
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                        textView.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
+                        insalesFragment!!.fullDescTextViewList.add(textView)
+                        textView.setOnClickListener(this)
+                        dynamicFullDescTextViewWrapper.addView(textView)
+                    }
                     //BaseActivity.dismiss()
                 }
             }
@@ -3469,7 +3535,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intentV)
                     dismiss()
                 } else if (intent.action != null && intent.action == "move-next") {
-                    apViewPager.currentItem = 1
+                    apViewPager.currentItem = apViewPager.currentItem + 1
                 }
             }
         }
@@ -4580,8 +4646,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    apQuantityView.setText(s.toString())
-                    appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
+                    if (s.toString().substring(0) == "0"){
+                        BaseActivity.showAlert(requireActivity(),"Default Quantity value should start from greater then 0!")
+                        apQuantityDefaultInputBox.setText(s.toString().substring(1))
+                    }
+                    else{
+                        apQuantityView.setText(s.toString())
+                        appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
+                        appSettings.putString("AP_PRODUCT_QUANTITY",s.toString())
+                    }
                 }
 
             })
@@ -4670,7 +4743,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_QUANTITY_VALUE", s.toString())
+                    if (s.toString().substring(0) == "0"){
+                        BaseActivity.showAlert(requireActivity(),"Quantity value should start from greater then 0!")
+                        apQuantityView.setText(s.toString().substring(1))
+                    }
+                    else{
+                        appSettings.putString("AP_PRODUCT_QUANTITY", s.toString())
+                    }
                 }
 
             })
@@ -4775,14 +4854,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apPriceDefaultInputBox.setText(apPriceDefaultValue)
                             apPriceView.setText(apPriceDefaultValue)
                         } else {
-                            apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
+                            apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
                             apPriceView.setSelection(apPriceView.text.toString().length)
                         }
                     } else if (position == 2) {
                         apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
                         apPriceViewWrapper.visibility = View.GONE
-                        apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
+                        apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
                         apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apPriceListId)
@@ -4813,7 +4892,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             }
                     } else {
                         apPriceViewWrapper.visibility = View.VISIBLE
-                        apPriceView.setText(appSettings.getString("AP_PRICE_VALUE"))
+                        apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
                         apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListBtn.visibility = View.GONE
                         apPriceDefaultInputWrapper.visibility = View.GONE
@@ -4842,7 +4921,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_PRICE_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_PRICE", s.toString())
                 }
 
             })

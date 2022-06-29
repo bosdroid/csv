@@ -11,13 +11,16 @@ import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
@@ -25,6 +28,7 @@ import androidx.appcompat.widget.AppCompatSpinner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
@@ -221,6 +225,19 @@ class ApDescriptionInputFragment : Fragment() {
 
         })
 
+        apDescriptionView.setOnEditorActionListener(object:TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_NEXT){
+                    BaseActivity.hideSoftKeyboard(requireActivity(),apDescriptionView)
+                    val intent = Intent("move-next")
+                    LocalBroadcastManager.getInstance(requireActivity())
+                        .sendBroadcast(intent)
+                }
+                return false
+            }
+
+        })
+
         val apDescriptionSpinnerSelectedPosition = appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
         val apDescriptionDefaultValue = appSettings.getString("AP_DESCRIPTION_DEFAULT_VALUE")
         val apDescriptionListId = appSettings.getInt("AP_DESCRIPTION_LIST_ID")
@@ -355,6 +372,18 @@ class ApDescriptionInputFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
 
+            }
+
+        })
+        apDescriptionDefaultInputBox.setOnEditorActionListener(object :TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    BaseActivity.hideSoftKeyboard(requireActivity(),apDescriptionDefaultInputBox)
+                    val intent = Intent("move-next")
+                    LocalBroadcastManager.getInstance(requireActivity())
+                        .sendBroadcast(intent)
+                }
+                return false
             }
 
         })

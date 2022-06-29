@@ -5,15 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.core.text.isDigitsOnly
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
@@ -158,13 +162,31 @@ class ApQuantityInputFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                apQuantityView.setText(s.toString())
-                appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
-                appSettings.putString("AP_PRODUCT_QUANTITY",s.toString())
+
             }
 
             override fun afterTextChanged(s: Editable?) {
+                if (s.toString().substring(0) == "0"){
+                    BaseActivity.showAlert(requireActivity(),"Default Quantity value should start from greater then 0!")
+                    apQuantityDefaultInputBox.setText(s.toString().substring(1))
+                }
+                else{
+                    apQuantityView.setText(s.toString())
+                    appSettings.putString("AP_QUANTITY_DEFAULT_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_QUANTITY",s.toString())
+                }
+            }
 
+        })
+        apQuantityDefaultInputBox.setOnEditorActionListener(object :TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    BaseActivity.hideSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
+                    val intent = Intent("move-next")
+                    LocalBroadcastManager.getInstance(requireActivity())
+                        .sendBroadcast(intent)
+                }
+                return false
             }
 
         })
@@ -249,11 +271,30 @@ class ApQuantityInputFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                appSettings.putString("AP_PRODUCT_QUANTITY", s.toString())
+
             }
 
             override fun afterTextChanged(s: Editable?) {
+                if (s.toString().substring(0) == "0"){
+                    BaseActivity.showAlert(requireActivity(),"Quantity value should start from greater then 0!")
+                    apQuantityView.setText(s.toString().substring(1))
+                }
+                else{
+                    appSettings.putString("AP_PRODUCT_QUANTITY", s.toString())
+                }
 
+            }
+
+        })
+        apQuantityView.setOnEditorActionListener(object:TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_NEXT){
+                    BaseActivity.hideSoftKeyboard(requireActivity(),apQuantityView)
+                    val intent = Intent("move-next")
+                    LocalBroadcastManager.getInstance(requireActivity())
+                        .sendBroadcast(intent)
+                }
+                return false
             }
 
         })
