@@ -1,6 +1,7 @@
 package com.boris.expert.csvmagic.view.activities
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.ConnectivityManager
@@ -484,6 +485,16 @@ open class BaseActivity : AppCompatActivity() {
                 .setCancelable(false)
                 .setPositiveButton("Ok") { dialog, which ->
                     dialog.dismiss()
+                }
+                .create().show()
+        }
+
+        fun showAlert(context: Context, message: String,listener:DialogInterface.OnClickListener) {
+            MaterialAlertDialogBuilder(context)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("Ok") { dialog, which ->
+                    listener.onClick(dialog,which)
                 }
                 .create().show()
         }

@@ -91,7 +91,7 @@
                 android:textSize="@dimen/largeText"
                 android:imeOptions="actionNext"
                 android:hint="@string/description_text"
-                android:inputType="text" />
+                android:inputType="textMultiLine" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout

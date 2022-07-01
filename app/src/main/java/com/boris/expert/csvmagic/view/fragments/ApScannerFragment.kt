@@ -1,6 +1,8 @@
 package com.boris.expert.csvmagic.view.fragments
 
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -95,7 +97,12 @@ class ApScannerFragment : Fragment() {
                         } else {
                             BaseActivity.showAlert(
                                 requireActivity(),
-                                "${getString(R.string.barcode_data_format_error_text)}\nBarcode Data: ${it.text}"
+                                "${getString(R.string.barcode_data_format_error_text)}\nBarcode Data: ${it.text}",object :DialogInterface.OnClickListener{
+                                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                                        startPreview()
+                                    }
+
+                                }
                             )
                         }
                     }

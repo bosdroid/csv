@@ -3,6 +3,8 @@ package com.boris.expert.csvmagic.view.fragments
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -284,6 +286,17 @@ class ApPriceInputFragment : Fragment() {
             }
 
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val position = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
+        if (position == 0 || position == 1){
+            Handler(Looper.myLooper()!!).postDelayed(Runnable {
+                BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
+                apPriceView.setSelection(apPriceView.text.toString().length)
+            },1000)
+        }
     }
 
     private fun openListWithFieldsDialog(fieldType: String) {

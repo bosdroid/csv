@@ -3,6 +3,8 @@ package com.boris.expert.csvmagic.view.fragments
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -299,6 +301,17 @@ class ApQuantityInputFragment : Fragment() {
 
         })
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val position = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
+        if (position == 0 || position == 1){
+            Handler(Looper.myLooper()!!).postDelayed(Runnable {
+                BaseActivity.showSoftKeyboard(requireActivity(),apQuantityView)
+                apQuantityView.setSelection(apQuantityView.text.toString().length)
+            },1000)
+        }
     }
 
     private fun openListWithFieldsDialog(fieldType: String) {

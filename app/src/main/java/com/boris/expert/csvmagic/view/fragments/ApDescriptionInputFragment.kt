@@ -53,6 +53,7 @@ import kotlin.collections.ArrayList
 
 class ApDescriptionInputFragment : Fragment() {
 
+    private lateinit var apDescriptionSpinner: AppCompatSpinner
     private lateinit var apDescriptionVoiceRecView: LinearLayout
     private lateinit var apDescriptionImageRecView: LinearLayout
     private lateinit var apDescriptionCameraRecView: LinearLayout
@@ -98,7 +99,7 @@ class ApDescriptionInputFragment : Fragment() {
         apDescriptionView  = view.findViewById(R.id.ap_description)
         apDescriptionViewWrapper = view.findViewById<TextInputLayout>(R.id.ap_description_wrapper)
         getDescriptionBtn  = view.findViewById(R.id.get_description_text_view)
-        val apDescriptionSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_description_options_spinner)
+        apDescriptionSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_description_options_spinner)
         apDescriptionListBtn = view.findViewById<MaterialButton>(R.id.ap_description_list_with_fields_btn)
         val apDescriptionDefaultInputBox = view.findViewById<TextInputEditText>(R.id.ap_description_non_changeable_default_text_input)
         apDescriptionDefaultInputWrapper = view.findViewById<TextInputLayout>(R.id.ap_description_non_changeable_default_text_input_wrapper)
@@ -510,6 +511,13 @@ class ApDescriptionInputFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
+        val position = appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
+        if (position == 0 || position == 1){
+            Handler(Looper.myLooper()!!).postDelayed(Runnable {
+                BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
+                apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+            },1000)
+        }
     }
 
     private fun openListWithFieldsDialog(fieldType: String) {
@@ -763,6 +771,8 @@ class ApDescriptionInputFragment : Fragment() {
                 apDescriptionDefaultValueMessage.visibility = View.GONE
                 apDescriptionListSpinner.visibility = View.GONE
                 apDescriptionViewWrapper.visibility = View.VISIBLE
+                appSettings.putInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION", 0)
+                apDescriptionSpinner.setSelection(0,false)
                 dialog.dismiss()
             }
             builder.setMessage("Description already have data, Are you sure you want to erase data?")

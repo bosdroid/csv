@@ -98,6 +98,13 @@ class ApTitleInputFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
+        val position = appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
+        if (position == 0 || position == 1){
+           Handler(Looper.myLooper()!!).postDelayed(Runnable {
+               BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+               apTitleView.setSelection(apTitleView.text.toString().length)
+           },1000)
+        }
     }
 
     private fun initViews(view: View) {
@@ -779,6 +786,8 @@ class ApTitleInputFragment : Fragment() {
                 apTitleDefaultValueMessage.visibility = View.GONE
                 apTitleListSpinner.visibility = View.GONE
                 apTitleViewWrapper.visibility = View.VISIBLE
+                appSettings.putInt("AP_TITLE_SPINNER_SELECTED_POSITION", 0)
+                apTitleSpinner.setSelection(0,false)
                 dialog.dismiss()
             }
             builder.setMessage("Title already have data, Are you sure you want to erase data?")

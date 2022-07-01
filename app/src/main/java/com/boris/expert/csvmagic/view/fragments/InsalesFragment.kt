@@ -97,7 +97,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var productsList = mutableListOf<Product>()
     private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
-    private lateinit var productAdapter: InSalesProductsAdapter
+    private lateinit var productAdapter: InSalesProductsAdapter1
     private var galleryIntentType = 0
     private var currentPhotoPath: String? = null
     private var selectedImageBase64String: String = ""
@@ -272,8 +272,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun resetProductList() {
         productsList.clear()
         productsList.addAll(originalProductsList)
-//        productAdapter.submitList(productsList)
-        productAdapter.notifyItemRangeChanged(0, productsList.size)
+        productAdapter.notifyDataSetChanged()
+//        productAdapter.notifyItemRangeChanged(0, productsList.size)
         productsRecyclerView.smoothScrollToPosition(0)
     }
 
@@ -366,8 +366,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-//                productAdapter.submitList(productsList)
+//                productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
             }
         }
     }
@@ -579,13 +579,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         )
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
-        productAdapter = InSalesProductsAdapter(
-            requireActivity(),
-            productsList as ArrayList<Product>
+        productAdapter = InSalesProductsAdapter1(
+            requireActivity()
         )
+        productAdapter.submitList(productsList)
         productsRecyclerView.isNestedScrollingEnabled = false
         productsRecyclerView.adapter = productAdapter
-        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
+        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter1.OnItemClickListener {
             override fun onItemClick(position: Int) {
 
             }
@@ -1837,8 +1837,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 originalProductsList.addAll(cacheList)
                 originalProductsList.sortByDescending { it.id }
                 productsList.addAll(originalProductsList)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-//                productAdapter.submitList(productsList)
+//                productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
                 Handler(Looper.myLooper()!!).postDelayed({
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
@@ -2509,8 +2509,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             originalProductsList.clear()
                             originalProductsList.addAll(cacheList)
                             productsList.addAll(originalProductsList)
-                            productAdapter.notifyItemRangeChanged(0, productsList.size)
-//                            productAdapter.submitList(productsList)
+//                            productAdapter.notifyItemRangeChanged(0, productsList.size)
+                            productAdapter.submitList(productsList)
                         }
 //                            if (originalProductsList.size > 0) {
 //                                productsList.addAll(originalProductsList)
@@ -2644,12 +2644,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 if (searchBox.text.toString().trim().isNotEmpty()) {
                     searchBox.setText("")
                 }
-                if (productsList.isNotEmpty()) {
-                    productsList.clear()
-                }
-                productsList.addAll(originalProductsList)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                if (productsList.isNotEmpty()) {
+//                    productsList.clear()
+//                }
+//                productsList.clear()
+//                productsList.addAll(originalProductsList)
+//                productAdapter.notifyItemRangeChanged(0, productsList.size)
 //                productAdapter.submitList(productsList)
+                resetProductList()
 
             }
             R.id.insales_products_search_btn -> {
@@ -2823,8 +2825,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                productAdapter.notifyItemRangeChanged(0, productsList.size)
-//                productAdapter.submitList(productsList)
+//                productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.submitList(productsList)
 
             }
         }
@@ -2911,7 +2913,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         private val password: String,
         private val pItem: Product,
         private val position: Int,
-        private val insalesAdapter: InSalesProductsAdapter,
+        private val insalesAdapter: InSalesProductsAdapter1,
         private val viewModel: SalesCustomersViewModel,
         private val listener: ResponseListener
     ) : DialogFragment(), View.OnClickListener {
@@ -6032,6 +6034,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                            stringBuilder.append(title)
 //                            apTitleView.setText(stringBuilder.toString())
                             appSettings.putString("AP_PRODUCT_TITLE", title)
+                            val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
+                            if (currentFragment is ApTitleInputFragment){
+                                currentFragment.updateTestData(title)
+                            }
+
                         }
                     }
 
@@ -6039,6 +6046,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         val description = data.getStringExtra("DESCRIPTION") as String
                         if (description.isNotEmpty()) {
                             appSettings.putString("AP_PRODUCT_DESCRIPTION", description)
+                            val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
+                            if (currentFragment is ApDescriptionInputFragment){
+                                currentFragment.updateTestData(description)
+                            }
 //                            val currentPItemDescription = apDescriptionView.text.toString().trim()
 //                            val stringBuilder = java.lang.StringBuilder()
 //                            stringBuilder.append(currentPItemDescription)

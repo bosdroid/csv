@@ -89,8 +89,8 @@
                     android:maxHeight="300dp"
                     android:gravity="start"
                     android:textSize="@dimen/largeText"
-                    android:inputType="text"
-                    android:imeOptions="actionNext"
+                    android:inputType="textMultiLine"
+                    android:imeOptions="actionNext|flagNavigateNext"
                     android:hint="@string/title_text"
                     />
             </com.google.android.material.textfield.TextInputLayout>

@@ -3,21 +3,28 @@ package com.boris.expert.csvmagic.adapters
 import android.content.Context
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import android.widget.ScrollView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.ProductImages
+import com.boris.expert.csvmagic.utils.ProductDiff
 import com.boris.expert.csvmagic.utils.WrapContentLinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import net.expandable.ExpandableTextView
+import java.util.*
 
-class InSalesProductsAdapter(val context: Context, var productsItems: List<Product>) :
-    RecyclerView.Adapter<InSalesProductsAdapter.ItemViewHolder>() {
+
+class InSalesProductsAdapter1(val context: Context) :
+    ListAdapter<Product, InSalesProductsAdapter1.ItemViewHolder>(ProductDiff()) {
 
 
     interface OnItemClickListener {
@@ -55,11 +62,10 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
     class ItemViewHolder(itemView: View, Listener: OnItemClickListener) :
         RecyclerView.ViewHolder(itemView) {
+
         val productTitle: ExpandableTextView
         val productDescription: ExpandableTextView
         val imagesRecyclerView: RecyclerView
-
-        //        val addImageView:AppCompatImageView
         val editImageView: AppCompatImageView
         val grammarCheckView: AppCompatImageView
         val grammarStatusView: MaterialTextView
@@ -69,20 +75,17 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
         val skuBarcodeView: MaterialTextView
         val collapseExpandImg: AppCompatImageView
         val collapseExpandDescriptionImg: AppCompatImageView
-//        val collapseExpandLayout: LinearLayout
         val insalesItemEditTextview:MaterialTextView
-
-        //        val sliderView:SliderView
-//        val addProductCard: CardView
         val getDescriptionBtn: AppCompatImageView
         val cameraIconView: AppCompatImageView
         val imageIconView: AppCompatImageView
+//        val titleScrollView:ScrollView
+//        val descriptionScrollView:ScrollView
 
         init {
             productTitle = itemView.findViewById(R.id.insales_p_item_title)
             productDescription = itemView.findViewById(R.id.insales_p_item_description)
             imagesRecyclerView = itemView.findViewById(R.id.products_images_recyclerview)
-//            addImageView = itemView.findViewById(R.id.insales_p_item_add_image)
             editImageView = itemView.findViewById(R.id.insales_p_item_edit_image)
             insalesItemEditTextview = itemView.findViewById(R.id.insales_item_edit_textview)
             grammarCheckView = itemView.findViewById(R.id.grammar_check_icon_view)
@@ -91,16 +94,12 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
             skuBarcodeView = itemView.findViewById(R.id.sku_barcode_textview)
             descriptionSizeView = itemView.findViewById(R.id.total_description_size_textview)
             totalImagesView = itemView.findViewById(R.id.total_images_size_textview)
-//            collapseExpandLayout = itemView.findViewById(R.id.collapse_expand_layout)
             collapseExpandImg = itemView.findViewById(R.id.collapse_expand_img)
             collapseExpandDescriptionImg = itemView.findViewById(R.id.collapse_expand_description_img)
-//            sliderView = itemView.findViewById(R.id.imageSlider)
-//            addProductCard = itemView.findViewById(R.id.add_product_card)
             getDescriptionBtn = itemView.findViewById(R.id.get_description_text_view)
             cameraIconView = itemView.findViewById(R.id.insales_item_photo_icon_view)
             imageIconView = itemView.findViewById(R.id.insales_item_image_icon_view)
-
-            //            titleScrollView = itemView.findViewById(R.id.title_scrollbar)
+//            titleScrollView = itemView.findViewById(R.id.title_scrollbar)
 //            descriptionScrollView = itemView.findViewById(R.id.description_scrollbar)
 
 //            titleScrollView.setOnTouchListener(OnTouchListener { v, event -> // Disallow the touch request for parent scroll on touch of child view
@@ -165,15 +164,6 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
         }
     }
 
-    fun updateList(list: List<Product>){
-//        val diffCallback = ProductDiffCallback(productsItems, list)
-//        val diffResult = DiffUtil.calculateDiff(diffCallback)
-//        productsItems.addAll(list)
-//        diffResult.dispatchUpdatesTo(this)
-         productsItems = ArrayList(list)
-        notifyDataSetChanged()
-
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
 
@@ -189,7 +179,7 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
 
-        val item = productsItems[position]
+        val item = getItem(position)
 
         if (item.sku.isEmpty()){
             holder.skuBarcodeView.setText("Sku/Barcode: None")
@@ -197,6 +187,7 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
         else{
             holder.skuBarcodeView.setText("Sku/Barcode: ${item.sku}")
         }
+
         holder.titleSizeView.setText("Title Size: ${item.title.length}")
         holder.descriptionSizeView.setText("Description Size: ${item.fullDesc.length}")
         holder.totalImagesView.setText("Total Images: ${item.productImages!!.size}")
@@ -214,7 +205,7 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
         holder.productTitle.text = item.title
         holder.productTitle.isExpanded = false
-//        holder.productTitle.movementMethod = ScrollingMovementMethod.getInstance()
+        holder.productTitle.movementMethod = ScrollingMovementMethod.getInstance()
 
         if (item.fullDesc.length > 10) {
             holder.productDescription.setBackgroundColor(
@@ -235,12 +226,12 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
         holder.productDescription.text = item.fullDesc
         holder.productDescription.isExpanded = false
-//        holder.productDescription.movementMethod = ScrollingMovementMethod.getInstance()
+        holder.productDescription.movementMethod = ScrollingMovementMethod.getInstance()
 
         holder.imagesRecyclerView.layoutManager =
             WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         holder.imagesRecyclerView.hasFixedSize()
-        val adapter = ProductImagesAdapter(context, item.productImages as java.util.ArrayList<ProductImages>)
+        val adapter = ProductImagesAdapter(context, item.productImages as ArrayList<ProductImages>)
         holder.imagesRecyclerView.adapter = adapter
         adapter.setOnItemClickListener(object : ProductImagesAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -320,18 +311,18 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
 
     }
 
-    override fun getItemCount(): Int {
-        return productsItems.size
-    }
-
-
+//    override fun getItemCount(): Int {
+//        return productsItems.size
+//    }
+//
+//
 //    override fun getItemId(position: Int): Long {
 //        return position.toLong()
 //    }
-
-    override fun getItemViewType(position: Int): Int {
-        return position
-    }
+//
+//    override fun getItemViewType(position: Int): Int {
+//        return position
+//    }
 
 
 }
