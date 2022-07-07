@@ -2773,11 +2773,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     private fun addProduct() {
 
-//        appSettings.remove("AP_PRODUCT_CATEGORY")
-//        appSettings.remove("AP_PRODUCT_TITLE")
-//        appSettings.remove("AP_PRODUCT_DESCRIPTION")
-//        appSettings.remove("AP_PRODUCT_QUANTITY")
-//        appSettings.remove("AP_PRODUCT_PRICE")
 
         AddProductCustomDialog(
             originalCategoriesList,
@@ -3747,6 +3742,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             apPriceActiveListNameView =
                 view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
 
+
             val apTitleCameraRecView = view.findViewById<LinearLayout>(R.id.ap_title_camera_layout)
             val apTitleImageRecView = view.findViewById<LinearLayout>(R.id.ap_title_images_layout)
             val apTitleVoiceRecView = view.findViewById<LinearLayout>(R.id.ap_title_voice_layout)
@@ -3771,6 +3767,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apFirstLayout.visibility = View.GONE
                         apSecondLayout.visibility = View.VISIBLE
                         apNextPreviousButtons.visibility = View.VISIBLE
+
                     } else {
                         quickModeCheckBox.isChecked = false
                         MaterialAlertDialogBuilder(requireActivity())
@@ -3796,6 +3793,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     apSecondLayout.visibility = View.GONE
                     apNextPreviousButtons.visibility = View.GONE
                     apFirstLayout.visibility = View.VISIBLE
+                    apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
+                    apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
+                    apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
+                    apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
                 }
             }
 
@@ -4174,6 +4175,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 override fun afterTextChanged(s: Editable?) {
                     apTitleView.setText(s.toString())
                     appSettings.putString("AP_TITLE_DEFAULT_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_TITLE", s.toString())
                 }
 
             })
@@ -4200,7 +4202,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apTitleDefaultInputBox.setText(apTitleDefaultValue)
                             apTitleView.setText(apTitleDefaultValue)
                         } else {
-                            apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                            apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
                             apTitleView.setSelection(apTitleView.text.toString().length)
                         }
                     } else if (position == 2) {
@@ -4211,7 +4213,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleListBtn.visibility = View.VISIBLE
                         apTitleActiveListNameView.visibility = View.VISIBLE
                         apTitleViewWrapper.visibility = View.GONE
-                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apTitleListId)
@@ -4249,7 +4251,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleViewWrapper.visibility = View.VISIBLE
-                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleVoiceRecView.visibility = View.VISIBLE
                     } else if (position == 4) {
@@ -4260,7 +4262,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleImageRecView.visibility = View.GONE
                         apTitleViewWrapper.visibility = View.VISIBLE
-                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleCameraRecView.visibility = View.VISIBLE
                     } else if (position == 5) {
@@ -4271,7 +4273,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleVoiceRecView.visibility = View.GONE
                         apTitleCameraRecView.visibility = View.GONE
                         apTitleViewWrapper.visibility = View.VISIBLE
-                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                         apTitleImageRecView.visibility = View.VISIBLE
                     } else {
@@ -4283,7 +4285,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apTitleDefaultInputWrapper.visibility = View.GONE
                         apTitleListSpinner.visibility = View.GONE
                         apTitleViewWrapper.visibility = View.VISIBLE
-                        apTitleView.setText(appSettings.getString("AP_TITLE_VALUE"))
+                        apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
                         apTitleView.setSelection(apTitleView.text.toString().length)
                     }
                 }
@@ -4309,7 +4311,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_TITLE_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_TITLE", s.toString())
                 }
 
             })
@@ -4430,6 +4432,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 override fun afterTextChanged(s: Editable?) {
                     apDescriptionView.setText(s.toString())
                     appSettings.putString("AP_DESCRIPTION_DEFAULT_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_DESCRIPTION",s.toString())
                 }
 
             })
@@ -4456,7 +4459,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 apDescriptionDefaultInputBox.setText(apDescriptionDefaultValue)
                                 apDescriptionView.setText(apDescriptionDefaultValue)
                             } else {
-                                apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                                apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
                                 apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                             }
                         } else if (position == 2) {
@@ -4468,7 +4471,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apDescriptionActiveListNameView.visibility = View.VISIBLE
                             apDescriptionViewWrapper.visibility = View.GONE
                             apDescriptionListSpinner.visibility = View.VISIBLE
-                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
                             apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                             val listOptions: String =
                                 tableGenerator.getListValues(apDescriptionListId)
@@ -4506,7 +4509,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apDescriptionCameraRecView.visibility = View.GONE
                             apDescriptionImageRecView.visibility = View.GONE
                             apDescriptionViewWrapper.visibility = View.VISIBLE
-                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
                             apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                             apDescriptionVoiceRecView.visibility = View.VISIBLE
                         } else if (position == 4) {
@@ -4517,7 +4520,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apDescriptionVoiceRecView.visibility = View.GONE
                             apDescriptionImageRecView.visibility = View.GONE
                             apDescriptionViewWrapper.visibility = View.VISIBLE
-                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
                             apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                             apDescriptionCameraRecView.visibility = View.VISIBLE
                         } else if (position == 5) {
@@ -4528,7 +4531,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apDescriptionVoiceRecView.visibility = View.GONE
                             apDescriptionCameraRecView.visibility = View.GONE
                             apDescriptionViewWrapper.visibility = View.VISIBLE
-                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
                             apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                             apDescriptionImageRecView.visibility = View.VISIBLE
                         } else {
@@ -4540,7 +4543,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             apDescriptionDefaultInputWrapper.visibility = View.GONE
                             apDescriptionListSpinner.visibility = View.GONE
                             apDescriptionViewWrapper.visibility = View.VISIBLE
-                            apDescriptionView.setText(appSettings.getString("AP_DESCRIPTION_VALUE"))
+                            apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
                             apDescriptionView.setSelection(apDescriptionView.text.toString().length)
                         }
                     }
@@ -4566,14 +4569,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    appSettings.putString("AP_DESCRIPTION_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_DESCRIPTION", s.toString())
                 }
 
             })
 
             val apQuantitySpinnerSelectedPosition =
                 appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
-            val apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
+            var apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
             val apQuantityListId = appSettings.getInt("AP_QUANTITY_LIST_ID")
             val apQuantityActiveListName = appSettings.getString("AP_QUANTITY_LIST_NAME")
             if (apQuantityActiveListName!!.isEmpty()) {
@@ -4591,8 +4594,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apQuantityActiveListNameView.visibility = View.GONE
                 apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                 apQuantityViewWrapper.visibility = View.VISIBLE
-                apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                apQuantityView.setText(apQuantityDefaultValue)
+                if (apQuantityDefaultValue!!.isNotEmpty()) {
+                    apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                    apQuantityView.setText(apQuantityDefaultValue)
+                } else {
+                    apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
+                    apQuantityView.setSelection(apQuantityView.text.toString().length)
+                }
             } else if (apQuantitySpinnerSelectedPosition == 2) {
                 apQuantityDefaultInputWrapper.visibility = View.GONE
                 apQuantityListBtn.visibility = View.VISIBLE
@@ -4674,18 +4682,19 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                         apQuantityViewWrapper.visibility = View.VISIBLE
+                        apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
                         if (apQuantityDefaultValue!!.isNotEmpty()) {
                             apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
                             apQuantityView.setText(apQuantityDefaultValue)
                         } else {
-                            apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
+                            apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
                             apQuantityView.setSelection(apQuantityView.text.toString().length)
                         }
                     } else if (position == 2) {
                         apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListBtn.visibility = View.VISIBLE
                         apQuantityViewWrapper.visibility = View.GONE
-                        apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
+                        apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
                         apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apQuantityListId)
@@ -4716,7 +4725,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             }
                     } else {
                         apQuantityViewWrapper.visibility = View.VISIBLE
-                        apQuantityView.setText(appSettings.getString("AP_QUANTITY_VALUE"))
+                        apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
                         apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListBtn.visibility = View.GONE
                         apQuantityDefaultInputWrapper.visibility = View.GONE
@@ -4758,7 +4767,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             val apPriceSpinnerSelectedPosition =
                 appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
-            val apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
+            var apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
             val apPriceListId = appSettings.getInt("AP_PRICE_LIST_ID")
             val apPriceActiveListName = appSettings.getString("AP_PRICE_LIST_NAME")
             if (apPriceActiveListName!!.isEmpty()) {
@@ -4776,8 +4785,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apPriceActiveListNameView.visibility = View.GONE
                 apPriceDefaultInputWrapper.visibility = View.VISIBLE
                 apPriceViewWrapper.visibility = View.VISIBLE
-                apPriceDefaultInputBox.setText(apPriceDefaultValue)
-                apPriceView.setText(apPriceDefaultValue)
+                if (apPriceDefaultValue!!.isNotEmpty()) {
+                    apPriceDefaultInputBox.setText(apPriceDefaultValue)
+                    apPriceView.setText(apPriceDefaultValue)
+                }
+                else{
+                    apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
+                    apPriceView.setSelection(apPriceView.text.toString().length)
+                }
             } else if (apPriceSpinnerSelectedPosition == 2) {
                 apPriceDefaultInputWrapper.visibility = View.GONE
                 apPriceListBtn.visibility = View.VISIBLE
@@ -4835,6 +4850,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 override fun afterTextChanged(s: Editable?) {
                     apPriceView.setText(s.toString())
                     appSettings.putString("AP_PRICE_DEFAULT_VALUE", s.toString())
+                    appSettings.putString("AP_PRODUCT_PRICE",s.toString())
                 }
 
             })
@@ -4852,6 +4868,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apPriceListBtn.visibility = View.GONE
                         apPriceDefaultInputWrapper.visibility = View.VISIBLE
                         apPriceViewWrapper.visibility = View.VISIBLE
+                        apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
                         if (apPriceDefaultValue!!.isNotEmpty()) {
                             apPriceDefaultInputBox.setText(apPriceDefaultValue)
                             apPriceView.setText(apPriceDefaultValue)
@@ -5433,7 +5450,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                                 dismiss()
                                                                 listener.onSuccess("")
                                                             },
-                                                            2000
+                                                            6000
                                                         )
                                                     }
                                                 }
@@ -5549,7 +5566,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     Observer { response ->
 
                         if (response != null) {
-                            if (response.get("status").asString == "200") {
+//                            if (response.get("status").asString == "200") {
                                 selectedImageBase64String = ""
                                 selectedInternetImage = ""
 
@@ -5560,13 +5577,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     index++
                                     uploadImages(productId, listImages, responseListener)
                                 }
-                            } else {
-                                BaseActivity.dismiss()
-                                BaseActivity.showAlert(
-                                    requireActivity(),
-                                    response.get("message").asString
-                                )
-                            }
+//                            } else {
+//                                BaseActivity.dismiss()
+//                                BaseActivity.showAlert(
+//                                    requireActivity(),
+//                                    response.get("message").asString
+//                                )
+//                            }
                         } else {
                             BaseActivity.dismiss()
                             BaseActivity.showAlert(

@@ -80,7 +80,7 @@ class ApPriceInputFragment : Fragment() {
         apPriceListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_price_list_spinner)
         apPriceActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_price_active_list_name)
         val apPriceSpinnerSelectedPosition = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
-        val apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
+        var apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
         val apPriceListId = appSettings.getInt("AP_PRICE_LIST_ID")
         val apPriceActiveListName = appSettings.getString("AP_PRICE_LIST_NAME")
         if (apPriceActiveListName!!.isEmpty()){
@@ -101,8 +101,15 @@ class ApPriceInputFragment : Fragment() {
                 apPriceDefaultInputWrapper.visibility = View.VISIBLE
                 apPriceDefaultValueMessage.visibility = View.VISIBLE
                 apPriceViewWrapper.visibility = View.VISIBLE
-                apPriceDefaultInputBox.setText(apPriceDefaultValue)
-                apPriceView.setText(apPriceDefaultValue)
+
+                if (apPriceDefaultValue!!.isNotEmpty()) {
+                    apPriceDefaultInputBox.setText(apPriceDefaultValue)
+                    apPriceView.setText(apPriceDefaultValue)
+                }
+                else{
+                    apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
+                    apPriceView.setSelection(apPriceView.text.toString().length)
+                }
 //                BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
             }
             2 -> {
@@ -202,8 +209,14 @@ class ApPriceInputFragment : Fragment() {
                         apPriceDefaultInputWrapper.visibility = View.VISIBLE
                         apPriceDefaultValueMessage.visibility = View.VISIBLE
                         apPriceViewWrapper.visibility = View.VISIBLE
-                        apPriceDefaultInputBox.setText(apPriceDefaultValue)
-                        apPriceView.setText(apPriceDefaultValue)
+                        apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
+                        if (apPriceDefaultValue!!.isNotEmpty()) {
+                            apPriceDefaultInputBox.setText(apPriceDefaultValue)
+                            apPriceView.setText(apPriceDefaultValue)
+                        } else {
+                            apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
+                            apPriceView.setSelection(apPriceView.text.toString().length)
+                        }
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
                     }
                     2 -> {
@@ -290,6 +303,7 @@ class ApPriceInputFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
         val position = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
             Handler(Looper.myLooper()!!).postDelayed(Runnable {

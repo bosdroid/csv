@@ -550,7 +550,7 @@ class ApImageUploadFragment : Fragment() {
                                                                     requireActivity()
                                                                 ).sendBroadcast(intent)
                                                             },
-                                                            2000
+                                                            6000
                                                         )
                                                     }
                                                 }
@@ -613,7 +613,7 @@ class ApImageUploadFragment : Fragment() {
                                             LocalBroadcastManager.getInstance(requireActivity())
                                                 .sendBroadcast(intent)
 
-                                        }, 2000)
+                                        }, 3000)
                                     }
 
                                 } else {
@@ -746,7 +746,7 @@ class ApImageUploadFragment : Fragment() {
                 requireActivity(),
                 Observer { response ->
                     if (response != null) {
-                        if (response.get("status").asString == "200") {
+//                        if (response.get("status").asString == "200") {
                             selectedImageBase64String = ""
                             selectedInternetImage = ""
 
@@ -758,13 +758,13 @@ class ApImageUploadFragment : Fragment() {
                                 index++
                                 uploadImages(productId,listImages,responseListener)
                             }
-                        } else {
-                            BaseActivity.dismiss()
-                            BaseActivity.showAlert(
-                                requireActivity(),
-                                response.get("message").asString
-                            )
-                        }
+//                        } else {
+//                            BaseActivity.dismiss()
+//                            BaseActivity.showAlert(
+//                                requireActivity(),
+//                                response.get("message").asString
+//                            )
+//                        }
                     } else {
                         BaseActivity.dismiss()
                         BaseActivity.showAlert(

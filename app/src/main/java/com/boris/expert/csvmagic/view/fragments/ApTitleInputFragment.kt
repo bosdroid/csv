@@ -11,10 +11,8 @@ import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.View.OnTouchListener
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -26,7 +24,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,7 +33,6 @@ import com.boris.expert.csvmagic.adapters.FieldListsAdapter
 import com.boris.expert.csvmagic.model.ListItem
 import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.activities.*
-import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.boris.expert.csvmagic.viewmodel.SharedViewModel
 import com.boris.expert.csvmagic.viewmodelfactory.ViewModelFactory
 import com.google.android.material.button.MaterialButton
@@ -48,7 +44,6 @@ import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ApTitleInputFragment : Fragment() {
@@ -101,9 +96,9 @@ class ApTitleInputFragment : Fragment() {
         val position = appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
            Handler(Looper.myLooper()!!).postDelayed(Runnable {
-               BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+               BaseActivity.showSoftKeyboard(requireActivity(), apTitleView)
                apTitleView.setSelection(apTitleView.text.toString().length)
-           },1000)
+           }, 1000)
         }
     }
 
@@ -154,13 +149,23 @@ class ApTitleInputFragment : Fragment() {
 
         })
 
-        apTitleView.setOnEditorActionListener(object:TextView.OnEditorActionListener{
+        apTitleView.setOnTouchListener(OnTouchListener { v, event ->
+            if (v.id == R.id.ap_title) {
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                when (event.action and MotionEvent.ACTION_MASK) {
+                    MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                }
+            }
+            false
+        })
+
+        apTitleView.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                if (actionId == EditorInfo.IME_ACTION_NEXT){
-                    BaseActivity.hideSoftKeyboard(requireActivity(),apTitleView)
+                if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                    BaseActivity.hideSoftKeyboard(requireActivity(), apTitleView)
                     val intent = Intent("move-next")
                     LocalBroadcastManager.getInstance(requireActivity())
-                        .sendBroadcast(intent)
+                            .sendBroadcast(intent)
                 }
                 return false
             }
@@ -224,9 +229,9 @@ class ApTitleInputFragment : Fragment() {
             val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
             if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
-                voiceLanguageSpinner.setSelection(0,false)
+                voiceLanguageSpinner.setSelection(0, false)
             } else {
-                voiceLanguageSpinner.setSelection(1,false)
+                voiceLanguageSpinner.setSelection(1, false)
             }
 
             voiceLanguageSpinner.onItemSelectedListener =
@@ -397,13 +402,13 @@ class ApTitleInputFragment : Fragment() {
             }
 
         })
-        apTitleDefaultInputBox.setOnEditorActionListener(object :TextView.OnEditorActionListener{
+        apTitleDefaultInputBox.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                if (actionId == EditorInfo.IME_ACTION_DONE){
-                    BaseActivity.hideSoftKeyboard(requireActivity(),apTitleDefaultInputBox)
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    BaseActivity.hideSoftKeyboard(requireActivity(), apTitleDefaultInputBox)
                     val intent = Intent("move-next")
                     LocalBroadcastManager.getInstance(requireActivity())
-                        .sendBroadcast(intent)
+                            .sendBroadcast(intent)
                 }
                 return false
             }
@@ -675,7 +680,7 @@ class ApTitleInputFragment : Fragment() {
                             stringBuilder.append(currentPItemDescription)
                             stringBuilder.append(title)
                             apTitleView.setText(stringBuilder.toString())
-                            appSettings.putString("AP_PRODUCT_TITLE",apTitleView.text.toString().trim())
+                            appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString().trim())
 
                         }
                     }
@@ -768,14 +773,14 @@ class ApTitleInputFragment : Fragment() {
                 }
             }
 
-    fun updateTestData(text:String){
+    fun updateTestData(text: String){
         if (appSettings.getString("AP_PRODUCT_TITLE")!!.isNotEmpty()){
             val builder = MaterialAlertDialogBuilder(requireActivity())
             builder.setCancelable(false)
-            builder.setNegativeButton(requireActivity().resources.getString(R.string.cancel_text)){dialog,which->
+            builder.setNegativeButton(requireActivity().resources.getString(R.string.cancel_text)){ dialog, which->
                 dialog.dismiss()
             }
-            builder.setPositiveButton(requireActivity().resources.getString(R.string.erase)){dialog,which->
+            builder.setPositiveButton(requireActivity().resources.getString(R.string.erase)){ dialog, which->
                 apTitleView.setText(text)
                 apTitleVoiceRecView.visibility = View.GONE
                 apTitleCameraRecView.visibility = View.GONE
@@ -787,7 +792,7 @@ class ApTitleInputFragment : Fragment() {
                 apTitleListSpinner.visibility = View.GONE
                 apTitleViewWrapper.visibility = View.VISIBLE
                 appSettings.putInt("AP_TITLE_SPINNER_SELECTED_POSITION", 0)
-                apTitleSpinner.setSelection(0,false)
+                apTitleSpinner.setSelection(0, false)
                 dialog.dismiss()
             }
             builder.setMessage("Title already have data, Are you sure you want to erase data?")

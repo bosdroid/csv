@@ -81,7 +81,7 @@ class ApQuantityInputFragment : Fragment() {
         apQuantityListSpinner = view.findViewById<AppCompatSpinner>(R.id.ap_quantity_list_spinner)
         apQuantityActiveListNameView = view.findViewById<MaterialTextView>(R.id.ap_quantity_active_list_name)
         val apQuantitySpinnerSelectedPosition = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
-        val apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
+        var apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
         val apQuantityListId = appSettings.getInt("AP_QUANTITY_LIST_ID")
         val apQuantityActiveListName = appSettings.getString("AP_QUANTITY_LIST_NAME")
         if (apQuantityActiveListName!!.isEmpty()){
@@ -102,8 +102,13 @@ class ApQuantityInputFragment : Fragment() {
                 apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                 apQuantityDefaultValueMessage.visibility = View.VISIBLE
                 apQuantityViewWrapper.visibility = View.VISIBLE
-                apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                apQuantityView.setText(apQuantityDefaultValue)
+                if (apQuantityDefaultValue!!.isNotEmpty()) {
+                    apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                    apQuantityView.setText(apQuantityDefaultValue)
+                } else {
+                    apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
+                    apQuantityView.setSelection(apQuantityView.text.toString().length)
+                }
 //                BaseActivity.showSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
             }
             2 -> {
@@ -209,8 +214,14 @@ class ApQuantityInputFragment : Fragment() {
                         apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                         apQuantityDefaultValueMessage.visibility = View.VISIBLE
                         apQuantityViewWrapper.visibility = View.VISIBLE
-                        apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
-                        apQuantityView.setText(apQuantityDefaultValue)
+                        apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
+                        if (apQuantityDefaultValue!!.isNotEmpty()) {
+                            apQuantityDefaultInputBox.setText(apQuantityDefaultValue)
+                            apQuantityView.setText(apQuantityDefaultValue)
+                        } else {
+                            apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
+                            apQuantityView.setSelection(apQuantityView.text.toString().length)
+                        }
 //                        BaseActivity.showSoftKeyboard(requireActivity(),apQuantityDefaultInputBox)
                     }
                     2 -> {
@@ -305,6 +316,7 @@ class ApQuantityInputFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
         val position = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
             Handler(Looper.myLooper()!!).postDelayed(Runnable {

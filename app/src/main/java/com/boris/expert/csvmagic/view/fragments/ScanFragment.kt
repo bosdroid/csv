@@ -358,7 +358,9 @@ class ScanFragment : Fragment(), TablesDataAdapter.OnItemClickListener,
     }
 
     private fun displayTableData() {
-
+        if (tableMainLayout.childCount > 0){
+            tableMainLayout.removeAllViews()
+        }
         val columns = tableGenerator.getTableColumns(tableName)
         val tableHeaders = TableRow(context)
         tableHeaders.weightSum = columns!!.size * 2F

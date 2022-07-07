@@ -88,6 +88,7 @@
                     android:layout_height="300dp"
                     android:maxHeight="300dp"
                     android:gravity="start"
+                    android:isScrollContainer="true"
                     android:textSize="@dimen/largeText"
                     android:inputType="textMultiLine"
                     android:imeOptions="actionNext"

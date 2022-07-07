@@ -11,11 +11,8 @@ import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.KeyEvent
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -224,6 +221,16 @@ class ApDescriptionInputFragment : Fragment() {
 
             }
 
+        })
+
+        apDescriptionView.setOnTouchListener(View.OnTouchListener { v, event ->
+            if (v.id == R.id.ap_description) {
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                when (event.action and MotionEvent.ACTION_MASK) {
+                    MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                }
+            }
+            false
         })
 
         apDescriptionView.setOnEditorActionListener(object:TextView.OnEditorActionListener{

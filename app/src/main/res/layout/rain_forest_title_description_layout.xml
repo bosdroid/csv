@@ -17,6 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/defaultDpMargin"
         android:src="@drawable/ic_close"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
