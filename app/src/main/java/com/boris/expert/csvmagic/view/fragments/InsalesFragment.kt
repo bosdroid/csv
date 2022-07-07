@@ -2498,20 +2498,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )
-                            originalProductsList.sortByDescending { it.id }
-                            Paper.book().write(Constants.cacheProducts, originalProductsList)
-                            currentTotalProducts = originalProductsList.size
                         }
+                        originalProductsList.sortByDescending { it.id }
+                        Paper.book().write(Constants.cacheProducts, originalProductsList)
+                        currentTotalProducts = originalProductsList.size
                         BaseActivity.dismiss()
-                        val cacheList: ArrayList<Product>? =
-                            Paper.book().read(Constants.cacheProducts)
-                        if (cacheList != null && cacheList.size > 0) {
-                            originalProductsList.clear()
-                            originalProductsList.addAll(cacheList)
+//                        val cacheList: ArrayList<Product>? =
+//                            Paper.book().read(Constants.cacheProducts)
+//                        if (cacheList != null && cacheList.size > 0) {
+//                            originalProductsList.addAll(cacheList)
                             productsList.addAll(originalProductsList)
 //                            productAdapter.notifyItemRangeChanged(0, productsList.size)
-                            productAdapter.submitList(productsList)
-                        }
+//                            productAdapter.submitList(productsList)
+                        productAdapter.notifyDataSetChanged()
+//                        }
 //                            if (originalProductsList.size > 0) {
 //                                productsList.addAll(originalProductsList)
 //                                adapter.notifyItemRangeChanged(0, productsList.size)
