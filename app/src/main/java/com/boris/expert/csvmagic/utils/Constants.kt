@@ -1,6 +1,5 @@
 package com.boris.expert.csvmagic.utils
 
-import android.R.string
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -11,16 +10,15 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
+import androidx.work.*
 import com.boris.expert.csvmagic.R
-import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.interfaces.FirebaseStorageCallback
 import com.boris.expert.csvmagic.interfaces.OnCompleteAction
 import com.boris.expert.csvmagic.model.Product
 import com.boris.expert.csvmagic.model.QRTypes
 import com.boris.expert.csvmagic.model.Sheet
 import com.boris.expert.csvmagic.model.User
+import com.boris.expert.csvmagic.services.ImageUploadService
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -118,6 +116,8 @@ class Constants {
         var listUpdateFlag = 0
         var barcodeImageList = mutableListOf<String>()
         var multiImagesList = mutableListOf<String>()
+        const val channelId:String = "101010"
+        const val channelName:String = "CSV Magic"
 
 
         private fun getBackgroundImageFolderFile(context: Context): File {
@@ -149,6 +149,7 @@ class Constants {
             return tempStr
         }
 
+
         private fun verifyValidSignature(signedData: String, signature: String): Boolean {
             return try {
                 // To get key go to Developer Console > Select your app > Development Tools > Services & APIs.
@@ -157,6 +158,22 @@ class Constants {
             } catch (e: IOException) {
                 false
             }
+        }
+
+        fun startImageUploadService(productId:Int,imagesList:String,type:String){
+            val inputData = Data.Builder()
+                .putInt("pId", productId)
+                .putString("imageList", imagesList)
+                .putString("type", type)
+                .build()
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+            val imageWorker: WorkRequest = OneTimeWorkRequest.Builder(ImageUploadService::class.java)
+                .setInputData(inputData)
+                .setConstraints(constraints)
+                .build()
+            WorkManager.getInstance().enqueue(imageWorker)
         }
 
         fun calculateDays(createdAt: Long, expiredAtx: Long): Int {

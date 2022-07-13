@@ -70,6 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/CardView.Light"
+                android:visibility="gone"
                 >
 
                 <LinearLayout
@@ -217,37 +218,52 @@
             </androidx.cardview.widget.CardView>
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/defaultDpMargin">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    >
+                     <androidx.appcompat.widget.AppCompatImageView
+                         android:layout_width="100dp"
+                         android:layout_height="100dp"
+                         android:src="@drawable/placeholder"
+                         android:scaleType="fitCenter"
+                         android:id="@+id/insales_p_item_image_view"
+                         />
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:text="@string/product_title_text"
-                        android:textSize="@dimen/mediumText"
-                        android:layout_marginTop="@dimen/defaultDpMargin"
-                        android:layout_marginStart="@dimen/defaultDpMargin"
-                        />
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_margin="@dimen/defaultDpMargin"
-                        >
+                        android:layout_weight="1"
+                        android:layout_marginEnd="@dimen/defaultDpMargin"
+                        android:orientation="vertical">
 
-<!--                        <ScrollView-->
-<!--                            android:layout_width="0dp"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_weight="1"-->
-<!--                            android:id="@+id/title_scrollbar"-->
-<!--                            android:fillViewport="true"-->
-<!--                            >-->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:text="@string/product_title_text"
+                            android:visibility="gone"
+                            android:textSize="@dimen/mediumText"
+                            android:layout_marginTop="@dimen/defaultDpMargin"
+                            android:layout_marginStart="@dimen/defaultDpMargin"
+                            />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_margin="@dimen/defaultDpMargin"
+                            >
+
+                            <!--                        <ScrollView-->
+                            <!--                            android:layout_width="0dp"-->
+                            <!--                            android:layout_height="wrap_content"-->
+                            <!--                            android:layout_weight="1"-->
+                            <!--                            android:id="@+id/title_scrollbar"-->
+                            <!--                            android:fillViewport="true"-->
+                            <!--                            >-->
                             <net.expandable.ExpandableTextView
                                 android:id="@+id/insales_p_item_title"
                                 android:layout_width="0dp"
@@ -255,79 +271,123 @@
                                 android:layout_weight="1"
                                 android:layout_gravity="center"
                                 android:textColor="@color/black"
-                                app:collapse_lines="2"
+                                app:collapse_lines="1"
                                 android:textSize="@dimen/largeText" />
-<!--                        </ScrollView>-->
+                            <!--                        </ScrollView>-->
 
 
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:id="@+id/collapse_expand_img"
-                            android:src="@drawable/ic_arrow_down"
-                            />
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:id="@+id/collapse_expand_img"
+                                android:src="@drawable/ic_arrow_down"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_margin="@dimen/defaultDpMargin"
+                            >
+                            <!--                        <ScrollView-->
+                            <!--                            android:layout_width="0dp"-->
+                            <!--                            android:layout_height="wrap_content"-->
+                            <!--                            android:layout_weight="1"-->
+                            <!--                            android:id="@+id/description_scrollbar"-->
+                            <!--                            android:fillViewport="true"-->
+                            <!--                            >-->
+                            <net.expandable.ExpandableTextView
+                                android:id="@+id/insales_p_item_description"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:collapse_lines="1"
+                                android:scrollbars="vertical"
+                                android:layout_gravity="center"
+                                android:textColor="@color/black"
+                                android:textSize="@dimen/largeText" />
+                            <!--                        </ScrollView>-->
+
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:id="@+id/collapse_expand_description_img"
+                                android:src="@drawable/ic_arrow_down"
+                                />
+                        </LinearLayout>
                     </LinearLayout>
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/insales_p_item_edit_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/defaultDpMargin"
+                        android:src="@drawable/ic_edit"
+                        app:tint="@color/primary_positive_color" />
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/defaultDpMargin">
+<!--            <androidx.cardview.widget.CardView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="@dimen/defaultDpMargin">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="vertical">-->
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:text="@string/description_text"
-                        android:textSize="@dimen/mediumText"
-                        android:layout_marginTop="@dimen/defaultDpMargin"
-                        android:layout_marginStart="@dimen/defaultDpMargin"
-                        />
+<!--                    <com.google.android.material.textview.MaterialTextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:textColor="@color/black"-->
+<!--                        android:text="@string/description_text"-->
+<!--                        android:textSize="@dimen/mediumText"-->
+<!--                        android:visibility="gone"-->
+<!--                        android:layout_marginTop="@dimen/defaultDpMargin"-->
+<!--                        android:layout_marginStart="@dimen/defaultDpMargin"-->
+<!--                        />-->
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_margin="@dimen/defaultDpMargin"
-                        >
-<!--                        <ScrollView-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_margin="@dimen/defaultDpMargin"-->
+<!--                        >-->
+<!--&lt;!&ndash;                        <ScrollView&ndash;&gt;-->
+<!--&lt;!&ndash;                            android:layout_width="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                            android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                            android:layout_weight="1"&ndash;&gt;-->
+<!--&lt;!&ndash;                            android:id="@+id/description_scrollbar"&ndash;&gt;-->
+<!--&lt;!&ndash;                            android:fillViewport="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                            >&ndash;&gt;-->
+<!--                        <net.expandable.ExpandableTextView-->
+<!--                            android:id="@+id/insales_p_item_description"-->
 <!--                            android:layout_width="0dp"-->
 <!--                            android:layout_height="wrap_content"-->
 <!--                            android:layout_weight="1"-->
-<!--                            android:id="@+id/description_scrollbar"-->
-<!--                            android:fillViewport="true"-->
-<!--                            >-->
-                        <net.expandable.ExpandableTextView
-                            android:id="@+id/insales_p_item_description"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            app:collapse_lines="3"
-                            android:scrollbars="vertical"
-                            android:layout_gravity="center"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/largeText" />
-<!--                        </ScrollView>-->
+<!--                            app:collapse_lines="3"-->
+<!--                            android:scrollbars="vertical"-->
+<!--                            android:layout_gravity="center"-->
+<!--                            android:textColor="@color/black"-->
+<!--                            android:textSize="@dimen/largeText" />-->
+<!--&lt;!&ndash;                        </ScrollView>&ndash;&gt;-->
 
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:id="@+id/collapse_expand_description_img"
-                            android:src="@drawable/ic_arrow_down"
-                            />
-                    </LinearLayout>
-                </LinearLayout>
+<!--                        <androidx.appcompat.widget.AppCompatImageView-->
+<!--                            android:layout_width="36dp"-->
+<!--                            android:layout_height="36dp"-->
+<!--                            android:id="@+id/collapse_expand_description_img"-->
+<!--                            android:src="@drawable/ic_arrow_down"-->
+<!--                            />-->
+<!--                    </LinearLayout>-->
+<!--                </LinearLayout>-->
 
-            </androidx.cardview.widget.CardView>
+<!--            </androidx.cardview.widget.CardView>-->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_marginTop="@dimen/defaultDpMargin">
 
                 <LinearLayout
@@ -355,6 +415,7 @@
                                 android:elevation="8dp"
                                 android:layout_marginStart="@dimen/defaultDpMargin"
                                 android:gravity="center_vertical"
+                                android:visibility="invisible"
                                 android:orientation="horizontal">
 
                                 <com.google.android.material.textview.MaterialTextView
@@ -366,7 +427,7 @@
                                     android:textSize="@dimen/largeText" />
 
                                 <androidx.appcompat.widget.AppCompatImageView
-                                    android:id="@+id/insales_p_item_edit_image"
+                                    android:id="@+id/insales_pp_item_edit_image"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center"

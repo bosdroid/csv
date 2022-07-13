@@ -564,6 +564,7 @@
     <string name="barcode_reader_text">Barcode Reader</string>
     <string name="erase">Erase</string>
     <string name="quick_edit_hint_text">Click on any word for quick edit.</string>
+    <string name="list_text">List</string>
 
     <string-array name="features_keys">
         <item>compressor_feature</item>

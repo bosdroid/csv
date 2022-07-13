@@ -161,6 +161,12 @@ dependencies {
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
 
+
+    def work_version = "2.7.1"
+
+    // WORKER LIBRARY
+    implementation("androidx.work:work-runtime-ktx:$work_version")
+
     // COLOR PICKER LIBRARY
     implementation 'com.github.duanhong169:colorpicker:1.1.6'
 

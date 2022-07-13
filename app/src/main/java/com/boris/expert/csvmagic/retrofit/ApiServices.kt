@@ -35,46 +35,102 @@ interface ApiServices {
 
     @GET("service/purchase/verify/{packageName}/{productId}/{token}")
     fun purchase(
-            @Path("packageName") packageName: String,
-            @Path("productId") productId: String,
-            @Path("token") token: String
+        @Path("packageName") packageName: String,
+        @Path("productId") productId: String,
+        @Path("token") token: String
     ): Call<JsonObject>
 
 
     @FormUrlEncoded
     @POST("insales/login.php")
-    fun salesLoginAccount(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
+    fun salesLoginAccount(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String
+    ): Call<JsonObject>
 
     @FormUrlEncoded
     @POST("insales/products.php")
-    fun salesProducts(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String,@Field("page") page:Int): Call<JsonObject>
+    fun salesProducts(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("page") page: Int
+    ): Call<JsonObject>
+
 
     @FormUrlEncoded
     @POST("insales/update_image.php")
-    fun updateProductImage(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("image") image:String, @Field("p_id") pId:Int, @Field("image_position") position:Int, @Field("image_id") imageId:Int, @Field("file_name") fileName:String): Call<JsonObject>
+    fun updateProductImage(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("image") image: String,
+        @Field("p_id") pId: Int,
+        @Field("image_position") position: Int,
+        @Field("image_id") imageId: Int,
+        @Field("file_name") fileName: String
+    ): Call<JsonObject>
+
 
     @FormUrlEncoded
     @POST("insales/add_image.php")
-    fun addProductImage(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String,@Field("image") image:String,@Field("p_id") pId:Int,@Field("file_name") fileName:String,@Field("src") src:String): Call<JsonObject>
+    fun addProductImage(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("image") image: String,
+        @Field("p_id") pId: Int,
+        @Field("file_name") fileName: String,
+        @Field("src") src: String
+    ): Call<JsonObject>
 
 
     @POST("")
-    fun updateProductImage(@Url url:String,@Body body: JSONObject): Call<JsonObject>
+    fun updateProductImage(@Url url: String, @Body body: JSONObject): Call<JsonObject>
 
     @FormUrlEncoded
     @POST("insales/remove_image.php")
-    fun removeProductImage(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("image_id") imageId:Int): Call<JsonObject>
+    fun removeProductImage(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("p_id") pId: Int,
+        @Field("image_id") imageId: Int
+    ): Call<JsonObject>
 
     @FormUrlEncoded
     @POST("insales/update_product.php")
-    fun updateProductDetail(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("p_id") pId:Int, @Field("title") title:String, @Field("short_desc") shortDesc:String, @Field("full_desc") fullDesc:String): Call<JsonObject>
+    fun updateProductDetail(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("p_id") pId: Int,
+        @Field("title") title: String,
+        @Field("short_desc") shortDesc: String,
+        @Field("full_desc") fullDesc: String
+    ): Call<JsonObject>
 
     @FormUrlEncoded
     @POST("insales/categories.php")
-    fun categories(@Field("email") email: String,@Field("password") password:String,@Field("shop_name") shopName:String): Call<JsonObject>
+    fun categories(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String
+    ): Call<JsonObject>
 
     @FormUrlEncoded
     @POST("insales/add_product.php")
-    fun addProduct(@Field("email") email: String, @Field("password") password:String, @Field("shop_name") shopName:String, @Field("category_id") cId:Int, @Field("title") title:String, @Field("description") desc:String, @Field("quantity") quantity:String, @Field("price") price:String,@Field("barcode") barcode:String): Call<JsonObject>
+    fun addProduct(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("category_id") cId: Int,
+        @Field("title") title: String,
+        @Field("description") desc: String,
+        @Field("quantity") quantity: String,
+        @Field("price") price: String,
+        @Field("barcode") barcode: String
+    ): Call<JsonObject>
 
 }

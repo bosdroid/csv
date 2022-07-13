@@ -532,30 +532,32 @@ class ApImageUploadFragment : Fragment() {
 
                                     if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
-                                        BaseActivity.startLoading(requireActivity())
-                                        uploadImages(
-                                            productId,
-                                            multiImagesList,
-                                            object : ResponseListener {
-                                                override fun onSuccess(result: String) {
-                                                    if (result.contains("success")) {
-                                                        resetFieldValues()
-                                                        Handler(Looper.myLooper()!!).postDelayed(
-                                                            {
-                                                                BaseActivity.dismiss()
+                                        Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_product")
+                                        multiImagesList.clear()
+//                                        BaseActivity.startLoading(requireActivity())
+//                                        uploadImages(
+//                                            productId,
+//                                            multiImagesList,
+//                                            object : ResponseListener {
+//                                                override fun onSuccess(result: String) {
+//                                                    if (result.contains("success")) {
+//                                                        resetFieldValues()
+//                                                        Handler(Looper.myLooper()!!).postDelayed(
+//                                                            {
+//                                                                BaseActivity.dismiss()
                                                                 creditCharged()
                                                                 val intent =
                                                                     Intent("dialog-dismiss")
                                                                 LocalBroadcastManager.getInstance(
                                                                     requireActivity()
                                                                 ).sendBroadcast(intent)
-                                                            },
-                                                            6000
-                                                        )
-                                                    }
-                                                }
-
-                                            })
+//                                                            },
+//                                                            6000
+//                                                        )
+//                                                    }
+//                                                }
+//
+//                                            })
 //                                        viewModel.callAddProductImage(
 //                                            requireActivity(),
 //                                            shopName,

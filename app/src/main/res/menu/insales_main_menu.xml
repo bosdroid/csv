@@ -12,10 +12,10 @@
         />
 
     <item
-        android:title="@string/filter_text"
-        android:id="@+id/insales_data_filter"
+        android:title="@string/list_text"
+        android:id="@+id/insales_list_type"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_filter"
+        android:icon="@drawable/ic_minimal_list"
         app:iconTint="@color/primary_positive_color"
         android:visible="false"
         />

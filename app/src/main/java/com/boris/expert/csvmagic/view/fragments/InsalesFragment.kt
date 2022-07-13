@@ -109,11 +109,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var userCurrentCredits = ""
     private var menu: Menu? = null
     private lateinit var searchResetBtn: MaterialTextView
+    private lateinit var searchEditText: TextInputEditText
     private lateinit var searchBox: TextInputEditText
     private lateinit var searchImageBtn: ImageButton
+    private lateinit var filterImageBtn: ImageButton
     private var currentPage = 1
     private var currentTotalProducts = 0
     private lateinit var linearLayoutManager: WrapContentLinearLayoutManager
+    private var productViewListType = 0
     private var dialogStatus = 0
     private var originalCategoriesList = mutableListOf<Category>()
     private var categoriesList = mutableListOf<Category>()
@@ -195,68 +198,84 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
                 .create().show()
             true
-        } else if (item.itemId == R.id.insales_data_filter) {
-            if (originalCategoriesList.size == 0) {
-                viewModel.callCategories(requireActivity(), shopName, email, password)
-                viewModel.getCategoriesResponse().observe(this, Observer { response ->
-                    if (response != null) {
-                        if (response.get("status").asString == "200") {
-                            val categories = response.get("categories").asJsonArray
-                            if (categories.size() > 0) {
-                                if (categoriesList.isNotEmpty()) {
-                                    categoriesList.clear()
-                                }
-                                for (i in 0 until categories.size()) {
-                                    val category = categories[i].asJsonObject
-                                    originalCategoriesList.add(
-                                        Category(
-                                            category.get("title").asString,
-                                            category.get("id").asInt
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
-                })
-            } else {
-                if (categoriesList.isNotEmpty()) {
-                    categoriesList.clear()
-                }
-                categoriesList.addAll(originalCategoriesList)
+        } else if (item.itemId == R.id.insales_list_type) {
+            productViewListType = appSettings.getInt("PRODUCT_VIEW_LIST_TYPE")
+            if (productViewListType == 0){
+                menu!!.findItem(R.id.insales_list_type).setIcon(R.drawable.ic_minimal_list)
+                productViewListType = 1
+                productAdapter.updateListType(productViewListType)
+                productAdapter.notifyDataSetChanged()
+                appSettings.putInt("PRODUCT_VIEW_LIST_TYPE",1)
+
             }
-
-            val builder = MaterialAlertDialogBuilder(requireActivity())
-            builder.setCancelable(false)
-            builder.setTitle(getString(R.string.sorting_heading_text))
-            builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
-                dialog.dismiss()
+            else{
+                menu!!.findItem(R.id.insales_list_type).setIcon(R.drawable.ic_normal_list)
+                productViewListType = 0
+                productAdapter.updateListType(productViewListType)
+                productAdapter.notifyDataSetChanged()
+                appSettings.putInt("PRODUCT_VIEW_LIST_TYPE",0)
             }
-
-            val arrayAdapter =
-                ArrayAdapter(
-                    requireActivity(),
-                    android.R.layout.select_dialog_item,
-                    BaseActivity.getSortingList(requireActivity())
-                )
-            builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface?, which: Int) {
-                    dialog!!.dismiss()
-                    if (which == 0) {
-                        resetProductList()
-                    } else if (which == 3) {
-                        displayCategoryFilterDialog(categoriesList)
-                    } else if (which == 4) {
-                        displayErrorItems()
-                    } else {
-                        sorting(which)
-                    }
-
-                }
-
-            })
-            val alert = builder.create()
-            alert.show()
+//            if (originalCategoriesList.size == 0) {
+//                viewModel.callCategories(requireActivity(), shopName, email, password)
+//                viewModel.getCategoriesResponse().observe(this, Observer { response ->
+//                    if (response != null) {
+//                        if (response.get("status").asString == "200") {
+//                            val categories = response.get("categories").asJsonArray
+//                            if (categories.size() > 0) {
+//                                if (categoriesList.isNotEmpty()) {
+//                                    categoriesList.clear()
+//                                }
+//                                for (i in 0 until categories.size()) {
+//                                    val category = categories[i].asJsonObject
+//                                    originalCategoriesList.add(
+//                                        Category(
+//                                            category.get("title").asString,
+//                                            category.get("id").asInt
+//                                        )
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                })
+//            } else {
+//                if (categoriesList.isNotEmpty()) {
+//                    categoriesList.clear()
+//                }
+//                categoriesList.addAll(originalCategoriesList)
+//            }
+//
+//            val builder = MaterialAlertDialogBuilder(requireActivity())
+//            builder.setCancelable(false)
+//            builder.setTitle(getString(R.string.sorting_heading_text))
+//            builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+//                dialog.dismiss()
+//            }
+//
+//            val arrayAdapter =
+//                ArrayAdapter(
+//                    requireActivity(),
+//                    android.R.layout.select_dialog_item,
+//                    BaseActivity.getSortingList(requireActivity())
+//                )
+//            builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
+//                override fun onClick(dialog: DialogInterface?, which: Int) {
+//                    dialog!!.dismiss()
+//                    if (which == 0) {
+//                        resetProductList()
+//                    } else if (which == 3) {
+//                        displayCategoryFilterDialog(categoriesList)
+//                    } else if (which == 4) {
+//                        displayErrorItems()
+//                    } else {
+//                        sorting(which)
+//                    }
+//
+//                }
+//
+//            })
+//            val alert = builder.create()
+//            alert.show()
             true
         } else if (item.itemId == R.id.insales_data_sync) {
             currentPage = 1
@@ -374,7 +393,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         this.menu = menu
-        //requireActivity().menuInflater.inflate(R.menu.insales_main_menu,menu)
+//        requireActivity().menuInflater.inflate(R.menu.insales_main_menu,menu)
     }
 
     override fun onCreateView(
@@ -399,116 +418,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         insalesLoginBtn = view.findViewById(R.id.insales_login_btn)
         insalesLoginBtn.setOnClickListener(this)
         productsRecyclerView = view.findViewById(R.id.insales_products_recyclerview)
-        searchResetBtn = view.findViewById(R.id.insales_products_search_reset_btn)
-        searchResetBtn.setOnClickListener(this)
-        searchBox = view.findViewById(R.id.insales_products_search_box)
-        searchImageBtn = view.findViewById(R.id.insales_products_search_btn)
-        searchImageBtn.setOnClickListener(this)
+//        searchResetBtn = view.findViewById(R.id.insales_products_search_reset_btn)
+//        searchResetBtn.setOnClickListener(this)
+        searchEditText = view.findViewById(R.id.insales_products_search)
+        searchEditText.setOnClickListener(this)
+        filterImageBtn = view.findViewById(R.id.insales_products_filter_btn)
+        filterImageBtn.setOnClickListener(this)
         fabAddProduct = view.findViewById(R.id.fab)
         fabAddProduct.setOnClickListener(this)
-        voiceSearchView = view.findViewById(R.id.voice_search_fragment_insales)
-        barcodeSearchFragmentInsales = view.findViewById(R.id.barcode_img_fragment_insales)
 
-        voiceSearchView.setOnClickListener {
-            voiceSearchHint = "voice_mode"
-            voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
-            val voiceLayout = LayoutInflater.from(context).inflate(
-                R.layout.voice_language_setting_layout,
-                null
-            )
-            val voiceLanguageSpinner =
-                voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
-            val voiceLanguageSaveBtn =
-                voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
-
-            if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
-                voiceLanguageSpinner.setSelection(0, false)
-            } else {
-                voiceLanguageSpinner.setSelection(1, false)
-            }
-
-            voiceLanguageSpinner.onItemSelectedListener =
-                object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        voiceLanguageCode =
-                            if (parent!!.selectedItem.toString().toLowerCase(
-                                    Locale.ENGLISH
-                                ).contains("english")
-                            ) {
-                                "en"
-                            } else {
-                                "ru"
-                            }
-                        appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
-
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                    }
-
-                }
-            val builder = MaterialAlertDialogBuilder(requireActivity())
-            builder.setView(voiceLayout)
-            val alert = builder.create();
-            alert.show()
-            voiceLanguageSaveBtn.setOnClickListener {
-                alert.dismiss()
-                Constants.listUpdateFlag = 1
-                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                    putExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                    )
-                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
-
-                }
-                voiceResultLauncher.launch(intent)
-            }
-        }
-
-        barcodeSearchFragmentInsales.setOnClickListener {
-            barcodeSearchHint = "default"
-            Constants.listUpdateFlag = 1
-            val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
-            barcodeImageResultLauncher.launch(intent)
-        }
-
-        searchBox.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (s.toString().isEmpty()) {
-                    resetProductList()
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-
-            }
-
-        })
-
-        searchBox.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                val query = searchBox.text.toString()
-                if (query.isNotEmpty()) {
-                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
-                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-                    search(query, "default")
-                }
-
-                return false
-            }
-
-        })
     }
 
 
@@ -560,7 +478,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             if (menu != null) {
                 menu!!.findItem(R.id.insales_logout).isVisible = false
-                menu!!.findItem(R.id.insales_data_filter).isVisible = false
+                menu!!.findItem(R.id.insales_list_type).isVisible = false
                 menu!!.findItem(R.id.insales_data_sync).isVisible = false
             }
         }
@@ -571,7 +489,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var unitCharacterPrice = 0F
     private var howMuchChargeCredits = 0F
     private fun showProducts() {
-
+        productViewListType = appSettings.getInt("PRODUCT_VIEW_LIST_TYPE")
         linearLayoutManager = WrapContentLinearLayoutManager(
             requireActivity(),
             RecyclerView.VERTICAL,
@@ -580,7 +498,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
         productAdapter = InSalesProductsAdapter1(
-            requireActivity()
+            requireActivity(),productViewListType
         )
         productAdapter.submitList(productsList)
         productsRecyclerView.isNestedScrollingEnabled = false
@@ -1494,26 +1412,28 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 updateImageBtn.setOnClickListener {
 
                     if (multiImagesList.isNotEmpty()) {
+                        Constants.startImageUploadService(pItem.id,multiImagesList.joinToString(","),"add_image")
+                        multiImagesList.clear()
                         alert.dismiss()
-                        BaseActivity.startLoading(requireActivity())
-
-                        uploadImages(
-                            pItem.id,
-                            multiImagesList,
-                            object : ResponseListener {
-                                override fun onSuccess(result: String) {
-                                    if (result.contains("success")) {
-                                        Handler(Looper.myLooper()!!).postDelayed(
-                                            {
-                                                BaseActivity.dismiss()
-                                                fetchProducts()//showProducts()
-                                            },
-                                            2000
-                                        )
-                                    }
-                                }
-
-                            })
+//                        BaseActivity.startLoading(requireActivity())
+//
+//                        uploadImages(
+//                            pItem.id,
+//                            multiImagesList,
+//                            object : ResponseListener {
+//                                override fun onSuccess(result: String) {
+//                                    if (result.contains("success")) {
+//                                        Handler(Looper.myLooper()!!).postDelayed(
+//                                            {
+//                                                BaseActivity.dismiss()
+//                                                fetchProducts()//showProducts()
+//                                            },
+//                                            2000
+//                                        )
+//                                    }
+//                                }
+//
+//                            })
 
 
 //                        viewModel.callAddProductImage(
@@ -1839,10 +1759,17 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 productsList.addAll(originalProductsList)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
                 productAdapter.submitList(productsList)
+
                 Handler(Looper.myLooper()!!).postDelayed({
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
-                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
+                        menu!!.findItem(R.id.insales_list_type).isVisible = true
+                        if (productViewListType == 0){
+                            menu!!.findItem(R.id.insales_list_type).setIcon(R.drawable.ic_normal_list)
+                        }
+                        else{
+                            menu!!.findItem(R.id.insales_list_type).setIcon(R.drawable.ic_minimal_list)
+                        }
                         menu!!.findItem(R.id.insales_data_sync).isVisible = true
                     }
                 }, 1500)
@@ -2433,12 +2360,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         }
 
     private fun fetchProducts(page: Int) {
-        if (dialogStatus == 1) {
-            BaseActivity.startLoading(
-                requireActivity(),
-                getString(R.string.please_wait_products_message)
-            )
-        }
+        try {
+            if (dialogStatus == 1) {
+                BaseActivity.startLoading(
+                    requireActivity(),
+                    getString(R.string.please_wait_products_message)
+                )
+            }
+
         viewModel.callProducts(requireActivity(), shopName, email, password, page)
         viewModel.getSalesProductsResponse().observe(this, Observer { response ->
 
@@ -2447,7 +2376,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     dialogStatus = 0
                     if (menu != null) {
                         menu!!.findItem(R.id.insales_logout).isVisible = true
-                        menu!!.findItem(R.id.insales_data_filter).isVisible = true
+                        menu!!.findItem(R.id.insales_list_type).isVisible = true
+                        if (productViewListType == 0){
+                            menu!!.findItem(R.id.insales_list_type).setIcon(R.drawable.ic_normal_list)
+                        }
+                        else{
+                            menu!!.findItem(R.id.insales_list_type).setIcon(R.drawable.ic_minimal_list)
+                        }
                         menu!!.findItem(R.id.insales_data_sync).isVisible = true
                     }
                     val products = response.getAsJsonArray("products")
@@ -2531,6 +2466,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 BaseActivity.dismiss()
             }
         })
+             }
+        catch (e:Exception){
+            e.printStackTrace()
+        }
     }
 
     private fun inSalesLogin(shopName: String, email: String, password: String) {
@@ -2551,6 +2490,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                     insalesLoginWrapperLayout.visibility = View.GONE
                     insalesDataWrapperLayout.visibility = View.VISIBLE
+                    insalesSearchWrapperLayout.visibility = View.VISIBLE
                     fabAddProduct.visibility = View.VISIBLE
 //                    menu!!.findItem(R.id.insales_logout).isVisible = true
 //                    menu!!.findItem(R.id.insales_data_filter).isVisible = true
@@ -2654,16 +2594,81 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 resetProductList()
 
             }
-            R.id.insales_products_search_btn -> {
-                val query = searchBox.text.toString().trim()
-                if (query.isNotEmpty()) {
-                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
-                    searchBox.clearFocus()
-                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-                    search(query, "default")
+            R.id.insales_products_filter_btn -> {
+                if (originalCategoriesList.size == 0) {
+                    viewModel.callCategories(requireActivity(), shopName, email, password)
+                    viewModel.getCategoriesResponse().observe(this, Observer { response ->
+                        if (response != null) {
+                            if (response.get("status").asString == "200") {
+                                val categories = response.get("categories").asJsonArray
+                                if (categories.size() > 0) {
+                                    if (categoriesList.isNotEmpty()) {
+                                        categoriesList.clear()
+                                    }
+                                    for (i in 0 until categories.size()) {
+                                        val category = categories[i].asJsonObject
+                                        originalCategoriesList.add(
+                                            Category(
+                                                category.get("title").asString,
+                                                category.get("id").asInt
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    })
                 } else {
-                    BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
+                    if (categoriesList.isNotEmpty()) {
+                        categoriesList.clear()
+                    }
+                    categoriesList.addAll(originalCategoriesList)
                 }
+
+                val builder = MaterialAlertDialogBuilder(requireActivity())
+                builder.setCancelable(false)
+                builder.setTitle(getString(R.string.sorting_heading_text))
+                builder.setNegativeButton(getString(R.string.cancel_text)) { dialog, which ->
+                    dialog.dismiss()
+                }
+
+                val arrayAdapter =
+                    ArrayAdapter(
+                        requireActivity(),
+                        android.R.layout.select_dialog_item,
+                        BaseActivity.getSortingList(requireActivity())
+                    )
+                builder.setAdapter(arrayAdapter, object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        dialog!!.dismiss()
+                        if (which == 0) {
+                            resetProductList()
+                        } else if (which == 3) {
+                            displayCategoryFilterDialog(categoriesList)
+                        } else if (which == 4) {
+                            displayErrorItems()
+                        } else {
+                            sorting(which)
+                        }
+
+                    }
+
+                })
+                val alert = builder.create()
+                alert.show()
+
+//                val query = searchBox.text.toString().trim()
+//                if (query.isNotEmpty()) {
+//                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+//                    searchBox.clearFocus()
+//                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+//                    search(query, "default")
+//                } else {
+//                    BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
+//                }
+            }
+            R.id.insales_products_search->{
+                 openSearchDialog()
             }
             R.id.fab -> {
                 addProduct()
@@ -2728,6 +2733,158 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                }
             }
         }
+    }
+
+    private fun openSearchDialog(){
+        val searchDialog = LayoutInflater.from(requireActivity()).inflate(R.layout.insales_product_search_dialog,null)
+        val builder = MaterialAlertDialogBuilder(requireActivity())
+        builder.setView(searchDialog)
+        builder.setCancelable(false)
+        val alert = builder.create()
+        alert.show()
+
+        val dialogCloseBtn = searchDialog.findViewById<AppCompatImageView>(R.id.search_product_dialog_close)
+        dialogCloseBtn.setOnClickListener{
+            alert.dismiss()
+        }
+        searchBox = searchDialog.findViewById(R.id.insales_products_search_box)
+        searchImageBtn = searchDialog.findViewById(R.id.insales_products_search_btn)
+        searchResetBtn = searchDialog.findViewById(R.id.insales_products_search_reset_btn)
+        voiceSearchView = searchDialog.findViewById(R.id.voice_search_fragment_insales)
+        barcodeSearchFragmentInsales = searchDialog.findViewById(R.id.barcode_img_fragment_insales)
+
+        searchImageBtn.setOnClickListener {
+                val query = searchBox.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+                    searchBox.clearFocus()
+                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+                    search(query, "default")
+                    alert.dismiss()
+                } else {
+                    BaseActivity.showAlert(requireActivity(), getString(R.string.empty_text_error))
+                }
+
+        }
+
+        searchResetBtn.setOnClickListener {
+            BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+            searchBox.clearFocus()
+            requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+            if (searchBox.text.toString().trim().isNotEmpty()) {
+                searchBox.setText("")
+            }
+//                if (productsList.isNotEmpty()) {
+//                    productsList.clear()
+//                }
+//                productsList.clear()
+//                productsList.addAll(originalProductsList)
+//                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                productAdapter.submitList(productsList)
+            resetProductList()
+            alert.dismiss()
+        }
+
+        voiceSearchView.setOnClickListener {
+            voiceSearchHint = "voice_mode"
+            voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
+            val voiceLayout = LayoutInflater.from(context).inflate(
+                R.layout.voice_language_setting_layout,
+                null
+            )
+            val voiceLanguageSpinner =
+                voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+            val voiceLanguageSaveBtn =
+                voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+
+            if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
+                voiceLanguageSpinner.setSelection(0, false)
+            } else {
+                voiceLanguageSpinner.setSelection(1, false)
+            }
+
+            voiceLanguageSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        voiceLanguageCode =
+                            if (parent!!.selectedItem.toString().toLowerCase(
+                                    Locale.ENGLISH
+                                ).contains("english")
+                            ) {
+                                "en"
+                            } else {
+                                "ru"
+                            }
+                        appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
+
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
+
+                }
+            val builder = MaterialAlertDialogBuilder(requireActivity())
+            builder.setView(voiceLayout)
+            val alert = builder.create();
+            alert.show()
+            voiceLanguageSaveBtn.setOnClickListener {
+                alert.dismiss()
+                Constants.listUpdateFlag = 1
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(
+                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                    )
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
+
+                }
+                voiceResultLauncher.launch(intent)
+            }
+        }
+
+        barcodeSearchFragmentInsales.setOnClickListener {
+            barcodeSearchHint = "default"
+            Constants.listUpdateFlag = 1
+            val intent = Intent(requireActivity(), BarcodeReaderActivity::class.java)
+            barcodeImageResultLauncher.launch(intent)
+        }
+
+        searchBox.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s.toString().isEmpty()) {
+                    resetProductList()
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
+
+        searchBox.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                val query = searchBox.text.toString()
+                if (query.isNotEmpty()) {
+                    BaseActivity.hideSoftKeyboard(requireActivity(), searchBox)
+                    requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+                    search(query, "default")
+                }
+
+                return false
+            }
+
+        })
     }
 
 //    private fun updateInsalesProductDetail(pItem: Product){

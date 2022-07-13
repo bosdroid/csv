@@ -29,6 +29,15 @@
         />
 
     <item
+        android:title="@string/list_text"
+        android:id="@+id/insales_list_type"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_normal_list"
+        app:iconTint="@color/primary_positive_color"
+        android:visible="false"
+        />
+
+    <item
         android:title="@string/logout"
         android:id="@+id/insales_logout"
         app:showAsAction="ifRoom"

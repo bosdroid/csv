@@ -376,7 +376,7 @@ class ImageManager {
             if (path.contains("http") || path.contains("https")){
                return URL(path).openStream().use { inputStream ->
                    ByteArrayOutputStream().use { outputStream ->
-                       Base64OutputStream(outputStream, Base64.NO_WRAP).use { base64FilterStream ->
+                       Base64OutputStream(outputStream, Base64.DEFAULT).use { base64FilterStream ->
                            inputStream.copyTo(base64FilterStream)
                            base64FilterStream.close()
                            outputStream.toString()
@@ -387,7 +387,7 @@ class ImageManager {
             }
             return FileInputStream(path).use { inputStream ->
                 ByteArrayOutputStream().use { outputStream ->
-                    Base64OutputStream(outputStream, Base64.NO_WRAP).use { base64FilterStream ->
+                    Base64OutputStream(outputStream, Base64.DEFAULT).use { base64FilterStream ->
                         inputStream.copyTo(base64FilterStream)
                         base64FilterStream.close()
                         outputStream.toString()

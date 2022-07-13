@@ -21,13 +21,15 @@
         android:layout_marginTop="@dimen/defaultDpMargin"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:padding="@dimen/small"
+        android:padding="10dp"
         >
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone"
+            >
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/voice_search_fragment_insales"
@@ -56,27 +58,32 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginEnd="@dimen/eightDpMargin"
                 android:hint="@string/search_hint_text"
                 app:endIconMode="clear_text"
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/insales_products_search_box"
+                    android:id="@+id/insales_products_search"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionSearch"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:hint="@string/search_hint_text"
                     android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <ImageButton
-                android:id="@+id/insales_products_search_btn"
+                android:id="@+id/insales_products_filter_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/defaultDpMargin"
                 android:background="@drawable/search_btn_background_design"
                 android:padding="@dimen/small"
-                android:src="@drawable/ic_search" />
+                android:tint="@color/white"
+                android:src="@drawable/ic_filter" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/insales_products_search_reset_btn"
@@ -84,6 +91,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="@string/reset_text"
+                android:visibility="gone"
                 android:textColor="@color/primary_positive_color"
                 android:textSize="@dimen/largeText" />
         </LinearLayout>
