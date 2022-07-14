@@ -247,6 +247,22 @@ class ApiRepository {
         return res
     }
 
+    fun salesProduct(shopName:String,email:String,password:String,pId:Int):MutableLiveData<JsonObject?>{
+        val res = MutableLiveData<JsonObject?>()
+
+        apiInterface.salesProduct(email,password,shopName,pId).enqueue(object:Callback<JsonObject>{
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                res.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                res.postValue(null)
+            }
+        })
+
+        return res
+    }
+
     fun updateProductImage(shopName:String,email:String,password:String,image:String,pId:Int,position:Int,imageId:Int,fileName:String):MutableLiveData<JsonObject?>
     {
         val res = MutableLiveData<JsonObject?>()

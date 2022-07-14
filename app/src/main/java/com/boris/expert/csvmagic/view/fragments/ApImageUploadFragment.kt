@@ -533,6 +533,7 @@ class ApImageUploadFragment : Fragment() {
                                     if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
                                         Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_product")
+                                        Constants.multiImagesSelectedListSize = multiImagesList.size
                                         multiImagesList.clear()
 //                                        BaseActivity.startLoading(requireActivity())
 //                                        uploadImages(
@@ -541,7 +542,7 @@ class ApImageUploadFragment : Fragment() {
 //                                            object : ResponseListener {
 //                                                override fun onSuccess(result: String) {
 //                                                    if (result.contains("success")) {
-//                                                        resetFieldValues()
+                                                        resetFieldValues()
 //                                                        Handler(Looper.myLooper()!!).postDelayed(
 //                                                            {
 //                                                                BaseActivity.dismiss()
@@ -607,6 +608,7 @@ class ApImageUploadFragment : Fragment() {
 //                                                })
                                     } else {
                                         Handler(Looper.myLooper()!!).postDelayed({
+                                            Constants.multiImagesSelectedListSize = 0
                                             resetFieldValues()
                                             BaseActivity.dismiss()
                                             creditCharged()

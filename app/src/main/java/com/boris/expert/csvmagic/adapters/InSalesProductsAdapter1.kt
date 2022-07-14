@@ -380,8 +380,8 @@ class InSalesProductsAdapter1(val context: Context,private val type:Int) :
             }
 
         })
-        if (item.productImages.size > 0) {
-            adapter.notifyItemRangeChanged(0, item.productImages.size)
+        if (item.productImages!!.size > 0) {
+            adapter.notifyItemRangeChanged(0, item.productImages!!.size)
 //            val sliderAdapter = ProductImagesSlider(context,item.productImages as ArrayList<ProductImages>)
 //            holder.sliderView.setSliderAdapter(sliderAdapter)
 //            holder.sliderView.setIndicatorEnabled(true)
@@ -441,7 +441,7 @@ class InSalesProductsAdapter1(val context: Context,private val type:Int) :
             val itemViewHolder1 = holder as ItemViewHolder1
 
             if (item.productImages!!.size > 0){
-                Glide.with(context).load(item.productImages[0].imageUrl).into(itemViewHolder1.productImageView)
+                Glide.with(context).load(item.productImages!![0].imageUrl).into(itemViewHolder1.productImageView)
             }
 
             if (item.sku.isEmpty()) {

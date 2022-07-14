@@ -47,6 +47,8 @@ import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.GrammarCallback
 import com.boris.expert.csvmagic.interfaces.ResponseListener
 import com.boris.expert.csvmagic.model.*
+import com.boris.expert.csvmagic.retrofit.ApiServices
+import com.boris.expert.csvmagic.retrofit.RetrofitClientApi
 import com.boris.expert.csvmagic.utils.*
 import com.boris.expert.csvmagic.view.activities.*
 import com.boris.expert.csvmagic.viewmodel.AddProductViewModel
@@ -64,6 +66,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.gson.JsonObject
 import com.skydoves.balloon.ArrowOrientation
 import com.skydoves.balloon.Balloon
 import com.skydoves.balloon.BalloonAnimation
@@ -73,6 +76,9 @@ import io.paperdb.Paper
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 import java.util.*
 import java.util.regex.Pattern
@@ -441,10 +447,12 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         val insalesStatus = appSettings.getString("INSALES_STATUS")
 
         if (insalesStatus!!.isNotEmpty() && insalesStatus == "logged") {
-
+             val intentsFilter = IntentFilter()
+            intentsFilter.addAction("update-products")
+            intentsFilter.addAction("update-images")
             LocalBroadcastManager.getInstance(
                 requireActivity()
-            ).registerReceiver(broadcastReceiver, IntentFilter("update-products"))
+            ).registerReceiver(broadcastReceiver, intentsFilter)
 
             insalesLoginWrapperLayout.visibility = View.GONE
             insalesSearchWrapperLayout.visibility = View.VISIBLE
@@ -1412,7 +1420,22 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 updateImageBtn.setOnClickListener {
 
                     if (multiImagesList.isNotEmpty()) {
+                        val tempProduct = pItem
+                        for (i in 0 until multiImagesList.size){
+                            tempProduct.productImages!!.add(
+                                ProductImages(
+                                    0,
+                                    pItem.id,
+                                    "",
+                                    0
+                                )
+                            )
+                        }
+                        productsList.removeAt(position)
+                        productsList.add(position,tempProduct)
+                        productAdapter.notifyDataSetChanged()
                         Constants.startImageUploadService(pItem.id,multiImagesList.joinToString(","),"add_image")
+                        //Constants.multiImagesSelectedListSize = multiImagesList.size
                         multiImagesList.clear()
                         alert.dismiss()
 //                        BaseActivity.startLoading(requireActivity())
@@ -1477,6 +1500,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                                }
 //                            })
                     } else {
+                        Constants.multiImagesSelectedListSize = 0
                         BaseActivity.showAlert(
                             requireActivity(),
                             getString(R.string.image_attach_error)
@@ -2387,10 +2411,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
                     val products = response.getAsJsonArray("products")
                     if (products.size() > 0) {
-
-                        productsList.clear()
-                        originalProductsList.clear()
-                        Paper.book().delete(Constants.cacheProducts)
+                        if (products.size() < 250){
+                            productsList.clear()
+                            originalProductsList.clear()
+                            Paper.book().delete(Constants.cacheProducts)
+                        }
                         for (i in 0 until products.size()) {
                             val product = products.get(i).asJsonObject
                             val imagesArray = product.getAsJsonArray("images")
@@ -2410,6 +2435,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     )
                                 }
                             }
+
+                            if (Constants.imageLoadingStatus == 1 && product.get("id").asInt == Constants.productId){
+                                for (j in 0 until Constants.multiImagesSelectedListSize){
+                                    imagesList.add(
+                                        ProductImages(
+                                            0,
+                                            Constants.productId,
+                                            "",
+                                            0
+                                        )
+                                    )
+                                }
+                            }
+
                             originalProductsList.add(
                                 Product(
                                     product.get("id").asInt,
@@ -2433,11 +2472,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     imagesList as ArrayList<ProductImages>
                                 )
                             )
+
                         }
-                        originalProductsList.sortByDescending { it.id }
-                        Paper.book().write(Constants.cacheProducts, originalProductsList)
-                        currentTotalProducts = originalProductsList.size
-                        BaseActivity.dismiss()
+
+                            originalProductsList.sortByDescending { it.id }
+                            Paper.book().write(Constants.cacheProducts, originalProductsList)
+                            currentTotalProducts = originalProductsList.size
+                            BaseActivity.dismiss()
 //                        val cacheList: ArrayList<Product>? =
 //                            Paper.book().read(Constants.cacheProducts)
 //                        if (cacheList != null && cacheList.size > 0) {
@@ -2445,12 +2486,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             productsList.addAll(originalProductsList)
 //                            productAdapter.notifyItemRangeChanged(0, productsList.size)
 //                            productAdapter.submitList(productsList)
-                        productAdapter.notifyDataSetChanged()
+                            productAdapter.notifyDataSetChanged()
 //                        }
 //                            if (originalProductsList.size > 0) {
 //                                productsList.addAll(originalProductsList)
 //                                adapter.notifyItemRangeChanged(0, productsList.size)
 //                            }
+
                         if (currentTotalProducts == 250) {
                             currentPage += 1
                             fetchProducts(currentPage)
@@ -2989,6 +3031,95 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != null && intent.action == "update-products") {
                 fetchProducts()
+            }
+            else if (intent.action != null && intent.action == "update-images"){
+                val apiInterface: ApiServices = RetrofitClientApi.createService(ApiServices::class.java)
+                val productId = intent.getIntExtra("PID",0)
+
+                apiInterface.salesProduct(email,password,shopName,productId)
+                    .enqueue(object :Callback<JsonObject>{
+                        override fun onResponse(
+                            call: Call<JsonObject>,
+                            response: Response<JsonObject>?
+                        ) {
+                            val result = response!!.body()
+                            if (result != null) {
+                                if (result.get("status").asString == "200") {
+
+                                    val product = result.getAsJsonObject("product")
+                                    val imagesArray = product.getAsJsonArray("images")
+                                    val variants = product.getAsJsonArray("variants")
+                                    val variantsItem = variants[0].asJsonObject
+                                    val imagesList = mutableListOf<ProductImages>()
+
+                                    if (imagesArray.size() > 0) {
+                                        for (j in 0 until imagesArray.size()) {
+                                            val imageItem = imagesArray[j].asJsonObject
+                                            imagesList.add(
+                                                ProductImages(
+                                                    imageItem.get("id").asInt,
+                                                    imageItem.get("product_id").asInt,
+                                                    imageItem.get("url").asString,
+                                                    imageItem.get("position").asInt
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    val updatedProduct = Product(
+                                        product.get("id").asInt,
+                                        product.get("category_id").asInt,
+                                        product.get("title").asString,
+                                        if (product.get("short_description").isJsonNull) {
+                                            ""
+                                        } else {
+                                            product.get("short_description").asString
+                                        },
+                                        if (product.get("description").isJsonNull) {
+                                            ""
+                                        } else {
+                                            product.get("description").asString
+                                        },
+                                        if (variantsItem.get("sku").isJsonNull) {
+                                            ""
+                                        } else {
+                                            variantsItem.get("sku").asString
+                                        },
+                                        imagesList as ArrayList<ProductImages>
+                                    )
+                                    var foundPosition = -1
+                                    val cacheList: ArrayList<Product>? = Paper.book().read(Constants.cacheProducts)
+                                    if (cacheList!!.isNotEmpty()){
+                                        for (i in 0 until cacheList.size){
+                                            val item = cacheList[i]
+                                            if (item.id == productId){
+                                                foundPosition = i
+                                                break;
+                                            }
+                                        }
+
+                                        if (foundPosition != -1){
+                                            cacheList.removeAt(foundPosition)
+                                            cacheList.add(foundPosition,updatedProduct)
+                                            Paper.book().delete(Constants.cacheProducts)
+                                            Paper.book().write(Constants.cacheProducts, cacheList)
+                                            originalProductsList.clear()
+                                            productsList.clear()
+                                            originalProductsList.addAll(cacheList)
+                                            productsList.addAll(originalProductsList)
+                                            productAdapter.notifyDataSetChanged()
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+
+                        }
+
+                    })
             }
         }
     }
@@ -5594,25 +5725,30 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                                     if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
-                                        BaseActivity.startLoading(requireActivity())
-                                        uploadImages(
-                                            productId,
-                                            multiImagesList,
-                                            object : ResponseListener {
-                                                override fun onSuccess(result: String) {
-                                                    if (result.contains("success")) {
-                                                        Handler(Looper.myLooper()!!).postDelayed(
-                                                            {
-                                                                BaseActivity.dismiss()
-                                                                dismiss()
-                                                                listener.onSuccess("")
-                                                            },
-                                                            6000
-                                                        )
-                                                    }
-                                                }
-
-                                            })
+                                        Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_image")
+                                        Constants.multiImagesSelectedListSize = multiImagesList.size
+                                        resetFieldValues()
+                                        dismiss()
+                                        listener.onSuccess("")
+//                                        BaseActivity.startLoading(requireActivity())
+//                                        uploadImages(
+//                                            productId,
+//                                            multiImagesList,
+//                                            object : ResponseListener {
+//                                                override fun onSuccess(result: String) {
+//                                                    if (result.contains("success")) {
+//                                                        Handler(Looper.myLooper()!!).postDelayed(
+//                                                            {
+//                                                                BaseActivity.dismiss()
+//                                                                dismiss()
+//                                                                listener.onSuccess("")
+//                                                            },
+//                                                            6000
+//                                                        )
+//                                                    }
+//                                                }
+//
+//                                            })
 //                                        viewModel.callAddProductImage(
 //                                            requireActivity(),
 //                                            shopName,
@@ -5660,6 +5796,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                                                    }
 //                                                })
                                     } else {
+                                        Constants.multiImagesSelectedListSize = 0
                                         Handler(Looper.myLooper()!!).postDelayed({
                                             BaseActivity.dismiss()
                                             dismiss()
@@ -5681,6 +5818,17 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
             }
 
+        }
+
+        private fun resetFieldValues() {
+            appSettings.remove("AP_BARCODE_ID")
+            appSettings.remove("AP_PRODUCT_CATEGORY")
+            appSettings.remove("AP_PRODUCT_TITLE")
+            appSettings.remove("AP_PRODUCT_DESCRIPTION")
+            appSettings.remove("AP_PRODUCT_QUANTITY")
+            appSettings.remove("AP_PRODUCT_PRICE")
+            multiImagesList.clear()
+            barcodeImageList.clear()
         }
 
         var index = 0

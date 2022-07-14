@@ -260,8 +260,8 @@ class InSalesProductsAdapter(val context: Context, var productsItems: List<Produ
             }
 
         })
-        if (item.productImages.size > 0) {
-            adapter.notifyItemRangeChanged(0, item.productImages.size)
+        if (item.productImages!!.size > 0) {
+            adapter.notifyItemRangeChanged(0, item.productImages!!.size)
 //            val sliderAdapter = ProductImagesSlider(context,item.productImages as ArrayList<ProductImages>)
 //            holder.sliderView.setSliderAdapter(sliderAdapter)
 //            holder.sliderView.setIndicatorEnabled(true)

@@ -281,6 +281,7 @@
                                 android:layout_height="24dp"
                                 android:id="@+id/collapse_expand_img"
                                 android:src="@drawable/ic_arrow_down"
+                                android:visibility="gone"
                                 />
                         </LinearLayout>
                         <LinearLayout
@@ -305,7 +306,8 @@
                                 android:scrollbars="vertical"
                                 android:layout_gravity="center"
                                 android:textColor="@color/black"
-                                android:textSize="@dimen/largeText" />
+                                android:textStyle="italic"
+                                android:textSize="@dimen/mediumText" />
                             <!--                        </ScrollView>-->
 
                             <androidx.appcompat.widget.AppCompatImageView
@@ -313,6 +315,7 @@
                                 android:layout_height="24dp"
                                 android:id="@+id/collapse_expand_description_img"
                                 android:src="@drawable/ic_arrow_down"
+                                android:visibility="gone"
                                 />
                         </LinearLayout>
                     </LinearLayout>
@@ -322,6 +325,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/defaultDpMargin"
+                        android:layout_gravity="center_vertical"
                         android:src="@drawable/ic_edit"
                         app:tint="@color/primary_positive_color" />
 

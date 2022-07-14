@@ -9,6 +9,8 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -27,6 +29,7 @@ import com.boris.expert.csvmagic.viewmodel.SalesCustomersViewModel
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -48,7 +51,8 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
 
     override fun doWork(): Result {
         appSettings = AppSettings(applicationContext)
-
+        showNotification()
+        Constants.imageLoadingStatus = 1
 
         val productId = inputData.getInt("pId", 0)
         val imageList = inputData.getString("imageList")
@@ -62,12 +66,15 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
         shopName = appSettings.getString("INSALES_SHOP_NAME") as String
         email = appSettings.getString("INSALES_EMAIL") as String
         password = appSettings.getString("INSALES_PASSWORD") as String
-        CoroutineScope(Dispatchers.IO).launch {
 
+        Constants.productId = productId
+//        Handler(Looper.myLooper()!!).postDelayed({
+
+        CoroutineScope(Dispatchers.IO).launch {
+                 delay(3000)
             try {
 
                 if (imagesArray.isNotEmpty()) {
-                    showNotification()
 //                    updateNotificationProgress(100)
                     uploadImages(
                         productId,
@@ -77,9 +84,12 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
                             override fun onSuccess(result: String) {
                                 if (result.contains("success")) {
                                     notificationManager.cancel(101)
+                                    Constants.multiImagesSelectedListSize = 0
+                                    Constants.imageLoadingStatus = 0
                                     Toast.makeText(applicationContext,"Product images attached successfully!",Toast.LENGTH_SHORT).show()
                                     val intent =
-                                        Intent("update-products")
+                                        Intent("update-images")
+                                    intent.putExtra("PID",productId)
                                     LocalBroadcastManager.getInstance(
                                         applicationContext
                                     ).sendBroadcast(intent)
@@ -99,6 +109,8 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
                 notificationManager.cancel(101)
             }
         }
+
+//        },3000)
 
         return Result.success()
     }

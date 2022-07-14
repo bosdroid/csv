@@ -58,6 +58,15 @@ interface ApiServices {
         @Field("page") page: Int
     ): Call<JsonObject>
 
+    @FormUrlEncoded
+    @POST("insales/get_product.php")
+    fun salesProduct(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("shop_name") shopName: String,
+        @Field("p_id") pId: Int
+    ): Call<JsonObject>
+
 
     @FormUrlEncoded
     @POST("insales/update_image.php")

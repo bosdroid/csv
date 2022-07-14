@@ -9,7 +9,7 @@ data class Product (
     var shortDesc:String,
     var fullDesc:String,
     var sku:String,
-    val productImages:ArrayList<ProductImages>?
+    var productImages:ArrayList<ProductImages>?
         ):Serializable{
             constructor():this(0,0,"","","","",null)
         }

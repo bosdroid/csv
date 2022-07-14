@@ -33,6 +33,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.logging.Handler
 import java.util.regex.Pattern
 
 
@@ -118,7 +119,9 @@ class Constants {
         var multiImagesList = mutableListOf<String>()
         const val channelId:String = "101010"
         const val channelName:String = "CSV Magic"
-
+        var multiImagesSelectedListSize = 0
+        var imageLoadingStatus = 0
+        var productId = 0
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
@@ -161,6 +164,7 @@ class Constants {
         }
 
         fun startImageUploadService(productId:Int,imagesList:String,type:String){
+
             val inputData = Data.Builder()
                 .putInt("pId", productId)
                 .putString("imageList", imagesList)
