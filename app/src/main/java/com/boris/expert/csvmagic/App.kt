@@ -9,6 +9,7 @@ import io.paperdb.Paper
 class App : Application() {
 
     private lateinit var appSettings: AppSettings
+	
     override fun onCreate() {
         super.onCreate()
 
