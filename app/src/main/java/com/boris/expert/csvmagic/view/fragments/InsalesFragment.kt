@@ -299,7 +299,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun resetProductList() {
         productsList.clear()
         productsList.addAll(originalProductsList)
-        productAdapter.notifyDataSetChanged()
+        productAdapter.submitList(null)
+        productAdapter.submitList(productsList)
 //        productAdapter.notifyItemRangeChanged(0, productsList.size)
         productsRecyclerView.smoothScrollToPosition(0)
     }
@@ -321,8 +322,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         } else {
             productsList.clear()
             productsList.addAll(matchedProducts)
-            productAdapter.notifyDataSetChanged()
-
+            //productAdapter.notifyDataSetChanged()
+            productAdapter.submitList(null)
+            productAdapter.submitList(productsList)
         }
 
     }
@@ -341,8 +343,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
             })
-            productAdapter.notifyDataSetChanged()
-
+            //productAdapter.notifyDataSetChanged()
+            productAdapter.submitList(null)
+            productAdapter.submitList(productsList)
         } else {
             BaseActivity.showAlert(requireActivity(), getString(R.string.empty_list_error_message))
         }
@@ -394,8 +397,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
-                //productAdapter.submitList(productsList)
-                productAdapter.notifyDataSetChanged()
+                productAdapter.submitList(null)
+                productAdapter.submitList(productsList)
+                //productAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -527,6 +531,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         productAdapter = InSalesProductsAdapter1(
                 requireActivity(), productViewListType
         )
+        productAdapter.submitList(null)
         productAdapter.submitList(productsList)
         productsRecyclerView.isNestedScrollingEnabled = false
         productsRecyclerView.adapter = productAdapter
@@ -1559,7 +1564,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                     BaseActivity.dismiss()
                                                     dialogStatus = 1
                                                     fetchProducts()//showProducts()
-                                                }, 2000)
+                                                }, 3000)
                                             } else {
                                                 BaseActivity.dismiss()
                                                 BaseActivity.showAlert(
@@ -1809,9 +1814,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 originalProductsList.addAll(cacheList)
                 originalProductsList.sortByDescending { it.id }
                 productsList.addAll(originalProductsList)
+                productAdapter.submitList(null)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
-                //productAdapter.submitList(productsList)
-                productAdapter.notifyDataSetChanged()
+                productAdapter.submitList(productsList)
+                //productAdapter.notifyDataSetChanged()
 
                 Handler(Looper.myLooper()!!).postDelayed({
                     if (menu != null) {
@@ -2557,8 +2563,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 Paper.book().write(Constants.cacheProducts, originalProductsList)
 
                                 productsList.addAll(originalProductsList)
-                                productAdapter.notifyDataSetChanged()
-//                                productAdapter.submitList(productsList)
+                                productAdapter.submitList(null)
+                                //productAdapter.notifyDataSetChanged()
+                                productAdapter.submitList(productsList)
                                 BaseActivity.dismiss()
                             }
                         } else {
@@ -3102,8 +3109,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
+                productAdapter.submitList(null)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.notifyDataSetChanged()
+                //productAdapter.notifyDataSetChanged()
+                productAdapter.submitList(productsList)
 
             }
         }
@@ -3189,7 +3198,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 productsList.clear()
                                                 originalProductsList.addAll(cacheList)
                                                 productsList.addAll(originalProductsList)
-                                                productAdapter.notifyDataSetChanged()
+                                                productAdapter.submitList(null)
+                                                productAdapter.submitList(productsList)
+                                                //productAdapter.notifyDataSetChanged()
                                             }
                                         }
 
