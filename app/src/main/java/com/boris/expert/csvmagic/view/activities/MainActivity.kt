@@ -1298,29 +1298,35 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.home_csv_btn -> {
-                activeButtonFocus(homeCsvButton, homeInsalesButton, "table")
-                supportFragmentManager.beginTransaction()
+                val currentFragment = supportFragmentManager.findFragmentByTag("table")
+                if (currentFragment == null || !currentFragment.isVisible) {
+                    activeButtonFocus(homeCsvButton, homeInsalesButton, "table")
+                    supportFragmentManager.beginTransaction()
 //                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .replace(
-                        R.id.fragment_container,
-                        ScanFragment(),
-                        "table"
-                    )
-                    .addToBackStack("table")
-                    .commit()
+                            .replace(
+                                    R.id.fragment_container,
+                                    ScanFragment(),
+                                    "table"
+                            )
+                            .addToBackStack("table")
+                            .commit()
+                }
 
             }
             R.id.home_insales_btn -> {
-                activeButtonFocus(homeInsalesButton, homeCsvButton, "insales")
-                supportFragmentManager.beginTransaction()
+                val currentFragment = supportFragmentManager.findFragmentByTag("insales")
+                if (currentFragment == null || !currentFragment.isVisible) {
+                    activeButtonFocus(homeInsalesButton, homeCsvButton, "insales")
+                    supportFragmentManager.beginTransaction()
 //                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .replace(
-                        R.id.fragment_container,
-                        InsalesFragment(),
-                        "insales"
-                    )
-                    .addToBackStack("insales")
-                    .commit()
+                            .replace(
+                                    R.id.fragment_container,
+                                    InsalesFragment(),
+                                    "insales"
+                            )
+                            .addToBackStack("insales")
+                            .commit()
+                }
 
             }
             else -> {

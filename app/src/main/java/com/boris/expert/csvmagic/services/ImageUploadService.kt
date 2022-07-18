@@ -57,6 +57,7 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
         val productId = inputData.getInt("pId", 0)
         val imageList = inputData.getString("imageList")
         val type = inputData.getString("type")
+        val flag = inputData.getBoolean("flag",false)
         val imagesArray = mutableListOf<String>()
         if (imageList!!.contains(",")) {
             imagesArray.addAll(imageList.split(","))
@@ -87,12 +88,14 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
                                     Constants.multiImagesSelectedListSize = 0
                                     Constants.imageLoadingStatus = 0
                                     Toast.makeText(applicationContext,"Product images attached successfully!",Toast.LENGTH_SHORT).show()
-                                    val intent =
-                                        Intent("update-images")
-                                    intent.putExtra("PID",productId)
-                                    LocalBroadcastManager.getInstance(
-                                        applicationContext
-                                    ).sendBroadcast(intent)
+                                    if (flag) {
+                                        val intent =
+                                                Intent("update-images")
+                                        intent.putExtra("PID", productId)
+                                        LocalBroadcastManager.getInstance(
+                                                applicationContext
+                                        ).sendBroadcast(intent)
+                                    }
                                 }
                                 else{
                                     notificationManager.cancel(101)

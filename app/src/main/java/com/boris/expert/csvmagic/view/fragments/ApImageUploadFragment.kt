@@ -40,6 +40,7 @@ import com.boris.expert.csvmagic.adapters.BarcodeImageAdapter
 import com.boris.expert.csvmagic.adapters.InternetImageAdapter
 import com.boris.expert.csvmagic.interfaces.APICallback
 import com.boris.expert.csvmagic.interfaces.ResponseListener
+import com.boris.expert.csvmagic.model.ProductImages
 import com.boris.expert.csvmagic.utils.AppSettings
 import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.ImageManager
@@ -532,7 +533,7 @@ class ApImageUploadFragment : Fragment() {
 
                                     if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
-                                        Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_product")
+                                        Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_product",true)
                                         Constants.multiImagesSelectedListSize = multiImagesList.size
                                         multiImagesList.clear()
 //                                        BaseActivity.startLoading(requireActivity())
@@ -684,6 +685,27 @@ class ApImageUploadFragment : Fragment() {
 
         })
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val tempImageList = mutableListOf<String>()
+        val images = Constants.selectedRainForestProductImages
+        if (images.isNotEmpty()) {
+
+            if (images.contains(",")) {
+                tempImageList.addAll(images.split(","))
+            } else {
+                tempImageList.add(images)
+            }
+            if (tempImageList.isNotEmpty()) {
+                for (i in 0 until tempImageList.size) {
+                    multiImagesList.add(tempImageList[i])
+                    barcodeImageList.add(tempImageList[i])
+                }
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
 
     private var barcodeImageResultLauncher =

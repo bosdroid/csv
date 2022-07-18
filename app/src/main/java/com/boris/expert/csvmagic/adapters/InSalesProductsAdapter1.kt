@@ -356,7 +356,7 @@ class InSalesProductsAdapter1(val context: Context,private val type:Int) :
         itemViewHolder.productDescription.text = item.fullDesc
         itemViewHolder.productDescription.isExpanded = false
         itemViewHolder.productDescription.movementMethod = ScrollingMovementMethod.getInstance()
-
+            item.productImages!!.sortByDescending { it.id }
         itemViewHolder.imagesRecyclerView.layoutManager =
             WrapContentLinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         itemViewHolder.imagesRecyclerView.hasFixedSize()
@@ -540,7 +540,8 @@ class InSalesProductsAdapter1(val context: Context,private val type:Int) :
 
     }
 
-//    override fun getItemCount(): Int {
+
+    //    override fun getItemCount(): Int {
 //        return productsItems.size
 //    }
 //

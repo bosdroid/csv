@@ -122,6 +122,7 @@ class Constants {
         var multiImagesSelectedListSize = 0
         var imageLoadingStatus = 0
         var productId = 0
+        var selectedRainForestProductImages = ""
 
         private fun getBackgroundImageFolderFile(context: Context): File {
             return File(context.externalCacheDir, BACKGROUND_IMAGE_PATH)
@@ -163,12 +164,13 @@ class Constants {
             }
         }
 
-        fun startImageUploadService(productId:Int,imagesList:String,type:String){
+        fun startImageUploadService(productId:Int,imagesList:String,type:String,flag:Boolean){
 
             val inputData = Data.Builder()
                 .putInt("pId", productId)
                 .putString("imageList", imagesList)
                 .putString("type", type)
+                    .putBoolean("flag",flag)
                 .build()
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
