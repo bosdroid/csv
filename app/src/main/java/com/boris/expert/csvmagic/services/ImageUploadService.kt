@@ -72,7 +72,7 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
 //        Handler(Looper.myLooper()!!).postDelayed({
 
         CoroutineScope(Dispatchers.IO).launch {
-                 delay(3000)
+                 delay(8000)
             try {
 
                 if (imagesArray.isNotEmpty()) {

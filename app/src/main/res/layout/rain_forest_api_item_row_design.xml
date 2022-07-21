@@ -45,7 +45,7 @@
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/get_description_text"
+                android:text="@string/get_title_text"
                 android:layout_marginTop="@dimen/eightDpMargin"
                 android:id="@+id/rfa_item_get_description_view"
                 />

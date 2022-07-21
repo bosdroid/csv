@@ -533,9 +533,18 @@ class ApImageUploadFragment : Fragment() {
 
                                     if (multiImagesList.isNotEmpty()) {
                                         BaseActivity.dismiss()
-                                        Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_product",true)
-                                        Constants.multiImagesSelectedListSize = multiImagesList.size
-                                        multiImagesList.clear()
+                                        resetFieldValues()
+                                        creditCharged()
+                                        val intent =
+                                            Intent("dialog-dismiss")
+                                        LocalBroadcastManager.getInstance(
+                                            requireActivity()
+                                        ).sendBroadcast(intent)
+
+                                            Constants.startImageUploadService(productId,multiImagesList.joinToString(","),"add_product",true)
+                                            Constants.multiImagesSelectedListSize = multiImagesList.size
+                                            multiImagesList.clear()
+
 //                                        BaseActivity.startLoading(requireActivity())
 //                                        uploadImages(
 //                                            productId,
@@ -543,16 +552,11 @@ class ApImageUploadFragment : Fragment() {
 //                                            object : ResponseListener {
 //                                                override fun onSuccess(result: String) {
 //                                                    if (result.contains("success")) {
-                                                        resetFieldValues()
+
 //                                                        Handler(Looper.myLooper()!!).postDelayed(
 //                                                            {
 //                                                                BaseActivity.dismiss()
-                                                                creditCharged()
-                                                                val intent =
-                                                                    Intent("dialog-dismiss")
-                                                                LocalBroadcastManager.getInstance(
-                                                                    requireActivity()
-                                                                ).sendBroadcast(intent)
+
 //                                                            },
 //                                                            6000
 //                                                        )
@@ -622,7 +626,6 @@ class ApImageUploadFragment : Fragment() {
                                     }
 
                                 } else {
-                                    resetFieldValues()
                                     BaseActivity.dismiss()
                                     BaseActivity.showAlert(
                                         requireActivity(),
@@ -808,7 +811,6 @@ class ApImageUploadFragment : Fragment() {
         appSettings.remove("AP_PRODUCT_DESCRIPTION")
         appSettings.remove("AP_PRODUCT_QUANTITY")
         appSettings.remove("AP_PRODUCT_PRICE")
-        multiImagesList.clear()
         barcodeImageList.clear()
     }
 

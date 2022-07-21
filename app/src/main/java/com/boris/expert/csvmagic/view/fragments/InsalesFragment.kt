@@ -283,12 +283,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //            alert.show()
             true
         } else if (item.itemId == R.id.insales_data_sync) {
-            productsList.clear()
-            originalProductsList.clear()
-            Paper.book().delete(Constants.cacheProducts)
-            currentPage = 1
             dialogStatus = 1
-            fetchProducts(currentPage)
+            fetchProducts()
             true
         } else {
             super.onOptionsItemSelected(item)
@@ -299,7 +295,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun resetProductList() {
         productsList.clear()
         productsList.addAll(originalProductsList)
-        productAdapter.submitList(null)
+//        productAdapter.submitList(null)
         productAdapter.submitList(productsList)
 //        productAdapter.notifyItemRangeChanged(0, productsList.size)
         productsRecyclerView.smoothScrollToPosition(0)
@@ -323,7 +319,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             productsList.clear()
             productsList.addAll(matchedProducts)
             //productAdapter.notifyDataSetChanged()
-            productAdapter.submitList(null)
+//            productAdapter.submitList(null)
             productAdapter.submitList(productsList)
         }
 
@@ -344,7 +340,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             })
             //productAdapter.notifyDataSetChanged()
-            productAdapter.submitList(null)
+//            productAdapter.submitList(null)
             productAdapter.submitList(productsList)
         } else {
             BaseActivity.showAlert(requireActivity(), getString(R.string.empty_list_error_message))
@@ -397,7 +393,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.submitList(null)
+//                productAdapter.submitList(null)
                 productAdapter.submitList(productsList)
                 //productAdapter.notifyDataSetChanged()
             }
@@ -531,8 +527,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         productAdapter = InSalesProductsAdapter1(
                 requireActivity(), productViewListType
         )
-        productAdapter.submitList(null)
-        productAdapter.submitList(productsList)
+//        productAdapter.submitList(null)
+//        productAdapter.submitList(productsList)
         productsRecyclerView.isNestedScrollingEnabled = false
         productsRecyclerView.adapter = productAdapter
         productAdapter.setOnItemClickListener(object : InSalesProductsAdapter1.OnItemClickListener {
@@ -985,7 +981,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         }
                                     } else {
                                         BaseActivity.dismiss()
-                                        fetchProducts()//showProducts()
+                                        //fetchProducts()//showProducts()
                                     }
                                 })
                     } else {
@@ -1573,9 +1569,11 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 )
                                             }
                                         } else {
-                                            BaseActivity.dismiss()
-//                                            dialogStatus = 1
-//                                            fetchProducts()//showProducts()
+                                            Handler(Looper.myLooper()!!).postDelayed({
+                                                BaseActivity.dismiss()
+                                                dialogStatus = 1
+                                                fetchProducts()//showProducts()
+                                            }, 3000)
                                         }
                                     })
 
@@ -1814,7 +1812,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 originalProductsList.addAll(cacheList)
                 originalProductsList.sortByDescending { it.id }
                 productsList.addAll(originalProductsList)
-                productAdapter.submitList(null)
+//                productAdapter.submitList(null)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
                 productAdapter.submitList(productsList)
                 //productAdapter.notifyDataSetChanged()
@@ -2380,10 +2378,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private fun fetchProducts() {
         productsList.clear()
         originalProductsList.clear()
-        Paper.book().delete(Constants.cacheProducts)
-
+        Paper.book().destroy()
         currentPage = 1
-        //dialogStatus = 1
         fetchProducts(currentPage)
     }
 
@@ -2558,7 +2554,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 fetchProducts(currentPage)
                             }
                             else{
-
+                                Log.d("TEST199WRITE","WRITE")
                                 originalProductsList.sortByDescending { it.id }
                                 Paper.book().write(Constants.cacheProducts, originalProductsList)
 
@@ -3071,6 +3067,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 viewModel,
                 object : ResponseListener {
                     override fun onSuccess(result: String) {
+                        dialogStatus = 1
                         fetchProducts()
                     }
 
@@ -3088,7 +3085,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             if (type == "default") {
                 productsList.forEach { item ->
-                    if (item.title.contains(text, true)) {
+                    if (item.title.contains(text, true) || item.fullDesc.contains(text, true)) {
                         matchedProducts.add(item)
                     }
                 }
@@ -3109,7 +3106,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-                productAdapter.submitList(null)
+//                productAdapter.submitList(null)
 //                productAdapter.notifyItemRangeChanged(0, productsList.size)
                 //productAdapter.notifyDataSetChanged()
                 productAdapter.submitList(productsList)
@@ -3122,6 +3119,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != null && intent.action == "update-products") {
+                dialogStatus = 1
                 fetchProducts()
             } else if (intent.action != null && intent.action == "update-images") {
                 val apiInterface: ApiServices = RetrofitClientApi.createService(ApiServices::class.java)
@@ -3185,22 +3183,23 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 val item = cacheList[i]
                                                 if (item.id == productId) {
                                                     foundPosition = i
-                                                    break;
+                                                    break
                                                 }
                                             }
 
                                             if (foundPosition != -1) {
                                                 cacheList.removeAt(foundPosition)
                                                 cacheList.add(foundPosition, updatedProduct)
-                                                Paper.book().delete(Constants.cacheProducts)
+                                                Paper.book().destroy()
                                                 Paper.book().write(Constants.cacheProducts, cacheList)
                                                 originalProductsList.clear()
                                                 productsList.clear()
                                                 originalProductsList.addAll(cacheList)
                                                 productsList.addAll(originalProductsList)
-                                                productAdapter.submitList(null)
+//                                                productAdapter.submitList(null)
                                                 productAdapter.submitList(productsList)
-                                                //productAdapter.notifyDataSetChanged()
+                                                productAdapter.notifyItemChanged(foundPosition)
+//                                                productAdapter.notifyDataSetChanged()
                                             }
                                         }
 
@@ -4360,7 +4359,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         ProductImages(
                                                 0,
                                                 pItem.id,
-                                                "",
+                                            multiImagesList[i],
                                                 0
                                         )
                                 )
@@ -4837,7 +4836,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             getString(R.string.please_wait_product_update_message)
                     )
 
-                    Paper.book().delete(Constants.cacheProducts)
+                    Paper.book().destroy()
                     Paper.book()
                             .write(Constants.cacheProducts, insalesFragment!!.originalProductsList)
                     insalesAdapter.notifyItemChanged(position)
@@ -5306,9 +5305,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action != null && intent.action == "dialog-dismiss") {
-                    val intentV = Intent("update-products")
-                    LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(intentV)
                     dismiss()
+                    listener.onSuccess("")
                 } else if (intent.action != null && intent.action == "move-next") {
                     apViewPager.currentItem = apViewPager.currentItem + 1
                 }
@@ -5530,7 +5528,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apFirstLayout.visibility = View.GONE
                 apSecondLayout.visibility = View.VISIBLE
                 apNextPreviousButtons.visibility = View.VISIBLE
-            } else {
+            }
+            else {
                 apSecondLayout.visibility = View.GONE
                 apNextPreviousButtons.visibility = View.GONE
                 apFirstLayout.visibility = View.VISIBLE
@@ -5617,8 +5616,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     }
                 }
             }
-
-
 
             apBackArrowBtn.setOnClickListener {
                 dismiss()
@@ -7326,6 +7323,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                             Constants.multiImagesSelectedListSize = 0
                                             Handler(Looper.myLooper()!!).postDelayed({
                                                 BaseActivity.dismiss()
+                                                resetFieldValues()
                                                 dismiss()
                                                 listener.onSuccess("")
                                             }, 3000)
@@ -7367,7 +7365,6 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             appSettings.remove("AP_PRODUCT_DESCRIPTION")
             appSettings.remove("AP_PRODUCT_QUANTITY")
             appSettings.remove("AP_PRODUCT_PRICE")
-            multiImagesList.clear()
             barcodeImageList.clear()
         }
 
