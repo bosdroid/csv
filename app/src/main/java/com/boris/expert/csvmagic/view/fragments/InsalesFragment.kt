@@ -73,6 +73,9 @@ import com.skydoves.balloon.BalloonAnimation
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import io.paperdb.Paper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.expandable.ExpandableTextView
 import org.apmem.tools.layouts.FlowLayout
 import org.json.JSONObject
@@ -1556,11 +1559,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                                         if (response != null) {
                                             if (response.get("status").asString == "200") {
-                                                Handler(Looper.myLooper()!!).postDelayed({
+//                                                Handler(Looper.myLooper()!!).postDelayed({
                                                     BaseActivity.dismiss()
-                                                    dialogStatus = 1
-                                                    fetchProducts()//showProducts()
-                                                }, 3000)
+                                                    productsList[position].productImages!!.removeAt(imagePosition)
+                                                    productAdapter.notifyDataSetChanged()
+                                                updateMainProductList(productsList[position])
+//                                                    dialogStatus = 1
+//                                                    fetchProducts()//showProducts()
+//                                                }, 3000)
                                             } else {
                                                 BaseActivity.dismiss()
                                                 BaseActivity.showAlert(
@@ -1569,11 +1575,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 )
                                             }
                                         } else {
-                                            Handler(Looper.myLooper()!!).postDelayed({
+//                                            Handler(Looper.myLooper()!!).postDelayed({
                                                 BaseActivity.dismiss()
-                                                dialogStatus = 1
-                                                fetchProducts()//showProducts()
-                                            }, 3000)
+                                                productsList[position].productImages!!.removeAt(imagePosition)
+                                                productAdapter.notifyDataSetChanged()
+                                            updateMainProductList(productsList[position])
+//                                                dialogStatus = 1
+//                                                fetchProducts()//showProducts()
+//                                            }, 3000)
                                         }
                                     })
 
@@ -1835,6 +1844,33 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
         }
         Constants.listUpdateFlag = 0
+    }
+
+    private fun updateMainProductList(changeItem:Product){
+        CoroutineScope(Dispatchers.IO).launch {
+
+         if (originalProductsList.isNotEmpty()){
+             var isFound = false
+             var foundPosition = -1
+             for (i in 0 until originalProductsList.size){
+                   if (originalProductsList[i].id == changeItem.id){
+                       isFound = true
+                       foundPosition = i
+                       break
+                   }
+                 else{
+                     isFound = false
+                 }
+             }
+             if (isFound && foundPosition != -1){
+                 originalProductsList.removeAt(foundPosition)
+                 originalProductsList.add(foundPosition,changeItem)
+                 Paper.book().destroy()
+                 Paper.book().write(Constants.cacheProducts, originalProductsList)
+             }
+         }
+
+        }
     }
 
 
