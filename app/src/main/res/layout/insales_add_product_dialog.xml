@@ -150,6 +150,8 @@
                             android:id="@+id/ap_title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:maxHeight="300dp"
+                            android:isScrollContainer="true"
                             android:hint="@string/title_text"
                             android:textSize="@dimen/largeText"
                             android:inputType="textMultiLine" />
@@ -325,6 +327,8 @@
                             android:id="@+id/ap_description"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:maxHeight="300dp"
+                            android:isScrollContainer="true"
                             android:gravity="start"
                             android:textSize="@dimen/largeText"
                             android:hint="@string/description_text"

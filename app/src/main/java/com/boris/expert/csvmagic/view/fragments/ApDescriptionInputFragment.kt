@@ -233,6 +233,8 @@ class ApDescriptionInputFragment : Fragment() {
             false
         })
 
+
+
         apDescriptionView.setOnEditorActionListener(object:TextView.OnEditorActionListener{
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 if (actionId == EditorInfo.IME_ACTION_NEXT){
@@ -520,10 +522,10 @@ class ApDescriptionInputFragment : Fragment() {
         apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
         val position = appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
-            Handler(Looper.myLooper()!!).postDelayed(Runnable {
+//            Handler(Looper.myLooper()!!).postDelayed(Runnable {
                 BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
                 apDescriptionView.setSelection(apDescriptionView.text.toString().length)
-            },1000)
+//            },1000)
         }
     }
 
@@ -667,7 +669,7 @@ class ApDescriptionInputFragment : Fragment() {
                         stringBuilder.append(currentPItemDescription)
                         stringBuilder.append(description)
                         apDescriptionView.setText(stringBuilder.toString())
-                        appSettings.putString("AP_PRODUCT_DESCRIPTION",apDescriptionView.text.toString().trim())
+//                        appSettings.putString("AP_PRODUCT_DESCRIPTION",apDescriptionView.text.toString().trim())
 
                     }
                 }
@@ -687,9 +689,11 @@ class ApDescriptionInputFragment : Fragment() {
                 val currentPItemTitle = apDescriptionView.text.toString().trim()
                 val stringBuilder = java.lang.StringBuilder()
                 stringBuilder.append(currentPItemTitle)
-                stringBuilder.append(spokenText)
+                stringBuilder.append("$spokenText. ")
                 apDescriptionView.setText(stringBuilder.toString())
                 appSettings.putString("AP_PRODUCT_DESCRIPTION",apDescriptionView.text.toString().trim())
+                BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
+                apDescriptionView.setSelection(apDescriptionView.toString().length)
             }
         }
 
@@ -786,7 +790,21 @@ class ApDescriptionInputFragment : Fragment() {
             val alert = builder.create()
             alert.show()
         }
-
+        else{
+            apDescriptionView.setText(text)
+            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+            apDescriptionVoiceRecView.visibility = View.GONE
+            apDescriptionCameraRecView.visibility = View.GONE
+            apDescriptionImageRecView.visibility = View.GONE
+            apDescriptionListBtn.visibility = View.GONE
+            apDescriptionActiveListNameView.visibility = View.GONE
+            apDescriptionDefaultInputWrapper.visibility = View.GONE
+            apDescriptionDefaultValueMessage.visibility = View.GONE
+            apDescriptionListSpinner.visibility = View.GONE
+            apDescriptionViewWrapper.visibility = View.VISIBLE
+            appSettings.putInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION", 0)
+            apDescriptionSpinner.setSelection(0,false)
+        }
 
     }
 

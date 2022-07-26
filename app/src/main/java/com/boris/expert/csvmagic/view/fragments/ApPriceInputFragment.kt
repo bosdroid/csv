@@ -25,6 +25,7 @@ import com.boris.expert.csvmagic.R
 import com.boris.expert.csvmagic.adapters.FieldListsAdapter
 import com.boris.expert.csvmagic.model.ListItem
 import com.boris.expert.csvmagic.utils.AppSettings
+import com.boris.expert.csvmagic.utils.Constants
 import com.boris.expert.csvmagic.utils.TableGenerator
 import com.boris.expert.csvmagic.view.activities.BaseActivity
 import com.boris.expert.csvmagic.view.activities.FieldListsActivity
@@ -183,7 +184,8 @@ class ApPriceInputFragment : Fragment() {
         apPriceDefaultInputBox.setOnEditorActionListener(object:TextView.OnEditorActionListener{
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 if (actionId == EditorInfo.IME_ACTION_DONE){
-                    BaseActivity.hideSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
+//                    BaseActivity.hideSoftKeyboard(requireActivity(),apPriceDefaultInputBox)
+                    Constants.hideKeyboar(requireActivity())
                     val intent = Intent("move-next")
                     LocalBroadcastManager.getInstance(requireActivity())
                         .sendBroadcast(intent)
@@ -290,7 +292,8 @@ class ApPriceInputFragment : Fragment() {
         apPriceView.setOnEditorActionListener(object:TextView.OnEditorActionListener{
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 if (actionId == EditorInfo.IME_ACTION_NEXT){
-                    BaseActivity.hideSoftKeyboard(requireActivity(),apPriceView)
+                    //BaseActivity.hideSoftKeyboard(requireActivity(),apPriceView)
+                        Constants.hideKeyboar(requireActivity())
                     val intent = Intent("move-next")
                     LocalBroadcastManager.getInstance(requireActivity())
                         .sendBroadcast(intent)
@@ -306,10 +309,10 @@ class ApPriceInputFragment : Fragment() {
         apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
         val position = appSettings.getInt("AP_PRICE_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
-            Handler(Looper.myLooper()!!).postDelayed(Runnable {
+//            Handler(Looper.myLooper()!!).postDelayed(Runnable {
                 BaseActivity.showSoftKeyboard(requireActivity(),apPriceView)
                 apPriceView.setSelection(apPriceView.text.toString().length)
-            },1000)
+//            },1000)
         }
     }
 

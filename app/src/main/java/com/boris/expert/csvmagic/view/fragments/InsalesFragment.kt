@@ -3043,6 +3043,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                     search(query, "default")
                     searchEditText.setText(query)
+                    alert.dismiss()
                 }
 
                 return false
@@ -5464,6 +5465,26 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             })
 
+            apTitleView.setOnTouchListener(View.OnTouchListener { v, event ->
+                if (v.id == R.id.ap_title) {
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    when (event.action and MotionEvent.ACTION_MASK) {
+                        MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                false
+            })
+
+            apDescriptionView.setOnTouchListener(View.OnTouchListener { v, event ->
+                if (v.id == R.id.ap_description) {
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    when (event.action and MotionEvent.ACTION_MASK) {
+                        MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                false
+            })
+
             getTitleBtn.setOnClickListener {
                 userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 
@@ -7526,14 +7547,18 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             val currentPItemTitle = apTitleView.text.toString().trim()
                             val stringBuilder = java.lang.StringBuilder()
                             stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(spokenText)
+                            stringBuilder.append("$spokenText. ")
                             apTitleView.setText(stringBuilder.toString())
+                            BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+                            apTitleView.setSelection(apTitleView.toString().length)
                         } else {
                             val currentPItemTitle = apDescriptionView.text.toString().trim()
                             val stringBuilder = java.lang.StringBuilder()
                             stringBuilder.append(currentPItemTitle)
-                            stringBuilder.append(spokenText)
+                            stringBuilder.append("$spokenText. ")
                             apDescriptionView.setText(stringBuilder.toString())
+                            BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
+                            apDescriptionView.setSelection(apDescriptionView.toString().length)
                         }
                     }
                 }
@@ -7929,10 +7954,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 //                            stringBuilder.append(title)
 //                            apTitleView.setText(stringBuilder.toString())
                                 appSettings.putString("AP_PRODUCT_TITLE", title)
-                                val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
-                                if (currentFragment is ApTitleInputFragment) {
-                                    currentFragment.updateTestData(title)
-                                }
+//                                val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
+//                                if (currentFragment is ApTitleInputFragment) {
+//                                    currentFragment.updateTestData(title)
+//                                }
 
                             }
                         }
@@ -7941,10 +7966,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             val description = data.getStringExtra("DESCRIPTION") as String
                             if (description.isNotEmpty()) {
                                 appSettings.putString("AP_PRODUCT_DESCRIPTION", description)
-                                val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
-                                if (currentFragment is ApDescriptionInputFragment) {
-                                    currentFragment.updateTestData(description)
-                                }
+//                                val currentFragment = childFragmentManager.getFragments().get(apViewPager.getCurrentItem())
+//                                if (currentFragment is ApDescriptionInputFragment) {
+//                                    currentFragment.updateTestData(description)
+//                                }
 //                            val currentPItemDescription = apDescriptionView.text.toString().trim()
 //                            val stringBuilder = java.lang.StringBuilder()
 //                            stringBuilder.append(currentPItemDescription)

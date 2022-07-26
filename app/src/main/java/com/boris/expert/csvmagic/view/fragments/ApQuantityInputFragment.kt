@@ -319,10 +319,10 @@ class ApQuantityInputFragment : Fragment() {
         apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
         val position = appSettings.getInt("AP_QUANTITY_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
-            Handler(Looper.myLooper()!!).postDelayed(Runnable {
+//            Handler(Looper.myLooper()!!).postDelayed(Runnable {
                 BaseActivity.showSoftKeyboard(requireActivity(),apQuantityView)
                 apQuantityView.setSelection(apQuantityView.text.toString().length)
-            },1000)
+//            },1000)
         }
     }
 

@@ -67,7 +67,7 @@ import java.util.*
 
 
 class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickListener,
-        View.OnClickListener {
+    View.OnClickListener {
 
     private lateinit var context: Context
     private lateinit var toolbar: Toolbar
@@ -126,7 +126,9 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     val query = searchBox.text.toString().trim()
                     if (query.isNotEmpty()) {
-                        Constants.hideKeyboar(context)
+                        hideSoftKeyboard(context, searchBox)
+                        searchBox.clearFocus()
+                        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                         startLoading(context)
                         CoroutineScope(Dispatchers.IO).launch {
 //                        System.setProperty("GOOGLE_API_KEY",context.resources.getString(R.string.translation_api_key))
@@ -143,26 +145,26 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                 howMuchChargeCredits = total
                                 CoroutineScope(Dispatchers.IO).launch {
                                     GcpTranslator.translateFromRusToEng(
-                                            context,
-                                            query,
-                                            object : TranslationCallback {
-                                                override fun onTextTranslation(translatedText: String) {
-                                                    CoroutineScope(Dispatchers.Main).launch {
-                                                        if (translatedText.isNotEmpty()) {
-                                                            //showAlert(context,translatedText)
-                                                            getProducts(translatedText)
-                                                        } else {
-                                                            dismiss()
-                                                            showAlert(
-                                                                    context,
-                                                                    getString(R.string.something_wrong_with_translator_error)
-                                                            )
-                                                        }
+                                        context,
+                                        query,
+                                        object : TranslationCallback {
+                                            override fun onTextTranslation(translatedText: String) {
+                                                CoroutineScope(Dispatchers.Main).launch {
+                                                    if (translatedText.isNotEmpty()) {
+                                                        //showAlert(context,translatedText)
+                                                        getProducts(translatedText)
+                                                    } else {
+                                                        dismiss()
+                                                        showAlert(
+                                                            context,
+                                                            getString(R.string.something_wrong_with_translator_error)
+                                                        )
                                                     }
-
                                                 }
 
-                                            })
+                                            }
+
+                                        })
                                 }
                             }
                         }
@@ -179,9 +181,12 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
         voiceSearchIcon.setOnClickListener {
             voiceLanguageCode = appSettings.getString("VOICE_LANGUAGE_CODE") as String
-            val voiceLayout = LayoutInflater.from(context).inflate(R.layout.voice_language_setting_layout, null)
-            val voiceLanguageSpinner = voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
-            val voiceLanguageSaveBtn = voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
+            val voiceLayout =
+                LayoutInflater.from(context).inflate(R.layout.voice_language_setting_layout, null)
+            val voiceLanguageSpinner =
+                voiceLayout.findViewById<AppCompatSpinner>(R.id.voice_language_spinner)
+            val voiceLanguageSaveBtn =
+                voiceLayout.findViewById<MaterialButton>(R.id.voice_language_save_btn)
 
             if (voiceLanguageCode == "en" || voiceLanguageCode.isEmpty()) {
                 voiceLanguageSpinner.setSelection(0, false)
@@ -190,27 +195,30 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
             }
 
             voiceLanguageSpinner.onItemSelectedListener =
-                    object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                                parent: AdapterView<*>?,
-                                view: View?,
-                                position: Int,
-                                id: Long
-                        ) {
-                            voiceLanguageCode = if (parent!!.selectedItem.toString().toLowerCase(Locale.ENGLISH).contains("english")) {
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        voiceLanguageCode =
+                            if (parent!!.selectedItem.toString().toLowerCase(Locale.ENGLISH)
+                                    .contains("english")
+                            ) {
                                 "en"
                             } else {
                                 "ru"
                             }
-                            appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
-
-                        }
-
-                        override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                        }
+                        appSettings.putString("VOICE_LANGUAGE_CODE", voiceLanguageCode)
 
                     }
+
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
+
+                }
             val builder = MaterialAlertDialogBuilder(context)
             builder.setView(voiceLayout)
             val alert = builder.create();
@@ -219,8 +227,8 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 alert.dismiss()
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(
-                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
                     )
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, voiceLanguageCode)
 
@@ -252,45 +260,45 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
     }
 
     private var barcodeImageResultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    if (result.data != null && result.data!!.hasExtra("SCANNED_BARCODE_VALUE")) {
-                        val barcodeId =
-                                result.data!!.getStringExtra("SCANNED_BARCODE_VALUE") as String
-                        if (barcodeId.isNotEmpty()) {
-                            searchBox.setText(barcodeId)
-                            searchBox.clearFocus()
-                            hideSoftKeyboard(context, searchBox)
-                            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-                            startSearch(barcodeId)
-                        }
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                if (result.data != null && result.data!!.hasExtra("SCANNED_BARCODE_VALUE")) {
+                    val barcodeId =
+                        result.data!!.getStringExtra("SCANNED_BARCODE_VALUE") as String
+                    if (barcodeId.isNotEmpty()) {
+                        searchBox.setText(barcodeId)
+                        searchBox.clearFocus()
+                        hideSoftKeyboard(context, searchBox)
+                        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+                        startSearch(barcodeId)
                     }
-
-
                 }
+
+
             }
+        }
 
 
     private var voiceResultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
-                // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val spokenText: String =
-                            result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                                    .let { results ->
-                                        results!![0]
-                                    }
+            // THIS LINE OF CODE WILL CHECK THE IMAGE HAS BEEN SELECTED OR NOT
+            if (result.resultCode == Activity.RESULT_OK) {
+                val spokenText: String =
+                    result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                        .let { results ->
+                            results!![0]
+                        }
 
-                    searchBox.setText(spokenText)
-                    searchBox.clearFocus()
-                    hideSoftKeyboard(context, searchBox)
-                    window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-                    startSearch(spokenText)
-                }
+                searchBox.setText(spokenText)
+                searchBox.clearFocus()
+                hideSoftKeyboard(context, searchBox)
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+                startSearch(spokenText)
             }
+        }
 
     override fun onItemClick(position: Int) {
         val item = rainForestList[position]
@@ -407,26 +415,26 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 howMuchChargeCredits = total
                 CoroutineScope(Dispatchers.IO).launch {
                     GcpTranslator.translateFromRusToEng(
-                            context,
-                            query,
-                            object : TranslationCallback {
-                                override fun onTextTranslation(translatedText: String) {
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        if (translatedText.isNotEmpty()) {
-                                            //showAlert(context,translatedText)
-                                            getProducts(translatedText)
-                                        } else {
-                                            dismiss()
-                                            showAlert(
-                                                    context,
-                                                    getString(R.string.something_wrong_with_translator_error)
-                                            )
-                                        }
+                        context,
+                        query,
+                        object : TranslationCallback {
+                            override fun onTextTranslation(translatedText: String) {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    if (translatedText.isNotEmpty()) {
+                                        //showAlert(context,translatedText)
+                                        getProducts(translatedText)
+                                    } else {
+                                        dismiss()
+                                        showAlert(
+                                            context,
+                                            getString(R.string.something_wrong_with_translator_error)
+                                        )
                                     }
-
                                 }
 
-                            })
+                            }
+
+                        })
                 }
             }
         }
@@ -435,55 +443,55 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
     private fun getProducts(query: String) {
 
         val url =
-                "https://api.rainforestapi.com/request?api_key=2ADA91B95479431FAFCDEDFA36717046&type=search&amazon_domain=amazon.com&search_term=$query"
+            "https://api.rainforestapi.com/request?api_key=2ADA91B95479431FAFCDEDFA36717046&type=search&amazon_domain=amazon.com&search_term=$query"
         val stringRequest = StringRequest(
-                Request.Method.GET,
-                url,
-                {
+            Request.Method.GET,
+            url,
+            {
 
-                    val response = JSONObject(it)
-                    if (response.has("search_results")) {
-                        chargeCreditsPrice()
-                        val searchResults = response.getJSONArray("search_results")
-                        if (searchResults.length() > 0) {
-                            rainForestList.clear()
-                            var totalCharacters = 0
-                            for (i in 0 until searchResults.length()) {
-                                val item = searchResults.getJSONObject(i)
-                                rainForestList.add(
-                                        RainForestApiObject(
-                                                item.getString("asin"),
-                                                item.getString("image"),
-                                                item.getString("title")
-                                        )
+                val response = JSONObject(it)
+                if (response.has("search_results")) {
+                    chargeCreditsPrice()
+                    val searchResults = response.getJSONArray("search_results")
+                    if (searchResults.length() > 0) {
+                        rainForestList.clear()
+                        var totalCharacters = 0
+                        for (i in 0 until searchResults.length()) {
+                            val item = searchResults.getJSONObject(i)
+                            rainForestList.add(
+                                RainForestApiObject(
+                                    item.getString("asin"),
+                                    item.getString("image"),
+                                    item.getString("title")
                                 )
-                                totalCharacters += item.getString("title").length
-                            }
-                            val totalCreditPrice = unitCharacterPrice * totalCharacters
-                            howMuchChargeCredits = totalCreditPrice
-                            //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
+                            )
+                            totalCharacters += item.getString("title").length
+                        }
+                        val totalCreditPrice = unitCharacterPrice * totalCharacters
+                        howMuchChargeCredits = totalCreditPrice
+                        //userCurrentCredits = appSettings.getString(Constants.userCreditsValue) as String
 //                        userCurrentCredits = "0"
 //                        if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
-                            try {
+                        try {
 
-                                for (i in 0 until rainForestList.size) {
-                                    val text = rainForestList[i].title
-                                    GcpTranslator.translateFromEngToRus(
-                                            context,
-                                            text,
-                                            object : TranslationCallback {
-                                                override fun onTextTranslation(translatedText: String) {
-                                                    rainForestList[i].title = translatedText
-                                                    adapter.notifyItemChanged(i)
-                                                }
+                            for (i in 0 until rainForestList.size) {
+                                val text = rainForestList[i].title
+                                GcpTranslator.translateFromEngToRus(
+                                    context,
+                                    text,
+                                    object : TranslationCallback {
+                                        override fun onTextTranslation(translatedText: String) {
+                                            rainForestList[i].title = translatedText
+                                            adapter.notifyItemChanged(i)
+                                        }
 
-                                            })
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+                                    })
                             }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
 
-                            dismiss()
+                        dismiss()
 //                        if (rainForestList.size > 0) {
 //                            adapter.notifyItemRangeChanged(0,rainForestList.size)
 //                        }
@@ -493,7 +501,7 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                                adapter.notifyDataSetChanged()
 //                            }
 //                        }
-                            chargeCreditsPrice()
+                        chargeCreditsPrice()
 //                        CoroutineScope(Dispatchers.IO).launch {
 //                            try {
 //                                for (i in 0 until rainForestList.size) {
@@ -537,14 +545,14 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                                }
 //                                .create().show()
 //                        }
-                        } else {
-                            dismiss()
-                        }
+                    } else {
+                        dismiss()
                     }
-                },
-                {
-                    Log.d("TEST199", it.localizedMessage!!)
-                })
+                }
+            },
+            {
+                Log.d("TEST199", it.localizedMessage!!)
+            })
 
         stringRequest.retryPolicy = object : RetryPolicy {
             override fun getCurrentTimeout(): Int {
@@ -570,77 +578,77 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         userCurrentCredits = remaining.toString()
         hashMap["credits"] = userCurrentCredits
         firebaseDatabase.child(Constants.firebaseUserCredits)
-                .child(Constants.firebaseUserId)
-                .updateChildren(hashMap)
-                .addOnSuccessListener {
-                    howMuchChargeCredits = 0F
-                    getUserCredits(
-                            context
-                    )
-                }
-                .addOnFailureListener {
+            .child(Constants.firebaseUserId)
+            .updateChildren(hashMap)
+            .addOnSuccessListener {
+                howMuchChargeCredits = 0F
+                getUserCredits(
+                    context
+                )
+            }
+            .addOnFailureListener {
 
-                }
+            }
     }
 
     private fun getProductDescription(asin: String) {
         startLoading(context)
         val url =
-                "https://api.rainforestapi.com/request?api_key=2ADA91B95479431FAFCDEDFA36717046&type=product&amazon_domain=amazon.com&asin=$asin"
+            "https://api.rainforestapi.com/request?api_key=2ADA91B95479431FAFCDEDFA36717046&type=product&amazon_domain=amazon.com&asin=$asin"
         val stringRequest = StringRequest(
-                Request.Method.GET,
-                url,
-                {
-                    dismiss()
-                    val descriptionBuilder = StringBuilder()
-                    val response = JSONObject(it)
-                    if (response.has("product")) {
-                        val productResults = response.getJSONObject("product")
-                        val title = productResults.getString("title")
-                        if (productResults.has("specifications_flat")) {
-                            descriptionBuilder.append(productResults.getString("specifications_flat"))
-                            descriptionBuilder.append("\n\n")
+            Request.Method.GET,
+            url,
+            {
+                dismiss()
+                val descriptionBuilder = StringBuilder()
+                val response = JSONObject(it)
+                if (response.has("product")) {
+                    val productResults = response.getJSONObject("product")
+                    val title = productResults.getString("title")
+                    if (productResults.has("specifications_flat")) {
+                        descriptionBuilder.append(productResults.getString("specifications_flat"))
+                        descriptionBuilder.append("\n\n")
+                    }
+
+                    if (productResults.has("feature_bullets_flat")) {
+                        descriptionBuilder.append(productResults.getString("feature_bullets_flat"))
+                        descriptionBuilder.append("\n\n")
+                    }
+
+                    if (productResults.has("feature_bullets")) {
+                        val featureBullets = productResults.getJSONArray("feature_bullets")
+                        for (i in 0 until featureBullets.length()) {
+                            descriptionBuilder.append(featureBullets[i])
+                            descriptionBuilder.append("\n")
                         }
+                    }
 
-                        if (productResults.has("feature_bullets_flat")) {
-                            descriptionBuilder.append(productResults.getString("feature_bullets_flat"))
-                            descriptionBuilder.append("\n\n")
-                        }
-
-                        if (productResults.has("feature_bullets")) {
-                            val featureBullets = productResults.getJSONArray("feature_bullets")
-                            for (i in 0 until featureBullets.length()) {
-                                descriptionBuilder.append(featureBullets[i])
-                                descriptionBuilder.append("\n")
-                            }
-                        }
-
-                        if (productResults.has("description")) {
-                            descriptionBuilder.append("\n\n")
-                            descriptionBuilder.append(productResults.getString("description"))
-                        }
+                    if (productResults.has("description")) {
+                        descriptionBuilder.append("\n\n")
+                        descriptionBuilder.append(productResults.getString("description"))
+                    }
 
 
-                        val description = if (descriptionBuilder.toString().isEmpty()) {
-                            ""
-                        } else {
-                            descriptionBuilder.toString()
-                        }
+                    val description = if (descriptionBuilder.toString().isEmpty()) {
+                        ""
+                    } else {
+                        descriptionBuilder.toString()
+                    }
 
-                        val imageList = if (productResults.has("images_flat")) {
-                            productResults.getString("images_flat")
-                        } else {
-                            ""
-                        }
+                    val imageList = if (productResults.has("images_flat")) {
+                        productResults.getString("images_flat")
+                    } else {
+                        ""
+                    }
 
-                        CustomDialog(
-                                title,
-                                description,
-                                imageList,
-                                userCurrentCredits,
-                                unitCharacterPrice,
-                                howMuchChargeCredits
-                        ).show(supportFragmentManager, "dialog")
+                    CustomDialog(
+                        title,
+                        description,
+                        imageList,
+                        userCurrentCredits,
+                        unitCharacterPrice,
+                        howMuchChargeCredits
+                    ).show(supportFragmentManager, "dialog")
 
 //                        val layoutBuilder = MaterialAlertDialogBuilder(context)
 //                        val dialogLayout = LayoutInflater.from(context)
@@ -853,11 +861,11 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                            }
 //                        }
 
-                    }
-                },
-                {
-                    Log.d("TEST199", it.localizedMessage!!)
-                })
+                }
+            },
+            {
+                Log.d("TEST199", it.localizedMessage!!)
+            })
 
         stringRequest.retryPolicy = object : RetryPolicy {
             override fun getCurrentTimeout(): Int {
@@ -940,23 +948,23 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                textView.setOnTouchListener(LinkMovementMethodOverride())
 
                 val balloon = Balloon.Builder(context)
-                        .setLayout(R.layout.ballon_layout_design)
-                        .setArrowSize(10)
-                        .setArrowOrientation(ArrowOrientation.TOP)
-                        .setArrowPosition(0.1f)
-                        .setWidthRatio(0.55f)
-                        .setCornerRadius(4f)
-                        .setBackgroundColor(ContextCompat.getColor(context, R.color.light_gray))
-                        .setBalloonAnimation(BalloonAnimation.ELASTIC)
-                        .setLifecycleOwner(this@RainForestApiActivity)
-                        .build()
+                    .setLayout(R.layout.ballon_layout_design)
+                    .setArrowSize(10)
+                    .setArrowOrientation(ArrowOrientation.TOP)
+                    .setArrowPosition(0.1f)
+                    .setWidthRatio(0.55f)
+                    .setCornerRadius(4f)
+                    .setBackgroundColor(ContextCompat.getColor(context, R.color.light_gray))
+                    .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                    .setLifecycleOwner(this@RainForestApiActivity)
+                    .build()
                 val editTextBox =
-                        balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
+                    balloon.getContentView().findViewById<TextInputEditText>(R.id.balloon_edit_text)
                 editTextBox.setText(mWord)
                 val closeBtn =
-                        balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
+                    balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_close_btn)
                 val applyBtn =
-                        balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
+                    balloon.getContentView().findViewById<AppCompatButton>(R.id.balloon_apply_btn)
                 balloon.showAlignTop(widget)
                 editTextBox.requestFocus()
                 Constants.openKeyboar(context)
@@ -979,12 +987,12 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
     }
 
     open class CustomDialog(
-            private val title: String,
-            private val description: String,
-            private val imageList: String,
-            private var userCurrentCredits: String,
-            private val unitCharacterPrice: Float,
-            private var howMuchChargeCredits: Float
+        private val title: String,
+        private val description: String,
+        private val imageList: String,
+        private var userCurrentCredits: String,
+        private val unitCharacterPrice: Float,
+        private var howMuchChargeCredits: Float
     ) : DialogFragment(), View.OnClickListener {
 
         private var titleTextViewList = mutableListOf<TextView>()
@@ -997,31 +1005,32 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
         private lateinit var rainForestProductImagesRecyclerView: RecyclerView
         var rainForestProductImagesList = mutableListOf<String>()
         private lateinit var rainForestProductImageAdapter: RainForestProductImageAdapter
+        private lateinit var fullDescriptionBtn: AppCompatImageView
 
         override fun onAttach(context: Context) {
             super.onAttach(context)
             sharedViewModel = ViewModelProviders.of(
-                    requireActivity() as RainForestApiActivity,
-                    ViewModelFactory(SharedViewModel()).createFor()
+                requireActivity() as RainForestApiActivity,
+                ViewModelFactory(SharedViewModel()).createFor()
             )[SharedViewModel::class.java]
         }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setStyle(
-                    STYLE_NORMAL,
-                    R.style.FullScreenDialogStyle
+                STYLE_NORMAL,
+                R.style.FullScreenDialogStyle
             )
             rainForestApiInstance = RainForestApiActivity()
         }
 
         override fun onCreateView(
-                inflater: LayoutInflater,
-                container: ViewGroup?,
-                savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
         ): View? {
             val v =
-                    inflater.inflate(R.layout.rain_forest_title_description_layout, container)
+                inflater.inflate(R.layout.rain_forest_title_description_layout, container)
 
             initViews(v)
 
@@ -1030,23 +1039,31 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 
         private fun initViews(view: View) {
             val dialogCloseBtn =
-                    view.findViewById<AppCompatImageView>(R.id.dialog_close_btn)
+                view.findViewById<AppCompatImageView>(R.id.dialog_close_btn)
             val titleTextView =
-                    view.findViewById<MaterialTextView>(R.id.title_text_view)
+                view.findViewById<MaterialTextView>(R.id.title_text_view)
             val descriptionTextView =
-                    view.findViewById<MaterialTextView>(R.id.description_text_view)
+                view.findViewById<MaterialTextView>(R.id.description_text_view)
             val titleAddBtn =
-                    view.findViewById<MaterialTextView>(R.id.add_title_button)
+                view.findViewById<MaterialTextView>(R.id.add_title_button)
             val descriptionAddBtn =
-                    view.findViewById<MaterialTextView>(R.id.add_description_button)
+                view.findViewById<MaterialTextView>(R.id.add_description_button)
             val backBtn =
-                    view.findViewById<MaterialButton>(R.id.rfa_item_back_btn)
+                view.findViewById<MaterialButton>(R.id.rfa_item_back_btn)
             val doneBtn = view.findViewById<MaterialButton>(R.id.rfa_item_done_btn)
             val dynamicTitleTextViewWrapper =
-                    view.findViewById<FlowLayout>(R.id.dynamic_textview_wrapper)
+                view.findViewById<FlowLayout>(R.id.dynamic_textview_wrapper)
             val dynamicDescriptionTextViewWrapper =
-                    view.findViewById<FlowLayout>(R.id.dynamic_description_textview_wrapper)
-            rainForestProductImagesRecyclerView = view.findViewById(R.id.rainforest_product_images_recyclerview)
+                view.findViewById<FlowLayout>(R.id.dynamic_description_textview_wrapper)
+            rainForestProductImagesRecyclerView =
+                view.findViewById(R.id.rainforest_product_images_recyclerview)
+            fullDescriptionBtn = view.findViewById(R.id.full_description_button)
+
+            fullDescriptionBtn.setOnClickListener {
+                FullDescriptionDialogFragment(
+                    description
+                ).show(childFragmentManager, "dialog")
+            }
 
             if (imageList.isNotEmpty()) {
                 rainForestProductImagesList.addAll(imageList.split(","))
@@ -1057,17 +1074,17 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
             rainForestProductImagesRecyclerView.layoutManager = layoutManager
             rainForestProductImagesRecyclerView.hasFixedSize()
             rainForestProductImageAdapter = RainForestProductImageAdapter(
-                    requireActivity(),
-                    rainForestProductImagesList as ArrayList<String>
+                requireActivity(),
+                rainForestProductImagesList as ArrayList<String>
             )
             rainForestProductImagesRecyclerView.adapter = rainForestProductImageAdapter
             rainForestProductImageAdapter.setOnItemClickListener(object :
-                    RainForestProductImageAdapter.OnItemClickListener {
+                RainForestProductImageAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedImage = rainForestProductImagesList[position]
                     FullImageFragment(selectedImage).show(
-                            childFragmentManager,
-                            "full-image-dialog"
+                        childFragmentManager,
+                        "full-image-dialog"
                     )
                 }
 
@@ -1077,26 +1094,26 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     val selectedImage = rainForestProductImagesList[position]
                     //Toast.makeText(requireActivity(),selectedImage,Toast.LENGTH_SHORT).show()
                     if (btn.text.toString()
-                                    .toLowerCase(Locale.ENGLISH) == "attach"
+                            .toLowerCase(Locale.ENGLISH) == "attach"
                     ) {
                         finalSelectedImageList.add(selectedImage)
 
                         btn.text =
-                                requireActivity().resources.getString(R.string.attached_text)
+                            requireActivity().resources.getString(R.string.attached_text)
                         btn.setBackgroundColor(
-                                ContextCompat.getColor(
-                                        requireActivity(),
-                                        R.color.dark_gray
-                                )
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.dark_gray
+                            )
                         )
                     } else {
                         btn.text =
-                                requireActivity().resources.getString(R.string.attach_text)
+                            requireActivity().resources.getString(R.string.attach_text)
                         btn.setBackgroundColor(
-                                ContextCompat.getColor(
-                                        requireActivity(),
-                                        R.color.primary_positive_color
-                                )
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.primary_positive_color
+                            )
                         )
                         finalSelectedImageList.remove(selectedImage)
                     }
@@ -1143,7 +1160,20 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     stringBuilder.toString().trim()
                     //descriptionTextView.text.toString()
                 }
-                Constants.selectedRainForestProductImages = if (finalSelectedImageList.isEmpty()){""}else{finalSelectedImageList.joinToString(",")}
+                if (Constants.selectedRainForestProductImages.isEmpty()) {
+                    Constants.selectedRainForestProductImages =
+                        if (finalSelectedImageList.isEmpty()) {
+                            ""
+                        } else {
+                            finalSelectedImageList.joinToString(",")
+                        }
+                } else {
+                    Constants.selectedRainForestProductImages =
+                        "${Constants.selectedRainForestProductImages},${
+                            finalSelectedImageList.joinToString(",")
+                        }"
+
+                }
                 requireActivity().setResult(RESULT_OK, Intent().apply {
                     putExtra("TITLE", finalTitleText)
                     putExtra("DESCRIPTION", finalDescriptionText)
@@ -1159,20 +1189,67 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
 //                    if (userCurrentCredits.isNotEmpty() && (userCurrentCredits != "0" || userCurrentCredits != "0.0") && userCurrentCredits.toFloat() >= totalCreditPrice) {
 
             GcpTranslator.translateFromEngToRus(
+                requireActivity(),
+                title,
+                object : TranslationCallback {
+                    override fun onTextTranslation(translatedText: String) {
+                        if (translatedText.isNotEmpty()) {
+                            titleTextView.text = translatedText
+
+                            val textList = translatedText.split(" ")
+
+                            titleTextViewList.clear()
+                            for (i in 0 until textList.size) {
+                                val params = FlowLayout.LayoutParams(
+                                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                                    FlowLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                params.setMargins(5, 5, 5, 5)
+                                val textView = MaterialTextView(requireActivity())
+                                textView.layoutParams = params
+                                textView.text = textList[i]
+                                textView.tag = "title"
+                                textView.id = i
+                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                                textView.setTextColor(
+                                    ContextCompat.getColor(
+                                        requireActivity(),
+                                        R.color.black
+                                    )
+                                )
+                                titleTextViewList.add(textView)
+                                textView.setOnClickListener(this@CustomDialog)
+                                dynamicTitleTextViewWrapper.addView(textView)
+                            }
+
+
+                        } else {
+                            titleTextView.text = ""
+                        }
+                    }
+
+                })
+
+//                        initSelectebleWord(titleTextView.text.toString(), titleTextView)
+//                        titleTextView.setOnTouchListener(LinkMovementMethodOverride())
+
+
+            if (description.isNotEmpty()) {
+                GcpTranslator.translateFromEngToRus(
                     requireActivity(),
-                    title,
+                    description,
                     object : TranslationCallback {
                         override fun onTextTranslation(translatedText: String) {
                             if (translatedText.isNotEmpty()) {
-                                titleTextView.text = translatedText
+                                descriptionTextView.text = translatedText
 
                                 val textList = translatedText.split(" ")
 
-                                titleTextViewList.clear()
+                                descriptionTextViewList.clear()
                                 for (i in 0 until textList.size) {
                                     val params = FlowLayout.LayoutParams(
-                                            FlowLayout.LayoutParams.WRAP_CONTENT,
-                                            FlowLayout.LayoutParams.WRAP_CONTENT
+                                        FlowLayout.LayoutParams.WRAP_CONTENT,
+                                        FlowLayout.LayoutParams.WRAP_CONTENT
                                     )
                                     params.setMargins(5, 5, 5, 5)
                                     val textView = MaterialTextView(requireActivity())
@@ -1182,73 +1259,26 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                                     textView.id = i
                                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                                     textView.setTextColor(
-                                            ContextCompat.getColor(
-                                                    requireActivity(),
-                                                    R.color.black
-                                            )
+                                        ContextCompat.getColor(
+                                            requireActivity(),
+                                            R.color.black
+                                        )
                                     )
-                                    titleTextViewList.add(textView)
+                                    descriptionTextViewList.add(textView)
                                     textView.setOnClickListener(this@CustomDialog)
-                                    dynamicTitleTextViewWrapper.addView(textView)
+                                    dynamicDescriptionTextViewWrapper.addView(textView)
                                 }
 
-
                             } else {
-                                titleTextView.text = ""
+                                descriptionTextView.text = ""
                             }
                         }
 
                     })
-
-//                        initSelectebleWord(titleTextView.text.toString(), titleTextView)
-//                        titleTextView.setOnTouchListener(LinkMovementMethodOverride())
-
-
-            if (description.isNotEmpty()) {
-                GcpTranslator.translateFromEngToRus(
-                        requireActivity(),
-                        description,
-                        object : TranslationCallback {
-                            override fun onTextTranslation(translatedText: String) {
-                                if (translatedText.isNotEmpty()) {
-                                    descriptionTextView.text = translatedText
-
-                                    val textList = translatedText.split(" ")
-
-                                    descriptionTextViewList.clear()
-                                    for (i in 0 until textList.size) {
-                                        val params = FlowLayout.LayoutParams(
-                                                FlowLayout.LayoutParams.WRAP_CONTENT,
-                                                FlowLayout.LayoutParams.WRAP_CONTENT
-                                        )
-                                        params.setMargins(5, 5, 5, 5)
-                                        val textView = MaterialTextView(requireActivity())
-                                        textView.layoutParams = params
-                                        textView.text = textList[i]
-                                        textView.tag = "title"
-                                        textView.id = i
-                                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                                        textView.setTextColor(
-                                                ContextCompat.getColor(
-                                                        requireActivity(),
-                                                        R.color.black
-                                                )
-                                        )
-                                        descriptionTextViewList.add(textView)
-                                        textView.setOnClickListener(this@CustomDialog)
-                                        dynamicDescriptionTextViewWrapper.addView(textView)
-                                    }
-
-                                } else {
-                                    descriptionTextView.text = ""
-                                }
-                            }
-
-                        })
             } else {
                 val params = FlowLayout.LayoutParams(
-                        FlowLayout.LayoutParams.WRAP_CONTENT,
-                        FlowLayout.LayoutParams.WRAP_CONTENT
+                    FlowLayout.LayoutParams.WRAP_CONTENT,
+                    FlowLayout.LayoutParams.WRAP_CONTENT
                 )
                 params.setMargins(5, 5, 5, 5)
                 val textView = MaterialTextView(requireActivity())
@@ -1266,17 +1296,17 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
             userCurrentCredits = remaining.toString()
             hashMap["credits"] = userCurrentCredits
             firebaseDatabase.child(Constants.firebaseUserCredits)
-                    .child(Constants.firebaseUserId)
-                    .updateChildren(hashMap)
-                    .addOnSuccessListener {
-                        howMuchChargeCredits = 0F
-                        getUserCredits(
-                                requireActivity()
-                        )
-                    }
-                    .addOnFailureListener {
+                .child(Constants.firebaseUserId)
+                .updateChildren(hashMap)
+                .addOnSuccessListener {
+                    howMuchChargeCredits = 0F
+                    getUserCredits(
+                        requireActivity()
+                    )
+                }
+                .addOnFailureListener {
 
-                    }
+                }
 //                    }
 //                    else{
 //                        titleTextView.text = title
@@ -1369,35 +1399,35 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                     val position = view.id
                     val textView = view as MaterialTextView
                     view.setBackgroundColor(
-                            ContextCompat.getColor(
-                                    requireActivity(),
-                                    R.color.primary_positive_color
-                            )
+                        ContextCompat.getColor(
+                            requireActivity(),
+                            R.color.primary_positive_color
+                        )
                     )
                     view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
                     val balloon = Balloon.Builder(requireActivity())
-                            .setLayout(R.layout.ballon_layout_design)
-                            .setArrowSize(10)
-                            .setArrowOrientation(ArrowOrientation.TOP)
-                            .setArrowPosition(0.5f)
-                            .setWidthRatio(0.55f)
-                            .setCornerRadius(4f)
-                            .setBackgroundColor(
-                                    ContextCompat.getColor(
-                                            requireActivity(),
-                                            R.color.light_gray
-                                    )
+                        .setLayout(R.layout.ballon_layout_design)
+                        .setArrowSize(10)
+                        .setArrowOrientation(ArrowOrientation.TOP)
+                        .setArrowPosition(0.5f)
+                        .setWidthRatio(0.55f)
+                        .setCornerRadius(4f)
+                        .setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.light_gray
                             )
-                            .setBalloonAnimation(BalloonAnimation.ELASTIC)
-                            .setLifecycleOwner(this)
-                            .build()
+                        )
+                        .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                        .setLifecycleOwner(this)
+                        .build()
                     val editTextBox = balloon.getContentView()
-                            .findViewById<TextInputEditText>(R.id.balloon_edit_text)
+                        .findViewById<TextInputEditText>(R.id.balloon_edit_text)
                     editTextBox.setText(textView.text.toString().trim())
                     val closeBtn = balloon.getContentView()
-                            .findViewById<AppCompatButton>(R.id.balloon_close_btn)
+                        .findViewById<AppCompatButton>(R.id.balloon_close_btn)
                     val applyBtn = balloon.getContentView()
-                            .findViewById<AppCompatButton>(R.id.balloon_apply_btn)
+                        .findViewById<AppCompatButton>(R.id.balloon_apply_btn)
                     balloon.showAlignTop(textView)
                     editTextBox.requestFocus()
                     Constants.openKeyboar(requireActivity())
@@ -1405,10 +1435,10 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         Constants.hideKeyboar(requireActivity())
                         balloon.dismiss()
                         view.setBackgroundColor(
-                                ContextCompat.getColor(
-                                        requireActivity(),
-                                        R.color.white
-                                )
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.white
+                            )
                         )
                         view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
                     }
@@ -1418,10 +1448,10 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                         //val tempText = textView.replace(mWord,editTextBox.text.toString().trim())
                         textView.text = editTextBox.text.toString().trim()
                         view.setBackgroundColor(
-                                ContextCompat.getColor(
-                                        requireActivity(),
-                                        R.color.white
-                                )
+                            ContextCompat.getColor(
+                                requireActivity(),
+                                R.color.white
+                            )
                         )
                         view.setTextColor(ContextCompat.getColor(requireActivity(), R.color.black))
 
@@ -1430,6 +1460,48 @@ class RainForestApiActivity : BaseActivity(), RainForestApiAdapter.OnItemClickLi
                 }
             }
         }
+
+    }
+
+
+    open class FullDescriptionDialogFragment(private val description: String) : DialogFragment() {
+
+        private lateinit var fullDescriptionView: MaterialTextView
+        private lateinit var dialogCloseBtn: AppCompatImageView
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setStyle(
+                STYLE_NORMAL,
+                R.style.FullScreenDialogStyle
+            )
+
+        }
+
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val v =
+                inflater.inflate(R.layout.rain_forest_full_description_layout, container)
+
+            initViews(v)
+
+            return v
+        }
+
+        private fun initViews(view: View) {
+            fullDescriptionView = view.findViewById(R.id.full_description_text_view)
+            dialogCloseBtn = view.findViewById(R.id.dialog_close_btn)
+
+
+            fullDescriptionView.setText(description)
+            dialogCloseBtn.setOnClickListener {
+                dismiss()
+            }
+        }
+
 
     }
 

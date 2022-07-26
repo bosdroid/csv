@@ -95,10 +95,10 @@ class ApTitleInputFragment : Fragment() {
         apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
         val position = appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
         if (position == 0 || position == 1){
-           Handler(Looper.myLooper()!!).postDelayed(Runnable {
+//           Handler(Looper.myLooper()!!).postDelayed(Runnable {
                BaseActivity.showSoftKeyboard(requireActivity(), apTitleView)
                apTitleView.setSelection(apTitleView.text.toString().length)
-           }, 1000)
+//           }, 1000)
         }
     }
 
@@ -680,7 +680,7 @@ class ApTitleInputFragment : Fragment() {
                             stringBuilder.append(currentPItemDescription)
                             stringBuilder.append(title)
                             apTitleView.setText(stringBuilder.toString())
-                            appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString().trim())
+//                            appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString().trim())
 
                         }
                     }
@@ -700,9 +700,11 @@ class ApTitleInputFragment : Fragment() {
                     val currentPItemTitle = apTitleView.text.toString().trim()
                     val stringBuilder = java.lang.StringBuilder()
                     stringBuilder.append(currentPItemTitle)
-                    stringBuilder.append(spokenText)
+                    stringBuilder.append("$spokenText. ")
                     apTitleView.setText(stringBuilder.toString())
                     appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString().trim())
+                    BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+                    apTitleView.setSelection(apTitleView.toString().length)
 
                 }
             }
@@ -798,6 +800,21 @@ class ApTitleInputFragment : Fragment() {
             builder.setMessage("Title already have data, Are you sure you want to erase data?")
             val alert = builder.create()
             alert.show()
+        }
+        else{
+            apTitleView.setText(text)
+            apTitleView.setSelection(apTitleView.text.toString().length)
+            apTitleVoiceRecView.visibility = View.GONE
+            apTitleCameraRecView.visibility = View.GONE
+            apTitleImageRecView.visibility = View.GONE
+            apTitleListBtn.visibility = View.GONE
+            apTitleActiveListNameView.visibility = View.GONE
+            apTitleDefaultInputWrapper.visibility = View.GONE
+            apTitleDefaultValueMessage.visibility = View.GONE
+            apTitleListSpinner.visibility = View.GONE
+            apTitleViewWrapper.visibility = View.VISIBLE
+            appSettings.putInt("AP_TITLE_SPINNER_SELECTED_POSITION", 0)
+            apTitleSpinner.setSelection(0, false)
         }
 
     }

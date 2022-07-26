@@ -692,6 +692,8 @@ class ApImageUploadFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        multiImagesList.clear()
+        barcodeImageList.clear()
         val tempImageList = mutableListOf<String>()
         val images = Constants.selectedRainForestProductImages
         if (images.isNotEmpty()) {
