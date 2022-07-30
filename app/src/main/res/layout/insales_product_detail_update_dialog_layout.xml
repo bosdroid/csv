@@ -226,6 +226,26 @@
                     tools:listitem="@layout/keyword_item_row_design" />
 
                 <androidx.cardview.widget.CardView
+                    style="@style/CardView.Light"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/defaultDpMargin"
+                    >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/products_images_recyclerview"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/defaultDpMargin">
@@ -243,26 +263,6 @@
                             android:text="@string/quick_edit_hint_text"
                             android:textColor="@color/black"
                             android:textSize="@dimen/largeText" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    style="@style/CardView.Light"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/defaultDpMargin"
-                    >
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/products_images_recyclerview"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
