@@ -551,6 +551,7 @@
     <string name="erase">Erase</string>
     <string name="quick_edit_hint_text">Click on any word for quick edit.</string>
     <string name="list_text">List</string>
+    <string name="exit_without_saving_warning_message">Do you really want to exit without saving changes?</string>
 
     <string-array name="features_keys">
 		<item>compressor_feature</item>

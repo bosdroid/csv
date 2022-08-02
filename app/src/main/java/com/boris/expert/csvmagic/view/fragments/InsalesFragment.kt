@@ -4029,7 +4029,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             insalesUpdateProductImageLayout.findViewById<MaterialButton>(R.id.insales_product_dialog_cancel_btn)
                     val updateImageBtn =
                             insalesUpdateProductImageLayout.findViewById<MaterialButton>(R.id.insales_product_dialog_update_btn)
-
+                    updateImageBtn.setText(requireActivity().resources.getString(R.string.add_text))
                     imagesRecyclerView.layoutManager = LinearLayoutManager(
                             requireActivity(), RecyclerView.HORIZONTAL,
                             false
@@ -4466,9 +4466,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 )
                             }
                             productImagesadapter.notifyItemRangeChanged(0, pItem.productImages!!.size)
-                            Constants.startImageUploadService(pItem.id, multiImagesList.joinToString(","), "add_image", false)
+//                            Constants.startImageUploadService(pItem.id, multiImagesList.joinToString(","), "add_image", false)
                             Constants.multiImagesSelectedListSize = multiImagesList.size
-                            multiImagesList.clear()
+//                            multiImagesList.clear()
                             productImagesChanges = true
                             alert.dismiss()
 //                        BaseActivity.startLoading(requireActivity())
@@ -4880,9 +4880,21 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
             dialogCancelBtn.setOnClickListener {
                 BaseActivity.hideSoftKeyboard(requireContext(), dialogCancelBtn)
-                dismiss()
+
                 if (productImagesChanges) {
-                    listener.onSuccess("image_changes")
+
+                    MaterialAlertDialogBuilder(requireActivity())
+                        .setCancelable(false)
+                        .setMessage(requireActivity().resources.getString(R.string.exit_without_saving_warning_message))
+                        .setNegativeButton(requireActivity().resources.getString(R.string.no_text)){dialog,which->
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(requireActivity().resources.getString(R.string.yes_text)){dialog,which->
+                            dialog.dismiss()
+                            multiImagesList.clear()
+                            dismiss()
+                        }
+                        .create().show()
                 }
             }
 
@@ -4957,6 +4969,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                 if (response != null) {
                                     if (response.get("status").asString == "200") {
                                         BaseActivity.dismiss()
+                                        if (multiImagesList.isNotEmpty()){
+                                            Constants.startImageUploadService(pItem.id, multiImagesList.joinToString(","), "images", true)
+                                        }
                                         if (selectedProductImages != null && selectedProductImages.isNotEmpty()) {
                                             Constants.startImageUploadService(Constants.pItem!!.id, selectedProductImages.joinToString(","), "images", true)
                                         }
@@ -8170,6 +8185,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (response.get("status").asString == "200") {
                         val categories = response.get("categories").asJsonArray
                         if (categories.size() > 0) {
+                            originalCategoriesList.clear()
                             for (i in 0 until categories.size()) {
                                 val category = categories[i].asJsonObject
                                 originalCategoriesList.add(
