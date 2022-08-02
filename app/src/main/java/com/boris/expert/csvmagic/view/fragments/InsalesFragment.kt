@@ -106,7 +106,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
     private var productsList = mutableListOf<Product>()
     private var originalProductsList = mutableListOf<Product>()
     private lateinit var productsRecyclerView: RecyclerView
-    private lateinit var productAdapter: InSalesProductsAdapter1
+    private lateinit var productAdapter: InSalesProductsAdapter
     private var galleryIntentType = 0
     private var currentPhotoPath: String? = null
     private var selectedImageBase64String: String = ""
@@ -200,7 +200,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         appSettings.remove("INSALES_PASSWORD")
                         originalProductsList.clear()
                         productsList.clear()
-                        Paper.book().delete(Constants.cacheProducts)
+                        Paper.book().destroy()
 //                    startActivity(Intent(context, SalesCustomersActivity::class.java))
                         checkInsalesAccount()
 
@@ -299,8 +299,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         productsList.clear()
         productsList.addAll(originalProductsList)
 //        productAdapter.submitList(null)
-        productAdapter.submitList(productsList)
-//        productAdapter.notifyItemRangeChanged(0, productsList.size)
+//        productAdapter.submitList(productsList)
+        productAdapter.notifyItemRangeChanged(0, productsList.size)
         productsRecyclerView.smoothScrollToPosition(0)
     }
 
@@ -321,9 +321,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         } else {
             productsList.clear()
             productsList.addAll(matchedProducts)
-            //productAdapter.notifyDataSetChanged()
+            productAdapter.notifyDataSetChanged()
 //            productAdapter.submitList(null)
-            productAdapter.submitList(productsList)
+//            productAdapter.submitList(productsList)
         }
 
     }
@@ -342,9 +342,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 }
 
             })
-            //productAdapter.notifyDataSetChanged()
+            productAdapter.notifyDataSetChanged()
 //            productAdapter.submitList(null)
-            productAdapter.submitList(productsList)
+//            productAdapter.submitList(productsList)
         } else {
             BaseActivity.showAlert(requireActivity(), getString(R.string.empty_list_error_message))
         }
@@ -395,9 +395,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
-//                productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
 //                productAdapter.submitList(null)
-                productAdapter.submitList(productsList)
+//                productAdapter.submitList(productsList)
                 //productAdapter.notifyDataSetChanged()
             }
         }
@@ -527,14 +527,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         )
         productsRecyclerView.layoutManager = linearLayoutManager
         productsRecyclerView.hasFixedSize()
-        productAdapter = InSalesProductsAdapter1(
-                requireActivity(), productViewListType
+        productAdapter = InSalesProductsAdapter(
+                requireActivity(), productsList, productViewListType
         )
 //        productAdapter.submitList(null)
 //        productAdapter.submitList(productsList)
         productsRecyclerView.isNestedScrollingEnabled = false
         productsRecyclerView.adapter = productAdapter
-        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter1.OnItemClickListener {
+        productAdapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
 
             }
@@ -1458,7 +1458,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         productsList.add(position, tempProduct)
                         productAdapter.notifyDataSetChanged()
                         Constants.startImageUploadService(pItem.id, multiImagesList.joinToString(","), "add_image", true)
-                        //Constants.multiImagesSelectedListSize = multiImagesList.size
+                        Constants.multiImagesSelectedListSize = multiImagesList.size
                         multiImagesList.clear()
                         alert.dismiss()
 //                        BaseActivity.startLoading(requireActivity())
@@ -1560,9 +1560,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         if (response != null) {
                                             if (response.get("status").asString == "200") {
 //                                                Handler(Looper.myLooper()!!).postDelayed({
-                                                    BaseActivity.dismiss()
-                                                    productsList[position].productImages!!.removeAt(imagePosition)
-                                                    productAdapter.notifyDataSetChanged()
+                                                BaseActivity.dismiss()
+                                                productsList[position].productImages!!.removeAt(imagePosition)
+                                                productAdapter.notifyDataSetChanged()
                                                 updateMainProductList(productsList[position])
 //                                                    dialogStatus = 1
 //                                                    fetchProducts()//showProducts()
@@ -1576,9 +1576,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                             }
                                         } else {
 //                                            Handler(Looper.myLooper()!!).postDelayed({
-                                                BaseActivity.dismiss()
-                                                productsList[position].productImages!!.removeAt(imagePosition)
-                                                productAdapter.notifyDataSetChanged()
+                                            BaseActivity.dismiss()
+                                            productsList[position].productImages!!.removeAt(imagePosition)
+                                            productAdapter.notifyDataSetChanged()
                                             updateMainProductList(productsList[position])
 //                                                dialogStatus = 1
 //                                                fetchProducts()//showProducts()
@@ -1604,8 +1604,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         object : ResponseListener {
                             override fun onSuccess(result: String) {
                                 if (result.contains("image_changes")) {
-                                    dialogStatus = 0
-                                    fetchProducts()
+
+                                    if (Constants.productId != 0) {
+                                        addLoadingImages(Constants.productId)
+                                    } else {
+                                        dialogStatus = 0
+                                        fetchProducts()
+                                    }
                                 } else {
                                     dialogStatus = 1
                                     fetchProducts()
@@ -1822,8 +1827,8 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 originalProductsList.sortByDescending { it.id }
                 productsList.addAll(originalProductsList)
 //                productAdapter.submitList(null)
-//                productAdapter.notifyItemRangeChanged(0, productsList.size)
-                productAdapter.submitList(productsList)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
+//                productAdapter.submitList(productsList)
                 //productAdapter.notifyDataSetChanged()
 
                 Handler(Looper.myLooper()!!).postDelayed({
@@ -1846,29 +1851,28 @@ class InsalesFragment : Fragment(), View.OnClickListener {
         Constants.listUpdateFlag = 0
     }
 
-    private fun updateMainProductList(changeItem:Product){
+    private fun updateMainProductList(changeItem: Product) {
         CoroutineScope(Dispatchers.IO).launch {
 
-         if (originalProductsList.isNotEmpty()){
-             var isFound = false
-             var foundPosition = -1
-             for (i in 0 until originalProductsList.size){
-                   if (originalProductsList[i].id == changeItem.id){
-                       isFound = true
-                       foundPosition = i
-                       break
-                   }
-                 else{
-                     isFound = false
-                 }
-             }
-             if (isFound && foundPosition != -1){
-                 originalProductsList.removeAt(foundPosition)
-                 originalProductsList.add(foundPosition,changeItem)
-                 Paper.book().destroy()
-                 Paper.book().write(Constants.cacheProducts, originalProductsList)
-             }
-         }
+            if (originalProductsList.isNotEmpty()) {
+                var isFound = false
+                var foundPosition = -1
+                for (i in 0 until originalProductsList.size) {
+                    if (originalProductsList[i].id == changeItem.id) {
+                        isFound = true
+                        foundPosition = i
+                        break
+                    } else {
+                        isFound = false
+                    }
+                }
+                if (isFound && foundPosition != -1) {
+                    originalProductsList.removeAt(foundPosition)
+                    originalProductsList.add(foundPosition, changeItem)
+                    Paper.book().destroy()
+                    Paper.book().write(Constants.cacheProducts, originalProductsList)
+                }
+            }
 
         }
     }
@@ -2250,8 +2254,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         object : ResponseListener {
                                             override fun onSuccess(result: String) {
                                                 if (result.contains("image_changes")) {
-                                                    dialogStatus = 0
-                                                    fetchProducts()
+//                                                    dialogStatus = 0
+//                                                    fetchProducts()
+                                                    if (Constants.productId != 0) {
+                                                        addLoadingImages(Constants.productId)
+                                                    }else {
+                                                        dialogStatus = 0
+                                                        fetchProducts()
+                                                    }
                                                 } else {
                                                     dialogStatus = 1
                                                     fetchProducts()
@@ -2362,8 +2372,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                     object : ResponseListener {
                                         override fun onSuccess(result: String) {
                                             if (result.contains("image_changes")) {
-                                                dialogStatus = 0
-                                                fetchProducts()
+//                                                dialogStatus = 0
+//                                                fetchProducts()
+                                                if (Constants.productId != 0) {
+                                                    addLoadingImages(Constants.productId)
+                                                }else {
+                                                    dialogStatus = 0
+                                                    fetchProducts()
+                                                }
                                             } else {
                                                 dialogStatus = 1
                                                 fetchProducts()
@@ -2481,8 +2497,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             viewModel, object : ResponseListener {
                         override fun onSuccess(result: String) {
                             if (result.contains("image_changes")) {
-                                dialogStatus = 0
-                                fetchProducts()
+//                                dialogStatus = 0
+//                                fetchProducts()
+                                if (Constants.productId != 0) {
+                                    addLoadingImages(Constants.productId)
+                                }else {
+                                    dialogStatus = 0
+                                    fetchProducts()
+                                }
                             } else {
                                 dialogStatus = 1
                                 fetchProducts()
@@ -2588,16 +2610,15 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             if (currentTotalProducts == 250) {
                                 currentPage += 1
                                 fetchProducts(currentPage)
-                            }
-                            else{
-                                Log.d("TEST199WRITE","WRITE")
+                            } else {
+                                Log.d("TEST199WRITE", "WRITE")
                                 originalProductsList.sortByDescending { it.id }
                                 Paper.book().write(Constants.cacheProducts, originalProductsList)
 
                                 productsList.addAll(originalProductsList)
-                                productAdapter.submitList(null)
-                                //productAdapter.notifyDataSetChanged()
-                                productAdapter.submitList(productsList)
+//                                productAdapter.submitList(null)
+                                productAdapter.notifyDataSetChanged()
+//                                productAdapter.submitList(productsList)
                                 BaseActivity.dismiss()
                             }
                         } else {
@@ -3005,10 +3026,10 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             }
         }
 
-        if (searchEditText.text.toString().isNotEmpty()){
+        if (searchEditText.text.toString().isNotEmpty()) {
             searchBox.setText(searchEditText.text.toString())
             searchBox.setSelection(searchEditText.text.toString().length)
-            BaseActivity.showSoftKeyboard(requireActivity(),searchBox)
+            BaseActivity.showSoftKeyboard(requireActivity(), searchBox)
         }
 
         barcodeSearchFragmentInsales.setOnClickListener {
@@ -3144,9 +3165,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 productsList.clear()
                 productsList.addAll(matchedProducts)
 //                productAdapter.submitList(null)
-//                productAdapter.notifyItemRangeChanged(0, productsList.size)
+                productAdapter.notifyItemRangeChanged(0, productsList.size)
                 //productAdapter.notifyDataSetChanged()
-                productAdapter.submitList(productsList)
+//                productAdapter.submitList(productsList)
 
             }
         }
@@ -3226,6 +3247,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
 
                                             if (foundPosition != -1) {
                                                 cacheList.removeAt(foundPosition)
+//                                                productAdapter.notifyItemRemoved(foundPosition)
                                                 cacheList.add(foundPosition, updatedProduct)
                                                 Paper.book().destroy()
                                                 Paper.book().write(Constants.cacheProducts, cacheList)
@@ -3234,9 +3256,9 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                                 originalProductsList.addAll(cacheList)
                                                 productsList.addAll(originalProductsList)
 //                                                productAdapter.submitList(null)
-                                                productAdapter.submitList(productsList)
-                                                productAdapter.notifyItemChanged(foundPosition)
-//                                                productAdapter.notifyDataSetChanged()
+//                                                productAdapter.submitList(productsList)
+//                                                productAdapter.notifyItemInserted(foundPosition)
+                                                productAdapter.notifyDataSetChanged()
                                             }
                                         }
 
@@ -3245,10 +3267,52 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             }
 
                             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
-
+                                Log.d("TEST199", "t!!.localizedMessage")
                             }
 
                         })
+            }
+        }
+    }
+
+    fun addLoadingImages(productId: Int) {
+        var foundPosition = -1
+        var foundItem: Product? = null
+        val cacheList: ArrayList<Product>? = Paper.book().read(Constants.cacheProducts)
+        if (cacheList!!.isNotEmpty()) {
+            for (i in 0 until cacheList.size) {
+                val item = cacheList[i]
+                if (item.id == productId) {
+                    foundPosition = i
+                    foundItem = item
+                    break
+                }
+            }
+
+            if (foundPosition != -1 && foundItem != null) {
+
+                for (j in 0 until Constants.multiImagesSelectedListSize) {
+                    foundItem.productImages!!.add(
+                            ProductImages(
+                                    0,
+                                    productId,
+                                    "",
+                                    0
+                            )
+                    )
+                }
+
+                cacheList.removeAt(foundPosition)
+                cacheList.add(foundPosition, foundItem)
+                Paper.book().destroy()
+                Paper.book().write(Constants.cacheProducts, cacheList)
+                originalProductsList.clear()
+                productsList.clear()
+                originalProductsList.addAll(cacheList)
+                productsList.addAll(originalProductsList)
+
+                productAdapter.notifyItemChanged(0, productsList.size)
+
             }
         }
     }
@@ -3326,7 +3390,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             private val pItem: Product,
             private val position: Int,
             private val selectedProductImages: List<String>?,
-            private val insalesAdapter: InSalesProductsAdapter1,
+            private val insalesAdapter: InSalesProductsAdapter,
             private val viewModel: SalesCustomersViewModel,
             private val listener: ResponseListener
     ) : DialogFragment(), View.OnClickListener {
@@ -4396,14 +4460,14 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                                         ProductImages(
                                                 0,
                                                 pItem.id,
-                                            multiImagesList[i],
+                                                multiImagesList[i],
                                                 0
                                         )
                                 )
                             }
                             productImagesadapter.notifyItemRangeChanged(0, pItem.productImages!!.size)
                             Constants.startImageUploadService(pItem.id, multiImagesList.joinToString(","), "add_image", false)
-                            //Constants.multiImagesSelectedListSize = multiImagesList.size
+                            Constants.multiImagesSelectedListSize = multiImagesList.size
                             multiImagesList.clear()
                             productImagesChanges = true
                             alert.dismiss()
@@ -5585,8 +5649,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apFirstLayout.visibility = View.GONE
                 apSecondLayout.visibility = View.VISIBLE
                 apNextPreviousButtons.visibility = View.VISIBLE
-            }
-            else {
+            } else {
                 apSecondLayout.visibility = View.GONE
                 apNextPreviousButtons.visibility = View.GONE
                 apFirstLayout.visibility = View.VISIBLE
@@ -7549,16 +7612,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                             stringBuilder.append(currentPItemTitle)
                             stringBuilder.append("$spokenText. ")
                             apTitleView.setText(stringBuilder.toString())
-                            BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
-                            apTitleView.setSelection(apTitleView.toString().length)
+                            apTitleView.setSelection(apTitleView.text.toString().length)
+                            apTitleView.requestFocus()
+                            //BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
+
                         } else {
                             val currentPItemTitle = apDescriptionView.text.toString().trim()
                             val stringBuilder = java.lang.StringBuilder()
                             stringBuilder.append(currentPItemTitle)
                             stringBuilder.append("$spokenText. ")
                             apDescriptionView.setText(stringBuilder.toString())
-                            BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
-                            apDescriptionView.setSelection(apDescriptionView.toString().length)
+                            apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                            apDescriptionView.requestFocus()
+                            //BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
+
                         }
                     }
                 }

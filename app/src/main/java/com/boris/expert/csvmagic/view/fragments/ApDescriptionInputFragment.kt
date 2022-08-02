@@ -521,10 +521,10 @@ class ApDescriptionInputFragment : Fragment() {
         super.onResume()
         apDescriptionView.setText(appSettings.getString("AP_PRODUCT_DESCRIPTION"))
         val position = appSettings.getInt("AP_DESCRIPTION_SPINNER_SELECTED_POSITION")
+        apDescriptionView.setSelection(apDescriptionView.text.toString().length)
         if (position == 0 || position == 1){
 //            Handler(Looper.myLooper()!!).postDelayed(Runnable {
                 BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
-                apDescriptionView.setSelection(apDescriptionView.text.toString().length)
 //            },1000)
         }
     }
@@ -686,14 +686,17 @@ class ApDescriptionInputFragment : Fragment() {
                         .let { results ->
                             results!!.get(0)
                         }
-                val currentPItemTitle = apDescriptionView.text.toString().trim()
+                val currentPItemTitle = apDescriptionView.text.toString()
                 val stringBuilder = java.lang.StringBuilder()
                 stringBuilder.append(currentPItemTitle)
                 stringBuilder.append("$spokenText. ")
                 apDescriptionView.setText(stringBuilder.toString())
-                appSettings.putString("AP_PRODUCT_DESCRIPTION",apDescriptionView.text.toString().trim())
-                BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
-                apDescriptionView.setSelection(apDescriptionView.toString().length)
+                apDescriptionView.setSelection(apDescriptionView.text.toString().length)
+                apDescriptionView.requestFocus()
+
+                appSettings.putString("AP_PRODUCT_DESCRIPTION",apDescriptionView.text.toString())
+                //BaseActivity.showSoftKeyboard(requireActivity(),apDescriptionView)
+
             }
         }
 

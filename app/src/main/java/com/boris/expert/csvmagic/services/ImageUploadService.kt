@@ -87,15 +87,16 @@ class ImageUploadService(val context: Context, workerParams: WorkerParameters) :
                                     notificationManager.cancel(101)
                                     Constants.multiImagesSelectedListSize = 0
                                     Constants.imageLoadingStatus = 0
+                                    Constants.productId = 0
                                     Toast.makeText(applicationContext,"Product images attached successfully!",Toast.LENGTH_SHORT).show()
-                                    if (flag) {
+//                                    if (flag) {
                                         val intent =
                                                 Intent("update-images")
                                         intent.putExtra("PID", productId)
                                         LocalBroadcastManager.getInstance(
                                                 applicationContext
                                         ).sendBroadcast(intent)
-                                    }
+//                                    }
                                 }
                                 else{
                                     notificationManager.cancel(101)

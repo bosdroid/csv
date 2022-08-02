@@ -342,7 +342,7 @@ class SalesCustomersActivity : BaseActivity(), View.OnClickListener {
         productsRecyclerView.hasFixedSize()
         adapter = InSalesProductsAdapter(
             context,
-            productsList as ArrayList<Product>
+            productsList as ArrayList<Product>,0
         )
         productsRecyclerView.adapter = adapter
         adapter.setOnItemClickListener(object : InSalesProductsAdapter.OnItemClickListener {

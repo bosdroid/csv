@@ -94,10 +94,10 @@ class ApTitleInputFragment : Fragment() {
         super.onResume()
         apTitleView.setText(appSettings.getString("AP_PRODUCT_TITLE"))
         val position = appSettings.getInt("AP_TITLE_SPINNER_SELECTED_POSITION")
+        apTitleView.setSelection(apTitleView.text.toString().length)
         if (position == 0 || position == 1){
 //           Handler(Looper.myLooper()!!).postDelayed(Runnable {
                BaseActivity.showSoftKeyboard(requireActivity(), apTitleView)
-               apTitleView.setSelection(apTitleView.text.toString().length)
 //           }, 1000)
         }
     }
@@ -697,14 +697,15 @@ class ApTitleInputFragment : Fragment() {
                                     .let { results ->
                                         results!!.get(0)
                                     }
-                    val currentPItemTitle = apTitleView.text.toString().trim()
+                    val currentPItemTitle = apTitleView.text.toString()
                     val stringBuilder = java.lang.StringBuilder()
                     stringBuilder.append(currentPItemTitle)
                     stringBuilder.append("$spokenText. ")
                     apTitleView.setText(stringBuilder.toString())
-                    appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString().trim())
-                    BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
-                    apTitleView.setSelection(apTitleView.toString().length)
+                    apTitleView.setSelection(apTitleView.text.toString().length)
+                    apTitleView.requestFocus()
+                    appSettings.putString("AP_PRODUCT_TITLE", apTitleView.text.toString())
+                    //BaseActivity.showSoftKeyboard(requireActivity(),apTitleView)
 
                 }
             }
