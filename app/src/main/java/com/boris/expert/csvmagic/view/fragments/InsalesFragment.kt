@@ -6559,10 +6559,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apQuantityListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apQuantityListId)
                 val listValues = listOptions.split(",")
+                if (listValues.isNotEmpty()){
+                    appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
+                }
                 val apQuantitySpinnerAdapter = ArrayAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_item,
-                        listValues
+                    requireActivity(),
+                    android.R.layout.simple_spinner_item,
+                    listValues
                 )
                 apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
@@ -6629,6 +6632,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (position == 1) {
                         apQuantityListSpinner.visibility = View.GONE
                         apQuantityListBtn.visibility = View.GONE
+                        apQuantityActiveListNameView.visibility = View.GONE
                         apQuantityDefaultInputWrapper.visibility = View.VISIBLE
                         apQuantityViewWrapper.visibility = View.VISIBLE
                         apQuantityDefaultValue = appSettings.getString("AP_QUANTITY_DEFAULT_VALUE")
@@ -6642,16 +6646,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     } else if (position == 2) {
                         apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListBtn.visibility = View.VISIBLE
+                        apQuantityActiveListNameView.visibility = View.VISIBLE
                         apQuantityViewWrapper.visibility = View.GONE
                         apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
                         apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apQuantityListId)
                         val listValues = listOptions.split(",")
+                        if (listValues.isNotEmpty()){
+                            appSettings.putString("AP_PRODUCT_QUANTITY",listValues[0])
+                        }
                         val apQuantitySpinnerAdapter = ArrayAdapter(
-                                requireActivity(),
-                                android.R.layout.simple_spinner_item,
-                                listValues
+                            requireActivity(),
+                            android.R.layout.simple_spinner_item,
+                            listValues
                         )
                         apQuantitySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         apQuantityListSpinner.adapter = apQuantitySpinnerAdapter
@@ -6677,6 +6685,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apQuantityView.setText(appSettings.getString("AP_PRODUCT_QUANTITY"))
                         apQuantityView.setSelection(apQuantityView.text.toString().length)
                         apQuantityListBtn.visibility = View.GONE
+                        apQuantityActiveListNameView.visibility = View.GONE
                         apQuantityDefaultInputWrapper.visibility = View.GONE
                         apQuantityListSpinner.visibility = View.GONE
                     }
@@ -6748,10 +6757,13 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                 apPriceListSpinner.visibility = View.VISIBLE
                 val listOptions: String = tableGenerator.getListValues(apPriceListId)
                 val listValues = listOptions.split(",")
+                if (listValues.isNotEmpty()){
+                    appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
+                }
                 val apPriceSpinnerAdapter = ArrayAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_item,
-                        listValues
+                    requireActivity(),
+                    android.R.layout.simple_spinner_item,
+                    listValues
                 )
                 apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 apPriceListSpinner.adapter = apPriceSpinnerAdapter
@@ -6775,6 +6787,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
             } else {
                 apPriceViewWrapper.visibility = View.VISIBLE
                 apPriceListBtn.visibility = View.GONE
+                apPriceActiveListNameView.visibility = View.GONE
                 apPriceActiveListNameView.visibility = View.GONE
                 apPriceDefaultInputWrapper.visibility = View.GONE
                 apPriceListSpinner.visibility = View.GONE
@@ -6813,6 +6826,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     if (position == 1) {
                         apPriceListSpinner.visibility = View.GONE
                         apPriceListBtn.visibility = View.GONE
+                        apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultInputWrapper.visibility = View.VISIBLE
                         apPriceViewWrapper.visibility = View.VISIBLE
                         apPriceDefaultValue = appSettings.getString("AP_PRICE_DEFAULT_VALUE")
@@ -6826,16 +6840,20 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                     } else if (position == 2) {
                         apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListBtn.visibility = View.VISIBLE
+                        apPriceActiveListNameView.visibility = View.VISIBLE
                         apPriceViewWrapper.visibility = View.GONE
                         apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
                         apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListSpinner.visibility = View.VISIBLE
                         val listOptions: String = tableGenerator.getListValues(apPriceListId)
                         val listValues = listOptions.split(",")
+                        if (listValues.isNotEmpty()){
+                            appSettings.putString("AP_PRODUCT_PRICE",listValues[0])
+                        }
                         val apPriceSpinnerAdapter = ArrayAdapter(
-                                requireActivity(),
-                                android.R.layout.simple_spinner_item,
-                                listValues
+                            requireActivity(),
+                            android.R.layout.simple_spinner_item,
+                            listValues
                         )
                         apPriceSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         apPriceListSpinner.adapter = apPriceSpinnerAdapter
@@ -6861,6 +6879,7 @@ class InsalesFragment : Fragment(), View.OnClickListener {
                         apPriceView.setText(appSettings.getString("AP_PRODUCT_PRICE"))
                         apPriceView.setSelection(apPriceView.text.toString().length)
                         apPriceListBtn.visibility = View.GONE
+                        apPriceActiveListNameView.visibility = View.GONE
                         apPriceDefaultInputWrapper.visibility = View.GONE
                         apPriceListSpinner.visibility = View.GONE
                     }
